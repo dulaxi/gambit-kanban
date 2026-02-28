@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plus, MoreHorizontal, X, Pencil, Trash2 } from 'lucide-react'
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useBoardStore } from '../../store/boardStore'
-import Card from './Card'
+import SortableCard from './SortableCard'
 
 export default function Column({ column, boardId, onCardClick }) {
   const [isAdding, setIsAdding] = useState(false)
@@ -17,6 +19,8 @@ export default function Column({ column, boardId, onCardClick }) {
   const addCard = useBoardStore((s) => s.addCard)
   const renameColumn = useBoardStore((s) => s.renameColumn)
   const deleteColumn = useBoardStore((s) => s.deleteColumn)
+
+  const { setNodeRef: setDroppableRef } = useDroppable({ id: column.id })
 
   const columnCards = column.cardIds
     .map((id) => cards[id])
@@ -144,10 +148,18 @@ export default function Column({ column, boardId, onCardClick }) {
       </div>
 
       {/* Cards list */}
-      <div className="flex-1 overflow-y-auto px-3 pb-2 space-y-2 min-h-0">
-        {columnCards.map((card) => (
-          <Card key={card.id} card={card} onClick={onCardClick} />
-        ))}
+      <div
+        ref={setDroppableRef}
+        className="flex-1 overflow-y-auto px-3 pb-2 space-y-2 min-h-0"
+      >
+        <SortableContext
+          items={column.cardIds}
+          strategy={verticalListSortingStrategy}
+        >
+          {columnCards.map((card) => (
+            <SortableCard key={card.id} card={card} onClick={onCardClick} />
+          ))}
+        </SortableContext>
       </div>
 
       {/* Add card form */}
