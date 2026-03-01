@@ -7,6 +7,7 @@ const createDefaultBoard = () => {
   return {
     id: boardId,
     name: 'My Tasks',
+    icon: 'ClipboardList',
     columns: [
       { id: nanoid(), title: 'To Do', cardIds: [] },
       { id: nanoid(), title: 'In Progress', cardIds: [] },
@@ -24,17 +25,20 @@ export const useBoardStore = create(
       boards: { [defaultBoard.id]: defaultBoard },
       cards: {},
       activeBoardId: defaultBoard.id,
+      nextTaskNumber: 1,
 
       // Board actions
       setActiveBoard: (boardId) => set({ activeBoardId: boardId }),
 
-      addBoard: (name) => {
+      addBoard: (name, icon) => {
         const board = {
           id: nanoid(),
           name,
+          icon: icon || null,
           columns: [
             { id: nanoid(), title: 'To Do', cardIds: [] },
             { id: nanoid(), title: 'In Progress', cardIds: [] },
+            { id: nanoid(), title: 'Review', cardIds: [] },
             { id: nanoid(), title: 'Done', cardIds: [] },
           ],
         }
@@ -44,6 +48,14 @@ export const useBoardStore = create(
         }))
         return board.id
       },
+
+      updateBoardIcon: (boardId, icon) =>
+        set((state) => ({
+          boards: {
+            ...state.boards,
+            [boardId]: { ...state.boards[boardId], icon },
+          },
+        })),
 
       renameBoard: (boardId, name) =>
         set((state) => ({
@@ -122,14 +134,19 @@ export const useBoardStore = create(
 
       // Card actions
       addCard: (boardId, columnId, cardData) => {
+        const taskNumber = get().nextTaskNumber
         const card = {
           id: nanoid(),
           boardId,
+          taskNumber,
           title: cardData.title,
           description: cardData.description || '',
+          assignee: cardData.assignee || '',
           labels: cardData.labels || [],
           dueDate: cardData.dueDate || null,
           priority: cardData.priority || 'medium',
+          icon: cardData.icon || null,
+          completed: cardData.completed || false,
           checklist: cardData.checklist || [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -137,6 +154,7 @@ export const useBoardStore = create(
         set((state) => {
           const board = state.boards[boardId]
           return {
+            nextTaskNumber: state.nextTaskNumber + 1,
             cards: { ...state.cards, [card.id]: card },
             boards: {
               ...state.boards,
@@ -165,6 +183,45 @@ export const useBoardStore = create(
             },
           },
         })),
+
+      completeCard: (cardId) =>
+        set((state) => {
+          const card = state.cards[cardId]
+          if (!card) return state
+          const board = state.boards[card.boardId]
+          if (!board) return state
+
+          const currentColIndex = board.columns.findIndex((col) =>
+            col.cardIds.includes(cardId)
+          )
+          if (currentColIndex === -1) return state
+
+          const nextColIndex = Math.min(currentColIndex + 1, board.columns.length - 1)
+          const columns = board.columns.map((col, i) => {
+            if (i === currentColIndex) {
+              return { ...col, cardIds: col.cardIds.filter((id) => id !== cardId) }
+            }
+            if (i === nextColIndex && nextColIndex !== currentColIndex) {
+              return { ...col, cardIds: [...col.cardIds, cardId] }
+            }
+            return col
+          })
+
+          return {
+            cards: {
+              ...state.cards,
+              [cardId]: {
+                ...card,
+                completed: true,
+                updatedAt: new Date().toISOString(),
+              },
+            },
+            boards: {
+              ...state.boards,
+              [card.boardId]: { ...board, columns },
+            },
+          }
+        }),
 
       deleteCard: (cardId) =>
         set((state) => {

@@ -16,10 +16,16 @@ import {
 } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-const PRIORITY_COLORS = {
-  low: 'bg-green-500',
-  medium: 'bg-yellow-500',
+const DOT_COLORS = {
   high: 'bg-red-500',
+  medium: 'bg-blue-500',
+  low: 'bg-green-500',
+}
+
+const EVENT_ACCENT = {
+  high: 'border-l-red-500',
+  medium: 'border-l-blue-500',
+  low: 'border-l-green-500',
 }
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -55,131 +61,151 @@ export default function CalendarPage() {
   }, [selectedDay, cardsByDate])
 
   return (
-    <div className="flex gap-6 h-full">
-      {/* Calendar Grid */}
-      <div className="flex-1 min-w-0">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            {format(currentMonth, 'MMMM yyyy')}
-          </h1>
+    <div className="flex gap-4 h-[calc(100vh-7rem)]">
+      {/* Left: Calendar */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header — Apple style: arrows, month, today */}
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-              className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+              className="p-1 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-              className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+              className="p-1 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
             >
-              <ChevronRight className="w-5 h-5 text-gray-600" />
+              <ChevronRight className="w-5 h-5" />
             </button>
+            <h1 className="text-xl font-semibold text-gray-900 ml-2">
+              {format(currentMonth, 'MMMM yyyy')}
+            </h1>
           </div>
+          <button
+            onClick={() => {
+              setCurrentMonth(new Date())
+              setSelectedDay(new Date())
+            }}
+            className="px-3 py-1 text-sm font-medium text-red-500 border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+          >
+            Today
+          </button>
         </div>
 
-        {/* Day Headers */}
-        <div className="grid grid-cols-7 mb-1">
-          {DAY_NAMES.map((name) => (
-            <div
-              key={name}
-              className="text-center text-xs font-medium text-gray-500 py-2"
-            >
-              {name}
-            </div>
-          ))}
-        </div>
-
-        {/* Day Cells */}
-        <div className="grid grid-cols-7 border-t border-l border-gray-200">
-          {calendarDays.map((day) => {
-            const dateKey = format(day, 'yyyy-MM-dd')
-            const dayCards = cardsByDate[dateKey] || []
-            const inMonth = isSameMonth(day, currentMonth)
-            const today = isToday(day)
-            const selected = selectedDay && isSameDay(day, selectedDay)
-
-            return (
-              <button
-                key={dateKey}
-                type="button"
-                onClick={() => setSelectedDay(day)}
-                className={`border-r border-b border-gray-200 p-1.5 min-h-[90px] text-left cursor-pointer transition-all ${
-                  !inMonth ? 'opacity-40' : ''
-                } ${selected ? 'ring-2 ring-primary-500 ring-inset' : ''} hover:bg-gray-50`}
+        {/* Calendar grid */}
+        <div className="flex-1 flex flex-col rounded-xl bg-white border border-gray-200 overflow-hidden">
+          {/* Day headers */}
+          <div className="grid grid-cols-7">
+            {DAY_NAMES.map((name, i) => (
+              <div
+                key={name}
+                className={`text-center text-[11px] font-semibold uppercase tracking-wider py-2.5 text-gray-400 ${
+                  i < 6 ? 'border-r border-gray-100' : ''
+                }`}
               >
-                <div className="flex items-center justify-center mb-1">
-                  <span
-                    className={`text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full ${
-                      today
-                        ? 'bg-primary-600 text-white'
-                        : 'text-gray-700'
-                    }`}
-                  >
-                    {format(day, 'd')}
-                  </span>
-                </div>
-                <div className="space-y-0.5">
-                  {dayCards.slice(0, 2).map((card) => (
-                    <div
-                      key={card.id}
-                      className="text-[10px] text-gray-700 truncate bg-primary-50 rounded px-1 py-0.5"
+                {name}
+              </div>
+            ))}
+          </div>
+
+          {/* Day cells */}
+          <div className="grid grid-cols-7 flex-1 auto-rows-fr border-t border-gray-200">
+            {calendarDays.map((day, i) => {
+              const dateKey = format(day, 'yyyy-MM-dd')
+              const dayCards = cardsByDate[dateKey] || []
+              const inMonth = isSameMonth(day, currentMonth)
+              const today = isToday(day)
+              const selected = selectedDay && isSameDay(day, selectedDay)
+
+              return (
+                <button
+                  key={dateKey}
+                  type="button"
+                  onClick={() => setSelectedDay(day)}
+                  className={`relative border-b border-r border-gray-100 text-left cursor-pointer transition-colors flex flex-col ${
+                    selected ? 'bg-blue-50/30' : 'hover:bg-gray-50/60'
+                  }`}
+                >
+                  {/* Date number */}
+                  <div className="flex justify-center pt-1.5 pb-1">
+                    <span
+                      className={`text-[13px] w-7 h-7 flex items-center justify-center rounded-full leading-none ${
+                        today
+                          ? 'bg-red-500 text-white font-semibold'
+                          : inMonth
+                            ? 'text-gray-800 font-medium'
+                            : 'text-gray-300'
+                      }`}
                     >
-                      {card.title}
-                    </div>
-                  ))}
-                  {dayCards.length > 2 && (
-                    <div className="text-[10px] text-gray-400 px-1">
-                      +{dayCards.length - 2} more
+                      {format(day, 'd')}
+                    </span>
+                  </div>
+
+                  {/* Event dots */}
+                  {dayCards.length > 0 && (
+                    <div className="flex justify-center gap-[3px] pb-1">
+                      {dayCards.slice(0, 4).map((card) => (
+                        <span
+                          key={card.id}
+                          className={`w-[5px] h-[5px] rounded-full ${DOT_COLORS[card.priority] || DOT_COLORS.medium}`}
+                        />
+                      ))}
                     </div>
                   )}
-                </div>
-              </button>
-            )
-          })}
+                </button>
+              )
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Side Panel */}
-      <div className="w-72 shrink-0 bg-white rounded-xl border border-gray-200 p-4 self-start">
-        <h2 className="text-sm font-semibold text-gray-900 mb-3">
-          {selectedDay
-            ? format(selectedDay, 'EEEE, MMMM d')
-            : 'Select a day'}
-        </h2>
-        {!selectedDay ? (
-          <p className="text-sm text-gray-400">
-            Click on a day to see its tasks.
-          </p>
-        ) : selectedDayCards.length === 0 ? (
-          <p className="text-sm text-gray-400">No tasks due on this day.</p>
-        ) : (
-          <div className="space-y-3">
-            {selectedDayCards.map((card) => (
-              <div
-                key={card.id}
-                className="border-b border-gray-100 pb-3 last:border-0 last:pb-0"
+      {/* Right: Task detail panel */}
+      <div className="w-72 shrink-0 bg-white rounded-xl border border-gray-200 flex flex-col overflow-hidden">
+        {selectedDay ? (
+          <>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+              <span className="text-sm font-semibold text-gray-900">
+                {format(selectedDay, 'EEEE, MMM d')}
+              </span>
+              <button
+                onClick={() => setSelectedDay(null)}
+                className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <div className="flex items-start gap-2">
-                  <span
-                    className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
-                      PRIORITY_COLORS[card.priority] || PRIORITY_COLORS.medium
-                    }`}
-                  />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {card.title}
-                    </p>
+                Close
+              </button>
+            </div>
+
+            {selectedDayCards.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
+                No tasks scheduled
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+                {selectedDayCards.map((card) => (
+                  <div key={card.id} className={`flex flex-col gap-1 px-4 py-3 border-l-[3px] ${EVENT_ACCENT[card.priority] || EVENT_ACCENT.medium}`}>
+                    <p className="text-sm font-medium text-gray-900">{card.title}</p>
                     {card.description && (
-                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
-                        {card.description}
-                      </p>
+                      <p className="text-xs text-gray-500 line-clamp-2">{card.description}</p>
+                    )}
+                    {card.labels && card.labels.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-0.5">
+                        {card.labels.map((label, idx) => (
+                          <span key={idx} className="text-[10px] font-medium text-gray-500 bg-gray-100 rounded-full px-2 py-0.5">
+                            {label.text}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            )}
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
+            Select a day
           </div>
         )}
       </div>

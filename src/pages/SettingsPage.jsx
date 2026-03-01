@@ -87,7 +87,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Export Data */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-4">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm mb-4">
         <h2 className="text-sm font-semibold text-gray-900 mb-1">
           Export Data
         </h2>
@@ -96,7 +96,7 @@ export default function SettingsPage() {
         </p>
         <button
           onClick={handleExport}
-          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 cursor-pointer transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-900 text-sm font-medium rounded-xl hover:bg-gray-200 cursor-pointer transition-colors"
         >
           <Download className="w-4 h-4" />
           Export Backup
@@ -104,7 +104,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Import Data */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-4">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm mb-4">
         <h2 className="text-sm font-semibold text-gray-900 mb-1">
           Import Data
         </h2>
@@ -122,7 +122,7 @@ export default function SettingsPage() {
         />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+          className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
         >
           <Upload className="w-4 h-4" />
           Import Backup
@@ -142,9 +142,9 @@ export default function SettingsPage() {
       </div>
 
       {/* Danger Zone */}
-      <div className="bg-white rounded-xl border-2 border-red-200 p-5">
+      <div className="bg-white border-2 border-red-200 rounded-2xl p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-1">
-          <AlertTriangle className="w-4 h-4 text-red-500" />
+          <AlertTriangle className="w-4 h-4 text-red-400" />
           <h2 className="text-sm font-semibold text-red-700">Danger Zone</h2>
         </div>
         <p className="text-sm text-gray-500 mb-4">
@@ -155,7 +155,7 @@ export default function SettingsPage() {
         {!confirmingClear ? (
           <button
             onClick={() => setConfirmingClear(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 cursor-pointer transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 cursor-pointer transition-colors"
           >
             <Trash2 className="w-4 h-4" />
             Clear All Data
@@ -164,13 +164,13 @@ export default function SettingsPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleClearData}
-              className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 cursor-pointer transition-colors"
+              className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 cursor-pointer transition-colors"
             >
               Yes, delete everything
             </button>
             <button
               onClick={() => setConfirmingClear(false)}
-              className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              className="px-4 py-2 border border-gray-200 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
             >
               Cancel
             </button>

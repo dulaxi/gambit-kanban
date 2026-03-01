@@ -46,12 +46,12 @@ export default function NotesPage() {
   return (
     <div className="flex gap-0 h-[calc(100vh-7rem)]">
       {/* Notes List */}
-      <div className="w-72 shrink-0 bg-white rounded-l-xl border border-gray-200 flex flex-col">
+      <div className="w-72 shrink-0 bg-white border border-gray-200 rounded-l-2xl shadow-sm flex flex-col">
         <div className="p-3 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-900">Notes</h2>
           <button
             onClick={handleNewNote}
-            className="p-1.5 hover:bg-gray-100 rounded-lg cursor-pointer text-gray-500 hover:text-gray-700"
+            className="p-1.5 hover:bg-gray-100 rounded-lg cursor-pointer text-gray-500 hover:text-gray-900"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -69,7 +69,7 @@ export default function NotesPage() {
                 type="button"
                 onClick={() => setSelectedNoteId(note.id)}
                 className={`w-full text-left p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors group ${
-                  selectedNoteId === note.id ? 'bg-primary-50' : ''
+                  selectedNoteId === note.id ? 'bg-gray-50' : ''
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -83,7 +83,7 @@ export default function NotesPage() {
                   </div>
                   <button
                     onClick={(e) => handleDeleteNote(e, note.id)}
-                    className="p-1 opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 rounded text-gray-400 cursor-pointer transition-opacity"
+                    className="p-1 opacity-0 group-hover:opacity-100 hover:bg-gray-100 hover:text-red-500 rounded text-gray-400 cursor-pointer transition-opacity"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -95,7 +95,7 @@ export default function NotesPage() {
       </div>
 
       {/* Editor */}
-      <div className="flex-1 bg-white rounded-r-xl border-t border-r border-b border-gray-200 flex flex-col">
+      <div className="flex-1 bg-white border border-gray-200 border-l-0 rounded-r-2xl shadow-sm flex flex-col">
         {selectedNote ? (
           <>
             <div className="p-4 border-b border-gray-200">
@@ -103,7 +103,7 @@ export default function NotesPage() {
                 type="text"
                 value={selectedNote.title}
                 onChange={handleTitleChange}
-                className="text-xl font-bold text-gray-900 w-full outline-none bg-transparent"
+                className="text-xl font-bold text-gray-900 w-full outline-none bg-transparent placeholder-gray-400"
                 placeholder="Note title..."
               />
               <p className="text-xs text-gray-400 mt-1">
@@ -114,7 +114,7 @@ export default function NotesPage() {
             <textarea
               value={selectedNote.content}
               onChange={handleContentChange}
-              className="flex-1 p-4 text-sm text-gray-700 outline-none resize-none bg-transparent leading-relaxed"
+              className="flex-1 p-4 text-sm text-gray-600 outline-none resize-none bg-transparent leading-relaxed placeholder-gray-400"
               placeholder="Start writing..."
             />
           </>

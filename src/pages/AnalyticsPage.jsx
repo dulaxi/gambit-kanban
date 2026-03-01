@@ -17,19 +17,31 @@ import {
 } from 'recharts'
 
 const COLORS = [
-  '#3b82f6',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#ec4899',
-  '#6b7280',
+  '#38bdf8',
+  '#34d399',
+  '#fbbf24',
+  '#f87171',
+  '#a78bfa',
+  '#f472b6',
+  '#94a3b8',
 ]
 
 const PRIORITY_COLORS = {
-  Low: '#10b981',
-  Medium: '#f59e0b',
-  High: '#ef4444',
+  Low: '#34d399',
+  Medium: '#fbbf24',
+  High: '#f87171',
+}
+
+const TICK_STYLE = { fontSize: 11, fill: '#9ca3af' }
+
+const TOOLTIP_STYLE = {
+  contentStyle: {
+    background: '#fff',
+    border: '1px solid #e5e7eb',
+    borderRadius: '0.75rem',
+    color: '#1e293b',
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+  },
 }
 
 export default function AnalyticsPage() {
@@ -100,7 +112,7 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tasks Created (Last 14 Days) */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-gray-900 mb-4">
             Tasks Created (Last 14 Days)
           </h2>
@@ -114,21 +126,23 @@ export default function AnalyticsPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 11 }}
+                  tick={TICK_STYLE}
                   tickLine={false}
+                  stroke="#e5e7eb"
                 />
                 <YAxis
-                  tick={{ fontSize: 11 }}
+                  tick={TICK_STYLE}
                   tickLine={false}
                   allowDecimals={false}
+                  stroke="#e5e7eb"
                 />
-                <Tooltip />
+                <Tooltip {...TOOLTIP_STYLE} />
                 <Line
                   type="monotone"
                   dataKey="count"
-                  stroke="#3b82f6"
+                  stroke="#38bdf8"
                   strokeWidth={2}
-                  dot={{ r: 3 }}
+                  dot={{ r: 3, fill: '#38bdf8' }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -136,7 +150,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Tasks by Board */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-gray-900 mb-4">
             Tasks by Board
           </h2>
@@ -154,6 +168,7 @@ export default function AnalyticsPage() {
                   outerRadius={90}
                   dataKey="value"
                   label={({ name, value }) => `${name} (${value})`}
+                  style={{ fontSize: 11, fill: '#6b7280' }}
                 >
                   {boardData.map((_, index) => (
                     <Cell
@@ -162,14 +177,14 @@ export default function AnalyticsPage() {
                     />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip {...TOOLTIP_STYLE} />
               </PieChart>
             </ResponsiveContainer>
           )}
         </div>
 
         {/* Tasks by Priority */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-gray-900 mb-4">
             Tasks by Priority
           </h2>
@@ -183,15 +198,17 @@ export default function AnalyticsPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                 <XAxis
                   dataKey="name"
-                  tick={{ fontSize: 11 }}
+                  tick={TICK_STYLE}
                   tickLine={false}
+                  stroke="#e5e7eb"
                 />
                 <YAxis
-                  tick={{ fontSize: 11 }}
+                  tick={TICK_STYLE}
                   tickLine={false}
                   allowDecimals={false}
+                  stroke="#e5e7eb"
                 />
-                <Tooltip />
+                <Tooltip {...TOOLTIP_STYLE} />
                 <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                   {priorityData.map((entry) => (
                     <Cell
@@ -206,7 +223,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Tasks by Label */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-gray-900 mb-4">
             Tasks by Label
           </h2>
@@ -220,18 +237,20 @@ export default function AnalyticsPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                 <XAxis
                   type="number"
-                  tick={{ fontSize: 11 }}
+                  tick={TICK_STYLE}
                   tickLine={false}
                   allowDecimals={false}
+                  stroke="#e5e7eb"
                 />
                 <YAxis
                   type="category"
                   dataKey="name"
-                  tick={{ fontSize: 11 }}
+                  tick={TICK_STYLE}
                   tickLine={false}
                   width={100}
+                  stroke="#e5e7eb"
                 />
-                <Tooltip />
+                <Tooltip {...TOOLTIP_STYLE} />
                 <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                   {labelData.map((_, index) => (
                     <Cell

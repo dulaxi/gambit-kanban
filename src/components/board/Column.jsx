@@ -1,17 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plus, MoreHorizontal, X, Pencil, Trash2 } from 'lucide-react'
+import { Plus, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useBoardStore } from '../../store/boardStore'
 import SortableCard from './SortableCard'
+import InlineCardEditor from './InlineCardEditor'
 
-export default function Column({ column, boardId, onCardClick }) {
-  const [isAdding, setIsAdding] = useState(false)
-  const [newTitle, setNewTitle] = useState('')
+export default function Column({ column, boardId, onCardClick, onCreateCard, onCompleteCard, inlineCardId, onInlineDone, selectedCardId }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [isRenaming, setIsRenaming] = useState(false)
   const [renameValue, setRenameValue] = useState(column.title)
-  const inputRef = useRef(null)
   const renameRef = useRef(null)
   const menuRef = useRef(null)
 
@@ -27,19 +25,12 @@ export default function Column({ column, boardId, onCardClick }) {
     .filter(Boolean)
 
   useEffect(() => {
-    if (isAdding && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [isAdding])
-
-  useEffect(() => {
     if (isRenaming && renameRef.current) {
       renameRef.current.focus()
       renameRef.current.select()
     }
   }, [isRenaming])
 
-  // Close menu on click outside
   useEffect(() => {
     if (!menuOpen) return
     const handleClick = (e) => {
@@ -51,22 +42,9 @@ export default function Column({ column, boardId, onCardClick }) {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [menuOpen])
 
-  const handleAdd = () => {
-    const trimmed = newTitle.trim()
-    if (trimmed) {
-      addCard(boardId, column.id, { title: trimmed })
-      setNewTitle('')
-    }
-    setIsAdding(false)
-  }
-
-  const handleAddKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleAdd()
-    } else if (e.key === 'Escape') {
-      setNewTitle('')
-      setIsAdding(false)
-    }
+  const handleCreateCard = () => {
+    const cardId = addCard(boardId, column.id, { title: 'Untitled task' })
+    if (onCreateCard) onCreateCard(cardId)
   }
 
   const handleRename = () => {
@@ -87,37 +65,46 @@ export default function Column({ column, boardId, onCardClick }) {
   }
 
   return (
-    <div className="flex flex-col bg-gray-100 rounded-xl w-72 shrink-0">
+    <div className="flex flex-col w-[290px] shrink-0">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 pt-3 pb-2">
-        {isRenaming ? (
-          <input
-            ref={renameRef}
-            value={renameValue}
-            onChange={(e) => setRenameValue(e.target.value)}
-            onKeyDown={handleRenameKeyDown}
-            onBlur={handleRename}
-            className="text-sm font-semibold text-gray-900 bg-white border border-gray-300 rounded px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-primary-500 flex-1 mr-2"
-          />
-        ) : (
-          <h3 className="text-sm font-semibold text-gray-900 truncate">
-            {column.title}
-          </h3>
-        )}
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-gray-500 bg-gray-200 rounded-full px-2 py-0.5 font-medium">
+      <div className="flex items-center justify-between px-0.5 pb-3">
+        <div className="flex items-baseline gap-2">
+          {isRenaming ? (
+            <input
+              ref={renameRef}
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onKeyDown={handleRenameKeyDown}
+              onBlur={handleRename}
+              className="text-sm font-semibold rounded px-1.5 py-0.5 flex-1 mr-2 border border-gray-300 focus:border-blue-400 focus:outline-none bg-white"
+            />
+          ) : (
+            <h3 className="text-sm font-semibold text-gray-800">
+              {column.title}
+            </h3>
+          )}
+          <span className="text-xs text-gray-400">
             {columnCards.length}
           </span>
+        </div>
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={handleCreateCard}
+            className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
           <div className="relative" ref={menuRef}>
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
             >
               <MoreHorizontal className="w-4 h-4" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-8 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20 w-36">
+              <div className="absolute right-0 top-8 bg-white rounded-lg border border-gray-200 shadow-lg py-1 z-20 w-36">
                 <button
                   type="button"
                   onClick={() => {
@@ -125,7 +112,7 @@ export default function Column({ column, boardId, onCardClick }) {
                     setIsRenaming(true)
                     setRenameValue(column.title)
                   }}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   Rename
@@ -136,7 +123,7 @@ export default function Column({ column, boardId, onCardClick }) {
                     setMenuOpen(false)
                     deleteColumn(boardId, column.id)
                   }}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
+                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-red-600 hover:bg-gray-50"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete
@@ -150,61 +137,32 @@ export default function Column({ column, boardId, onCardClick }) {
       {/* Cards list */}
       <div
         ref={setDroppableRef}
-        className="flex-1 overflow-y-auto px-3 pb-2 space-y-2 min-h-0"
+        className="flex-1 overflow-y-auto pb-2 space-y-2 min-h-[80px]"
       >
         <SortableContext
           items={column.cardIds}
           strategy={verticalListSortingStrategy}
         >
-          {columnCards.map((card) => (
-            <SortableCard key={card.id} card={card} onClick={onCardClick} />
-          ))}
+          {columnCards.map((card) =>
+            card.id === inlineCardId ? (
+              <InlineCardEditor key={card.id} cardId={card.id} onDone={onInlineDone} />
+            ) : (
+              <SortableCard key={card.id} card={card} onClick={onCardClick} onComplete={onCompleteCard} isSelected={card.id === selectedCardId} />
+            )
+          )}
         </SortableContext>
       </div>
 
-      {/* Add card form */}
-      <div className="px-3 pb-3">
-        {isAdding ? (
-          <div className="space-y-2">
-            <input
-              ref={inputRef}
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              onKeyDown={handleAddKeyDown}
-              onBlur={handleAdd}
-              placeholder="Card title..."
-              className="w-full text-sm bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleAdd}
-                className="px-3 py-1.5 text-xs font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-              >
-                Add card
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setNewTitle('')
-                  setIsAdding(false)
-                }}
-                className="p-1 rounded hover:bg-gray-200 text-gray-400"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setIsAdding(true)}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg px-2 py-1.5 w-full transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Add a card
-          </button>
-        )}
+      {/* Add card */}
+      <div className="pt-1">
+        <button
+          type="button"
+          onClick={handleCreateCard}
+          className="flex items-center gap-1.5 text-[13px] text-gray-400 hover:text-gray-600 px-0.5 py-1.5 w-full transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Add task
+        </button>
       </div>
     </div>
   )

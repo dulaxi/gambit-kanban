@@ -108,7 +108,7 @@ export default function DashboardPage() {
         {statCards.map((stat) => (
           <div
             key={stat.label}
-            className="bg-white rounded-xl border border-gray-200 p-5"
+            className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
                   {stat.value}
                 </p>
               </div>
-              <div className={`p-3 rounded-lg ${stat.color}`}>
+              <div className={`p-3 rounded-xl ${stat.color}`}>
                 <stat.icon className="w-5 h-5" />
               </div>
             </div>
@@ -126,14 +126,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">
             Recent Activity
           </h2>
           <button
             onClick={() => navigate('/boards')}
-            className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 font-medium cursor-pointer"
+            className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
           >
             View boards
             <ArrowRight className="w-4 h-4" />

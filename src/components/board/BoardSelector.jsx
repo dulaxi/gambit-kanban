@@ -1,11 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronDown, Plus } from 'lucide-react'
+import { ChevronDown, Plus, LayoutGrid } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
+import DynamicIcon from './DynamicIcon'
+import IconPicker from './IconPicker'
 
 export default function BoardSelector() {
   const [open, setOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [newName, setNewName] = useState('')
+  const [newIcon, setNewIcon] = useState(null)
+  const [showIconPicker, setShowIconPicker] = useState(false)
   const dropdownRef = useRef(null)
   const createInputRef = useRef(null)
 
@@ -17,7 +21,6 @@ export default function BoardSelector() {
   const boardList = Object.values(boards)
   const activeBoard = boards[activeBoardId]
 
-  // Close on click outside
   useEffect(() => {
     if (!open) return
     const handleClick = (e) => {
@@ -25,6 +28,8 @@ export default function BoardSelector() {
         setOpen(false)
         setIsCreating(false)
         setNewName('')
+        setNewIcon(null)
+        setShowIconPicker(false)
       }
     }
     document.addEventListener('mousedown', handleClick)
@@ -40,10 +45,12 @@ export default function BoardSelector() {
   const handleCreate = () => {
     const trimmed = newName.trim()
     if (trimmed) {
-      addBoard(trimmed)
+      addBoard(trimmed, newIcon)
     }
     setNewName('')
+    setNewIcon(null)
     setIsCreating(false)
+    setShowIconPicker(false)
     setOpen(false)
   }
 
@@ -52,7 +59,9 @@ export default function BoardSelector() {
       handleCreate()
     } else if (e.key === 'Escape') {
       setNewName('')
+      setNewIcon(null)
       setIsCreating(false)
+      setShowIconPicker(false)
     }
   }
 
@@ -61,18 +70,25 @@ export default function BoardSelector() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
       >
+        <span className="w-5 h-5 flex items-center justify-center text-gray-400">
+          {activeBoard?.icon ? (
+            <DynamicIcon name={activeBoard.icon} className="w-4 h-4" />
+          ) : (
+            <LayoutGrid className="w-4 h-4" />
+          )}
+        </span>
         <span>{activeBoard?.name || 'Select board'}</span>
         <ChevronDown
-          className={`w-4 h-4 text-gray-400 transition-transform ${
+          className={`w-4 h-4 text-gray-500 transition-transform ${
             open ? 'rotate-180' : ''
           }`}
         />
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-30 w-56">
+        <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-30 w-64">
           {boardList.map((board) => (
             <button
               key={board.id}
@@ -81,34 +97,63 @@ export default function BoardSelector() {
                 setActiveBoard(board.id)
                 setOpen(false)
               }}
-              className={`w-full text-left px-3 py-2 text-sm transition-colors ${
+              className={`flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm transition-colors ${
                 board.id === activeBoardId
-                  ? 'bg-primary-50 text-primary-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-50 text-gray-900 font-medium'
+                  : 'text-gray-500 hover:bg-gray-50'
               }`}
             >
+              <span className="w-5 h-5 flex items-center justify-center text-gray-400 shrink-0">
+                {board.icon ? (
+                  <DynamicIcon name={board.icon} className="w-4 h-4" />
+                ) : (
+                  <LayoutGrid className="w-4 h-4" />
+                )}
+              </span>
               {board.name}
             </button>
           ))}
 
-          <div className="border-t border-gray-100 mt-1 pt-1">
+          <div className="border-t border-gray-200 mt-1 pt-1">
             {isCreating ? (
-              <div className="px-3 py-1.5">
-                <input
-                  ref={createInputRef}
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  onKeyDown={handleCreateKeyDown}
-                  onBlur={handleCreate}
-                  placeholder="Board name..."
-                  className="w-full text-sm border border-gray-300 rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
+              <div className="px-3 py-1.5 space-y-2">
+                <div className="flex items-center gap-2">
+                  {/* Icon pick button */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowIconPicker(!showIconPicker)}
+                      className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 transition-colors shrink-0"
+                    >
+                      {newIcon ? (
+                        <DynamicIcon name={newIcon} className="w-4 h-4" />
+                      ) : (
+                        <LayoutGrid className="w-4 h-4" />
+                      )}
+                    </button>
+                    {showIconPicker && (
+                      <IconPicker
+                        value={newIcon}
+                        onChange={(icon) => setNewIcon(icon)}
+                        onClose={() => setShowIconPicker(false)}
+                      />
+                    )}
+                  </div>
+                  <input
+                    ref={createInputRef}
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    onKeyDown={handleCreateKeyDown}
+                    placeholder="Board name..."
+                    className="flex-1 text-sm rounded-lg px-2 py-1.5 border border-gray-200 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-100"
+                  />
+                </div>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={() => setIsCreating(true)}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-400 hover:bg-gray-50 hover:text-gray-900"
               >
                 <Plus className="w-4 h-4" />
                 New board

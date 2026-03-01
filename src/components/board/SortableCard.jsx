@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import Card from './Card'
 
-export default function SortableCard({ card, onClick }) {
+export default function SortableCard({ card, onClick, onComplete, isSelected }) {
   const {
     attributes,
     listeners,
@@ -20,7 +20,7 @@ export default function SortableCard({ card, onClick }) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <Card card={card} onClick={onClick} />
+      <Card card={card} onClick={onClick} onComplete={onComplete} isSelected={isSelected} />
     </div>
   )
 }

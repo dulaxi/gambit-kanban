@@ -21,11 +21,11 @@ export default function AppLayout() {
   const title = pageTitles[basePath] || 'Gambit'
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f6f8f9]">
       <Sidebar />
       <div
         className={`transition-all duration-200 ${
-          collapsed ? 'ml-16' : 'ml-60'
+          collapsed ? 'ml-16' : 'ml-80'
         }`}
       >
         <Header title={title} />

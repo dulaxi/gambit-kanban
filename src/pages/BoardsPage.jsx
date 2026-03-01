@@ -2,28 +2,56 @@ import { useState } from 'react'
 import { useBoardStore } from '../store/boardStore'
 import BoardSelector from '../components/board/BoardSelector'
 import BoardView from '../components/board/BoardView'
-import CardModal from '../components/board/CardModal'
+import CardDetailPanel from '../components/board/CardDetailPanel'
 
 export default function BoardsPage() {
   const [editingCardId, setEditingCardId] = useState(null)
+  const [inlineCardId, setInlineCardId] = useState(null)
   const activeBoardId = useBoardStore((s) => s.activeBoardId)
 
+  const handleCardClick = (cardId) => {
+    setInlineCardId(null)
+    setEditingCardId(cardId)
+  }
+
+  const handleCreateCard = (cardId) => {
+    setEditingCardId(null)
+    setInlineCardId(cardId)
+  }
+
+  const handleInlineDone = () => {
+    setInlineCardId(null)
+  }
+
   return (
-    <div>
-      <div className="mb-4">
+    <div
+      className={`h-[calc(100vh-7rem)] flex flex-col transition-all duration-200 ${
+        editingCardId ? 'mr-[400px]' : ''
+      }`}
+    >
+      <div className="mb-4 shrink-0">
         <BoardSelector />
       </div>
 
-      {activeBoardId ? (
-        <BoardView boardId={activeBoardId} onCardClick={setEditingCardId} />
-      ) : (
-        <div className="flex items-center justify-center h-[calc(100vh-10rem)] text-gray-400">
-          Create a board to get started
-        </div>
-      )}
+      <div className="flex-1 min-h-0">
+        {activeBoardId ? (
+          <BoardView
+            boardId={activeBoardId}
+            onCardClick={handleCardClick}
+            onCreateCard={handleCreateCard}
+            inlineCardId={inlineCardId}
+            onInlineDone={handleInlineDone}
+            selectedCardId={editingCardId}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            Create a board to get started
+          </div>
+        )}
+      </div>
 
       {editingCardId && (
-        <CardModal
+        <CardDetailPanel
           cardId={editingCardId}
           onClose={() => setEditingCardId(null)}
         />

@@ -3,7 +3,8 @@ import { Plus, X } from 'lucide-react'
 import {
   DndContext,
   DragOverlay,
-  closestCorners,
+  pointerWithin,
+  rectIntersection,
   PointerSensor,
   useSensor,
   useSensors,
@@ -12,7 +13,7 @@ import { useBoardStore } from '../../store/boardStore'
 import Column from './Column'
 import Card from './Card'
 
-export default function BoardView({ boardId, onCardClick }) {
+export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCardId, onInlineDone, selectedCardId }) {
   const [isAddingColumn, setIsAddingColumn] = useState(false)
   const [newColumnTitle, setNewColumnTitle] = useState('')
   const [activeCardId, setActiveCardId] = useState(null)
@@ -22,10 +23,18 @@ export default function BoardView({ boardId, onCardClick }) {
   const cards = useBoardStore((s) => s.cards)
   const addColumn = useBoardStore((s) => s.addColumn)
   const moveCard = useBoardStore((s) => s.moveCard)
+  const completeCard = useBoardStore((s) => s.completeCard)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   )
+
+  // Custom collision: prefer pointerWithin (cards), fallback to rectIntersection (columns)
+  const collisionDetection = useCallback((args) => {
+    const pointerCollisions = pointerWithin(args)
+    if (pointerCollisions.length > 0) return pointerCollisions
+    return rectIntersection(args)
+  }, [])
 
   useEffect(() => {
     if (isAddingColumn && inputRef.current) {
@@ -33,42 +42,42 @@ export default function BoardView({ boardId, onCardClick }) {
     }
   }, [isAddingColumn])
 
-  const findColumnByCardId = useCallback(
-    (cardId) => {
-      if (!board) return null
-      return board.columns.find((col) => col.cardIds.includes(cardId)) || null
-    },
-    [board]
-  )
-
   const handleDragStart = useCallback((event) => {
     setActiveCardId(event.active.id)
   }, [])
 
+  const getBoard = useCallback(() => {
+    return useBoardStore.getState().boards[boardId]
+  }, [boardId])
+
+  const findCol = useCallback(
+    (b, cardId) => b.columns.find((col) => col.cardIds.includes(cardId)) || null,
+    []
+  )
+
   const handleDragOver = useCallback(
     (event) => {
       const { active, over } = event
-      if (!over || !board) return
+      if (!over) return
+
+      const b = getBoard()
+      if (!b) return
 
       const activeId = active.id
       const overId = over.id
 
-      const fromColumn = findColumnByCardId(activeId)
+      const fromColumn = findCol(b, activeId)
       if (!fromColumn) return
 
-      // Determine target column: overId might be a column id or a card id
-      let toColumn = board.columns.find((col) => col.id === overId)
+      let toColumn = b.columns.find((col) => col.id === overId)
       if (!toColumn) {
-        toColumn = findColumnByCardId(overId)
+        toColumn = findCol(b, overId)
       }
       if (!toColumn) return
 
-      // Only handle cross-column moves here
       if (fromColumn.id === toColumn.id) return
 
       const fromIndex = fromColumn.cardIds.indexOf(activeId)
-      // If hovering over a card in the target column, insert at that position
-      // If hovering over the column itself (empty area), insert at end
       let toIndex
       if (toColumn.cardIds.includes(overId)) {
         toIndex = toColumn.cardIds.indexOf(overId)
@@ -78,7 +87,7 @@ export default function BoardView({ boardId, onCardClick }) {
 
       moveCard(boardId, fromColumn.id, toColumn.id, fromIndex, toIndex)
     },
-    [board, boardId, findColumnByCardId, moveCard]
+    [boardId, getBoard, findCol, moveCard]
   )
 
   const handleDragEnd = useCallback(
@@ -86,18 +95,20 @@ export default function BoardView({ boardId, onCardClick }) {
       const { active, over } = event
       setActiveCardId(null)
 
-      if (!over || !board) return
+      if (!over) return
+
+      const b = getBoard()
+      if (!b) return
 
       const activeId = active.id
       const overId = over.id
 
-      const fromColumn = findColumnByCardId(activeId)
+      const fromColumn = findCol(b, activeId)
       if (!fromColumn) return
 
-      // For same-column reordering
-      let toColumn = board.columns.find((col) => col.id === overId)
+      let toColumn = b.columns.find((col) => col.id === overId)
       if (!toColumn) {
-        toColumn = findColumnByCardId(overId)
+        toColumn = findCol(b, overId)
       }
       if (!toColumn || fromColumn.id !== toColumn.id) return
 
@@ -108,12 +119,12 @@ export default function BoardView({ boardId, onCardClick }) {
         moveCard(boardId, fromColumn.id, toColumn.id, fromIndex, toIndex)
       }
     },
-    [board, boardId, findColumnByCardId, moveCard]
+    [boardId, getBoard, findCol, moveCard]
   )
 
   if (!board) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-10rem)] text-gray-400">
+      <div className="flex items-center justify-center h-full text-gray-400">
         No board selected
       </div>
     )
@@ -142,41 +153,46 @@ export default function BoardView({ boardId, onCardClick }) {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto h-[calc(100vh-10rem)] pb-4">
+      <div className="flex gap-5 overflow-x-auto h-full pb-4">
         {board.columns.map((column) => (
           <Column
             key={column.id}
             column={column}
             boardId={boardId}
             onCardClick={onCardClick}
+            onCreateCard={onCreateCard}
+            onCompleteCard={completeCard}
+            inlineCardId={inlineCardId}
+            onInlineDone={onInlineDone}
+            selectedCardId={selectedCardId}
           />
         ))}
 
-        {/* Add column */}
-        <div className="shrink-0 w-72">
+        {/* Add section */}
+        <div className="shrink-0 w-[290px]">
           {isAddingColumn ? (
-            <div className="bg-gray-100 rounded-xl p-3 space-y-2">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 space-y-2">
               <input
                 ref={inputRef}
                 value={newColumnTitle}
                 onChange={(e) => setNewColumnTitle(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onBlur={handleAddColumn}
-                placeholder="Column title..."
-                className="w-full text-sm bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="Section name"
+                className="w-full text-[13px] px-0 py-0 border-none focus:outline-none focus:ring-0 placeholder-gray-400 bg-transparent"
               />
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleAddColumn}
-                  className="px-3 py-1.5 text-xs font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
                 >
-                  Add column
+                  Add section
                 </button>
                 <button
                   type="button"
@@ -184,7 +200,7 @@ export default function BoardView({ boardId, onCardClick }) {
                     setNewColumnTitle('')
                     setIsAddingColumn(false)
                   }}
-                  className="p-1 rounded hover:bg-gray-200 text-gray-400"
+                  className="p-1 rounded hover:bg-gray-100 text-gray-400"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -194,10 +210,10 @@ export default function BoardView({ boardId, onCardClick }) {
             <button
               type="button"
               onClick={() => setIsAddingColumn(true)}
-              className="flex items-center gap-2 w-full px-4 py-3 text-sm font-medium text-gray-500 bg-gray-100/60 hover:bg-gray-100 rounded-xl border-2 border-dashed border-gray-200 hover:border-gray-300 transition-colors"
+              className="flex items-center gap-2 w-full px-0.5 py-2 text-[13px] text-gray-400 hover:text-gray-600 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              Add column
+              Add section
             </button>
           )}
         </div>
@@ -205,7 +221,7 @@ export default function BoardView({ boardId, onCardClick }) {
 
       <DragOverlay>
         {activeCard ? (
-          <div className="rotate-3 opacity-90">
+          <div className="rotate-2 opacity-90">
             <Card card={activeCard} onClick={() => {}} />
           </div>
         ) : null}
