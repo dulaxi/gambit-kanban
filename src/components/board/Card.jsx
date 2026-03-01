@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { format, isPast, parseISO } from 'date-fns'
 import { Calendar, CheckSquare, AlignLeft, CheckCircle2, FileText } from 'lucide-react'
+import { useBoardStore } from '../../store/boardStore'
 import DynamicIcon from './DynamicIcon'
 
 const LABEL_BG = {
@@ -45,12 +47,22 @@ function getInitials(name) {
     .slice(0, 2)
 }
 
-export default function Card({ card, onClick, onComplete, isSelected }) {
+export default function Card({ card, onClick, onComplete, isSelected, iconOverride }) {
   const { title, description, labels, priority, dueDate, checklist, assignee, taskNumber, completed, icon } = card
+  const displayIcon = iconOverride || icon
+  const updateCard = useBoardStore((s) => s.updateCard)
+  const [checklistOpen, setChecklistOpen] = useState(false)
 
   const checkedCount = checklist?.filter((item) => item.done).length || 0
   const totalCount = checklist?.length || 0
   const hasChecklist = totalCount > 0
+
+  const toggleCheckItem = (index) => {
+    const updated = checklist.map((item, i) =>
+      i === index ? { ...item, done: !item.done } : item
+    )
+    updateCard(card.id, { checklist: updated })
+  }
   const hasDescription = description && description.trim().length > 0
   const hasAssignee = assignee && assignee.trim().length > 0
 
@@ -73,8 +85,8 @@ export default function Card({ card, onClick, onComplete, isSelected }) {
       {/* Icon — left center */}
       <div className="flex items-center pl-3 shrink-0">
         <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
-          {icon ? (
-            <DynamicIcon name={icon} className="w-4 h-4" />
+          {displayIcon ? (
+            <DynamicIcon name={displayIcon} className="w-4 h-4" />
           ) : (
             <FileText className="w-4 h-4" />
           )}
@@ -112,7 +124,7 @@ export default function Card({ card, onClick, onComplete, isSelected }) {
             <CheckCircle2 className={`w-4 h-4 transition-colors ${completed ? 'text-emerald-400' : 'text-gray-300 hover:text-emerald-300'}`} />
           </button>
           {taskNumber && (
-            <span className="text-[11px] font-medium text-gray-500">Task {taskNumber}</span>
+            <span className="text-[11px] font-medium text-gray-500">Task #{taskNumber}</span>
           )}
           <span className={`w-2 h-2 rounded-full ${priDot}`} title={priority} />
         </div>
@@ -144,16 +156,21 @@ export default function Card({ card, onClick, onComplete, isSelected }) {
             )}
 
             {hasChecklist && (
-              <span
-                className={`text-[10px] font-medium flex items-center gap-1 px-2 py-0.5 rounded-full ${
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setChecklistOpen(!checklistOpen)
+                }}
+                className={`text-[10px] font-medium flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors ${
                   checkedCount === totalCount
-                    ? 'bg-emerald-100 text-emerald-300'
-                    : 'bg-gray-100 text-gray-300'
+                    ? 'bg-emerald-100 text-emerald-500'
+                    : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                 }`}
               >
                 <CheckSquare className="w-3 h-3" />
                 {checkedCount}/{totalCount}
-              </span>
+              </button>
             )}
 
             {hasDescription && (
@@ -173,6 +190,34 @@ export default function Card({ card, onClick, onComplete, isSelected }) {
             </span>
           )}
         </div>
+
+        {/* Expandable checklist */}
+        {hasChecklist && checklistOpen && (
+          <div className="mt-2 pt-2 border-t border-gray-100" onClick={(e) => e.stopPropagation()}>
+            {/* Progress bar */}
+            <div className="w-full bg-gray-100 rounded-full h-1 mb-2">
+              <div
+                className={`h-1 rounded-full transition-all ${checkedCount === totalCount ? 'bg-emerald-400' : 'bg-blue-400'}`}
+                style={{ width: `${(checkedCount / totalCount) * 100}%` }}
+              />
+            </div>
+            <div className="space-y-1">
+              {checklist.map((item, idx) => (
+                <label key={idx} className="flex items-center gap-2 py-0.5 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={item.done}
+                    onChange={() => toggleCheckItem(idx)}
+                    className="w-3.5 h-3.5 rounded border-gray-300 text-blue-400 focus:ring-blue-300"
+                  />
+                  <span className={`text-[12px] leading-snug ${item.done ? 'line-through text-gray-400' : 'text-gray-600'}`}>
+                    {item.text}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

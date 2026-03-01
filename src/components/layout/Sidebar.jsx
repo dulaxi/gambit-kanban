@@ -5,7 +5,6 @@ import {
   Kanban,
   Calendar,
   StickyNote,
-  BarChart3,
   Settings,
   ChevronsLeft,
   ChevronsRight,
@@ -13,6 +12,7 @@ import {
   ChevronRight,
   Plus,
   Trash2,
+  Layers,
 } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useBoardStore } from '../../store/boardStore'
@@ -23,7 +23,16 @@ function GambitLogo({ className }) {
   return (
     <svg viewBox="0 0 32 32" fill="none" className={className}>
       <rect width="32" height="32" rx="8" fill="currentColor" />
-      <path d="M16 7L22 11V21L16 25L10 21V11L16 7Z" fill="white" />
+      <path
+        d="M14 5.5C14 5.5 14.6 9.4 16 11C17.6 12.6 22 13 22 13C22 13 17.6 13.4 16 15C14.6 16.4 14 21 14 21C14 21 13.4 16.4 12 15C10.4 13.4 6 13 6 13C6 13 10.4 12.6 12 11C13.4 9.4 14 5.5 14 5.5Z"
+        fill="white"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M22 17.5C22 17.5 22.4 19.5 23.2 20.3C24 21.1 27 21.8 27 21.8C27 21.8 24 22.5 23.2 23.3C22.4 24.1 22 27 22 27C22 27 21.6 24.1 20.8 23.3C20 22.5 17 21.8 17 21.8C17 21.8 20 21.1 20.8 20.3C21.6 19.5 22 17.5 22 17.5Z"
+        fill="white"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }
@@ -32,7 +41,6 @@ const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/calendar', icon: Calendar, label: 'Calendar' },
   { to: '/notes', icon: StickyNote, label: 'Notes' },
-  { to: '/analytics', icon: BarChart3, label: 'Analytics' },
 ]
 
 export default function Sidebar() {
@@ -43,6 +51,7 @@ export default function Sidebar() {
   const setActiveBoard = useBoardStore((s) => s.setActiveBoard)
   const addBoard = useBoardStore((s) => s.addBoard)
   const deleteBoard = useBoardStore((s) => s.deleteBoard)
+  const renameBoard = useBoardStore((s) => s.renameBoard)
   const updateBoardIcon = useBoardStore((s) => s.updateBoardIcon)
   const location = useLocation()
   const navigate = useNavigate()
@@ -51,6 +60,8 @@ export default function Sidebar() {
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('')
   const [iconPickerBoardId, setIconPickerBoardId] = useState(null)
+  const [renamingBoardId, setRenamingBoardId] = useState(null)
+  const [renameValue, setRenameValue] = useState('')
 
   const isBoardsActive = location.pathname.startsWith('/boards')
 
@@ -75,7 +86,7 @@ export default function Sidebar() {
   return (
     <aside
       className={`fixed top-0 left-0 h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-200 z-30 ${
-        collapsed ? 'w-16' : 'w-80'
+        collapsed ? 'w-16' : 'w-60'
       }`}
     >
       {/* Logo */}
@@ -141,6 +152,21 @@ export default function Sidebar() {
 
             {boardsOpen && (
               <div className="ml-5 mt-1 pl-3 border-l border-gray-200 space-y-0.5">
+                {/* All Tasks — permanent entry */}
+                <div
+                  onClick={() => handleSelectBoard('__all__')}
+                  className={`flex items-center justify-between w-full px-3 py-1.5 rounded-lg text-sm transition-colors group cursor-pointer ${
+                    isBoardsActive && activeBoardId === '__all__'
+                      ? 'text-gray-900 font-medium bg-blue-50'
+                      : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="flex items-center gap-2 truncate">
+                    <Layers className="w-4 h-4 text-gray-400 shrink-0" />
+                    <span className="truncate">All Tasks</span>
+                  </span>
+                </div>
+
                 {Object.values(boards).map((board) => (
                   <div
                     key={board.id}
@@ -167,7 +193,40 @@ export default function Sidebar() {
                           <Kanban className="w-4 h-4 text-gray-400" />
                         )}
                       </button>
-                      {board.name}
+                      {renamingBoardId === board.id ? (
+                        <input
+                          autoFocus
+                          value={renameValue}
+                          onChange={(e) => setRenameValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const trimmed = renameValue.trim()
+                              if (trimmed) renameBoard(board.id, trimmed)
+                              setRenamingBoardId(null)
+                            } else if (e.key === 'Escape') {
+                              setRenamingBoardId(null)
+                            }
+                          }}
+                          onBlur={() => {
+                            const trimmed = renameValue.trim()
+                            if (trimmed) renameBoard(board.id, trimmed)
+                            setRenamingBoardId(null)
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 text-sm bg-white border border-blue-400 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-100 min-w-0"
+                        />
+                      ) : (
+                        <span
+                          onDoubleClick={(e) => {
+                            e.stopPropagation()
+                            setRenamingBoardId(board.id)
+                            setRenameValue(board.name)
+                          }}
+                          className="truncate"
+                        >
+                          {board.name}
+                        </span>
+                      )}
                     </span>
                     {Object.keys(boards).length > 1 && (
                       <Trash2

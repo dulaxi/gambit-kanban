@@ -8,6 +8,7 @@ const createDefaultBoard = () => {
     id: boardId,
     name: 'My Tasks',
     icon: 'ClipboardList',
+    nextTaskNumber: 1,
     columns: [
       { id: nanoid(), title: 'To Do', cardIds: [] },
       { id: nanoid(), title: 'In Progress', cardIds: [] },
@@ -25,7 +26,6 @@ export const useBoardStore = create(
       boards: { [defaultBoard.id]: defaultBoard },
       cards: {},
       activeBoardId: defaultBoard.id,
-      nextTaskNumber: 1,
 
       // Board actions
       setActiveBoard: (boardId) => set({ activeBoardId: boardId }),
@@ -35,6 +35,7 @@ export const useBoardStore = create(
           id: nanoid(),
           name,
           icon: icon || null,
+          nextTaskNumber: 1,
           columns: [
             { id: nanoid(), title: 'To Do', cardIds: [] },
             { id: nanoid(), title: 'In Progress', cardIds: [] },
@@ -134,14 +135,15 @@ export const useBoardStore = create(
 
       // Card actions
       addCard: (boardId, columnId, cardData) => {
-        const taskNumber = get().nextTaskNumber
+        const board = get().boards[boardId]
+        const taskNumber = board.nextTaskNumber || 1
         const card = {
           id: nanoid(),
           boardId,
           taskNumber,
           title: cardData.title,
           description: cardData.description || '',
-          assignee: cardData.assignee || '',
+          assignee: cardData.assignee || 'Abdullah H.',
           labels: cardData.labels || [],
           dueDate: cardData.dueDate || null,
           priority: cardData.priority || 'medium',
@@ -154,12 +156,12 @@ export const useBoardStore = create(
         set((state) => {
           const board = state.boards[boardId]
           return {
-            nextTaskNumber: state.nextTaskNumber + 1,
             cards: { ...state.cards, [card.id]: card },
             boards: {
               ...state.boards,
               [boardId]: {
                 ...board,
+                nextTaskNumber: taskNumber + 1,
                 columns: board.columns.map((col) =>
                   col.id === columnId
                     ? { ...col, cardIds: [...col.cardIds, card.id] }
@@ -228,12 +230,15 @@ export const useBoardStore = create(
           const card = state.cards[cardId]
           const { [cardId]: deleted, ...restCards } = state.cards
           const board = state.boards[card.boardId]
+          // If this was the last created task, reclaim its number
+          const reclaimNumber = card.taskNumber === (board.nextTaskNumber || 1) - 1
           return {
             cards: restCards,
             boards: {
               ...state.boards,
               [card.boardId]: {
                 ...board,
+                nextTaskNumber: reclaimNumber ? card.taskNumber : board.nextTaskNumber,
                 columns: board.columns.map((col) => ({
                   ...col,
                   cardIds: col.cardIds.filter((id) => id !== cardId),
@@ -272,6 +277,26 @@ export const useBoardStore = create(
           col.cardIds.map((id) => state.cards[id]).filter(Boolean)
         )
       },
+
+      resetTaskCounters: () =>
+        set((state) => {
+          const boards = {}
+          for (const [id, board] of Object.entries(state.boards)) {
+            boards[id] = { ...board, nextTaskNumber: 1 }
+          }
+          // Also reset taskNumber on all existing cards
+          const cards = {}
+          let boardCounters = {}
+          for (const [cid, card] of Object.entries(state.cards)) {
+            if (!boardCounters[card.boardId]) boardCounters[card.boardId] = 1
+            cards[cid] = { ...card, taskNumber: boardCounters[card.boardId]++ }
+          }
+          // Update boards with correct next number
+          for (const [bid, next] of Object.entries(boardCounters)) {
+            if (boards[bid]) boards[bid].nextTaskNumber = next
+          }
+          return { boards, cards }
+        }),
 
       getAllCards: () => Object.values(get().cards),
     }),

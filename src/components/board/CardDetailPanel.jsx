@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   X, Trash2, Plus, Check, User, Calendar, Flag, Tag, CheckSquare,
-  Briefcase, GitBranch, LayoutList, CheckCircle2, FileText, Smile,
+  Briefcase, LayoutList, CheckCircle2, FileText, Smile,
 } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
 import DynamicIcon from './DynamicIcon'
@@ -216,7 +216,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
               <CheckCircle2 className={`w-5 h-5 transition-colors ${card.completed ? 'text-emerald-400' : 'text-gray-300 hover:text-emerald-300'}`} />
             </button>
             {card.taskNumber && (
-              <span className="text-xs font-medium text-gray-500">Task {card.taskNumber}</span>
+              <span className="text-xs font-medium text-gray-500">Task #{card.taskNumber}</span>
             )}
           </div>
           <input
@@ -340,14 +340,6 @@ export default function CardDetailPanel({ cardId, onClose }) {
             <span className="text-sm text-gray-700">{boardName}</span>
           </div>
 
-          {/* Dependencies */}
-          <div className="flex items-center py-2.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 w-32 shrink-0 text-gray-400">
-              <GitBranch className="w-4 h-4" />
-              <span className="text-sm">Dependencies</span>
-            </div>
-            <span className="text-sm text-gray-300">—</span>
-          </div>
 
           {/* Fields section header */}
           <div className="pt-4 pb-1 border-t border-gray-100">

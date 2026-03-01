@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronDown, Plus, LayoutGrid } from 'lucide-react'
+import { ChevronDown, Plus, LayoutGrid, Layers } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
 import DynamicIcon from './DynamicIcon'
 import IconPicker from './IconPicker'
@@ -73,13 +73,15 @@ export default function BoardSelector() {
         className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
       >
         <span className="w-5 h-5 flex items-center justify-center text-gray-400">
-          {activeBoard?.icon ? (
+          {activeBoardId === '__all__' ? (
+            <Layers className="w-4 h-4" />
+          ) : activeBoard?.icon ? (
             <DynamicIcon name={activeBoard.icon} className="w-4 h-4" />
           ) : (
             <LayoutGrid className="w-4 h-4" />
           )}
         </span>
-        <span>{activeBoard?.name || 'Select board'}</span>
+        <span>{activeBoardId === '__all__' ? 'All Tasks' : activeBoard?.name || 'Select board'}</span>
         <ChevronDown
           className={`w-4 h-4 text-gray-500 transition-transform ${
             open ? 'rotate-180' : ''
@@ -89,6 +91,25 @@ export default function BoardSelector() {
 
       {open && (
         <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-30 w-64">
+          {/* All Tasks option */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveBoard('__all__')
+              setOpen(false)
+            }}
+            className={`flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm transition-colors ${
+              activeBoardId === '__all__'
+                ? 'bg-blue-50 text-gray-900 font-medium'
+                : 'text-gray-500 hover:bg-gray-50'
+            }`}
+          >
+            <span className="w-5 h-5 flex items-center justify-center text-gray-400 shrink-0">
+              <Layers className="w-4 h-4" />
+            </span>
+            All Tasks
+          </button>
+          <div className="border-t border-gray-200 my-1" />
           {boardList.map((board) => (
             <button
               key={board.id}

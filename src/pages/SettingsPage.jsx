@@ -1,10 +1,26 @@
 import { useState, useRef } from 'react'
-import { Download, Upload, Trash2, AlertTriangle } from 'lucide-react'
+import { Download, Upload, Trash2, AlertTriangle, Palette } from 'lucide-react'
+import { useSettingsStore } from '../store/settingsStore'
+
+const themes = [
+  {
+    id: 'default',
+    label: 'Default',
+    swatches: ['#ffffff', '#e5e7eb', '#3b82f6', '#2563eb'],
+  },
+  {
+    id: 'github',
+    label: 'GitHub Dark',
+    swatches: ['#232925', '#0A241B', '#0FBF3E', '#5FED83'],
+  },
+]
 
 export default function SettingsPage() {
   const fileInputRef = useRef(null)
   const [importMessage, setImportMessage] = useState(null)
   const [confirmingClear, setConfirmingClear] = useState(false)
+  const theme = useSettingsStore((s) => s.theme)
+  const setTheme = useSettingsStore((s) => s.setTheme)
 
   const handleExport = () => {
     const data = {}
@@ -84,6 +100,43 @@ export default function SettingsPage() {
         <p className="text-gray-500 text-sm mt-1">
           Manage your data and preferences
         </p>
+      </div>
+
+      {/* Theme */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Palette className="w-4 h-4 text-gray-500" />
+          <h2 className="text-sm font-semibold text-gray-900">Theme</h2>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          Choose a color theme for the interface.
+        </p>
+        <div className="flex gap-3">
+          {themes.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTheme(t.id)}
+              className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border-2 cursor-pointer transition-colors ${
+                theme === t.id
+                  ? 'border-blue-400 bg-blue-50/60'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex gap-1">
+                {t.swatches.map((color, i) => (
+                  <div
+                    key={i}
+                    className="w-5 h-5 rounded-full border border-gray-200"
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+              <span className="text-xs font-medium text-gray-700">
+                {t.label}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Export Data */}

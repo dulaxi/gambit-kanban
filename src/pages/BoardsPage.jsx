@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useBoardStore } from '../store/boardStore'
 import BoardSelector from '../components/board/BoardSelector'
 import BoardView from '../components/board/BoardView'
+import AllBoardsView from '../components/board/AllBoardsView'
 import CardDetailPanel from '../components/board/CardDetailPanel'
 
 export default function BoardsPage() {
@@ -34,7 +35,12 @@ export default function BoardsPage() {
       </div>
 
       <div className="flex-1 min-h-0">
-        {activeBoardId ? (
+        {activeBoardId === '__all__' ? (
+          <AllBoardsView
+            onCardClick={handleCardClick}
+            selectedCardId={editingCardId}
+          />
+        ) : activeBoardId ? (
           <BoardView
             boardId={activeBoardId}
             onCardClick={handleCardClick}

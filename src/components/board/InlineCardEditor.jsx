@@ -130,7 +130,7 @@ export default function InlineCardEditor({ cardId, onDone }) {
           )}
         </div>
         {card.taskNumber && (
-          <span className="text-[11px] font-medium text-gray-500">Task {card.taskNumber}</span>
+          <span className="text-[11px] font-medium text-gray-500">Task #{card.taskNumber}</span>
         )}
       </div>
 
