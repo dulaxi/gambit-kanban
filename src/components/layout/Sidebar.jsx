@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useBoardStore } from '../../store/boardStore'
+import { useIsDesktop } from '../../hooks/useMediaQuery'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
 
@@ -43,6 +44,9 @@ const navItems = [
 export default function Sidebar() {
   const collapsed = useSettingsStore((s) => s.sidebarCollapsed)
   const toggle = useSettingsStore((s) => s.toggleSidebar)
+  const mobileMenuOpen = useSettingsStore((s) => s.mobileMenuOpen)
+  const closeMobileMenu = useSettingsStore((s) => s.closeMobileMenu)
+  const isDesktop = useIsDesktop()
   const boards = useBoardStore((s) => s.boards)
   const activeBoardId = useBoardStore((s) => s.activeBoardId)
   const setActiveBoard = useBoardStore((s) => s.setActiveBoard)
@@ -73,6 +77,7 @@ export default function Sidebar() {
   const handleSelectBoard = (boardId) => {
     setActiveBoard(boardId)
     navigate('/boards')
+    closeMobileMenu()
   }
 
   const handleDeleteBoard = (e, boardId) => {
@@ -80,16 +85,31 @@ export default function Sidebar() {
     deleteBoard(boardId)
   }
 
+  // On mobile, sidebar is always expanded (w-60) since collapse toggle is hidden
+  const showCollapsed = isDesktop && collapsed
+
   return (
-    <aside
-      className={`fixed top-0 left-0 h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-200 z-30 ${
-        collapsed ? 'w-16' : 'w-60'
-      }`}
-    >
+    <>
+      {/* Backdrop for mobile drawer */}
+      {!isDesktop && mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 z-30 transition-opacity"
+          onClick={closeMobileMenu}
+        />
+      )}
+      <aside
+        className={`fixed top-0 left-0 h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-200 z-40 ${
+          isDesktop
+            ? collapsed
+              ? 'w-16'
+              : 'w-60'
+            : `w-60 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`
+        }`}
+      >
       {/* Logo */}
       <div className="flex items-center gap-2 px-4 h-16 border-b border-gray-200">
         <GambitLogo />
-        {!collapsed && (
+        {!showCollapsed && (
           <span className="text-lg font-bold text-gray-900 tracking-tight">
             Gambit
           </span>
@@ -102,20 +122,21 @@ export default function Sidebar() {
         <NavLink
           to="/"
           end
+          onClick={closeMobileMenu}
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
               isActive
                 ? 'bg-blue-50 text-gray-900'
                 : 'text-gray-600 hover:bg-gray-100'
-            } ${collapsed ? 'justify-center' : ''}`
+            } ${showCollapsed ? 'justify-center' : ''}`
           }
         >
           <LayoutDashboard className="w-5 h-5 shrink-0" />
-          {!collapsed && <span>Dashboard</span>}
+          {!showCollapsed && <span>Dashboard</span>}
         </NavLink>
 
         {/* Boards with dropdown */}
-        {collapsed ? (
+        {showCollapsed ? (
           <NavLink
             to="/boards"
             className={({ isActive }) =>
@@ -286,16 +307,17 @@ export default function Sidebar() {
           <NavLink
             key={to}
             to={to}
+            onClick={closeMobileMenu}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-blue-50 text-gray-900'
                   : 'text-gray-600 hover:bg-gray-100'
-              } ${collapsed ? 'justify-center' : ''}`
+              } ${showCollapsed ? 'justify-center' : ''}`
             }
           >
             <Icon className="w-5 h-5 shrink-0" />
-            {!collapsed && <span>{label}</span>}
+            {!showCollapsed && <span>{label}</span>}
           </NavLink>
         ))}
       </nav>
@@ -304,34 +326,38 @@ export default function Sidebar() {
       <div className="border-t border-gray-200 py-4 px-2 space-y-1">
         <NavLink
           to="/settings"
+          onClick={closeMobileMenu}
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
               isActive
                 ? 'bg-blue-50 text-gray-900'
                 : 'text-gray-600 hover:bg-gray-100'
-            } ${collapsed ? 'justify-center' : ''}`
+            } ${showCollapsed ? 'justify-center' : ''}`
           }
         >
           <Settings className="w-5 h-5 shrink-0" />
-          {!collapsed && <span>Settings</span>}
+          {!showCollapsed && <span>Settings</span>}
         </NavLink>
 
-        <button
-          onClick={toggle}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors w-full ${
-            collapsed ? 'justify-center' : ''
-          }`}
-        >
-          {collapsed ? (
-            <ChevronsRight className="w-5 h-5" />
-          ) : (
-            <>
-              <ChevronsLeft className="w-5 h-5" />
-              <span>Collapse</span>
-            </>
-          )}
-        </button>
+        {isDesktop && (
+          <button
+            onClick={toggle}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors w-full ${
+              collapsed ? 'justify-center' : ''
+            }`}
+          >
+            {collapsed ? (
+              <ChevronsRight className="w-5 h-5" />
+            ) : (
+              <>
+                <ChevronsLeft className="w-5 h-5" />
+                <span>Collapse</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
     </aside>
+    </>
   )
 }

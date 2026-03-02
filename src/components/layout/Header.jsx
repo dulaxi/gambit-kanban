@@ -1,7 +1,9 @@
-import { Search, User, LogOut, Settings } from 'lucide-react'
+import { Search, User, LogOut, Settings, Menu } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
+import { useSettingsStore } from '../../store/settingsStore'
+import { useIsDesktop } from '../../hooks/useMediaQuery'
 import DynamicIcon from '../board/DynamicIcon'
 
 export default function Header({ title }) {
@@ -11,6 +13,8 @@ export default function Header({ title }) {
   const navigate = useNavigate()
   const profile = useAuthStore((s) => s.profile)
   const signOut = useAuthStore((s) => s.signOut)
+  const isDesktop = useIsDesktop()
+  const toggleMobileMenu = useSettingsStore((s) => s.toggleMobileMenu)
 
   useEffect(() => {
     if (!menuOpen) return
@@ -29,11 +33,22 @@ export default function Header({ title }) {
   }
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-      <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6">
+      <div className="flex items-center gap-3">
+        {!isDesktop && (
+          <button
+            type="button"
+            onClick={toggleMobileMenu}
+            className="p-1.5 -ml-1.5 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+      </div>
 
       {/* Search */}
-      <div className="relative w-80">
+      <div className="relative hidden sm:block sm:w-64 lg:w-80">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"

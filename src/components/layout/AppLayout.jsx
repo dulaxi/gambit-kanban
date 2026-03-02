@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
+import BottomTabBar from './BottomTabBar'
 import { useSettingsStore } from '../../store/settingsStore'
+import { useIsDesktop } from '../../hooks/useMediaQuery'
 import { useAuthStore } from '../../store/authStore'
 import { useBoardStore } from '../../store/boardStore'
 import { useNoteStore } from '../../store/noteStore'
@@ -20,6 +22,7 @@ export default function AppLayout() {
   const collapsed = useSettingsStore((s) => s.sidebarCollapsed)
   const theme = useSettingsStore((s) => s.theme)
   const font = useSettingsStore((s) => s.font)
+  const isDesktop = useIsDesktop()
   const location = useLocation()
   const user = useAuthStore((s) => s.user)
   const fetchBoards = useBoardStore((s) => s.fetchBoards)
@@ -83,11 +86,11 @@ export default function AppLayout() {
       <Sidebar />
       <div
         className={`transition-all duration-200 ${
-          collapsed ? 'ml-16' : 'ml-60'
+          isDesktop ? (collapsed ? 'ml-16' : 'ml-60') : 'ml-0'
         }`}
       >
         <Header title={title} />
-        <main className="p-6">
+        <main className={`p-4 sm:p-6 ${!isDesktop ? 'pb-20' : ''}`}>
           {/* Migration banner */}
           {showMigration && (
             <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
@@ -116,6 +119,7 @@ export default function AppLayout() {
           )}
           <Outlet />
         </main>
+        <BottomTabBar />
       </div>
     </div>
   )
