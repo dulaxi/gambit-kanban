@@ -25,7 +25,7 @@ export default function Header({ title }) {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/login')
+    navigate('/')
   }
 
   return (

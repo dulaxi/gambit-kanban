@@ -22,7 +22,7 @@ export default function SignupPage() {
     setLoading(true)
     try {
       await signUp(email, password, displayName || email.split('@')[0])
-      navigate('/')
+      navigate('/dashboard')
     } catch (err) {
       setError(err.message)
     } finally {

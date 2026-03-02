@@ -119,15 +119,12 @@ export default function CardDetailPanel({ cardId, onClose }) {
     }
   }, [cardId])
 
-  const saveAndCloseRef = useRef(handleSaveAndClose)
-  useEffect(() => {
-    saveAndCloseRef.current = handleSaveAndClose
-  })
+  const saveAndCloseRef = useRef(null)
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        saveAndCloseRef.current()
+        saveAndCloseRef.current?.()
       }
     }
     document.addEventListener('keydown', handleKeyDown)
@@ -158,6 +155,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
     handleSave()
     onClose()
   }
+  saveAndCloseRef.current = handleSaveAndClose
 
   const handleDelete = () => {
     deleteCard(cardId)

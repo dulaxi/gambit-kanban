@@ -9,7 +9,7 @@ import { useNoteStore } from '../../store/noteStore'
 import { hasLocalData, migrateLocalData } from '../../lib/migrateLocalData'
 
 const pageTitles = {
-  '/': 'Dashboard',
+  '/dashboard': 'Dashboard',
   '/boards': 'Boards',
   '/calendar': 'Calendar',
   '/notes': 'Notes',
