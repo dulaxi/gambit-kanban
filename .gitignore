@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# MCP config (contains PAT)
+.mcp.json
+.playwright-mcp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
