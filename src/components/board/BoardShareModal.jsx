@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import { X, UserPlus, Trash2, Mail, Crown, Users } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
+import { useIsMobile } from '../../hooks/useMediaQuery'
 
 export default function BoardShareModal({ board, onClose }) {
+  const isMobile = useIsMobile()
   const [members, setMembers] = useState([])
   const [invitations, setInvitations] = useState([])
   const [email, setEmail] = useState('')
@@ -118,7 +120,11 @@ export default function BoardShareModal({ board, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
+      <div className={`bg-white shadow-xl ${
+        isMobile
+          ? 'fixed inset-0'
+          : 'rounded-2xl w-full max-w-md mx-4'
+      }`}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">

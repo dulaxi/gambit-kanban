@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
+import { useIsMobile } from '../../hooks/useMediaQuery'
 import { createPortal } from 'react-dom'
 import DynamicIcon, { getAllIconNames } from './DynamicIcon'
 import { MATERIAL_CATEGORIES } from '../../data/materialSymbolsIcons'
@@ -69,7 +70,7 @@ function buildCategories(allIcons, categories) {
 
 function IconGrid({ icons: iconList, value, onChange, onClose }) {
   return (
-    <div className="grid grid-cols-10 gap-1">
+    <div className="grid grid-cols-6 sm:grid-cols-8 lg:grid-cols-10 gap-1">
       {iconList.map((name) => (
         <button
           key={name}
@@ -96,6 +97,7 @@ const LIBRARY_TABS = [
 ]
 
 export default function IconPicker({ value, onChange, onClose }) {
+  const isMobile = useIsMobile()
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('popular')
   const [activeTab, setActiveTab] = useState('all')
@@ -155,7 +157,11 @@ export default function IconPicker({ value, onChange, onClose }) {
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl shadow-2xl w-[640px] max-h-[80vh] flex flex-col overflow-hidden"
+        className={`bg-white shadow-2xl flex flex-col overflow-hidden ${
+          isMobile
+            ? 'fixed inset-0 rounded-none'
+            : 'rounded-2xl w-[640px] max-h-[80vh]'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with tabs */}
@@ -204,7 +210,7 @@ export default function IconPicker({ value, onChange, onClose }) {
         <div className="flex flex-1 min-h-0">
           {/* Category sidebar */}
           {!searchResults && (
-            <div className="w-44 shrink-0 border-r border-gray-100 overflow-y-auto py-2">
+            <div className="hidden sm:block w-44 shrink-0 border-r border-gray-100 overflow-y-auto py-2">
               {activeTab === 'all' && (
                 <div className="px-4 py-1 text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Lucide</div>
               )}

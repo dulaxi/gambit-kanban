@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNoteStore } from '../store/noteStore'
 import { format, parseISO } from 'date-fns'
-import { Plus, Trash2, FileText } from 'lucide-react'
+import { Plus, Trash2, FileText, ArrowLeft } from 'lucide-react'
+import { useIsMobile } from '../hooks/useMediaQuery'
 
 export default function NotesPage() {
   const notes = useNoteStore((s) => s.notes)
@@ -11,6 +12,15 @@ export default function NotesPage() {
   const fetchNotes = useNoteStore((s) => s.fetchNotes)
   const loading = useNoteStore((s) => s.loading)
   const [selectedNoteId, setSelectedNoteId] = useState(null)
+  const isMobile = useIsMobile()
+  const [showEditor, setShowEditor] = useState(false)
+
+  const handleSelectNote = (noteId) => {
+    setSelectedNoteId(noteId)
+    if (isMobile) setShowEditor(true)
+  }
+
+  const handleBackToList = () => setShowEditor(false)
 
   useEffect(() => {
     fetchNotes()
@@ -60,7 +70,7 @@ export default function NotesPage() {
   return (
     <div className="flex gap-0 h-[calc(100vh-7rem)]">
       {/* Notes List */}
-      <div className="w-72 shrink-0 bg-white border border-gray-200 rounded-l-2xl shadow-sm flex flex-col">
+      <div className={`${isMobile ? (showEditor ? 'hidden' : 'flex-1 rounded-2xl') : 'w-72 shrink-0 rounded-l-2xl'} bg-white border border-gray-200 shadow-sm flex flex-col`}>
         <div className="p-3 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-900">Notes</h2>
           <button
@@ -81,7 +91,7 @@ export default function NotesPage() {
               <button
                 key={note.id}
                 type="button"
-                onClick={() => setSelectedNoteId(note.id)}
+                onClick={() => handleSelectNote(note.id)}
                 className={`w-full text-left p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors group ${
                   selectedNoteId === note.id ? 'bg-gray-50' : ''
                 }`}
@@ -109,10 +119,16 @@ export default function NotesPage() {
       </div>
 
       {/* Editor */}
-      <div className="flex-1 bg-white border border-gray-200 border-l-0 rounded-r-2xl shadow-sm flex flex-col">
+      <div className={`${isMobile ? (showEditor ? 'flex-1 rounded-2xl border-l' : 'hidden') : 'flex-1 border-l-0 rounded-r-2xl'} bg-white border border-gray-200 shadow-sm flex flex-col`}>
         {selectedNote ? (
           <>
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-4 border-b border-gray-200 flex items-center">
+              {isMobile && (
+                <button onClick={handleBackToList} className="p-1.5 rounded-lg hover:bg-gray-100 mr-2">
+                  <ArrowLeft className="w-5 h-5 text-gray-500" />
+                </button>
+              )}
+              <div className="flex-1">
               <input
                 type="text"
                 value={selectedNote.title}
@@ -124,6 +140,7 @@ export default function NotesPage() {
                 Last edited{' '}
                 {selectedNote.updated_at && format(parseISO(selectedNote.updated_at), 'MMM d, yyyy h:mm a')}
               </p>
+              </div>
             </div>
             <textarea
               value={selectedNote.content}

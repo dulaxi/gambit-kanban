@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   X, Trash2, Plus, Check, User, Calendar, Flag, Tag, CheckSquare,
-  Briefcase, LayoutList, CheckCircle2, FileText, Smile, UserPlus,
+  Briefcase, LayoutList, CheckCircle2, FileText, Smile, UserPlus, ArrowLeft,
 } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
@@ -9,6 +9,7 @@ import { useSettingsStore } from '../../store/settingsStore'
 import { supabase } from '../../lib/supabase'
 import DynamicIcon from './DynamicIcon'
 import IconPicker from './IconPicker'
+import { useIsMobile } from '../../hooks/useMediaQuery'
 
 const LABEL_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'pink', 'gray']
 
@@ -65,6 +66,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
   const addBoardMember = useBoardStore((s) => s.addBoardMember)
   const profile = useAuthStore((s) => s.profile)
   const font = useSettingsStore((s) => s.font)
+  const isMobile = useIsMobile()
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -229,17 +231,32 @@ export default function CardDetailPanel({ cardId, onClose }) {
   })() : null
 
   return (
-    <div className="fixed top-16 right-0 bottom-0 w-[420px] bg-white border-l border-gray-200 flex flex-col z-20">
+    <div className={`fixed bg-white border-l border-gray-200 flex flex-col z-20 ${
+      isMobile
+        ? 'inset-0'
+        : 'top-16 right-0 bottom-0 w-[340px] lg:w-[420px]'
+    }`}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 py-2.5 border-b border-gray-100">
-        <button
-          type="button"
-          onClick={handleSave}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <Check className="w-3.5 h-3.5" />
-          Save
-        </button>
+        <div className="flex items-center gap-1">
+          {isMobile && (
+            <button
+              type="button"
+              onClick={handleSaveAndClose}
+              className="p-1.5 rounded-lg hover:bg-gray-100"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-500" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleSave}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Check className="w-3.5 h-3.5" />
+            Save
+          </button>
+        </div>
         <div className="flex items-center gap-0.5">
           <button
             type="button"
@@ -249,13 +266,15 @@ export default function CardDetailPanel({ cardId, onClose }) {
           >
             <Trash2 className="w-4 h-4" />
           </button>
-          <button
-            type="button"
-            onClick={handleSaveAndClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          {!isMobile && (
+            <button
+              type="button"
+              onClick={handleSaveAndClose}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -290,7 +309,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
         <div className="px-5 space-y-0">
           {/* Icon */}
           <div className="flex items-center py-2.5 border-t border-gray-100 relative">
-            <div className="flex items-center gap-2 w-32 shrink-0 text-gray-400">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-400">
               <Smile className="w-4 h-4" />
               <span className="text-sm">Icon</span>
             </div>
@@ -319,7 +338,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
 
           {/* Assignee */}
           <div className="flex items-center py-2.5 border-t border-gray-100 relative">
-            <div className="flex items-center gap-2 w-32 shrink-0 text-gray-400">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-400">
               <User className="w-4 h-4" />
               <span className="text-sm">Assignee</span>
             </div>
@@ -351,7 +370,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
               const showAddOption = query && !exactMatch
 
               return (
-                <div className="absolute left-32 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 w-56 overflow-hidden">
+                <div className="absolute left-24 sm:left-32 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 w-56 overflow-hidden">
                   <div className="p-2 border-b border-gray-100">
                     <input
                       value={assigneeSearch}
@@ -438,7 +457,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
 
           {/* Due date */}
           <div className="flex items-center py-2.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 w-32 shrink-0 text-gray-400">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-400">
               <Calendar className="w-4 h-4" />
               <span className="text-sm">Due date</span>
             </div>
@@ -477,7 +496,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
 
           {/* Projects */}
           <div className="flex items-center py-2.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 w-32 shrink-0 text-gray-400">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-400">
               <Briefcase className="w-4 h-4" />
               <span className="text-sm">Projects</span>
             </div>
@@ -492,7 +511,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
 
           {/* Priority */}
           <div className="flex items-center py-2.5 relative">
-            <div className="flex items-center gap-2 w-32 shrink-0 text-gray-400">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-400">
               <Flag className="w-4 h-4" />
               <span className="text-sm">Priority</span>
             </div>
@@ -505,7 +524,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
               <span className="text-gray-700">{currentPriority.label}</span>
             </button>
             {showPriorityPicker && (
-              <div className="absolute left-32 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-10 w-36">
+              <div className="absolute left-24 sm:left-32 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-10 w-36">
                 {PRIORITY_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
@@ -530,7 +549,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
 
           {/* Status */}
           <div className="flex items-center py-2.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 w-32 shrink-0 text-gray-400">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-400">
               <LayoutList className="w-4 h-4" />
               <span className="text-sm">Status</span>
             </div>
@@ -539,7 +558,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
 
           {/* Labels */}
           <div className="flex items-start py-2.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 w-32 shrink-0 text-gray-400 pt-0.5">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-400 pt-0.5">
               <Tag className="w-4 h-4" />
               <span className="text-sm">Labels</span>
             </div>

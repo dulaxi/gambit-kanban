@@ -27,7 +27,7 @@ export default function BoardsPage() {
   return (
     <div
       className={`h-[calc(100vh-7rem)] flex flex-col transition-all duration-200 ${
-        editingCardId ? 'mr-[400px]' : ''
+        editingCardId ? 'md:mr-[340px] lg:mr-[420px]' : ''
       }`}
     >
       <div className="mb-4 shrink-0">

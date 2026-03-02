@@ -61,7 +61,7 @@ export default function CalendarPage() {
   }, [selectedDay, cardsByDate])
 
   return (
-    <div className="flex gap-4 h-[calc(100vh-7rem)]">
+    <div className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-7rem)]">
       {/* Left: Calendar */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header — Apple style: arrows, month, today */}
@@ -162,7 +162,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Right: Task detail panel */}
-      <div className="w-72 shrink-0 bg-white rounded-xl border border-gray-200 flex flex-col overflow-hidden">
+      <div className="w-full lg:w-72 shrink-0 bg-white rounded-xl border border-gray-200 flex flex-col overflow-hidden max-h-64 lg:max-h-none">
         {selectedDay ? (
           <>
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">

@@ -10,6 +10,7 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { useBoardStore } from '../../store/boardStore'
+import { useIsMobile } from '../../hooks/useMediaQuery'
 import Column from './Column'
 import Card from './Card'
 
@@ -19,6 +20,7 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
   const [activeCardId, setActiveCardId] = useState(null)
   const inputRef = useRef(null)
   const affectedCardsRef = useRef(new Set())
+  const isMobile = useIsMobile()
 
   const board = useBoardStore((s) => s.boards[boardId])
   const allColumns = useBoardStore((s) => s.columns)
@@ -34,9 +36,8 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
     .filter((c) => c.board_id === boardId)
     .sort((a, b) => a.position - b.position)
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
-  )
+  const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  const sensors = useSensors(...(isMobile ? [] : [pointerSensor]))
 
   // Custom collision: prefer pointerWithin (cards), fallback to rectIntersection (columns)
   const collisionDetection = useCallback((args) => {
@@ -215,7 +216,7 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-5 overflow-x-auto h-full pb-4">
+      <div className="flex gap-3 sm:gap-5 overflow-x-auto h-full pb-4 snap-x snap-mandatory sm:snap-none">
         {boardColumns.map((column) => (
           <Column
             key={column.id}
@@ -231,7 +232,7 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
         ))}
 
         {/* Add section */}
-        <div className="shrink-0 w-[290px]">
+        <div className="shrink-0 w-[85vw] sm:w-[260px] lg:w-[290px] snap-start">
           {isAddingColumn ? (
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 space-y-2">
               <input
