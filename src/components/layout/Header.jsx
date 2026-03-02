@@ -52,8 +52,8 @@ export default function Header({ title }) {
         )}
       </div>
 
-      {/* Center: logo (mobile) / search (desktop) */}
-      {isDesktop ? (
+      {/* Center: search (desktop only) */}
+      {isDesktop && (
         <div className="relative hidden sm:block sm:w-64 lg:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -64,28 +64,27 @@ export default function Header({ title }) {
             className="w-full pl-10 pr-4 py-2 text-sm rounded-xl bg-gray-100 border border-gray-200 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-100"
           />
         </div>
-      ) : (
-        <div className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2">
-          <span
-            className="material-symbols-outlined text-gray-900"
-            style={{ fontSize: '20px', lineHeight: '20px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-          >
-            owl
-          </span>
-          <span className="text-sm font-semibold text-gray-900 tracking-tight">Gambit</span>
-        </div>
       )}
 
-      {/* Avatar + Dropdown */}
+      {/* Right: Gambit icon (mobile) / Avatar (desktop) + Dropdown */}
       <div className="relative" ref={menuRef}>
         <button
           type="button"
           onClick={() => setMenuOpen(!menuOpen)}
           className={`w-9 h-9 rounded-full flex items-center justify-center cursor-pointer ${
-            profile?.icon ? `${profile.color === 'bg-[#A0A0A0]' ? 'text-gray-900' : 'text-white'} ${profile.color || 'bg-gray-300'}` : 'bg-gray-100'
+            isDesktop
+              ? profile?.icon ? `${profile.color === 'bg-[#A0A0A0]' ? 'text-gray-900' : 'text-white'} ${profile.color || 'bg-gray-300'}` : 'bg-gray-100'
+              : ''
           }`}
         >
-          {profile?.icon ? (
+          {!isDesktop ? (
+            <span
+              className="material-symbols-outlined text-gray-900"
+              style={{ fontSize: '22px', lineHeight: '22px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
+            >
+              owl
+            </span>
+          ) : profile?.icon ? (
             <DynamicIcon name={profile.icon} className="w-5 h-5" />
           ) : (
             <User className="w-5 h-5 text-gray-600" />
