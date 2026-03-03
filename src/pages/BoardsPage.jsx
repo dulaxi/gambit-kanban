@@ -8,6 +8,7 @@ import CardDetailPanel from '../components/board/CardDetailPanel'
 export default function BoardsPage() {
   const [editingCardId, setEditingCardId] = useState(null)
   const [inlineCardId, setInlineCardId] = useState(null)
+  const [filters, setFilters] = useState({ priority: [], assignee: null, label: [], due: null })
   const activeBoardId = useBoardStore((s) => s.activeBoardId)
 
   const handleCardClick = (cardId) => {
@@ -31,7 +32,7 @@ export default function BoardsPage() {
       }`}
     >
       <div className="mb-4 shrink-0">
-        <BoardSelector />
+        <BoardSelector filters={filters} setFilters={setFilters} />
       </div>
 
       <div className="flex-1 min-h-0">
@@ -48,6 +49,7 @@ export default function BoardsPage() {
             inlineCardId={inlineCardId}
             onInlineDone={handleInlineDone}
             selectedCardId={editingCardId}
+            filters={filters}
           />
         ) : (
           <div className="flex items-center justify-center h-full text-gray-400">

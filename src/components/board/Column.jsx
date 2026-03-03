@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from 'react'
 import { Plus, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { isToday, isPast, isThisWeek, parseISO } from 'date-fns'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import SortableCard from './SortableCard'
 import InlineCardEditor from './InlineCardEditor'
 
-export default function Column({ column, boardId, onCardClick, onCreateCard, onCompleteCard, inlineCardId, onInlineDone, selectedCardId }) {
+export default function Column({ column, boardId, onCardClick, onCreateCard, onCompleteCard, inlineCardId, onInlineDone, selectedCardId, filters }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [isRenaming, setIsRenaming] = useState(false)
   const [renameValue, setRenameValue] = useState(column.title)
@@ -26,6 +27,21 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
   const columnCards = Object.values(allCards)
     .filter((c) => c.column_id === column.id)
     .sort((a, b) => a.position - b.position)
+
+  // Apply filters (keep columnCards intact for DnD)
+  const filteredCards = columnCards.filter((card) => {
+    if (filters?.priority?.length && !filters.priority.includes(card.priority)) return false
+    if (filters?.assignee && card.assignee_name !== filters.assignee) return false
+    if (filters?.label?.length && !(card.labels || []).some((l) => filters.label.includes(l.text))) return false
+    if (filters?.due) {
+      const d = card.due_date ? parseISO(card.due_date) : null
+      if (filters.due === 'overdue' && !(d && isPast(d) && !isToday(d))) return false
+      if (filters.due === 'today' && !(d && isToday(d))) return false
+      if (filters.due === 'week' && !(d && isThisWeek(d))) return false
+      if (filters.due === 'none' && d) return false
+    }
+    return true
+  })
 
   const cardIds = columnCards.map((c) => c.id)
 
@@ -90,7 +106,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
             </h3>
           )}
           <span className="text-xs text-gray-400">
-            {columnCards.length}
+            {filteredCards.length}
           </span>
         </div>
         <div className="flex items-center">
@@ -149,7 +165,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
           items={cardIds}
           strategy={verticalListSortingStrategy}
         >
-          {columnCards.map((card) =>
+          {filteredCards.map((card) =>
             card.id === inlineCardId ? (
               <InlineCardEditor key={card.id} cardId={card.id} onDone={onInlineDone} />
             ) : (
