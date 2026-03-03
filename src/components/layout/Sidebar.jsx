@@ -14,9 +14,11 @@ import {
   Trash2,
   Layers,
   Users,
+  Briefcase,
 } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useBoardStore } from '../../store/boardStore'
+import { useAuthStore } from '../../store/authStore'
 import { useIsDesktop } from '../../hooks/useMediaQuery'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import DynamicIcon from '../board/DynamicIcon'
@@ -50,7 +52,8 @@ export default function Sidebar() {
   const mobileMenuOpen = useSettingsStore((s) => s.mobileMenuOpen)
   const closeMobileMenu = useSettingsStore((s) => s.closeMobileMenu)
   const isDesktop = useIsDesktop()
-  const boards = useBoardStore((s) => s.boards)
+  const user = useAuthStore((s) => s.user)
+  const allBoards = useBoardStore((s) => s.boards)
   const activeBoardId = useBoardStore((s) => s.activeBoardId)
   const setActiveBoard = useBoardStore((s) => s.setActiveBoard)
   const addBoard = useBoardStore((s) => s.addBoard)
@@ -68,6 +71,11 @@ export default function Sidebar() {
   const [iconPickerBoardId, setIconPickerBoardId] = useState(null)
   const [renamingBoardId, setRenamingBoardId] = useState(null)
   const [renameValue, setRenameValue] = useState('')
+
+  // Only show boards the user owns in the Boards dropdown (shared boards go under Workspace)
+  const ownedBoards = Object.fromEntries(
+    Object.entries(allBoards).filter(([, b]) => b.owner_id === user?.id)
+  )
 
   const isBoardsActive = location.pathname.startsWith('/boards')
 
@@ -190,7 +198,7 @@ export default function Sidebar() {
                   </span>
                 </div>
 
-                {Object.values(boards).map((board) => (
+                {Object.values(ownedBoards).map((board) => (
                   <div
                     key={board.id}
                     onClick={() => handleSelectBoard(board.id)}
@@ -251,7 +259,7 @@ export default function Sidebar() {
                         </span>
                       )}
                     </span>
-                    {Object.keys(boards).length > 1 && (
+                    {Object.keys(ownedBoards).length > 1 && (
                       <Trash2
                         className="w-3.5 h-3.5 text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 shrink-0"
                         onClick={(e) => handleDeleteBoard(e, board.id)}
@@ -366,7 +374,7 @@ export default function Sidebar() {
                   }`}
                 >
                   <span className="flex items-center gap-2 truncate">
-                    <Layers className="w-4 h-4 text-gray-400 shrink-0" />
+                    <Briefcase className="w-4 h-4 text-gray-400 shrink-0" />
                     <span className="truncate">Overview</span>
                   </span>
                   {invitationCount > 0 && (

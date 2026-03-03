@@ -118,7 +118,10 @@ export default function DashboardPage() {
     dueTodayCards,
     overdueCards,
   } = useMemo(() => {
-    const allCards = Object.values(cards)
+    const myName = profile?.display_name
+    const allCards = Object.values(cards).filter(
+      (c) => c.assignee_name && c.assignee_name === myName
+    )
     const allColumns = Object.values(columns)
 
     const doneColumnIds = new Set(
@@ -171,7 +174,7 @@ export default function DashboardPage() {
       dueTodayCards: dueTodayArr,
       overdueCards: overdueArr,
     }
-  }, [cards, columns])
+  }, [cards, columns, profile])
 
   const boardSummaries = useMemo(() => {
     const allBoards = Object.values(boards)
@@ -179,8 +182,9 @@ export default function DashboardPage() {
       const boardCols = Object.values(columns)
         .filter((c) => c.board_id === board.id)
         .sort((a, b) => a.position - b.position)
+      const myName = profile?.display_name
       const boardCards = Object.values(cards).filter(
-        (c) => c.board_id === board.id
+        (c) => c.board_id === board.id && c.assignee_name && c.assignee_name === myName
       )
       const totalCards = boardCards.length
 
@@ -204,7 +208,7 @@ export default function DashboardPage() {
         lastUpdated: lastUpdated || null,
       }
     })
-  }, [boards, columns, cards])
+  }, [boards, columns, cards, profile])
 
   // ---- Helpers -------------------------------------------------------
   function navigateToCard(card) {
