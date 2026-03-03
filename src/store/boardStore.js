@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
 
+const ACTIVE_BOARD_KEY = 'gambit_active_board'
+
 export const useBoardStore = create((set, get) => ({
   boards: {},
   columns: {},
@@ -16,46 +18,53 @@ export const useBoardStore = create((set, get) => ({
   fetchBoards: async () => {
     set({ loading: true })
 
-    const { data: boards } = await supabase
-      .from('boards')
-      .select('*')
-      .order('created_at')
+    try {
+      const [boardsRes, columnsRes, cardsRes] = await Promise.all([
+        supabase.from('boards').select('*').order('created_at'),
+        supabase.from('columns').select('*').order('position'),
+        supabase.from('cards').select('*').order('position'),
+      ])
 
-    const { data: columns } = await supabase
-      .from('columns')
-      .select('*')
-      .order('position')
+      if (boardsRes.error) console.error('Failed to fetch boards:', boardsRes.error)
+      if (columnsRes.error) console.error('Failed to fetch columns:', columnsRes.error)
+      if (cardsRes.error) console.error('Failed to fetch cards:', cardsRes.error)
 
-    const { data: cards } = await supabase
-      .from('cards')
-      .select('*')
-      .order('position')
+      const boardMap = {}
+      ;(boardsRes.data || []).forEach((b) => { boardMap[b.id] = b })
 
-    const boardMap = {}
-    ;(boards || []).forEach((b) => { boardMap[b.id] = b })
+      const columnMap = {}
+      ;(columnsRes.data || []).forEach((c) => { columnMap[c.id] = c })
 
-    const columnMap = {}
-    ;(columns || []).forEach((c) => { columnMap[c.id] = c })
+      const cardMap = {}
+      ;(cardsRes.data || []).forEach((c) => { cardMap[c.id] = c })
 
-    const cardMap = {}
-    ;(cards || []).forEach((c) => { cardMap[c.id] = c })
+      const firstBoardId = boardsRes.data?.length ? boardsRes.data[0].id : null
+      const current = get().activeBoardId
+      const saved = localStorage.getItem(ACTIVE_BOARD_KEY)
+      const restoredId = current && boardMap[current] ? current
+        : saved && (saved === '__all__' || boardMap[saved]) ? saved
+        : firstBoardId
 
-    const firstBoardId = boards?.length ? boards[0].id : null
-    const current = get().activeBoardId
-
-    set({
-      boards: boardMap,
-      columns: columnMap,
-      cards: cardMap,
-      activeBoardId: current && boardMap[current] ? current : firstBoardId,
-      loading: false,
-    })
+      set({
+        boards: boardMap,
+        columns: columnMap,
+        cards: cardMap,
+        activeBoardId: restoredId,
+        loading: false,
+      })
+    } catch (err) {
+      console.error('fetchBoards failed:', err)
+      set({ loading: false })
+    }
   },
 
   // ============================================================
   // BOARD ACTIONS
   // ============================================================
-  setActiveBoard: (boardId) => set({ activeBoardId: boardId }),
+  setActiveBoard: (boardId) => {
+    localStorage.setItem(ACTIVE_BOARD_KEY, boardId)
+    set({ activeBoardId: boardId })
+  },
 
   addBoard: async (name, icon) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -94,6 +103,7 @@ export const useBoardStore = create((set, get) => ({
       .insert(colInserts)
       .select()
 
+    localStorage.setItem(ACTIVE_BOARD_KEY, board.id)
     set((state) => {
       const columnMap = { ...state.columns }
       ;(cols || []).forEach((c) => { columnMap[c.id] = c })
@@ -134,14 +144,15 @@ export const useBoardStore = create((set, get) => ({
         if (c.board_id !== boardId) cards[c.id] = c
       })
       const remainingIds = Object.keys(restBoards)
+      const newActiveId = state.activeBoardId === boardId
+        ? remainingIds[0] || null
+        : state.activeBoardId
+      localStorage.setItem(ACTIVE_BOARD_KEY, newActiveId || '')
       return {
         boards: restBoards,
         columns,
         cards,
-        activeBoardId:
-          state.activeBoardId === boardId
-            ? remainingIds[0] || null
-            : state.activeBoardId,
+        activeBoardId: newActiveId,
       }
     })
     await supabase.from('boards').delete().eq('id', boardId)
@@ -204,6 +215,10 @@ export const useBoardStore = create((set, get) => ({
   addCard: async (boardId, columnId, cardData) => {
     const state = get()
     const board = state.boards[boardId]
+    if (!board) {
+      console.error('addCard: board not found', boardId)
+      return null
+    }
 
     // Calculate positions
     const columnCards = Object.values(state.cards)
@@ -212,7 +227,7 @@ export const useBoardStore = create((set, get) => ({
 
     const allCards = Object.values(state.cards)
     const globalNumber = allCards.reduce((max, c) => Math.max(max, c.global_task_number || 0), 0) + 1
-    const taskNumber = board?.next_task_number || 1
+    const taskNumber = board.next_task_number || 1
 
     const cardInsert = {
       board_id: boardId,
@@ -231,33 +246,41 @@ export const useBoardStore = create((set, get) => ({
       checklist: cardData.checklist || [],
     }
 
-    const { data: card } = await supabase
-      .from('cards')
-      .insert(cardInsert)
-      .select()
-      .single()
+    try {
+      const { data: card, error } = await supabase
+        .from('cards')
+        .insert(cardInsert)
+        .select()
+        .single()
 
-    if (!card) return null
+      if (error || !card) {
+        console.error('Failed to create card:', error)
+        return null
+      }
 
-    // Increment board task number
-    const { error: numError } = await supabase
-      .from('boards')
-      .update({ next_task_number: taskNumber + 1 })
-      .eq('id', boardId)
+      // Increment board task number
+      const { error: numError } = await supabase
+        .from('boards')
+        .update({ next_task_number: taskNumber + 1 })
+        .eq('id', boardId)
 
-    if (numError) {
-      console.error('Failed to increment task number:', numError)
+      if (numError) {
+        console.error('Failed to increment task number:', numError)
+      }
+
+      set((state) => ({
+        cards: { ...state.cards, [card.id]: card },
+        boards: {
+          ...state.boards,
+          [boardId]: { ...state.boards[boardId], next_task_number: taskNumber + 1 },
+        },
+      }))
+
+      return card.id
+    } catch (err) {
+      console.error('addCard failed:', err)
+      return null
     }
-
-    set((state) => ({
-      cards: { ...state.cards, [card.id]: card },
-      boards: {
-        ...state.boards,
-        [boardId]: { ...state.boards[boardId], next_task_number: taskNumber + 1 },
-      },
-    }))
-
-    return card.id
   },
 
   updateCard: async (cardId, updates) => {
@@ -278,6 +301,7 @@ export const useBoardStore = create((set, get) => ({
     if ('position' in updates) dbUpdates.position = updates.position
 
     // Optimistic update
+    const prevCard = get().cards[cardId]
     set((state) => ({
       cards: {
         ...state.cards,
@@ -285,7 +309,16 @@ export const useBoardStore = create((set, get) => ({
       },
     }))
 
-    await supabase.from('cards').update(dbUpdates).eq('id', cardId)
+    const { error } = await supabase.from('cards').update(dbUpdates).eq('id', cardId)
+    if (error) {
+      console.error('Failed to update card:', error)
+      // Rollback optimistic update
+      if (prevCard) {
+        set((state) => ({
+          cards: { ...state.cards, [cardId]: prevCard },
+        }))
+      }
+    }
   },
 
   completeCard: async (cardId) => {

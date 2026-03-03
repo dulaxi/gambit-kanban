@@ -58,6 +58,7 @@ export default function BoardsPage() {
 
       {editingCardId && (
         <CardDetailPanel
+          key={editingCardId}
           cardId={editingCardId}
           onClose={() => setEditingCardId(null)}
         />

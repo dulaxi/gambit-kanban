@@ -68,13 +68,14 @@ export default function CardDetailPanel({ cardId, onClose }) {
   const font = useSettingsStore((s) => s.font)
   const isMobile = useIsMobile()
 
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [assignee, setAssignee] = useState('')
-  const [priority, setPriority] = useState('medium')
-  const [dueDate, setDueDate] = useState('')
-  const [labels, setLabels] = useState([])
-  const [checklist, setChecklist] = useState([])
+  // Initialize state directly from card (component remounts via key={cardId} in parent)
+  const [title, setTitle] = useState(card?.title || '')
+  const [description, setDescription] = useState(card?.description || '')
+  const [assignee, setAssignee] = useState(card?.assignee_name || '')
+  const [priority, setPriority] = useState(card?.priority || 'medium')
+  const [dueDate, setDueDate] = useState(card?.due_date || '')
+  const [labels, setLabels] = useState(card?.labels ? [...card.labels] : [])
+  const [checklist, setChecklist] = useState(card?.checklist ? card.checklist.map((item) => ({ ...item })) : [])
   const [newLabelText, setNewLabelText] = useState('')
   const [newLabelColor, setNewLabelColor] = useState('blue')
   const [showLabelForm, setShowLabelForm] = useState(false)
@@ -86,24 +87,14 @@ export default function CardDetailPanel({ cardId, onClose }) {
   const [showIconPicker, setShowIconPicker] = useState(false)
   const [boardMemberNames, setBoardMemberNames] = useState([])
 
+  // Dirty flag — ONLY set by user interactions, never by effects
+  const isDirtyRef = useRef(false)
+  const autoSaveTimerRef = useRef(null)
+  const formDataRef = useRef({ title: card?.title || '', description: card?.description || '', assignee: card?.assignee_name || '', priority: card?.priority || 'medium', dueDate: card?.due_date || '', labels: card?.labels ? [...card.labels] : [], checklist: card?.checklist ? card.checklist.map((item) => ({ ...item })) : [] })
+
+  // Fetch board members on mount
   useEffect(() => {
     if (card) {
-      setTitle(card.title)
-      setDescription(card.description || '')
-      setAssignee(card.assignee_name || '')
-      setPriority(card.priority || 'medium')
-      setDueDate(card.due_date || '')
-      setLabels(card.labels ? [...card.labels] : [])
-      setChecklist(card.checklist ? card.checklist.map((item) => ({ ...item })) : [])
-      setShowLabelForm(false)
-      setNewLabelText('')
-      setNewCheckItem('')
-      setShowPriorityPicker(false)
-      setShowAssigneePicker(false)
-      setAssigneeSearch('')
-      setEditingDueDate(false)
-
-      // Fetch board members
       supabase
         .from('board_members')
         .select('profiles(display_name)')
@@ -119,9 +110,54 @@ export default function CardDetailPanel({ cardId, onClose }) {
           setBoardMemberNames(names)
         })
     }
-  }, [cardId])
+  }, [])
 
   const saveAndCloseRef = useRef(null)
+
+  // Schedule a debounced save — reads latest data from formDataRef
+  const scheduleSave = useCallback(() => {
+    isDirtyRef.current = true
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+    autoSaveTimerRef.current = setTimeout(() => {
+      if (cardId && formDataRef.current) {
+        const d = formDataRef.current
+        useBoardStore.getState().updateCard(cardId, {
+          title: d.title.trim() || card?.title || 'Untitled task',
+          description: d.description,
+          assignee_name: d.assignee.trim(),
+          priority: d.priority,
+          due_date: d.dueDate || null,
+          labels: d.labels,
+          checklist: d.checklist,
+        })
+        isDirtyRef.current = false
+      }
+    }, 1000)
+  }, [cardId, card?.title])
+
+  // Keep formDataRef in sync (passive — does NOT trigger saves)
+  useEffect(() => {
+    formDataRef.current = { title, description, assignee, priority, dueDate, labels, checklist }
+  })
+
+  // Save on unmount (navigation away, component destroyed)
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+      if (isDirtyRef.current && formDataRef.current && cardId) {
+        const d = formDataRef.current
+        useBoardStore.getState().updateCard(cardId, {
+          title: d.title.trim() || 'Untitled task',
+          description: d.description,
+          assignee_name: d.assignee.trim(),
+          priority: d.priority,
+          due_date: d.dueDate || null,
+          labels: d.labels,
+          checklist: d.checklist,
+        })
+      }
+    }
+  }, [cardId])
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -142,6 +178,8 @@ export default function CardDetailPanel({ cardId, onClose }) {
   const statusName = column?.title || '—'
 
   const handleSave = () => {
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+    isDirtyRef.current = false
     updateCard(cardId, {
       title: title.trim() || card.title,
       description,
@@ -170,11 +208,13 @@ export default function CardDetailPanel({ cardId, onClose }) {
       setLabels([...labels, { text: trimmed, color: newLabelColor }])
       setNewLabelText('')
       setShowLabelForm(false)
+      scheduleSave()
     }
   }
 
   const removeLabel = (index) => {
     setLabels(labels.filter((_, i) => i !== index))
+    scheduleSave()
   }
 
   const addCheckItem = () => {
@@ -182,6 +222,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
     if (trimmed) {
       setChecklist([...checklist, { text: trimmed, done: false }])
       setNewCheckItem('')
+      scheduleSave()
     }
   }
 
@@ -191,10 +232,12 @@ export default function CardDetailPanel({ cardId, onClose }) {
         i === index ? { ...item, done: !item.done } : item
       )
     )
+    scheduleSave()
   }
 
   const removeCheckItem = (index) => {
     setChecklist(checklist.filter((_, i) => i !== index))
+    scheduleSave()
   }
 
   const checkedCount = checklist.filter((item) => item.done).length
@@ -299,7 +342,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
           </div>
           <input
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => { setTitle(e.target.value); scheduleSave() }}
             className={`text-lg font-semibold bg-transparent border-none focus:outline-none w-full placeholder-gray-300 ${card.completed ? 'text-gray-400 line-through' : 'text-gray-900'}`}
             placeholder="Task name"
           />
@@ -382,10 +425,12 @@ export default function CardDetailPanel({ cardId, onClose }) {
                           setAssignee(name)
                           setShowAssigneePicker(false)
                           setAssigneeSearch('')
+                          scheduleSave()
                         } else if (e.key === 'Enter' && filtered.length === 1) {
                           setAssignee(filtered[0])
                           setShowAssigneePicker(false)
                           setAssigneeSearch('')
+                          scheduleSave()
                         } else if (e.key === 'Escape') {
                           setShowAssigneePicker(false)
                           setAssigneeSearch('')
@@ -404,6 +449,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                           setAssignee('')
                           setShowAssigneePicker(false)
                           setAssigneeSearch('')
+                          scheduleSave()
                         }}
                         className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-gray-400 hover:bg-gray-50 transition-colors"
                       >
@@ -419,6 +465,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                           setAssignee(member)
                           setShowAssigneePicker(false)
                           setAssigneeSearch('')
+                          scheduleSave()
                         }}
                         className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
                           assignee === member
@@ -442,6 +489,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                           setAssignee(name)
                           setShowAssigneePicker(false)
                           setAssigneeSearch('')
+                          scheduleSave()
                         }}
                         className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 transition-colors border-t border-gray-100"
                       >
@@ -468,6 +516,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                 onChange={(e) => {
                   setDueDate(e.target.value ? `${e.target.value}T23:59:59` : '')
                   setEditingDueDate(false)
+                  scheduleSave()
                 }}
                 onBlur={() => setEditingDueDate(false)}
                 autoFocus
@@ -532,6 +581,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                     onClick={() => {
                       setPriority(opt.value)
                       setShowPriorityPicker(false)
+                      scheduleSave()
                     }}
                     className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
                       priority === opt.value
@@ -639,7 +689,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
           <label className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2 block">Description</label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => { setDescription(e.target.value); scheduleSave() }}
             rows={4}
             placeholder="Add details about this task..."
             className="w-full text-sm text-gray-700 rounded-lg px-3 py-2 resize-none border border-gray-200 focus:border-blue-200 focus:outline-none focus:ring-1 focus:ring-blue-50 placeholder-gray-300"

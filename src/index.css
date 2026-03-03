@@ -41,7 +41,7 @@
   outline-offset: 2px;
 }
 
-/* Scrollbar styling */
+/* Scrollbar styling — hidden until hovering the scrollable area */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -52,12 +52,19 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
+  background: transparent;
   border-radius: 3px;
+  transition: background 0.2s;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.25);
+*:hover > ::-webkit-scrollbar-thumb,
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+*:hover > ::-webkit-scrollbar-thumb:hover,
+*:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
 
 /* Mobile safe areas for bottom tab bar (iOS notch/home indicator) */

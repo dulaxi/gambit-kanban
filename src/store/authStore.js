@@ -8,17 +8,32 @@ export const useAuthStore = create((set, get) => ({
   loading: true,
 
   initialize: async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session) {
-      set({ user: session.user, session })
-      await get().fetchProfile()
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error) {
+        console.error('Failed to get session:', error)
+      } else if (session) {
+        set({ user: session.user, session })
+        try {
+          await get().fetchProfile()
+        } catch (profileErr) {
+          console.error('Failed to fetch profile:', profileErr)
+        }
+      }
+    } catch (err) {
+      console.error('Auth initialization failed:', err)
+    } finally {
+      set({ loading: false })
     }
-    set({ loading: false })
 
     supabase.auth.onAuthStateChange(async (event, session) => {
       set({ user: session?.user || null, session })
       if (session?.user) {
-        await get().fetchProfile()
+        try {
+          await get().fetchProfile()
+        } catch (err) {
+          console.error('Failed to fetch profile on auth change:', err)
+        }
       } else {
         set({ profile: null })
       }

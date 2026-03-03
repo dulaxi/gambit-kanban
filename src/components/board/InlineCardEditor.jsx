@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import {
-  X, Check, User, Calendar, Flag, Tag, Plus, CheckCircle2, FileText, Smile,
+  X, Check, User, Calendar, Flag, Tag, Plus, CheckCircle2, FileText, Smile, Trash2, ListChecks,
 } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
 import DynamicIcon from './DynamicIcon'
@@ -49,6 +49,9 @@ export default function InlineCardEditor({ cardId, onDone }) {
   const [newLabelText, setNewLabelText] = useState('')
   const [newLabelColor, setNewLabelColor] = useState('blue')
   const [showIconPicker, setShowIconPicker] = useState(false)
+  const [description, setDescription] = useState('')
+  const [checklist, setChecklist] = useState([])
+  const [newCheckItem, setNewCheckItem] = useState('')
 
   const titleRef = useRef(null)
 
@@ -59,6 +62,8 @@ export default function InlineCardEditor({ cardId, onDone }) {
       setPriority(card.priority || 'medium')
       setDueDate(card.due_date || '')
       setLabels(card.labels ? [...card.labels] : [])
+      setDescription(card.description || '')
+      setChecklist(card.checklist ? [...card.checklist] : [])
     }
   }, [cardId])
 
@@ -81,6 +86,8 @@ export default function InlineCardEditor({ cardId, onDone }) {
       priority,
       due_date: dueDate || null,
       labels,
+      description: description.trim(),
+      checklist,
     })
     onDone()
   }
@@ -247,6 +254,72 @@ export default function InlineCardEditor({ cardId, onDone }) {
             <Tag className="w-3 h-3" />
           </button>
         )}
+      </div>
+
+      {/* Description */}
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Add description..."
+        rows={2}
+        className="w-full text-[11px] text-gray-600 bg-gray-50 rounded-lg border border-gray-100 focus:border-blue-200 focus:outline-none px-2 py-1.5 resize-none placeholder-gray-300"
+      />
+
+      {/* Checklist */}
+      <div className="space-y-1">
+        {checklist.length > 0 && (
+          <div className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
+            <ListChecks className="w-3 h-3" />
+            <span>{checklist.filter((i) => i.done).length}/{checklist.length}</span>
+          </div>
+        )}
+        {checklist.map((item, idx) => (
+          <div key={idx} className="flex items-center gap-1.5 group">
+            <button
+              type="button"
+              onClick={() => {
+                const updated = [...checklist]
+                updated[idx] = { ...updated[idx], done: !updated[idx].done }
+                setChecklist(updated)
+              }}
+              className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                item.done ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              {item.done && <Check className="w-2.5 h-2.5" />}
+            </button>
+            <span className={`text-[11px] flex-1 ${item.done ? 'line-through text-gray-300' : 'text-gray-600'}`}>
+              {item.text}
+            </span>
+            <button
+              type="button"
+              onClick={() => setChecklist(checklist.filter((_, i) => i !== idx))}
+              className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all"
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
+        ))}
+        <div className="flex items-center gap-1.5">
+          <Plus className="w-3 h-3 text-gray-300 shrink-0" />
+          <input
+            value={newCheckItem}
+            onChange={(e) => setNewCheckItem(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                e.stopPropagation()
+                const trimmed = newCheckItem.trim()
+                if (trimmed) {
+                  setChecklist([...checklist, { text: trimmed, done: false }])
+                  setNewCheckItem('')
+                }
+              }
+            }}
+            placeholder="Add checklist item..."
+            className="text-[11px] text-gray-600 bg-transparent border-none focus:outline-none placeholder-gray-300 flex-1"
+          />
+        </div>
       </div>
 
       {/* Actions */}

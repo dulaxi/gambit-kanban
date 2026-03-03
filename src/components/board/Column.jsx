@@ -48,7 +48,8 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
   }, [menuOpen])
 
   const handleCreateCard = async () => {
-    const cardId = await addCard(boardId, column.id, { title: 'Untitled task', assignee: profile?.display_name || '' })
+    const today = new Date().toISOString().split('T')[0] + 'T23:59:59'
+    const cardId = await addCard(boardId, column.id, { title: 'Untitled task', assignee: profile?.display_name || '', dueDate: today })
     if (onCreateCard && cardId) onCreateCard(cardId)
   }
 
