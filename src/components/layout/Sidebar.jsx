@@ -40,7 +40,6 @@ function GambitLogo({ size = 28 }) {
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/calendar', icon: Calendar, label: 'Calendar' },
-  { to: '/workspace', icon: Users, label: 'Workspace', badge: true },
   { to: '/notes', icon: StickyNote, label: 'Notes' },
 ]
 
@@ -61,7 +60,9 @@ export default function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
 
+  const sharedBoards = useWorkspaceStore((s) => s.sharedBoards)
   const [boardsOpen, setBoardsOpen] = useState(true)
+  const [workspaceOpen, setWorkspaceOpen] = useState(true)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('')
   const [iconPickerBoardId, setIconPickerBoardId] = useState(null)
@@ -306,8 +307,103 @@ export default function Sidebar() {
           </div>
         )}
 
+        {/* Workspace with dropdown */}
+        {showCollapsed ? (
+          <NavLink
+            to="/workspace"
+            className={({ isActive }) =>
+              `flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-blue-50 text-gray-900'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`
+            }
+          >
+            <span className="relative">
+              <Users className="w-5 h-5 shrink-0" />
+              {invitationCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {invitationCount > 9 ? '9+' : invitationCount}
+                </span>
+              )}
+            </span>
+          </NavLink>
+        ) : (
+          <div>
+            <button
+              onClick={() => setWorkspaceOpen(!workspaceOpen)}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full ${
+                location.pathname.startsWith('/workspace')
+                  ? 'bg-blue-50 text-gray-900'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <span className="relative">
+                <Users className="w-5 h-5 shrink-0" />
+                {invitationCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {invitationCount > 9 ? '9+' : invitationCount}
+                  </span>
+                )}
+              </span>
+              <span className="flex-1 text-left">Workspace</span>
+              {workspaceOpen ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+
+            {workspaceOpen && (
+              <div className="ml-5 mt-1 pl-3 border-l border-gray-200 space-y-0.5">
+                {/* Invitations link */}
+                <div
+                  onClick={() => { navigate('/workspace'); closeMobileMenu() }}
+                  className={`flex items-center justify-between w-full px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer ${
+                    location.pathname === '/workspace' && !activeBoardId?.startsWith('ws_')
+                      ? 'text-gray-900 font-medium bg-blue-50'
+                      : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="flex items-center gap-2 truncate">
+                    <Layers className="w-4 h-4 text-gray-400 shrink-0" />
+                    <span className="truncate">Overview</span>
+                  </span>
+                  {invitationCount > 0 && (
+                    <span className="text-[10px] font-semibold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full">
+                      {invitationCount}
+                    </span>
+                  )}
+                </div>
+
+                {/* Shared boards */}
+                {sharedBoards.map((board) => (
+                  <div
+                    key={board.id}
+                    onClick={() => { setActiveBoard(board.id); navigate('/boards'); closeMobileMenu() }}
+                    className={`flex items-center w-full px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer ${
+                      isBoardsActive && activeBoardId === board.id
+                        ? 'text-gray-900 font-medium bg-blue-50'
+                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 truncate">
+                      {board.icon ? (
+                        <DynamicIcon name={board.icon} className="w-4 h-4 text-gray-400 shrink-0" />
+                      ) : (
+                        <Kanban className="w-4 h-4 text-gray-400 shrink-0" />
+                      )}
+                      <span className="truncate">{board.name}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Other nav items */}
-        {navItems.slice(1).map(({ to, icon: Icon, label, badge }) => (
+        {navItems.slice(1).map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
@@ -320,14 +416,7 @@ export default function Sidebar() {
               } ${showCollapsed ? 'justify-center' : ''}`
             }
           >
-            <span className="relative">
-              <Icon className="w-5 h-5 shrink-0" />
-              {badge && invitationCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {invitationCount > 9 ? '9+' : invitationCount}
-                </span>
-              )}
-            </span>
+            <Icon className="w-5 h-5 shrink-0" />
             {!showCollapsed && <span>{label}</span>}
           </NavLink>
         ))}
