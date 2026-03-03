@@ -61,41 +61,20 @@ export default function BoardShareModal({ board, onClose }) {
 
     setLoading(true)
 
-    // Check if user already exists
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('email', trimmed)
-      .single()
+    // Always create an invitation row (whether user exists or not)
+    const { error: invError } = await supabase
+      .from('board_invitations')
+      .insert({
+        board_id: board.id,
+        invited_email: trimmed,
+        invited_by: user.id,
+      })
 
-    if (existingProfile) {
-      // Add directly as member
-      const { error: memberError } = await supabase
-        .from('board_members')
-        .insert({ board_id: board.id, user_id: existingProfile.id, role: 'member' })
-
-      if (memberError) {
-        setError(memberError.message)
-      } else {
-        await fetchMembers()
-        setEmail('')
-      }
+    if (invError) {
+      setError(invError.message)
     } else {
-      // Create invitation
-      const { error: invError } = await supabase
-        .from('board_invitations')
-        .insert({
-          board_id: board.id,
-          invited_email: trimmed,
-          invited_by: user.id,
-        })
-
-      if (invError) {
-        setError(invError.message)
-      } else {
-        await fetchInvitations()
-        setEmail('')
-      }
+      await fetchInvitations()
+      setEmail('')
     }
 
     setLoading(false)
