@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   X, Trash2, Plus, Check, User, Calendar, Flag, Tag, CheckSquare,
-  Briefcase, LayoutList, CheckCircle2, FileText, Smile, UserPlus, ArrowLeft,
+  Briefcase, LayoutList, CheckCircle2, FileText, Smile, UserPlus, ArrowLeft, MessageSquare,
 } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -65,8 +66,15 @@ export default function CardDetailPanel({ cardId, onClose }) {
   const allColumns = useBoardStore((s) => s.columns)
   const addBoardMember = useBoardStore((s) => s.addBoardMember)
   const profile = useAuthStore((s) => s.profile)
+  const user = useAuthStore((s) => s.user)
   const font = useSettingsStore((s) => s.font)
   const isMobile = useIsMobile()
+
+  const [commentText, setCommentText] = useState('')
+  const comments = useBoardStore((s) => s.comments[cardId])
+  const fetchComments = useBoardStore((s) => s.fetchComments)
+  const addComment = useBoardStore((s) => s.addComment)
+  const deleteComment = useBoardStore((s) => s.deleteComment)
 
   // Initialize state directly from card (component remounts via key={cardId} in parent)
   const [title, setTitle] = useState(card?.title || '')
@@ -92,7 +100,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
   const autoSaveTimerRef = useRef(null)
   const formDataRef = useRef({ title: card?.title || '', description: card?.description || '', assignee: card?.assignee_name || '', priority: card?.priority || 'medium', dueDate: card?.due_date || '', labels: card?.labels ? [...card.labels] : [], checklist: card?.checklist ? card.checklist.map((item) => ({ ...item })) : [] })
 
-  // Fetch board members on mount
+  // Fetch board members and comments on mount
   useEffect(() => {
     if (card) {
       supabase
@@ -109,6 +117,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
             .filter(Boolean)
           setBoardMemberNames(names)
         })
+      fetchComments(cardId)
     }
   }, [])
 
@@ -694,6 +703,63 @@ export default function CardDetailPanel({ cardId, onClose }) {
             placeholder="Add details about this task..."
             className="w-full text-sm text-gray-700 rounded-lg px-3 py-2 resize-none border border-gray-200 focus:border-blue-200 focus:outline-none focus:ring-1 focus:ring-blue-50 placeholder-gray-300"
           />
+        </div>
+
+        {/* Comments */}
+        <div className="px-5 pt-4 pb-4 border-t border-gray-100">
+          <label className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3 block">
+            Comments
+          </label>
+          <div className="space-y-3 mb-3">
+            {(comments || []).map((comment) => (
+              <div key={comment.id} className="group">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-xs font-medium text-gray-700">{comment.author_name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-gray-400">
+                      {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                    </span>
+                    {comment.user_id === user?.id && (
+                      <button
+                        type="button"
+                        onClick={() => deleteComment(comment.id, cardId)}
+                        className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 mt-0.5">{comment.text}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && commentText.trim()) {
+                  addComment(cardId, commentText.trim())
+                  setCommentText('')
+                }
+              }}
+              placeholder="Add a comment..."
+              className="flex-1 text-sm px-3 py-1.5 rounded-lg border border-gray-200 focus:border-blue-200 focus:outline-none placeholder-gray-300"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (commentText.trim()) {
+                  addComment(cardId, commentText.trim())
+                  setCommentText('')
+                }
+              }}
+              className="px-3 py-1.5 text-xs font-medium bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
+            >
+              Send
+            </button>
+          </div>
         </div>
 
         {/* Checklist */}

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
+import { useAuthStore } from './authStore'
 
 const ACTIVE_BOARD_KEY = 'gambit_active_board'
 
@@ -11,6 +12,7 @@ export const useBoardStore = create((set, get) => ({
   loading: true,
   subscriptions: [],
   _isDragging: false,
+  comments: {},
 
   // ============================================================
   // FETCH (load all boards the user has access to)
@@ -523,6 +525,71 @@ export const useBoardStore = create((set, get) => ({
   },
 
   getAllCards: () => Object.values(get().cards),
+
+  // ============================================================
+  // COMMENT ACTIONS
+  // ============================================================
+  fetchComments: async (cardId) => {
+    const { data, error } = await supabase
+      .from('card_comments')
+      .select('*')
+      .eq('card_id', cardId)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      console.error('Failed to fetch comments:', error)
+      return
+    }
+
+    set((state) => ({
+      comments: { ...state.comments, [cardId]: data || [] },
+    }))
+  },
+
+  addComment: async (cardId, text) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const profile = useAuthStore.getState().profile
+    const authorName = profile?.display_name || user.email || 'Unknown'
+
+    const { data, error } = await supabase
+      .from('card_comments')
+      .insert({ card_id: cardId, user_id: user.id, author_name: authorName, text })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Failed to add comment:', error)
+      return
+    }
+
+    set((state) => ({
+      comments: {
+        ...state.comments,
+        [cardId]: [...(state.comments[cardId] || []), data],
+      },
+    }))
+  },
+
+  deleteComment: async (commentId, cardId) => {
+    const { error } = await supabase
+      .from('card_comments')
+      .delete()
+      .eq('id', commentId)
+
+    if (error) {
+      console.error('Failed to delete comment:', error)
+      return
+    }
+
+    set((state) => ({
+      comments: {
+        ...state.comments,
+        [cardId]: (state.comments[cardId] || []).filter((c) => c.id !== commentId),
+      },
+    }))
+  },
 
   // ============================================================
   // REAL-TIME SUBSCRIPTIONS
