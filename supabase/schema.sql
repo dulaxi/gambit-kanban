@@ -364,3 +364,53 @@ alter publication supabase_realtime add table public.boards;
 alter publication supabase_realtime add table public.columns;
 alter publication supabase_realtime add table public.cards;
 alter publication supabase_realtime add table public.board_members;
+
+-- ============================================================
+-- 10. CARD COMMENTS
+-- ============================================================
+create table public.card_comments (
+  id uuid primary key default gen_random_uuid(),
+  card_id uuid not null references public.cards(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  author_name text not null default '',
+  text text not null default '',
+  created_at timestamptz default now()
+);
+
+create index idx_card_comments_card_id on public.card_comments(card_id);
+
+alter table public.card_comments enable row level security;
+
+create policy "Members can view comments"
+  on public.card_comments for select
+  using (
+    card_id in (
+      select c.id from public.cards c
+      where c.board_id in (
+        select board_id from public.board_members where user_id = auth.uid()
+      )
+    )
+  );
+
+create policy "Members can create comments"
+  on public.card_comments for insert
+  with check (
+    user_id = auth.uid()
+    and card_id in (
+      select c.id from public.cards c
+      where c.board_id in (
+        select board_id from public.board_members where user_id = auth.uid()
+      )
+    )
+  );
+
+create policy "Users can delete own comments"
+  on public.card_comments for delete
+  using (user_id = auth.uid());
+
+-- ============================================================
+-- 11. RECURRING TASKS
+-- ============================================================
+alter table public.cards add column recurrence_interval int;
+alter table public.cards add column recurrence_unit text check (recurrence_unit in ('days', 'weeks', 'months'));
+alter table public.cards add column recurrence_next_due date;
