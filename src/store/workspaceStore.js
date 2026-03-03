@@ -170,4 +170,27 @@ export const useWorkspaceStore = create((set, get) => ({
       console.error('declineInvitation failed:', err)
     }
   },
+
+  // ============================================================
+  // LEAVE BOARD (via RPC)
+  // ============================================================
+  leaveBoard: async (boardId) => {
+    try {
+      const { error } = await supabase.rpc('leave_board', {
+        target_board_id: boardId,
+      })
+
+      if (error) {
+        console.error('Failed to leave board:', error)
+        return
+      }
+
+      await Promise.all([
+        get().fetchSharedBoards(),
+        useBoardStore.getState().fetchBoards(),
+      ])
+    } catch (err) {
+      console.error('leaveBoard failed:', err)
+    }
+  },
 }))

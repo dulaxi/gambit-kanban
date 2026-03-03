@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, Kanban, Check, X, UserPlus, Mail } from 'lucide-react'
+import { Users, Kanban, Check, X, UserPlus, Mail, LogOut } from 'lucide-react'
 import { useWorkspaceStore } from '../store/workspaceStore'
 import { useBoardStore } from '../store/boardStore'
 import DynamicIcon from '../components/board/DynamicIcon'
@@ -15,6 +15,7 @@ export default function WorkspacePage() {
   const fetchSharedBoards = useWorkspaceStore((s) => s.fetchSharedBoards)
   const acceptInvitation = useWorkspaceStore((s) => s.acceptInvitation)
   const declineInvitation = useWorkspaceStore((s) => s.declineInvitation)
+  const leaveBoard = useWorkspaceStore((s) => s.leaveBoard)
   const setActiveBoard = useBoardStore((s) => s.setActiveBoard)
 
   useEffect(() => {
@@ -163,11 +164,25 @@ export default function WorkspacePage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {sharedBoards.map((board) => (
-                <button
+                <div
                   key={board.id}
                   onClick={() => handleBoardClick(board.id)}
-                  className="bg-white rounded-xl border border-gray-200 p-4 text-left cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all"
+                  className="bg-white rounded-xl border border-gray-200 p-4 text-left cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all group relative"
                 >
+                  {/* Leave button — top right, visible on hover */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (window.confirm(`Leave "${board.name}"? You'll need a new invitation to rejoin.`)) {
+                        leaveBoard(board.id)
+                      }
+                    }}
+                    className="absolute top-2.5 right-2.5 p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                    title="Leave board"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
+
                   {/* Top row: icon + name */}
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
@@ -177,7 +192,7 @@ export default function WorkspacePage() {
                         <Kanban className="w-4.5 h-4.5 text-gray-400" />
                       )}
                     </div>
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-gray-900 truncate pr-6">
                       {board.name}
                     </p>
                   </div>
@@ -200,7 +215,7 @@ export default function WorkspacePage() {
                       {board.memberCount} member{board.memberCount !== 1 ? 's' : ''}
                     </span>
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           )}
