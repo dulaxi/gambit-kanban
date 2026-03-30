@@ -207,6 +207,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
   const [showIconPicker, setShowIconPicker] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
+  const [savingBoard, setSavingBoard] = useState(false)
   const dropdownRef = useRef(null)
   const createInputRef = useRef(null)
 
@@ -284,9 +285,10 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
 
   const handleCreate = async () => {
     const trimmed = newName.trim()
-    if (trimmed) {
-      await addBoard(trimmed, newIcon)
-    }
+    if (!trimmed || savingBoard) return
+    setSavingBoard(true)
+    await addBoard(trimmed, newIcon)
+    setSavingBoard(false)
     setNewName('')
     setNewIcon(null)
     setIsCreating(false)

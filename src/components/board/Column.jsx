@@ -7,6 +7,7 @@ import { useAuthStore } from '../../store/authStore'
 import SortableCard from './SortableCard'
 import InlineCardEditor from './InlineCardEditor'
 import { filterCards } from '../../utils/cardFilters'
+import ConfirmModal from './ConfirmModal'
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 }
 
@@ -34,7 +35,9 @@ function sortCards(cards, sortBy) {
 
 export default function Column({ column, boardId, onCardClick, onCreateCard, onCompleteCard, inlineCardId, onInlineDone, selectedCardId, filters, sortBy }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [isRenaming, setIsRenaming] = useState(false)
+  const [creating, setCreating] = useState(false)
   const [renameValue, setRenameValue] = useState(column.title)
   const renameRef = useRef(null)
   const menuRef = useRef(null)
@@ -76,9 +79,12 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
   }, [menuOpen])
 
   const handleCreateCard = async () => {
+    if (creating) return
+    setCreating(true)
     const today = new Date().toISOString().split('T')[0] + 'T23:59:59'
     const cardId = await addCard(boardId, column.id, { title: 'Untitled task', assignee: profile?.display_name || '', dueDate: today })
     if (onCreateCard && cardId) onCreateCard(cardId)
+    setCreating(false)
   }
 
   const handleRename = () => {
@@ -155,7 +161,11 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
                   type="button"
                   onClick={() => {
                     setMenuOpen(false)
-                    deleteColumn(boardId, column.id)
+                    if (columnCards.length > 0) {
+                      setConfirmDelete(true)
+                    } else {
+                      deleteColumn(boardId, column.id)
+                    }
                   }}
                   className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-red-600 hover:bg-gray-50"
                 >
@@ -192,12 +202,25 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
         <button
           type="button"
           onClick={handleCreateCard}
-          className="flex items-center gap-1.5 text-[13px] text-gray-500 hover:text-gray-600 px-0.5 py-1.5 w-full transition-colors"
+          disabled={creating}
+          className="flex items-center gap-1.5 text-[13px] text-gray-500 hover:text-gray-600 px-0.5 py-1.5 w-full transition-colors disabled:opacity-50"
         >
           <Plus className="w-4 h-4" />
-          Add task
+          {creating ? 'Adding...' : 'Add task'}
         </button>
       </div>
+
+      {confirmDelete && (
+        <ConfirmModal
+          title={`Delete "${column.title}"`}
+          message={`This section has ${columnCards.length} task(s) that will be permanently deleted.`}
+          onConfirm={() => {
+            setConfirmDelete(false)
+            deleteColumn(boardId, column.id)
+          }}
+          onCancel={() => setConfirmDelete(false)}
+        />
+      )}
     </div>
   )
 }

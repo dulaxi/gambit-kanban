@@ -7,6 +7,48 @@ import { addRecurrenceInterval } from '../utils/dateUtils'
 
 const ACTIVE_BOARD_KEY = 'gambit_active_board'
 
+// Undo-able delete: removes from UI, shows a toast with an Undo button,
+// waits 5s, then commits the DB delete unless the user clicks Undo.
+function undoableDelete(message) {
+  return new Promise((resolve) => {
+    let settled = false
+    const id = String(Date.now())
+
+    toast.success(message, { duration: 5000, id })
+
+    // Inject an Undo button into the toast after it renders using safe DOM methods
+    setTimeout(() => {
+      const containers = document.querySelectorAll('[role="status"]')
+      containers.forEach((c) => {
+        if (c.textContent.includes(message) && !c.querySelector(`[data-undo-id]`)) {
+          const btn = document.createElement('button')
+          btn.setAttribute('data-undo-id', id)
+          btn.style.cssText = 'color:#60a5fa;font-weight:600;font-size:13px;background:none;border:none;cursor:pointer;margin-left:8px;white-space:nowrap'
+          btn.textContent = 'Undo'
+          c.style.display = 'flex'
+          c.style.alignItems = 'center'
+          c.style.gap = '4px'
+          c.appendChild(btn)
+        }
+      })
+    }, 50)
+
+    // Listen for undo click (dispatched from UndoListener in App.jsx)
+    const handler = () => {
+      if (settled) return
+      settled = true
+      toast.dismiss(id)
+      resolve(false)
+    }
+    window.addEventListener(`gambit:undo:${id}`, handler, { once: true })
+
+    setTimeout(() => {
+      window.removeEventListener(`gambit:undo:${id}`, handler)
+      if (!settled) { settled = true; resolve(true) }
+    }, 5000)
+  })
+}
+
 export const useBoardStore = create((set, get) => ({
   boards: {},
   columns: {},
@@ -139,30 +181,40 @@ export const useBoardStore = create((set, get) => ({
   },
 
   deleteBoard: async (boardId) => {
-    set((state) => {
-      const { [boardId]: _, ...restBoards } = state.boards
+    const state = get()
+    const prevBoard = state.boards[boardId]
+    const prevColumns = Object.values(state.columns).filter((c) => c.board_id === boardId)
+    const prevCards = Object.values(state.cards).filter((c) => c.board_id === boardId)
+    const prevActiveId = state.activeBoardId
+
+    // Optimistic remove from UI
+    set((s) => {
+      const { [boardId]: _, ...restBoards } = s.boards
       const columns = {}
       const cards = {}
-      Object.values(state.columns).forEach((c) => {
-        if (c.board_id !== boardId) columns[c.id] = c
-      })
-      Object.values(state.cards).forEach((c) => {
-        if (c.board_id !== boardId) cards[c.id] = c
-      })
+      Object.values(s.columns).forEach((c) => { if (c.board_id !== boardId) columns[c.id] = c })
+      Object.values(s.cards).forEach((c) => { if (c.board_id !== boardId) cards[c.id] = c })
       const remainingIds = Object.keys(restBoards)
-      const newActiveId = state.activeBoardId === boardId
-        ? remainingIds[0] || null
-        : state.activeBoardId
+      const newActiveId = s.activeBoardId === boardId ? remainingIds[0] || null : s.activeBoardId
       localStorage.setItem(ACTIVE_BOARD_KEY, newActiveId || '')
-      return {
-        boards: restBoards,
-        columns,
-        cards,
-        activeBoardId: newActiveId,
-      }
+      return { boards: restBoards, columns, cards, activeBoardId: newActiveId }
     })
-    await supabase.from('boards').delete().eq('id', boardId)
-    toast.success('Board deleted')
+
+    const shouldDelete = await undoableDelete('Board deleted — undo?')
+
+    if (shouldDelete) {
+      await supabase.from('boards').delete().eq('id', boardId)
+    } else {
+      set((s) => {
+        const columns = { ...s.columns }
+        const cards = { ...s.cards }
+        prevColumns.forEach((c) => { columns[c.id] = c })
+        prevCards.forEach((c) => { cards[c.id] = c })
+        return { boards: { ...s.boards, [boardId]: prevBoard }, columns, cards, activeBoardId: prevActiveId }
+      })
+      localStorage.setItem(ACTIVE_BOARD_KEY, prevActiveId || '')
+      toast.success('Board restored')
+    }
   },
 
   // Board members (kept as simple name strings on cards for display,
@@ -205,16 +257,30 @@ export const useBoardStore = create((set, get) => ({
   },
 
   deleteColumn: async (boardId, columnId) => {
-    set((state) => {
-      const { [columnId]: _, ...restColumns } = state.columns
+    const state = get()
+    const prevColumn = state.columns[columnId]
+    const prevCards = Object.values(state.cards).filter((c) => c.column_id === columnId)
+
+    // Optimistic remove
+    set((s) => {
+      const { [columnId]: _, ...restColumns } = s.columns
       const cards = {}
-      Object.values(state.cards).forEach((c) => {
-        if (c.column_id !== columnId) cards[c.id] = c
-      })
+      Object.values(s.cards).forEach((c) => { if (c.column_id !== columnId) cards[c.id] = c })
       return { columns: restColumns, cards }
     })
-    await supabase.from('columns').delete().eq('id', columnId)
-    toast.success('Section deleted')
+
+    const shouldDelete = await undoableDelete('Section deleted — undo?')
+
+    if (shouldDelete) {
+      await supabase.from('columns').delete().eq('id', columnId)
+    } else {
+      set((s) => {
+        const cards = { ...s.cards }
+        prevCards.forEach((c) => { cards[c.id] = c })
+        return { columns: { ...s.columns, [columnId]: prevColumn }, cards }
+      })
+      toast.success('Section restored')
+    }
   },
 
   // ============================================================
@@ -350,23 +416,25 @@ export const useBoardStore = create((set, get) => ({
 
   deleteCard: async (cardId) => {
     const prevCard = get().cards[cardId]
+    if (!prevCard) return
 
-    // Optimistic delete
+    // Optimistic remove from UI
     set((state) => {
       const { [cardId]: _, ...restCards } = state.cards
       return { cards: restCards }
     })
 
-    const { error } = await supabase.from('cards').delete().eq('id', cardId)
+    const shouldDelete = await undoableDelete('Task deleted — undo?')
 
-    // Rollback on failure
-    if (error && prevCard) {
-      set((state) => ({
-        cards: { ...state.cards, [cardId]: prevCard },
-      }))
-      toast.error('Failed to delete task')
+    if (shouldDelete) {
+      const { error } = await supabase.from('cards').delete().eq('id', cardId)
+      if (error) {
+        set((state) => ({ cards: { ...state.cards, [cardId]: prevCard } }))
+        toast.error('Failed to delete task')
+      }
     } else {
-      toast.success('Task deleted')
+      set((state) => ({ cards: { ...state.cards, [cardId]: prevCard } }))
+      toast.success('Task restored')
     }
   },
 

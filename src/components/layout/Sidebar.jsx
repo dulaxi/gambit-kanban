@@ -24,6 +24,7 @@ import { useIsDesktop } from '../../hooks/useMediaQuery'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
+import ConfirmModal from '../board/ConfirmModal'
 
 function GambitLogo({ size = 28 }) {
   return (
@@ -72,6 +73,7 @@ export default function Sidebar() {
   const [iconPickerBoardId, setIconPickerBoardId] = useState(null)
   const [renamingBoardId, setRenamingBoardId] = useState(null)
   const [renameValue, setRenameValue] = useState('')
+  const [confirmDeleteBoardId, setConfirmDeleteBoardId] = useState(null)
 
   const favoriteBoards = useSettingsStore((s) => s.favoriteBoards)
   const toggleFavorite = useSettingsStore((s) => s.toggleFavorite)
@@ -92,9 +94,13 @@ export default function Sidebar() {
 
   const isBoardsActive = location.pathname.startsWith('/boards')
 
-  const handleCreate = () => {
-    if (!newName.trim()) return
-    addBoard(newName.trim())
+  const [savingBoard, setSavingBoard] = useState(false)
+
+  const handleCreate = async () => {
+    if (!newName.trim() || savingBoard) return
+    setSavingBoard(true)
+    await addBoard(newName.trim())
+    setSavingBoard(false)
     setNewName('')
     setCreating(false)
     navigate('/boards')
@@ -108,7 +114,7 @@ export default function Sidebar() {
 
   const handleDeleteBoard = (e, boardId) => {
     e.stopPropagation()
-    deleteBoard(boardId)
+    setConfirmDeleteBoardId(boardId)
   }
 
   // On mobile, sidebar is always expanded (w-60) since collapse toggle is hidden
@@ -495,6 +501,18 @@ export default function Sidebar() {
         )}
       </div>
     </aside>
+
+    {confirmDeleteBoardId && (
+      <ConfirmModal
+        title="Delete board"
+        message="This will permanently delete the board and all its tasks."
+        onConfirm={() => {
+          deleteBoard(confirmDeleteBoardId)
+          setConfirmDeleteBoardId(null)
+        }}
+        onCancel={() => setConfirmDeleteBoardId(null)}
+      />
+    )}
     </>
   )
 }

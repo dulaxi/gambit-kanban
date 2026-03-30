@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBoardStore } from '../store/boardStore'
 import { useAuthStore } from '../store/authStore'
@@ -87,6 +87,7 @@ export default function DashboardPage() {
   const addBoard = useBoardStore((s) => s.addBoard)
   const profile = useAuthStore((s) => s.profile)
 
+  const [creatingBoard, setCreatingBoard] = useState(false)
   const displayName = profile?.display_name || 'there'
 
   // ---- Computed data ------------------------------------------------
@@ -118,7 +119,10 @@ export default function DashboardPage() {
   }
 
   async function handleNewBoard() {
+    if (creatingBoard) return
+    setCreatingBoard(true)
     const id = await addBoard('New Board')
+    setCreatingBoard(false)
     if (id) {
       setActiveBoard(id)
       navigate('/boards')
@@ -253,10 +257,11 @@ export default function DashboardPage() {
             </p>
             <button
               onClick={handleNewBoard}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
+              disabled={creatingBoard}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors cursor-pointer disabled:opacity-50"
             >
               <Plus className="w-4 h-4" />
-              New Board
+              {creatingBoard ? 'Creating...' : 'New Board'}
             </button>
           </div>
         ) : (

@@ -17,6 +17,7 @@ import Card from './Card'
 export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCardId, onInlineDone, selectedCardId, filters, sortBy }) {
   const [isAddingColumn, setIsAddingColumn] = useState(false)
   const [newColumnTitle, setNewColumnTitle] = useState('')
+  const [addingColumn, setAddingColumn] = useState(false)
   const [activeCardId, setActiveCardId] = useState(null)
   const inputRef = useRef(null)
   const affectedCardsRef = useRef(new Set())
@@ -188,10 +189,13 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
     )
   }
 
-  const handleAddColumn = () => {
+  const handleAddColumn = async () => {
+    if (addingColumn) return
     const trimmed = newColumnTitle.trim()
     if (trimmed) {
-      addColumn(boardId, trimmed)
+      setAddingColumn(true)
+      await addColumn(boardId, trimmed)
+      setAddingColumn(false)
     }
     setNewColumnTitle('')
     setIsAddingColumn(false)
@@ -250,9 +254,10 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
                 <button
                   type="button"
                   onClick={handleAddColumn}
-                  className="px-3 py-1.5 text-xs font-medium bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                  disabled={addingColumn}
+                  className="px-3 py-1.5 text-xs font-medium bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50"
                 >
-                  Add section
+                  {addingColumn ? 'Adding...' : 'Add section'}
                 </button>
                 <button
                   type="button"
