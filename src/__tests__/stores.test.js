@@ -61,7 +61,9 @@ describe('boardStore', () => {
       cards: { c1: { id: 'c1', board_id: 'b1', column_id: 'col1' }, c2: { id: 'c2', board_id: 'b2', column_id: 'col2' } },
       activeBoardId: 'b1',
     })
-    await useBoardStore.getState().deleteBoard('b1')
+    // deleteBoard uses undoableDelete with a 5s timer — after optimistic removal, state is already updated
+    const promise = useBoardStore.getState().deleteBoard('b1')
+    // Check optimistic removal immediately
     const state = useBoardStore.getState()
     expect(state.boards).not.toHaveProperty('b1')
     expect(state.columns).not.toHaveProperty('col1')
@@ -84,7 +86,8 @@ describe('boardStore', () => {
     useBoardStore.setState({
       cards: { c1: { id: 'c1' }, c2: { id: 'c2' } },
     })
-    await useBoardStore.getState().deleteCard('c1')
+    // deleteCard uses undoableDelete — check optimistic removal immediately
+    const promise = useBoardStore.getState().deleteCard('c1')
     expect(useBoardStore.getState().cards).not.toHaveProperty('c1')
     expect(useBoardStore.getState().cards).toHaveProperty('c2')
   })
