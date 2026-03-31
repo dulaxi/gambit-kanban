@@ -151,6 +151,7 @@ export default function Header({ title }) {
           <button
             type="button"
             onClick={closeMobileSearch}
+            aria-label="Close search"
             className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
           >
             <X className="w-4 h-4" />
@@ -245,7 +246,7 @@ export default function Header({ title }) {
 
           {/* Search results dropdown */}
           {showDropdown && (
-            <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden max-h-80 overflow-y-auto">
+            <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden max-h-80 overflow-y-auto animate-dropdown">
               {!hasResults && (
                 <p className="px-4 py-3 text-sm text-gray-500">No results found</p>
               )}
@@ -306,6 +307,7 @@ export default function Header({ title }) {
           <button
             type="button"
             onClick={() => setMobileSearchOpen(true)}
+            aria-label="Search"
             className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
           >
             <Search className="w-[18px] h-[18px]" />
@@ -317,6 +319,7 @@ export default function Header({ title }) {
           <button
             type="button"
             onClick={() => setNotifOpen(!notifOpen)}
+            aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
             className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
           >
             <Bell className="w-[18px] h-[18px]" />
@@ -328,7 +331,7 @@ export default function Header({ title }) {
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+            <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden animate-dropdown">
               <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
                 <span className="text-sm font-semibold text-gray-900">Notifications</span>
                 {unreadCount > 0 && (
@@ -413,7 +416,7 @@ export default function Header({ title }) {
         </button>
 
         {menuOpen && (
-          <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-30 w-48">
+          <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-30 w-48 animate-dropdown">
             <div className="px-3 py-2 border-b border-gray-100">
               <p className="text-sm font-medium text-gray-900 truncate">{profile?.display_name || 'User'}</p>
               <p className="text-xs text-gray-500 truncate">{profile?.email || ''}</p>

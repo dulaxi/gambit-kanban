@@ -185,8 +185,8 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
 
   if (!board) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
-        No board selected
+      <div className="flex flex-col items-center justify-center h-full text-center px-6">
+        <p className="text-sm text-gray-500">Select a board from the sidebar to get started</p>
       </div>
     )
   }

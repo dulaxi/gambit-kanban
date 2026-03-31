@@ -37,6 +37,7 @@ export default function Card({ card, onClick, onComplete, isSelected, iconOverri
     <div
       role="button"
       tabIndex={0}
+      aria-label={`Task: ${title}`}
       onClick={() => onClick(card.id)}
       style={font === 'sf-mono' ? { fontFamily: "'SF Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace" } : undefined}
       className={`w-full rounded-xl border shadow-sm transition-all text-left cursor-pointer flex ${

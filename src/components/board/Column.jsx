@@ -153,7 +153,8 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
           <button
             type="button"
             onClick={handleCreateCard}
-            className="p-1 rounded text-gray-500 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            aria-label="Add task"
+            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-600 hover:bg-gray-100 transition-colors"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -161,12 +162,13 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1 rounded text-gray-500 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              aria-label="Column options"
+              className="p-1.5 rounded-lg text-gray-500 hover:text-gray-600 hover:bg-gray-100 transition-colors"
             >
               <MoreHorizontal className="w-4 h-4" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-8 bg-white rounded-lg border border-gray-200 shadow-lg py-1 z-20 w-36">
+              <div className="absolute right-0 top-8 bg-white rounded-xl border border-gray-200 shadow-lg py-1 z-20 w-40 animate-dropdown">
                 <button
                   type="button"
                   onClick={() => {

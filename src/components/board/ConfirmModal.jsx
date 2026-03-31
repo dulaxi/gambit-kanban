@@ -14,8 +14,11 @@ export default function ConfirmModal({ title, message, confirmLabel = 'Delete', 
   }, [onCancel])
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={onCancel}>
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={onCancel} role="presentation">
       <div
+        role="alertdialog"
+        aria-labelledby="confirm-title"
+        aria-describedby="confirm-message"
         className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-5"
         onClick={(e) => e.stopPropagation()}
       >
@@ -23,9 +26,9 @@ export default function ConfirmModal({ title, message, confirmLabel = 'Delete', 
           <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center shrink-0">
             <AlertTriangle className="w-5 h-5 text-red-500" />
           </div>
-          <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+          <h3 id="confirm-title" className="text-sm font-semibold text-gray-900">{title}</h3>
         </div>
-        <p className="text-sm text-gray-600 mb-5 ml-12">{message}</p>
+        <p id="confirm-message" className="text-sm text-gray-600 mb-5 ml-12">{message}</p>
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"

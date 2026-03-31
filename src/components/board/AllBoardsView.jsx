@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Layers } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
 import Card from './Card'
 import { buildColumnMap } from '../../utils/columnGrouping'
@@ -52,8 +53,12 @@ export default function AllBoardsView({ onCardClick, selectedCardId }) {
 
   if (columnEntries.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
-        No boards yet
+      <div className="flex flex-col items-center justify-center h-full text-center px-6">
+        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+          <Layers className="w-6 h-6 text-gray-400" />
+        </div>
+        <p className="text-sm font-medium text-gray-700">No tasks across boards</p>
+        <p className="text-xs text-gray-500 mt-1">Create a board and add tasks to see them here</p>
       </div>
     )
   }
