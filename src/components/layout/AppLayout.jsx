@@ -30,6 +30,7 @@ export default function AppLayout() {
   const location = useLocation()
   const user = useAuthStore((s) => s.user)
   const fetchBoards = useBoardStore((s) => s.fetchBoards)
+  const createSampleBoard = useBoardStore((s) => s.createSampleBoard)
   const spawnRecurringTasks = useBoardStore((s) => s.spawnRecurringTasks)
   const subscribeToBoards = useBoardStore((s) => s.subscribeToBoards)
   const unsubscribeAll = useBoardStore((s) => s.unsubscribeAll)
@@ -57,7 +58,14 @@ export default function AppLayout() {
   // Fetch data and set up real-time when authenticated
   useEffect(() => {
     if (user) {
-      fetchBoards().then(() => spawnRecurringTasks())
+      fetchBoards().then(() => {
+        spawnRecurringTasks()
+        // Create sample board for first-time users
+        const boards = useBoardStore.getState().boards
+        if (Object.keys(boards).length === 0) {
+          createSampleBoard()
+        }
+      })
       fetchNotes()
       fetchInvitations()
       fetchSharedBoards()

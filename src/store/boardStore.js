@@ -192,6 +192,91 @@ export const useBoardStore = create((set, get) => ({
     return board.id
   },
 
+  createSampleBoard: async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const boardId = crypto.randomUUID()
+    const { error } = await supabase
+      .from('boards')
+      .insert({ id: boardId, name: 'My First Project', icon: 'Rocket', owner_id: user.id })
+
+    if (error) return null
+
+    const { data: board } = await supabase
+      .from('boards')
+      .select()
+      .eq('id', boardId)
+      .single()
+
+    if (!board) return null
+
+    const columnTitles = ['To Do', 'In Progress', 'Review', 'Done']
+    const { data: cols } = await supabase
+      .from('columns')
+      .insert(columnTitles.map((title, i) => ({ board_id: board.id, title, position: i })))
+      .select()
+
+    if (!cols || cols.length === 0) return board.id
+
+    const profile = useAuthStore.getState().profile
+    const assignee = profile?.display_name || ''
+    const today = new Date()
+    const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
+    const nextWeek = new Date(today); nextWeek.setDate(today.getDate() + 7)
+    const fmtDate = (d) => d.toISOString().split('T')[0] + 'T23:59:59'
+
+    const toDoCol = cols.find((c) => c.title === 'To Do')
+    const inProgressCol = cols.find((c) => c.title === 'In Progress')
+    const reviewCol = cols.find((c) => c.title === 'Review')
+    const doneCol = cols.find((c) => c.title === 'Done')
+
+    const sampleCards = [
+      { column_id: toDoCol.id, position: 0, task_number: 1, global_task_number: 1, title: 'Set up project structure', description: 'Organize the codebase and create initial folder structure', assignee_name: assignee, priority: 'high', due_date: fmtDate(tomorrow), labels: [{ text: 'Setup', color: 'blue' }], checklist: [{ text: 'Create folder structure', checked: true }, { text: 'Install dependencies', checked: false }, { text: 'Configure environment', checked: false }] },
+      { column_id: toDoCol.id, position: 1, task_number: 2, global_task_number: 2, title: 'Design the landing page', description: 'Create wireframes and mockups for the main landing page', assignee_name: assignee, priority: 'medium', due_date: fmtDate(nextWeek), labels: [{ text: 'Design', color: 'purple' }] },
+      { column_id: toDoCol.id, position: 2, task_number: 3, global_task_number: 3, title: 'Write API documentation', priority: 'low', labels: [{ text: 'Docs', color: 'green' }] },
+      { column_id: inProgressCol.id, position: 0, task_number: 4, global_task_number: 4, title: 'Build authentication flow', description: 'Implement sign up, sign in, and password reset', assignee_name: assignee, priority: 'high', due_date: fmtDate(today), labels: [{ text: 'Feature', color: 'blue' }] },
+      { column_id: reviewCol.id, position: 0, task_number: 5, global_task_number: 5, title: 'Review onboarding screens', assignee_name: assignee, priority: 'medium', labels: [{ text: 'Review', color: 'yellow' }] },
+      { column_id: doneCol.id, position: 0, task_number: 6, global_task_number: 6, title: 'Create project board', completed: true, priority: 'low', labels: [{ text: 'Setup', color: 'blue' }] },
+    ]
+
+    const cardInserts = sampleCards.map((c) => ({
+      board_id: board.id,
+      column_id: c.column_id,
+      position: c.position,
+      task_number: c.task_number,
+      global_task_number: c.global_task_number,
+      title: c.title,
+      description: c.description || '',
+      assignee_name: c.assignee_name || '',
+      priority: c.priority || 'medium',
+      due_date: c.due_date || null,
+      labels: c.labels || [],
+      checklist: c.checklist || [],
+      completed: c.completed || false,
+    }))
+
+    const { data: cards } = await supabase.from('cards').insert(cardInserts).select()
+
+    await supabase.from('boards').update({ next_task_number: 7 }).eq('id', board.id)
+
+    // Update local state
+    const columnMap = {}
+    cols.forEach((c) => { columnMap[c.id] = c })
+    const cardMap = {}
+    ;(cards || []).forEach((c) => { cardMap[c.id] = c })
+
+    localStorage.setItem(ACTIVE_BOARD_KEY, board.id)
+    set((state) => ({
+      boards: { ...state.boards, [board.id]: { ...board, next_task_number: 7 } },
+      columns: { ...state.columns, ...columnMap },
+      cards: { ...state.cards, ...cardMap },
+      activeBoardId: board.id,
+    }))
+
+    return board.id
+  },
+
   updateBoardIcon: async (boardId, icon) => {
     // Optimistic
     set((state) => ({
