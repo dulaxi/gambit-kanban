@@ -11,6 +11,7 @@ import { useNoteStore } from '../../store/noteStore'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useNotificationStore } from '../../store/notificationStore'
 import { hasLocalData, migrateLocalData } from '../../lib/migrateLocalData'
+import toast from 'react-hot-toast'
 import OfflineBanner from './OfflineBanner'
 
 const pageTitles = {
@@ -64,6 +65,31 @@ export default function AppLayout() {
         const boards = useBoardStore.getState().boards
         if (Object.keys(boards).length === 0) {
           createSampleBoard()
+          return
+        }
+
+        // Due date reminders — check for overdue and due-today tasks
+        const profile = useAuthStore.getState().profile
+        const displayName = profile?.display_name || ''
+        const cards = useBoardStore.getState().cards
+        const now = new Date()
+        const todayStr = now.toISOString().split('T')[0]
+
+        let overdue = 0
+        let dueToday = 0
+        Object.values(cards).forEach((card) => {
+          if (card.completed || card.archived || !card.due_date) return
+          if (displayName && card.assignee_name !== displayName) return
+          const dueDateStr = card.due_date.split('T')[0]
+          if (dueDateStr < todayStr) overdue++
+          else if (dueDateStr === todayStr) dueToday++
+        })
+
+        if (overdue > 0) {
+          toast(`You have ${overdue} overdue task${overdue > 1 ? 's' : ''}`, { icon: '🔴', duration: 5000 })
+        }
+        if (dueToday > 0) {
+          toast(`${dueToday} task${dueToday > 1 ? 's' : ''} due today`, { icon: '🟡', duration: 5000 })
         }
       })
       fetchNotes()
