@@ -6,6 +6,7 @@ import {
   pointerWithin,
   rectIntersection,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
@@ -38,7 +39,8 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
     .sort((a, b) => a.position - b.position)
 
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
-  const sensors = useSensors(...(isMobile ? [] : [pointerSensor]))
+  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } })
+  const sensors = useSensors(isMobile ? touchSensor : pointerSensor)
 
   // Custom collision: prefer pointerWithin (cards), fallback to rectIntersection (columns)
   const collisionDetection = useCallback((args) => {
@@ -284,9 +286,9 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
         </div>
       </div>
 
-      <DragOverlay>
+      <DragOverlay dropAnimation={null}>
         {activeCardId && activeCard ? (
-          <div className="rotate-2 opacity-90">
+          <div className={`${isMobile ? 'scale-105 shadow-xl' : 'rotate-2'} opacity-90`}>
             <Card card={activeCard} onClick={() => {}} />
           </div>
         ) : null}

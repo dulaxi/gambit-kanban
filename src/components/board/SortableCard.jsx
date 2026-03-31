@@ -1,12 +1,16 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { GripVertical } from 'lucide-react'
 import Card from './Card'
+import { useIsMobile } from '../../hooks/useMediaQuery'
 
 export default function SortableCard({ card, onClick, onComplete, isSelected }) {
+  const isMobile = useIsMobile()
   const {
     attributes,
     listeners,
     setNodeRef,
+    setActivatorNodeRef,
     transform,
     transition,
     isDragging,
@@ -16,7 +20,25 @@ export default function SortableCard({ card, onClick, onComplete, isSelected }) 
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.4 : 1,
-    touchAction: 'none',
+  }
+
+  if (isMobile) {
+    // On mobile, use a drag handle so touch scrolling works normally
+    return (
+      <div ref={setNodeRef} style={style} className="flex items-stretch">
+        <div
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          className="flex items-center px-1 text-gray-300 active:text-gray-500 touch-none"
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <Card card={card} onClick={onClick} onComplete={onComplete} isSelected={isSelected} />
+        </div>
+      </div>
+    )
   }
 
   return (
