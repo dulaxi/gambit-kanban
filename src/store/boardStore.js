@@ -49,6 +49,26 @@ function undoableDelete(message) {
   })
 }
 
+// Fire-and-forget activity logger — never blocks the calling action.
+async function logActivity(cardId, action, detail) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const profile = useAuthStore.getState().profile
+    const actorName = profile?.display_name || user.email || 'Unknown'
+    await supabase.from('card_activity').insert({
+      card_id: cardId,
+      user_id: user.id,
+      actor_name: actorName,
+      action,
+      detail,
+    })
+  } catch (err) {
+    // Activity logging should never break the main flow
+    console.error('logActivity failed:', err)
+  }
+}
+
 export const useBoardStore = create((set, get) => ({
   boards: {},
   columns: {},
@@ -58,6 +78,8 @@ export const useBoardStore = create((set, get) => ({
   subscriptions: [],
   _isDragging: false,
   comments: {},
+  activity: {},
+  attachments: {},
 
   // ============================================================
   // FETCH (load all boards the user has access to)
@@ -101,6 +123,11 @@ export const useBoardStore = create((set, get) => ({
       })
     } catch (err) {
       console.error('fetchBoards failed:', err)
+      if (!navigator.onLine) {
+        toast.error('You\'re offline — showing cached data')
+      } else {
+        toast.error('Failed to load boards — check your connection')
+      }
       set({ loading: false })
     }
   },
@@ -350,6 +377,7 @@ export const useBoardStore = create((set, get) => ({
         },
       }))
 
+      logActivity(card.id, 'created', null)
       return card.id
     } catch (err) {
       console.error('addCard failed:', err)
@@ -395,6 +423,22 @@ export const useBoardStore = create((set, get) => ({
           cards: { ...state.cards, [cardId]: prevCard },
         }))
       }
+    } else if (prevCard) {
+      // Log meaningful field changes (skip position-only updates)
+      if ('priority' in dbUpdates && dbUpdates.priority !== prevCard.priority) {
+        logActivity(cardId, 'updated_priority', `${prevCard.priority} → ${dbUpdates.priority}`)
+      }
+      if ('assignee_name' in dbUpdates && dbUpdates.assignee_name !== prevCard.assignee_name) {
+        const from = prevCard.assignee_name || 'unassigned'
+        const to = dbUpdates.assignee_name || 'unassigned'
+        logActivity(cardId, 'updated_assignee', `${from} → ${to}`)
+      }
+      if ('due_date' in dbUpdates && dbUpdates.due_date !== prevCard.due_date) {
+        logActivity(cardId, 'updated_due_date', dbUpdates.due_date ? dbUpdates.due_date.split('T')[0] : 'removed')
+      }
+      if ('title' in dbUpdates && dbUpdates.title !== prevCard.title) {
+        logActivity(cardId, 'renamed', `${prevCard.title} → ${dbUpdates.title}`)
+      }
     }
   },
 
@@ -412,6 +456,7 @@ export const useBoardStore = create((set, get) => ({
     }))
 
     await supabase.from('cards').update({ completed: newCompleted }).eq('id', cardId)
+    logActivity(cardId, newCompleted ? 'completed' : 'reopened', null)
   },
 
   deleteCard: async (cardId) => {
@@ -509,6 +554,11 @@ export const useBoardStore = create((set, get) => ({
         const { error } = await supabase.from('cards').update(rest).eq('id', id)
         if (error) console.error('Failed to update card position:', error)
       }
+
+      // Log the column move
+      const fromCol = state.columns[fromColumnId]
+      const toCol = state.columns[toColumnId]
+      logActivity(movedCard.id, 'moved', `${fromCol?.title || 'Unknown'} → ${toCol?.title || 'Unknown'}`)
     }
   },
 
@@ -652,6 +702,24 @@ export const useBoardStore = create((set, get) => ({
     }))
   },
 
+  fetchActivity: async (cardId) => {
+    const { data, error } = await supabase
+      .from('card_activity')
+      .select('*')
+      .eq('card_id', cardId)
+      .order('created_at', { ascending: false })
+      .limit(50)
+
+    if (error) {
+      console.error('Failed to fetch activity:', error)
+      return
+    }
+
+    set((state) => ({
+      activity: { ...state.activity, [cardId]: data || [] },
+    }))
+  },
+
   deleteComment: async (commentId, cardId) => {
     const { error } = await supabase
       .from('card_comments')
@@ -669,6 +737,115 @@ export const useBoardStore = create((set, get) => ({
         [cardId]: (state.comments[cardId] || []).filter((c) => c.id !== commentId),
       },
     }))
+  },
+
+  // ============================================================
+  // ATTACHMENTS
+  // ============================================================
+  fetchAttachments: async (cardId) => {
+    const { data, error } = await supabase
+      .from('card_attachments')
+      .select('*')
+      .eq('card_id', cardId)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Failed to fetch attachments:', error)
+      return
+    }
+
+    set((state) => ({
+      attachments: { ...state.attachments, [cardId]: data || [] },
+    }))
+  },
+
+  uploadAttachment: async (cardId, file) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const fileId = crypto.randomUUID()
+    const storagePath = `${user.id}/${cardId}/${fileId}_${file.name}`
+
+    // Upload to storage
+    const { error: uploadError } = await supabase.storage
+      .from('attachments')
+      .upload(storagePath, file)
+
+    if (uploadError) {
+      console.error('Failed to upload file:', uploadError)
+      toast.error('Failed to upload file')
+      return null
+    }
+
+    // Save metadata
+    const { data, error } = await supabase
+      .from('card_attachments')
+      .insert({
+        card_id: cardId,
+        user_id: user.id,
+        file_name: file.name,
+        file_size: file.size,
+        content_type: file.type,
+        storage_path: storagePath,
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Failed to save attachment metadata:', error)
+      return null
+    }
+
+    set((state) => ({
+      attachments: {
+        ...state.attachments,
+        [cardId]: [data, ...(state.attachments[cardId] || [])],
+      },
+    }))
+
+    logActivity(cardId, 'attached', file.name)
+    return data
+  },
+
+  deleteAttachment: async (attachmentId, cardId, storagePath) => {
+    // Remove from storage
+    const { error: storageError } = await supabase.storage
+      .from('attachments')
+      .remove([storagePath])
+
+    if (storageError) {
+      console.error('Failed to delete file from storage:', storageError)
+    }
+
+    // Remove metadata
+    const { error } = await supabase
+      .from('card_attachments')
+      .delete()
+      .eq('id', attachmentId)
+
+    if (error) {
+      console.error('Failed to delete attachment:', error)
+      return
+    }
+
+    set((state) => ({
+      attachments: {
+        ...state.attachments,
+        [cardId]: (state.attachments[cardId] || []).filter((a) => a.id !== attachmentId),
+      },
+    }))
+  },
+
+  getAttachmentUrl: async (storagePath) => {
+    const { data, error } = await supabase.storage
+      .from('attachments')
+      .createSignedUrl(storagePath, 3600) // 1 hour expiry
+
+    if (error) {
+      console.error('Failed to get signed URL:', error)
+      return null
+    }
+    return data.signedUrl
   },
 
   // ============================================================

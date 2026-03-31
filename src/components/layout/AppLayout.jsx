@@ -9,7 +9,9 @@ import { useAuthStore } from '../../store/authStore'
 import { useBoardStore } from '../../store/boardStore'
 import { useNoteStore } from '../../store/noteStore'
 import { useWorkspaceStore } from '../../store/workspaceStore'
+import { useNotificationStore } from '../../store/notificationStore'
 import { hasLocalData, migrateLocalData } from '../../lib/migrateLocalData'
+import OfflineBanner from './OfflineBanner'
 
 const pageTitles = {
   '/dashboard': 'Dashboard',
@@ -34,6 +36,8 @@ export default function AppLayout() {
   const fetchNotes = useNoteStore((s) => s.fetchNotes)
   const fetchInvitations = useWorkspaceStore((s) => s.fetchInvitations)
   const fetchSharedBoards = useWorkspaceStore((s) => s.fetchSharedBoards)
+  const fetchNotifications = useNotificationStore((s) => s.fetchNotifications)
+  const subscribeToNotifications = useNotificationStore((s) => s.subscribeToNotifications)
   const [showMigration, setShowMigration] = useState(false)
   const [migrating, setMigrating] = useState(false)
 
@@ -58,6 +62,8 @@ export default function AppLayout() {
       fetchInvitations()
       fetchSharedBoards()
       subscribeToBoards()
+      fetchNotifications()
+      const unsubNotifications = subscribeToNotifications()
 
       // Check for local data migration
       if (hasLocalData()) {
@@ -66,6 +72,7 @@ export default function AppLayout() {
 
       return () => {
         unsubscribeAll()
+        unsubNotifications()
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,6 +132,7 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <OfflineBanner />
       <Sidebar />
       <div
         className={`transition-all duration-200 ${

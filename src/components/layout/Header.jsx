@@ -1,10 +1,12 @@
-import { Search, User, LogOut, Settings, LayoutGrid } from 'lucide-react'
+import { Search, User, LogOut, Settings, LayoutGrid, Bell, AtSign, UserPlus, MessageSquare, ArrowRight } from 'lucide-react'
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { formatDistanceToNow } from 'date-fns'
 import { useAuthStore } from '../../store/authStore'
 import { useBoardStore } from '../../store/boardStore'
 import { useNoteStore } from '../../store/noteStore'
 import { useSettingsStore } from '../../store/settingsStore'
+import { useNotificationStore } from '../../store/notificationStore'
 import { useIsDesktop } from '../../hooks/useMediaQuery'
 import DynamicIcon from '../board/DynamicIcon'
 
@@ -12,13 +14,20 @@ export default function Header({ title }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchFocused, setSearchFocused] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
   const menuRef = useRef(null)
   const searchRef = useRef(null)
+  const notifRef = useRef(null)
   const navigate = useNavigate()
   const profile = useAuthStore((s) => s.profile)
   const signOut = useAuthStore((s) => s.signOut)
   const isDesktop = useIsDesktop()
   const toggleMobileMenu = useSettingsStore((s) => s.toggleMobileMenu)
+
+  const notifications = useNotificationStore((s) => s.notifications)
+  const unreadCount = useNotificationStore((s) => s.unreadCount)
+  const markAsRead = useNotificationStore((s) => s.markAsRead)
+  const markAllAsRead = useNotificationStore((s) => s.markAllAsRead)
 
   const cards = useBoardStore((s) => s.cards)
   const boards = useBoardStore((s) => s.boards)
@@ -35,6 +44,18 @@ export default function Header({ title }) {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [menuOpen])
+
+  // Close notification panel on click outside
+  useEffect(() => {
+    if (!notifOpen) return
+    const handleClick = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [notifOpen])
 
   // Close search on click outside
   useEffect(() => {
@@ -186,7 +207,84 @@ export default function Header({ title }) {
         </div>
       )}
 
-      {/* Right: Gambit icon (mobile) / Avatar (desktop) + Dropdown */}
+      {/* Right: notifications + avatar */}
+      <div className="flex items-center gap-2">
+        {/* Notification bell */}
+        <div className="relative" ref={notifRef}>
+          <button
+            type="button"
+            onClick={() => setNotifOpen(!notifOpen)}
+            className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          >
+            <Bell className="w-[18px] h-[18px]" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
+
+          {notifOpen && (
+            <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
+                <span className="text-sm font-semibold text-gray-900">Notifications</span>
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={markAllAsRead}
+                    className="text-[11px] font-medium text-blue-500 hover:text-blue-600"
+                  >
+                    Mark all read
+                  </button>
+                )}
+              </div>
+              <div className="max-h-72 overflow-y-auto">
+                {notifications.length === 0 && (
+                  <p className="px-4 py-6 text-sm text-gray-500 text-center">No notifications yet</p>
+                )}
+                {notifications.map((n) => {
+                  const icon = n.type === 'mention' ? <AtSign className="w-3.5 h-3.5 text-blue-500" />
+                    : n.type === 'assigned' ? <UserPlus className="w-3.5 h-3.5 text-emerald-500" />
+                    : n.type === 'moved' ? <ArrowRight className="w-3.5 h-3.5 text-purple-500" />
+                    : <MessageSquare className="w-3.5 h-3.5 text-gray-400" />
+
+                  return (
+                    <button
+                      key={n.id}
+                      type="button"
+                      onClick={() => {
+                        if (!n.read) markAsRead(n.id)
+                        if (n.card_id && n.board_id) {
+                          setActiveBoard(n.board_id)
+                          setNotifOpen(false)
+                          navigate('/boards')
+                          setTimeout(() => {
+                            window.dispatchEvent(new CustomEvent('gambit:open-card', { detail: { cardId: n.card_id } }))
+                          }, 100)
+                        }
+                      }}
+                      className={`flex items-start gap-2.5 w-full px-4 py-2.5 text-left hover:bg-gray-50 transition-colors ${!n.read ? 'bg-blue-50/50' : ''}`}
+                    >
+                      <div className="mt-0.5 shrink-0">{icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] text-gray-700">
+                          <span className="font-medium">{n.actor_name || 'Someone'}</span>{' '}
+                          {n.title}
+                        </p>
+                        {n.body && <p className="text-[11px] text-gray-500 truncate mt-0.5">{n.body}</p>}
+                        <p className="text-[10px] text-gray-400 mt-0.5">
+                          {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
+                        </p>
+                      </div>
+                      {!n.read && <span className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 shrink-0" />}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
       <div className="relative" ref={menuRef}>
         <button
           type="button"
@@ -238,6 +336,7 @@ export default function Header({ title }) {
             </button>
           </div>
         )}
+      </div>
       </div>
     </header>
   )

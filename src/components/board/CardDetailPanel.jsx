@@ -2,17 +2,76 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   X, Trash2, Plus, Check, User, Calendar, Flag, Tag, CheckSquare,
   Briefcase, LayoutList, CheckCircle2, FileText, Smile, UserPlus, ArrowLeft, MessageSquare, Repeat,
+  History, ArrowRight, PencilLine, CircleCheck, CircleDot, Paperclip, Download, Upload, File, Image,
 } from 'lucide-react'
 import { formatDistanceToNow, parseISO, format } from 'date-fns'
+import toast from 'react-hot-toast'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { supabase } from '../../lib/supabase'
 import DynamicIcon from './DynamicIcon'
 import IconPicker from './IconPicker'
+import MentionInput from './MentionInput'
 import { useIsMobile } from '../../hooks/useMediaQuery'
+import { useNotificationStore } from '../../store/notificationStore'
 import { LABEL_BG, getAvatarColor, getInitials } from '../../utils/formatting'
 import { addRecurrenceInterval } from '../../utils/dateUtils'
+
+function parseMentions(text, boardMembers) {
+  const mentions = []
+  const re = /@(\w[\w ]*?)(?=\s@|\s[^@]|$)/g
+  let m
+  while ((m = re.exec(text)) !== null) {
+    const name = m[1].trim()
+    const member = boardMembers.find(
+      (mb) => mb.display_name.toLowerCase() === name.toLowerCase()
+    )
+    if (member) mentions.push(member)
+  }
+  return mentions
+}
+
+function CommentBox({ commentText, setCommentText, addComment, cardId, card, boardMembers, notify, profile }) {
+  const handleSubmit = () => {
+    if (!commentText.trim()) return
+    addComment(cardId, commentText.trim())
+
+    // Notify mentioned users
+    const mentioned = parseMentions(commentText, boardMembers)
+    for (const member of mentioned) {
+      notify({
+        userId: member.user_id,
+        type: 'mention',
+        title: 'mentioned you in a comment',
+        body: commentText.trim().slice(0, 100),
+        cardId,
+        boardId: card?.board_id,
+        actorName: profile?.display_name || 'Someone',
+      })
+    }
+    setCommentText('')
+  }
+
+  return (
+    <div className="flex gap-2">
+      <MentionInput
+        value={commentText}
+        onChange={setCommentText}
+        members={boardMembers}
+        placeholder="Add a comment... (@ to mention)"
+        onSubmit={handleSubmit}
+      />
+      <button
+        type="button"
+        onClick={handleSubmit}
+        className="px-3 py-1.5 text-xs font-medium bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
+      >
+        Send
+      </button>
+    </div>
+  )
+}
 
 const LABEL_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'pink', 'gray']
 
@@ -52,6 +111,14 @@ export default function CardDetailPanel({ cardId, onClose }) {
   const fetchComments = useBoardStore((s) => s.fetchComments)
   const addComment = useBoardStore((s) => s.addComment)
   const deleteComment = useBoardStore((s) => s.deleteComment)
+  const activityItems = useBoardStore((s) => s.activity[cardId])
+  const fetchActivity = useBoardStore((s) => s.fetchActivity)
+  const notify = useNotificationStore((s) => s.notify)
+  const attachmentItems = useBoardStore((s) => s.attachments[cardId])
+  const fetchAttachments = useBoardStore((s) => s.fetchAttachments)
+  const uploadAttachment = useBoardStore((s) => s.uploadAttachment)
+  const deleteAttachment = useBoardStore((s) => s.deleteAttachment)
+  const getAttachmentUrl = useBoardStore((s) => s.getAttachmentUrl)
 
   // Initialize state directly from card (component remounts via key={cardId} in parent)
   const [title, setTitle] = useState(card?.title || '')
@@ -71,6 +138,9 @@ export default function CardDetailPanel({ cardId, onClose }) {
   const [editingDueDate, setEditingDueDate] = useState(false)
   const [showIconPicker, setShowIconPicker] = useState(false)
   const [showRecurrencePicker, setShowRecurrencePicker] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [boardMembers, setBoardMembers] = useState([])
+  const fileInputRef = useRef(null)
   const [customInterval, setCustomInterval] = useState(1)
   const [customUnit, setCustomUnit] = useState('days')
   const [boardMemberNames, setBoardMemberNames] = useState([])
@@ -98,6 +168,25 @@ export default function CardDetailPanel({ cardId, onClose }) {
           setBoardMemberNames(names)
         })
       fetchComments(cardId)
+      fetchActivity(cardId)
+      fetchAttachments(cardId)
+
+      // Fetch board members for @mention autocomplete
+      if (card?.board_id) {
+        supabase
+          .from('board_members')
+          .select('user_id, profiles(id, display_name, icon, color)')
+          .eq('board_id', card.board_id)
+          .then(({ data }) => {
+            if (data) {
+              setBoardMembers(data.map((m) => ({
+                user_id: m.profiles?.id || m.user_id,
+                display_name: m.profiles?.display_name || 'Unknown',
+                color: m.profiles?.color || 'bg-gray-300',
+              })))
+            }
+          })
+      }
     }
   }, [])
 
@@ -801,36 +890,111 @@ export default function CardDetailPanel({ cardId, onClose }) {
                     )}
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 mt-0.5">{comment.text}</p>
+                <p className="text-sm text-gray-600 mt-0.5">
+                  {comment.text.split(/(@\w[\w ]*)/g).map((part, i) =>
+                    part.startsWith('@') ? (
+                      <span key={i} className="font-medium text-blue-600">{part}</span>
+                    ) : (
+                      <span key={i}>{part}</span>
+                    )
+                  )}
+                </p>
               </div>
             ))}
           </div>
-          <div className="flex gap-2">
-            <input
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && commentText.trim()) {
-                  addComment(cardId, commentText.trim())
-                  setCommentText('')
-                }
-              }}
-              placeholder="Add a comment..."
-              className="flex-1 text-sm px-3 py-1.5 rounded-lg border border-gray-200 focus:border-blue-200 focus:outline-none placeholder-gray-500"
-            />
+          <CommentBox
+            commentText={commentText}
+            setCommentText={setCommentText}
+            addComment={addComment}
+            cardId={cardId}
+            card={card}
+            boardMembers={boardMembers}
+            notify={notify}
+            profile={profile}
+          />
+        </div>
+
+        {/* Attachments */}
+        <div className="px-5 pt-3 pb-3 border-t border-gray-100">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-2">
+              <Paperclip className="w-3.5 h-3.5" />
+              Attachments
+            </label>
             <button
               type="button"
-              onClick={() => {
-                if (commentText.trim()) {
-                  addComment(cardId, commentText.trim())
-                  setCommentText('')
-                }
-              }}
-              className="px-3 py-1.5 text-xs font-medium bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-1 text-[11px] font-medium text-blue-500 hover:text-blue-600 disabled:opacity-50"
             >
-              Send
+              <Upload className="w-3 h-3" />
+              {uploading ? 'Uploading...' : 'Add file'}
             </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                if (file.size > 10 * 1024 * 1024) {
+                  toast.error('File must be under 10 MB')
+                  return
+                }
+                setUploading(true)
+                await uploadAttachment(cardId, file)
+                setUploading(false)
+                e.target.value = ''
+              }}
+            />
           </div>
+          {(attachmentItems || []).length > 0 && (
+            <div className="space-y-1.5">
+              {(attachmentItems || []).map((att) => {
+                const isImage = att.content_type?.startsWith('image/')
+                const sizeStr = att.file_size < 1024
+                  ? `${att.file_size} B`
+                  : att.file_size < 1024 * 1024
+                    ? `${(att.file_size / 1024).toFixed(1)} KB`
+                    : `${(att.file_size / (1024 * 1024)).toFixed(1)} MB`
+
+                return (
+                  <div key={att.id} className="group flex items-center gap-2 py-1.5 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                      {isImage ? <Image className="w-3.5 h-3.5 text-blue-400" /> : <File className="w-3.5 h-3.5 text-gray-400" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-medium text-gray-700 truncate">{att.file_name}</p>
+                      <p className="text-[10px] text-gray-400">{sizeStr}</p>
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const url = await getAttachmentUrl(att.storage_path)
+                          if (url) window.open(url, '_blank')
+                        }}
+                        className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                        title="Download"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                      </button>
+                      {att.user_id === user?.id && (
+                        <button
+                          type="button"
+                          onClick={() => deleteAttachment(att.id, cardId, att.storage_path)}
+                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* Checklist */}
@@ -902,6 +1066,46 @@ export default function CardDetailPanel({ cardId, onClose }) {
             </button>
           </div>
         </div>
+
+        {/* Activity Log */}
+        {activityItems && activityItems.length > 0 && (
+          <div className="px-5 pt-3 pb-5 border-t border-gray-100">
+            <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <History className="w-3.5 h-3.5" />
+              Activity
+            </label>
+            <div className="space-y-2">
+              {activityItems.map((item) => (
+                <div key={item.id} className="flex items-start gap-2 text-[12px]">
+                  <div className="mt-0.5 shrink-0">
+                    {item.action === 'created' && <Plus className="w-3 h-3 text-green-500" />}
+                    {item.action === 'moved' && <ArrowRight className="w-3 h-3 text-blue-500" />}
+                    {item.action === 'completed' && <CircleCheck className="w-3 h-3 text-emerald-500" />}
+                    {item.action === 'reopened' && <CircleDot className="w-3 h-3 text-amber-500" />}
+                    {item.action.startsWith('updated_') && <PencilLine className="w-3 h-3 text-gray-400" />}
+                    {item.action === 'renamed' && <PencilLine className="w-3 h-3 text-gray-400" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-medium text-gray-700">{item.actor_name}</span>{' '}
+                    <span className="text-gray-500">
+                      {item.action === 'created' && 'created this task'}
+                      {item.action === 'moved' && `moved ${item.detail}`}
+                      {item.action === 'completed' && 'marked complete'}
+                      {item.action === 'reopened' && 'reopened'}
+                      {item.action === 'updated_priority' && `changed priority ${item.detail}`}
+                      {item.action === 'updated_assignee' && `reassigned ${item.detail}`}
+                      {item.action === 'updated_due_date' && `set due date to ${item.detail}`}
+                      {item.action === 'renamed' && `renamed ${item.detail}`}
+                    </span>
+                    <span className="text-gray-400 ml-1.5">
+                      {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

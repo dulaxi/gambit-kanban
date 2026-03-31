@@ -414,3 +414,155 @@ create policy "Users can delete own comments"
 alter table public.cards add column recurrence_interval int;
 alter table public.cards add column recurrence_unit text check (recurrence_unit in ('days', 'weeks', 'months'));
 alter table public.cards add column recurrence_next_due date;
+
+-- ============================================================
+-- 12. CARD ACTIVITY LOG
+-- ============================================================
+create table public.card_activity (
+  id uuid primary key default gen_random_uuid(),
+  card_id uuid not null references public.cards(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  actor_name text not null default '',
+  action text not null,
+  detail text,
+  created_at timestamptz default now()
+);
+
+create index idx_card_activity_card_id on public.card_activity(card_id);
+
+alter table public.card_activity enable row level security;
+
+create policy "Members can view card activity"
+  on public.card_activity for select
+  to authenticated
+  using (
+    card_id in (
+      select c.id from public.cards c
+      where c.board_id in (
+        select board_id from public.board_members where user_id = auth.uid()
+      )
+    )
+  );
+
+create policy "Members can create card activity"
+  on public.card_activity for insert
+  to authenticated
+  with check (
+    user_id = auth.uid()
+    and card_id in (
+      select c.id from public.cards c
+      where c.board_id in (
+        select board_id from public.board_members where user_id = auth.uid()
+      )
+    )
+  );
+
+-- ============================================================
+-- 13. CARD ATTACHMENTS
+-- ============================================================
+create table public.card_attachments (
+  id uuid primary key default gen_random_uuid(),
+  card_id uuid not null references public.cards(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  file_name text not null,
+  file_size bigint not null default 0,
+  content_type text not null default '',
+  storage_path text not null,
+  created_at timestamptz default now()
+);
+
+create index idx_card_attachments_card_id on public.card_attachments(card_id);
+
+alter table public.card_attachments enable row level security;
+
+create policy "Members can view attachments"
+  on public.card_attachments for select
+  to authenticated
+  using (
+    card_id in (
+      select c.id from public.cards c
+      where c.board_id in (
+        select board_id from public.board_members where user_id = auth.uid()
+      )
+    )
+  );
+
+create policy "Members can upload attachments"
+  on public.card_attachments for insert
+  to authenticated
+  with check (
+    user_id = auth.uid()
+    and card_id in (
+      select c.id from public.cards c
+      where c.board_id in (
+        select board_id from public.board_members where user_id = auth.uid()
+      )
+    )
+  );
+
+create policy "Users can delete own attachments"
+  on public.card_attachments for delete
+  to authenticated
+  using (user_id = auth.uid());
+
+-- Storage bucket for attachments (run manually if this errors —
+-- some Supabase versions need it via Dashboard > Storage > New Bucket)
+insert into storage.buckets (id, name, public)
+values ('attachments', 'attachments', false)
+on conflict do nothing;
+
+create policy "Authenticated users can upload attachments"
+  on storage.objects for insert
+  to authenticated
+  with check (bucket_id = 'attachments');
+
+create policy "Authenticated users can read attachments"
+  on storage.objects for select
+  to authenticated
+  using (bucket_id = 'attachments');
+
+create policy "Users can delete own attachments from storage"
+  on storage.objects for delete
+  to authenticated
+  using (bucket_id = 'attachments' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ============================================================
+-- 14. NOTIFICATIONS
+-- ============================================================
+create table public.notifications (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  type text not null,
+  title text not null,
+  body text,
+  card_id uuid references public.cards(id) on delete cascade,
+  board_id uuid references public.boards(id) on delete cascade,
+  actor_name text,
+  read boolean not null default false,
+  created_at timestamptz default now()
+);
+
+create index idx_notifications_user_id on public.notifications(user_id);
+create index idx_notifications_read on public.notifications(user_id, read);
+
+alter table public.notifications enable row level security;
+
+create policy "Users can view own notifications"
+  on public.notifications for select
+  to authenticated
+  using (user_id = auth.uid());
+
+create policy "Authenticated users can create notifications"
+  on public.notifications for insert
+  to authenticated
+  with check (true);
+
+create policy "Users can update own notifications"
+  on public.notifications for update
+  to authenticated
+  using (user_id = auth.uid());
+
+create policy "Users can delete own notifications"
+  on public.notifications for delete
+  to authenticated
+  using (user_id = auth.uid());
