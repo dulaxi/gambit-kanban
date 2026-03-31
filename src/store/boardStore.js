@@ -283,6 +283,14 @@ export const useBoardStore = create((set, get) => ({
     await supabase.from('columns').update({ title }).eq('id', columnId)
   },
 
+  updateColumnWipLimit: async (columnId, wipLimit) => {
+    const value = wipLimit || null
+    set((state) => ({
+      columns: { ...state.columns, [columnId]: { ...state.columns[columnId], wip_limit: value } },
+    }))
+    await supabase.from('columns').update({ wip_limit: value }).eq('id', columnId)
+  },
+
   deleteColumn: async (boardId, columnId) => {
     const state = get()
     const prevColumn = state.columns[columnId]

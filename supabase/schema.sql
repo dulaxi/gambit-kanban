@@ -571,3 +571,8 @@ create policy "Users can delete own notifications"
 -- 15. CARD ARCHIVING
 -- ============================================================
 alter table public.cards add column archived boolean not null default false;
+
+-- ============================================================
+-- 16. COLUMN WIP LIMITS
+-- ============================================================
+alter table public.columns add column wip_limit int;

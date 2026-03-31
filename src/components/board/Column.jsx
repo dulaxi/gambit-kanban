@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plus, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { Plus, MoreHorizontal, Pencil, Trash2, Gauge } from 'lucide-react'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useBoardStore } from '../../store/boardStore'
@@ -39,6 +39,8 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
   const [isRenaming, setIsRenaming] = useState(false)
   const [creating, setCreating] = useState(false)
   const [renameValue, setRenameValue] = useState(column.title)
+  const [editingWip, setEditingWip] = useState(false)
+  const [wipValue, setWipValue] = useState(column.wip_limit || '')
   const renameRef = useRef(null)
   const menuRef = useRef(null)
 
@@ -46,6 +48,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
   const addCard = useBoardStore((s) => s.addCard)
   const renameColumn = useBoardStore((s) => s.renameColumn)
   const deleteColumn = useBoardStore((s) => s.deleteColumn)
+  const updateColumnWipLimit = useBoardStore((s) => s.updateColumnWipLimit)
   const profile = useAuthStore((s) => s.profile)
 
   const { setNodeRef: setDroppableRef } = useDroppable({ id: column.id })
@@ -59,6 +62,8 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
   const filteredCards = sortCards(filterCards(columnCards, filters), sortBy)
 
   const cardIds = columnCards.map((c) => c.id)
+  const wipLimit = column.wip_limit
+  const overWip = wipLimit && columnCards.length > wipLimit
 
   useEffect(() => {
     if (isRenaming && renameRef.current) {
@@ -105,7 +110,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
   }
 
   return (
-    <div className="flex flex-col w-[calc(100vw-3.5rem)] sm:w-[260px] lg:w-[290px] shrink-0 snap-start">
+    <div className={`flex flex-col w-[calc(100vw-3.5rem)] sm:w-[260px] lg:w-[290px] shrink-0 snap-start ${overWip ? 'ring-2 ring-red-200 rounded-xl' : ''}`}>
       {/* Header */}
       <div className="flex items-center justify-between px-0.5 pb-3">
         <div className="flex items-baseline gap-2">
@@ -123,8 +128,8 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               {column.title}
             </h3>
           )}
-          <span className="text-xs text-gray-500">
-            {filteredCards.length}
+          <span className={`text-xs ${overWip ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+            {filteredCards.length}{wipLimit ? `/${wipLimit}` : ''}
           </span>
         </div>
         <div className="flex items-center">
@@ -156,6 +161,18 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   Rename
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    setEditingWip(true)
+                    setWipValue(column.wip_limit || '')
+                  }}
+                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                >
+                  <Gauge className="w-3.5 h-3.5" />
+                  WIP limit{wipLimit ? ` (${wipLimit})` : ''}
                 </button>
                 <button
                   type="button"
@@ -220,6 +237,51 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
           }}
           onCancel={() => setConfirmDelete(false)}
         />
+      )}
+
+      {editingWip && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={() => setEditingWip(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-xs mx-4 p-5" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-semibold text-gray-900 mb-1">WIP Limit</h3>
+            <p className="text-xs text-gray-500 mb-3">Maximum number of tasks in "{column.title}". Leave empty for no limit.</p>
+            <input
+              type="number"
+              min="0"
+              value={wipValue}
+              onChange={(e) => setWipValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  updateColumnWipLimit(column.id, parseInt(wipValue) || null)
+                  setEditingWip(false)
+                } else if (e.key === 'Escape') {
+                  setEditingWip(false)
+                }
+              }}
+              autoFocus
+              placeholder="No limit"
+              className="w-full text-sm rounded-xl px-3 py-2 border border-gray-200 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-100 mb-3"
+            />
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setEditingWip(false)}
+                className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  updateColumnWipLimit(column.id, parseInt(wipValue) || null)
+                  setEditingWip(false)
+                }}
+                className="px-3 py-1.5 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
