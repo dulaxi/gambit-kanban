@@ -1,5 +1,14 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
-import { ChevronDown, Plus, LayoutGrid, Layers, Users, Filter, X, Check, ArrowUpDown, Archive, ArchiveRestore, Trash2 } from 'lucide-react'
+import { ChevronDown, Plus, LayoutGrid, Layers, Users, Filter, X, Check, ArrowUpDown, Archive, ArchiveRestore, Trash2, Copy } from 'lucide-react'
+
+const BOARD_TEMPLATES = [
+  { name: 'Blank', icon: null, columns: ['To Do', 'In Progress', 'Review', 'Done'] },
+  { name: 'Bug Tracker', icon: 'Bug', columns: ['Triage', 'Investigating', 'Fix In Progress', 'Verified'] },
+  { name: 'Sprint Board', icon: 'Zap', columns: ['Backlog', 'Sprint', 'In Progress', 'Done'] },
+  { name: 'Content Pipeline', icon: 'PenTool', columns: ['Ideas', 'Drafting', 'Editing', 'Published'] },
+  { name: 'Hiring Pipeline', icon: 'UserPlus', columns: ['Applied', 'Phone Screen', 'Interview', 'Offer'] },
+  { name: 'Simple', icon: null, columns: ['To Do', 'Done'] },
+]
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import DynamicIcon from './DynamicIcon'
@@ -209,6 +218,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
   const [showFilters, setShowFilters] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
   const [savingBoard, setSavingBoard] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState(BOARD_TEMPLATES[0])
   const dropdownRef = useRef(null)
   const createInputRef = useRef(null)
 
@@ -296,10 +306,13 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
     const trimmed = newName.trim()
     if (!trimmed || savingBoard) return
     setSavingBoard(true)
-    await addBoard(trimmed, newIcon)
+    const icon = newIcon || selectedTemplate.icon
+    const cols = selectedTemplate.name === 'Blank' ? undefined : selectedTemplate.columns
+    await addBoard(trimmed, icon, cols)
     setSavingBoard(false)
     setNewName('')
     setNewIcon(null)
+    setSelectedTemplate(BOARD_TEMPLATES[0])
     setIsCreating(false)
     setShowIconPicker(false)
     setOpen(false)
@@ -422,6 +435,25 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
                           placeholder="Board name..."
                           className="flex-1 text-sm rounded-lg px-2 py-1.5 border border-gray-200 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-100"
                         />
+                      </div>
+                      <div className="flex items-center gap-1 flex-wrap">
+                        {BOARD_TEMPLATES.map((t) => (
+                          <button
+                            key={t.name}
+                            type="button"
+                            onClick={() => {
+                              setSelectedTemplate(t)
+                              if (t.icon && !newIcon) setNewIcon(t.icon)
+                            }}
+                            className={`px-2 py-0.5 text-[11px] rounded-md border transition-colors ${
+                              selectedTemplate.name === t.name
+                                ? 'bg-blue-50 border-blue-200 text-blue-600 font-medium'
+                                : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                            }`}
+                          >
+                            {t.name}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   ) : (

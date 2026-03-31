@@ -140,7 +140,7 @@ export const useBoardStore = create((set, get) => ({
     set({ activeBoardId: boardId })
   },
 
-  addBoard: async (name, icon) => {
+  addBoard: async (name, icon, customColumns) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
@@ -164,8 +164,8 @@ export const useBoardStore = create((set, get) => ({
 
     if (!board) return null
 
-    // Create default columns
-    const defaultColumns = ['To Do', 'In Progress', 'Review', 'Done']
+    // Create columns (custom or default)
+    const defaultColumns = customColumns || ['To Do', 'In Progress', 'Review', 'Done']
     const colInserts = defaultColumns.map((title, i) => ({
       board_id: board.id,
       title,
