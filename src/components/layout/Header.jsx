@@ -1,4 +1,4 @@
-import { Search, User, LogOut, Settings, LayoutGrid, Bell, AtSign, UserPlus, MessageSquare, ArrowRight } from 'lucide-react'
+import { Search, User, LogOut, Settings, LayoutGrid, Bell, AtSign, UserPlus, MessageSquare, ArrowRight, X } from 'lucide-react'
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
@@ -14,7 +14,9 @@ export default function Header({ title }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchFocused, setSearchFocused] = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
+  const mobileSearchRef = useRef(null)
   const menuRef = useRef(null)
   const searchRef = useRef(null)
   const notifRef = useRef(null)
@@ -118,8 +120,96 @@ export default function Header({ title }) {
     navigate('/')
   }
 
+  const closeMobileSearch = () => {
+    setMobileSearchOpen(false)
+    setSearchQuery('')
+    setSearchFocused(false)
+  }
+
+  // Auto-focus mobile search input when opened
+  useEffect(() => {
+    if (mobileSearchOpen && mobileSearchRef.current) {
+      mobileSearchRef.current.focus()
+    }
+  }, [mobileSearchOpen])
+
   return (
     <header className="relative h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6">
+      {/* Mobile search overlay */}
+      {!isDesktop && mobileSearchOpen ? (
+        <div className="absolute inset-0 bg-white flex items-center gap-2 px-4 z-40" ref={searchRef}>
+          <Search className="w-4 h-4 text-gray-500 shrink-0" />
+          <input
+            ref={mobileSearchRef}
+            type="text"
+            placeholder="Search tasks, notes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            className="flex-1 text-sm py-2 bg-transparent focus:outline-none placeholder-gray-400"
+          />
+          <button
+            type="button"
+            onClick={closeMobileSearch}
+            className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          {/* Mobile search results */}
+          {showDropdown && (
+            <div className="absolute left-0 right-0 top-full bg-white border-t border-gray-200 shadow-lg z-50 max-h-[70vh] overflow-y-auto">
+              {!hasResults && (
+                <p className="px-4 py-3 text-sm text-gray-500">No results found</p>
+              )}
+              {searchResults.cards.length > 0 && (
+                <div>
+                  <p className="px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">Tasks</p>
+                  {searchResults.cards.map((card) => (
+                    <button
+                      key={card.id}
+                      type="button"
+                      onClick={() => { handleCardResult(card); closeMobileSearch() }}
+                      className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="text-[11px] font-mono text-gray-500 shrink-0">#{card.task_number}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-gray-900 truncate">{card.title}</p>
+                        {boards[card.board_id] && (
+                          <p className="text-[11px] text-gray-500 truncate">{boards[card.board_id].name}</p>
+                        )}
+                      </div>
+                      {card.priority && (
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${
+                          card.priority === 'high' ? 'bg-rose-400' : card.priority === 'medium' ? 'bg-amber-400' : 'bg-emerald-400'
+                        }`} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {searchResults.notes.length > 0 && (
+                <div>
+                  <p className="px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">Notes</p>
+                  {searchResults.notes.map((note) => (
+                    <button
+                      key={note.id}
+                      type="button"
+                      onClick={() => { handleNoteResult(note); closeMobileSearch() }}
+                      className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-gray-900 truncate">{note.title}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
       {/* Left: grid button (mobile) + title (mobile) / title (desktop) */}
       <div className="flex items-center gap-2.5 min-w-0">
         {!isDesktop && (
@@ -137,6 +227,8 @@ export default function Header({ title }) {
           <span className="text-sm font-medium text-gray-600 truncate">{title}</span>
         )}
       </div>
+      </>
+      )}
 
       {/* Center: search (desktop only) */}
       {isDesktop && (
@@ -207,8 +299,19 @@ export default function Header({ title }) {
         </div>
       )}
 
-      {/* Right: notifications + avatar */}
-      <div className="flex items-center gap-2">
+      {/* Right: search (mobile) + notifications + avatar */}
+      <div className="flex items-center gap-1">
+        {/* Mobile search trigger */}
+        {!isDesktop && !mobileSearchOpen && (
+          <button
+            type="button"
+            onClick={() => setMobileSearchOpen(true)}
+            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          >
+            <Search className="w-[18px] h-[18px]" />
+          </button>
+        )}
+
         {/* Notification bell */}
         <div className="relative" ref={notifRef}>
           <button
