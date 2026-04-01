@@ -1,5 +1,5 @@
 import { Link, Navigate } from 'react-router-dom'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import '@fontsource/google-sans/latin-400.css'
 import '@fontsource/google-sans/latin-500.css'
 import '@fontsource/google-sans/latin-700.css'
@@ -356,47 +356,6 @@ export default function LandingPage() {
   const user = useAuthStore((s) => s.user)
   const loading = useAuthStore((s) => s.loading)
   const [visible, setVisible] = useState(false)
-  const pageRef = useRef(null)
-
-  // Create cursor circle via DOM + attach listeners
-  useEffect(() => {
-    // Cursor circle
-    const circle = document.createElement('div')
-    Object.assign(circle.style, {
-      position: 'fixed',
-      top: '0',
-      left: '0',
-      width: '32px',
-      height: '32px',
-      borderRadius: '50%',
-      backdropFilter: 'invert(1) contrast(2)',
-      WebkitBackdropFilter: 'invert(1) contrast(2)',
-      pointerEvents: 'none',
-      zIndex: '99999',
-      opacity: '0',
-      transform: 'translate3d(-100px, -100px, 0)',
-    })
-    document.body.appendChild(circle)
-
-    const handleMove = (e) => {
-      circle.style.transform = `translate3d(${e.clientX - 16}px, ${e.clientY - 16}px, 0)`
-      const hit = e.target.closest('a, button')
-      circle.style.opacity = hit ? '0' : '1'
-    }
-
-    const handleLeave = () => {
-      circle.style.opacity = '0'
-    }
-
-    window.addEventListener('mousemove', handleMove)
-    document.addEventListener('mouseleave', handleLeave)
-
-    return () => {
-      window.removeEventListener('mousemove', handleMove)
-      document.removeEventListener('mouseleave', handleLeave)
-      document.body.removeChild(circle)
-    }
-  }, [])
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 50)
@@ -416,7 +375,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div ref={pageRef} className={`landing-no-cursor min-h-screen bg-[#F2EDE8] transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`landing-font min-h-screen bg-[#F2EDE8] transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
 
       {/* ─── Nav ─── */}
       <nav className="sticky top-0 z-50 bg-[#F2EDE8]/80 backdrop-blur-xl border-b border-[#E0DBD5]/50">
@@ -544,8 +503,8 @@ export default function LandingPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
           {stats.map((s) => (
             <div key={s.label} className="text-center">
-              <div className="text-3xl sm:text-4xl font-extrabold text-[#8BA32E] tracking-tight font-heading">{s.value}</div>
-              <div className="text-xs text-[#8E8E89] font-medium mt-1 uppercase tracking-wider">{s.label}</div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-[#8BA32E] tracking-tight font-logo">{s.value}</div>
+              <div className="text-xs text-[#8E8E89] font-medium mt-1 uppercase tracking-wider font-logo">{s.label}</div>
             </div>
           ))}
         </div>
@@ -630,7 +589,7 @@ export default function LandingPage() {
             {tools.map((t) => (
               <div
                 key={t.title}
-                className="flex items-center gap-3 p-3 rounded-xl bg-[#F2EDE8] hover:bg-[#E8E2DB] transition-colors group cursor-default"
+                className="flex items-center gap-3 p-3 rounded-xl bg-[#F2EDE8] hover:bg-[#E8E2DB] transition-colors group"
               >
                 <div className="w-8 h-8 rounded-lg bg-[#C2D64A]/20 flex items-center justify-center shrink-0 transition-colors">
                   <t.icon className="w-4 h-4 text-[#1B1B18]" />

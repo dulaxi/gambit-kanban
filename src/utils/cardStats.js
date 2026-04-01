@@ -1,4 +1,4 @@
-import { isToday, isPast, parseISO } from 'date-fns'
+import { isToday, isPast, isYesterday, parseISO, startOfDay, subDays, format } from 'date-fns'
 
 export function computeTaskStats(cards, columns, displayName) {
   const allCards = Object.values(cards).filter(
@@ -21,14 +21,19 @@ export function computeTaskStats(cards, columns, displayName) {
   let overdue = 0
   let inProgress = 0
   let completed = 0
+  let completedYesterday = 0
   const dueTodayCards = []
   const overdueCards = []
+  const focusCards = []
 
   for (const card of allCards) {
     const isDone = doneColumnIds.has(card.column_id)
 
     if (isDone) {
       completed++
+      if (card.updated_at && isYesterday(parseISO(card.updated_at))) {
+        completedYesterday++
+      }
       continue
     }
 
@@ -41,14 +46,48 @@ export function computeTaskStats(cards, columns, displayName) {
       if (isToday(due)) {
         dueToday++
         dueTodayCards.push(card)
+        focusCards.push(card)
       } else if (isPast(due)) {
         overdue++
         overdueCards.push(card)
+        focusCards.push(card)
       }
     }
   }
 
-  return { dueToday, overdue, inProgress, completed, dueTodayCards, overdueCards }
+  // Sort focus: overdue first (oldest first), then due today by priority
+  const priorityWeight = { high: 0, medium: 1, low: 2 }
+  focusCards.sort((a, b) => {
+    const aOverdue = overdueCards.includes(a) ? 0 : 1
+    const bOverdue = overdueCards.includes(b) ? 0 : 1
+    if (aOverdue !== bOverdue) return aOverdue - bOverdue
+    return (priorityWeight[a.priority] ?? 1) - (priorityWeight[b.priority] ?? 1)
+  })
+
+  // Streak: count consecutive days (ending today or yesterday) that had completions
+  const allDone = Object.values(cards).filter(
+    (c) => !c.archived && doneColumnIds.has(c.column_id) && c.updated_at
+  )
+  const completionDays = new Set(
+    allDone.map((c) => format(parseISO(c.updated_at), 'yyyy-MM-dd'))
+  )
+  let streak = 0
+  const today = startOfDay(new Date())
+  for (let i = 0; i < 30; i++) {
+    const day = format(subDays(today, i), 'yyyy-MM-dd')
+    if (completionDays.has(day)) {
+      streak++
+    } else if (i === 0) {
+      continue // today hasn't ended yet, skip
+    } else {
+      break
+    }
+  }
+
+  return {
+    dueToday, overdue, inProgress, completed, completedYesterday,
+    dueTodayCards, overdueCards, focusCards, streak,
+  }
 }
 
 export function computeBoardSummaries(boards, columns, cards, displayName) {

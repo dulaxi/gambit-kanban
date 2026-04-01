@@ -44,25 +44,9 @@
   animation: dropdownIn 0.15s ease-out;
 }
 
-/* Landing page font + cursor */
-.landing-no-cursor {
+/* Landing page font */
+.landing-font {
   font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-}
-.landing-no-cursor,
-.landing-no-cursor * {
-  cursor: none !important;
-}
-
-/* Landing page: invert buttons on hover */
-.landing-no-cursor a,
-.landing-no-cursor button {
-  transition: filter 0.3s ease !important;
-}
-.landing-no-cursor a:hover,
-.landing-no-cursor button:hover {
-  filter: invert(1) contrast(2);
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
 }
 
 /* Text selection */
