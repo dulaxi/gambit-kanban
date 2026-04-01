@@ -186,7 +186,7 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
   if (!board) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center px-6">
-        <p className="text-sm text-gray-500">Select a board from the sidebar to get started</p>
+        <p className="text-sm text-[#8E8E89]">Select a board from the sidebar to get started</p>
       </div>
     )
   }
@@ -242,7 +242,7 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
         {/* Add section */}
         <div className="shrink-0 w-[calc(100vw-3.5rem)] sm:w-[260px] lg:w-[290px] snap-start">
           {isAddingColumn ? (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 space-y-2">
+            <div className="bg-white rounded-lg border border-[#E0DBD5] shadow-sm p-3 space-y-2">
               <input
                 ref={inputRef}
                 value={newColumnTitle}
@@ -250,14 +250,14 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
                 onKeyDown={handleKeyDown}
                 onBlur={handleAddColumn}
                 placeholder="Section name"
-                className="w-full text-[13px] px-0 py-0 border-none focus:outline-none focus:ring-0 placeholder-gray-400 bg-transparent"
+                className="w-full text-[13px] px-0 py-0 border-none focus:outline-none focus:ring-0 placeholder-[#C4BFB8] bg-transparent"
               />
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleAddColumn}
                   disabled={addingColumn}
-                  className="px-3 py-1.5 text-xs font-medium bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50"
+                  className="px-3 py-1.5 text-xs font-medium bg-[#C2D64A] text-white rounded-md hover:bg-[#A8BA32] transition-colors disabled:opacity-50"
                 >
                   {addingColumn ? 'Adding...' : 'Add section'}
                 </button>
@@ -267,7 +267,7 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
                     setNewColumnTitle('')
                     setIsAddingColumn(false)
                   }}
-                  className="p-1 rounded hover:bg-gray-100 text-gray-500"
+                  className="p-1 rounded hover:bg-[#E8E2DB] text-[#8E8E89]"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -277,7 +277,7 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
             <button
               type="button"
               onClick={() => setIsAddingColumn(true)}
-              className="flex items-center gap-2 w-full px-0.5 py-2 text-[13px] text-gray-500 hover:text-gray-600 transition-colors"
+              className="flex items-center gap-2 w-full px-0.5 py-2 text-[13px] text-[#8E8E89] hover:text-[#5C5C57] transition-colors"
             >
               <Plus className="w-4 h-4" />
               Add section

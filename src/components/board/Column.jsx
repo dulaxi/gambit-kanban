@@ -127,7 +127,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
   }
 
   return (
-    <div className={`flex flex-col w-[calc(100vw-3.5rem)] sm:w-[260px] lg:w-[290px] shrink-0 snap-start ${overWip ? 'bg-red-50/60 rounded-xl p-2 -m-2' : ''}`}>
+    <div className={`flex flex-col w-[calc(100vw-3.5rem)] sm:w-[260px] lg:w-[290px] shrink-0 snap-start ${overWip ? 'bg-[#E8E2DB] rounded-xl px-2.5 py-2' : ''}`}>
       {/* Header */}
       <div className="flex items-center justify-between px-0.5 pb-3">
         <div className="flex items-baseline gap-2">
@@ -138,14 +138,14 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               onChange={(e) => setRenameValue(e.target.value)}
               onKeyDown={handleRenameKeyDown}
               onBlur={handleRename}
-              className="text-sm font-semibold rounded px-1.5 py-0.5 flex-1 mr-2 border border-gray-300 focus:border-blue-400 focus:outline-none bg-white"
+              className="text-sm font-semibold rounded px-1.5 py-0.5 flex-1 mr-2 border border-[#E0DBD5] focus:border-[#C2D64A] focus:outline-none bg-white"
             />
           ) : (
-            <h3 className="text-sm font-semibold text-gray-800">
+            <h3 className="text-sm font-semibold text-[#1B1B18]">
               {column.title}
             </h3>
           )}
-          <span className={`text-xs ${overWip ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+          <span className={`text-xs ${overWip ? 'text-[#8B7355] font-medium' : 'text-[#8E8E89]'}`}>
             {filteredCards.length}{wipLimit ? `/${wipLimit}` : ''}
           </span>
         </div>
@@ -154,7 +154,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
             type="button"
             onClick={handleCreateCard}
             aria-label="Add task"
-            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-lg text-[#8E8E89] hover:text-[#5C5C57] hover:bg-[#E8E2DB] transition-colors"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -163,12 +163,12 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Column options"
-              className="p-1.5 rounded-lg text-gray-500 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="p-1.5 rounded-lg text-[#8E8E89] hover:text-[#5C5C57] hover:bg-[#E8E2DB] transition-colors"
             >
               <MoreHorizontal className="w-4 h-4" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-8 bg-white rounded-xl border border-gray-200 shadow-lg py-1 z-20 w-40 animate-dropdown">
+              <div className="absolute right-0 top-8 bg-white rounded-xl border border-[#E0DBD5] shadow-lg py-1 z-20 w-40 animate-dropdown">
                 <button
                   type="button"
                   onClick={() => {
@@ -176,7 +176,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
                     setIsRenaming(true)
                     setRenameValue(column.title)
                   }}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[#5C5C57] hover:bg-[#F2EDE8]"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   Rename
@@ -188,7 +188,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
                     setEditingWip(true)
                     setWipValue(column.wip_limit || '')
                   }}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[#5C5C57] hover:bg-[#F2EDE8]"
                 >
                   <Gauge className="w-3.5 h-3.5" />
                   WIP limit{wipLimit ? ` (${wipLimit})` : ''}
@@ -203,7 +203,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
                       deleteColumn(boardId, column.id)
                     }
                   }}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-red-600 hover:bg-gray-50"
+                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[#7A5C44] hover:bg-[#F2EDE8]"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete
@@ -235,7 +235,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
           <button
             type="button"
             onClick={() => setVisibleCount((c) => c + 20)}
-            className="w-full py-1.5 text-[12px] font-medium text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="w-full py-1.5 text-[12px] font-medium text-[#A8BA32] hover:text-[#A8BA32] hover:bg-[#EEF2D6] rounded-lg transition-colors"
           >
             Show {Math.min(filteredCards.length - visibleCount, 20)} more ({filteredCards.length - visibleCount} remaining)
           </button>
@@ -249,7 +249,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
             type="button"
             onClick={() => handleCreateCard()}
             disabled={creating}
-            className="flex items-center gap-1.5 text-[13px] text-gray-500 hover:text-gray-600 px-0.5 py-1.5 flex-1 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 text-[13px] text-[#8E8E89] hover:text-[#5C5C57] px-0.5 py-1.5 flex-1 transition-colors disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
             {creating ? 'Adding...' : 'Add task'}
@@ -258,7 +258,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
             <button
               type="button"
               onClick={() => setShowTemplates(!showTemplates)}
-              className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="p-1 rounded text-[#C4BFB8] hover:text-[#5C5C57] hover:bg-[#E8E2DB] transition-colors"
               title="From template"
             >
               <Bookmark className="w-3.5 h-3.5" />
@@ -266,10 +266,10 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
           )}
         </div>
         {showTemplates && (
-          <div className="absolute bottom-full mb-1 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-30 overflow-hidden">
-            <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-100">
-              <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Templates</span>
-              <button type="button" onClick={() => setShowTemplates(false)} className="text-gray-400 hover:text-gray-600">
+          <div className="absolute bottom-full mb-1 left-0 right-0 bg-white border border-[#E0DBD5] rounded-xl shadow-lg z-30 overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#E8E2DB]">
+              <span className="text-[10px] font-semibold text-[#8E8E89] uppercase tracking-wider">Templates</span>
+              <button type="button" onClick={() => setShowTemplates(false)} className="text-[#C4BFB8] hover:text-[#5C5C57]">
                 <X className="w-3 h-3" />
               </button>
             </div>
@@ -279,14 +279,14 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
                   <button
                     type="button"
                     onClick={() => handleCreateCard(t)}
-                    className="flex-1 text-left px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 truncate transition-colors"
+                    className="flex-1 text-left px-3 py-1.5 text-sm text-[#5C5C57] hover:bg-[#F2EDE8] truncate transition-colors"
                   >
                     {t.name}
                   </button>
                   <button
                     type="button"
                     onClick={() => deleteTemplate(t.id)}
-                    className="p-1 mr-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                    className="p-1 mr-1 text-[#C4BFB8] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 transition-all"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -312,8 +312,8 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
       {editingWip && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={() => setEditingWip(false)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-xs mx-4 p-5" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold text-gray-900 mb-1">WIP Limit</h3>
-            <p className="text-xs text-gray-500 mb-3">Maximum number of tasks in "{column.title}". Leave empty for no limit.</p>
+            <h3 className="text-sm font-semibold text-[#1B1B18] mb-1">WIP Limit</h3>
+            <p className="text-xs text-[#8E8E89] mb-3">Maximum number of tasks in "{column.title}". Leave empty for no limit.</p>
             <input
               type="number"
               min="0"
@@ -329,13 +329,13 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               }}
               autoFocus
               placeholder="No limit"
-              className="w-full text-sm rounded-xl px-3 py-2 border border-gray-200 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-100 mb-3"
+              className="w-full text-sm rounded-xl px-3 py-2 border border-[#E0DBD5] focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6] mb-3"
             />
             <div className="flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setEditingWip(false)}
-                className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-3 py-1.5 text-sm font-medium text-[#5C5C57] hover:bg-[#E8E2DB] rounded-lg transition-colors"
               >
                 Cancel
               </button>
@@ -345,7 +345,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
                   updateColumnWipLimit(column.id, parseInt(wipValue) || null)
                   setEditingWip(false)
                 }}
-                className="px-3 py-1.5 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+                className="px-3 py-1.5 text-sm font-medium text-white bg-[#C2D64A] hover:bg-[#A8BA32] rounded-lg transition-colors"
               >
                 Save
               </button>

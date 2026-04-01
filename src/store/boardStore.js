@@ -31,7 +31,7 @@ function undoableDelete(message) {
         if (c.textContent.includes(message) && !c.querySelector(`[data-undo-id]`)) {
           const btn = document.createElement('button')
           btn.setAttribute('data-undo-id', id)
-          btn.style.cssText = 'color:#60a5fa;font-weight:600;font-size:13px;background:none;border:none;cursor:pointer;margin-left:8px;white-space:nowrap'
+          btn.style.cssText = 'color:#C2D64A;font-weight:600;font-size:13px;background:none;border:none;cursor:pointer;margin-left:8px;white-space:nowrap'
           btn.textContent = 'Undo'
           c.style.display = 'flex'
           c.style.alignItems = 'center'

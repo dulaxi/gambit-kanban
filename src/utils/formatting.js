@@ -1,27 +1,27 @@
 export const LABEL_BG = {
-  red: 'bg-[#FFE0DB] text-[#CF222E]',
-  blue: 'bg-[#DAF0FF] text-[#3094FF]',
-  green: 'bg-[#D1FDE0] text-[#08872B]',
-  yellow: 'bg-[#FFF4D4] text-[#9A6700]',
-  purple: 'bg-[#EDD8FD] text-[#8534F3]',
-  pink: 'bg-[#FFD6EA] text-[#BF3989]',
-  gray: 'bg-[#E4EBE6] text-[#909692]',
+  red: 'bg-[#F2D9C7] text-[#8B5A33]',
+  blue: 'bg-[#DAE0F0] text-[#4A5578]',
+  green: 'bg-[#EEF2D6] text-[#6B7A12]',
+  yellow: 'bg-[#F5EDCF] text-[#8B7322]',
+  purple: 'bg-[#E8DDE2] text-[#6E5A65]',
+  pink: 'bg-[#F0E0D2] text-[#7A5C44]',
+  gray: 'bg-[#E8E2DB] text-[#5C5C57]',
 }
 
 export const PRIORITY_DOT = {
-  low: 'bg-emerald-400',
-  medium: 'bg-amber-400',
-  high: 'bg-rose-400',
+  low: 'bg-[#A8BA32]',
+  medium: 'bg-[#D4A843]',
+  high: 'bg-[#C27A4A]',
 }
 
 export const AVATAR_COLORS = [
-  'bg-blue-200',
-  'bg-emerald-200',
-  'bg-purple-200',
-  'bg-pink-200',
-  'bg-amber-200',
-  'bg-rose-200',
-  'bg-teal-200',
+  'bg-[#E8E2DB]',
+  'bg-[#EEF2D6]',
+  'bg-[#E8DDE2]',
+  'bg-[#F2D9C7]',
+  'bg-[#F5EDCF]',
+  'bg-[#DAE0F0]',
+  'bg-[#D6E8E0]',
 ]
 
 export function getAvatarColor(name) {

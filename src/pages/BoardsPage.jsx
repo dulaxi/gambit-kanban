@@ -80,7 +80,7 @@ export default function BoardsPage() {
             sortBy={sortBy}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
+          <div className="flex items-center justify-center h-full text-[#8E8E89]">
             Create a board to get started
           </div>
         )}

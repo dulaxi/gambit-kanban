@@ -42,13 +42,13 @@ export default function Card({ card, onClick, onComplete, isSelected, iconOverri
       style={font === 'sf-mono' ? { fontFamily: "'SF Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace" } : undefined}
       className={`w-full rounded-xl border shadow-sm transition-all text-left cursor-pointer flex ${
         isSelected
-          ? 'bg-blue-50/60 border-blue-100'
-          : 'bg-white border-gray-200 hover:shadow-md'
+          ? 'bg-[#EEF2D6]/60 border-[#EEF2D6]'
+          : 'bg-white border-[#E0DBD5] hover:shadow-md'
       }`}
     >
       {/* Icon — left center */}
       <div className="flex items-center pl-3 shrink-0">
-        <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500">
+        <div className="w-7 h-7 rounded-lg bg-[#E8E2DB] flex items-center justify-center text-[#8E8E89]">
           {displayIcon ? (
             <DynamicIcon name={displayIcon} className="w-4 h-4" />
           ) : (
@@ -85,20 +85,20 @@ export default function Card({ card, onClick, onComplete, isSelected, iconOverri
             }}
             className="shrink-0"
           >
-            <CheckCircle2 className={`w-4 h-4 transition-colors ${completed ? 'text-emerald-400' : 'text-gray-500 hover:text-emerald-300'}`} />
+            <CheckCircle2 className={`w-4 h-4 transition-colors ${completed ? 'text-[#A8BA32]' : 'text-[#8E8E89] hover:text-[#C2D64A]'}`} />
           </button>
           {taskNumber && (
-            <span className="text-[11px] font-medium text-gray-600">Task #{taskNumber}</span>
+            <span className="text-[11px] font-medium text-[#5C5C57]">Task #{taskNumber}</span>
           )}
           <span className={`w-2 h-2 rounded-full ${priDot}`} title={priority} />
         </div>
-        <p className={`text-[13px] font-medium leading-snug ${completed ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
+        <p className={`text-[13px] font-medium leading-snug ${completed ? 'text-[#8E8E89] line-through' : 'text-[#1B1B18]'}`}>
           {title}
         </p>
 
         {/* Description preview */}
         {hasDescription && (
-          <p className="text-[12px] text-gray-500 leading-relaxed mt-1 line-clamp-2">
+          <p className="text-[12px] text-[#8E8E89] leading-relaxed mt-1 line-clamp-2">
             {description}
           </p>
         )}
@@ -110,12 +110,12 @@ export default function Card({ card, onClick, onComplete, isSelected, iconOverri
               <span
                 className={`text-[10px] font-medium flex items-center gap-1 px-2 py-0.5 rounded-full ${
                   isYesterday(dueDateObj) || (isPast(dueDateObj) && !isToday(dueDateObj))
-                    ? 'bg-rose-100 text-rose-500'
+                    ? 'bg-[#F2D9C7] text-[#C27A4A]'
                     : isToday(dueDateObj)
-                    ? 'bg-amber-100 text-amber-600'
+                    ? 'bg-[#F5EDCF] text-[#D4A843]'
                     : isTomorrow(dueDateObj)
-                    ? 'bg-blue-100 text-blue-500'
-                    : 'bg-emerald-100 text-emerald-500'
+                    ? 'bg-[#EEF2D6] text-[#A8BA32]'
+                    : 'bg-[#EEF2D6] text-[#A8BA32]'
                 }`}
               >
                 <Calendar className="w-3 h-3" />
@@ -132,8 +132,8 @@ export default function Card({ card, onClick, onComplete, isSelected, iconOverri
                 }}
                 className={`text-[10px] font-medium flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors ${
                   checkedCount === totalCount
-                    ? 'bg-emerald-100 text-emerald-500'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    ? 'bg-[#EEF2D6] text-[#A8BA32]'
+                    : 'bg-[#E8E2DB] text-[#8E8E89] hover:bg-[#E0DBD5]'
                 }`}
               >
                 <CheckSquare className="w-3 h-3" />
@@ -142,7 +142,7 @@ export default function Card({ card, onClick, onComplete, isSelected, iconOverri
             )}
 
             {hasDescription && (
-              <span className="text-[10px] text-gray-500 flex items-center">
+              <span className="text-[10px] text-[#8E8E89] flex items-center">
                 <AlignLeft className="w-3 h-3" />
               </span>
             )}
@@ -151,7 +151,7 @@ export default function Card({ card, onClick, onComplete, isSelected, iconOverri
           {/* Assignee avatar — bottom right */}
           {hasAssignee && (() => {
             const isMe = profile?.display_name && assignee.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
-            const iconText = profile.color === 'bg-[#A0A0A0]' ? 'text-gray-900' : 'text-white'
+            const iconText = profile.color === 'bg-[#8E8E89]' ? 'text-[#1B1B18]' : 'text-white'
             return isMe && profile.icon ? (
               <span
                 className={`w-6 h-6 rounded-full shrink-0 flex items-center justify-center ${iconText} ${profile.color}`}
@@ -172,11 +172,11 @@ export default function Card({ card, onClick, onComplete, isSelected, iconOverri
 
         {/* Expandable checklist */}
         {hasChecklist && checklistOpen && (
-          <div className="mt-2 pt-2 border-t border-gray-100" onClick={(e) => e.stopPropagation()}>
+          <div className="mt-2 pt-2 border-t border-[#E8E2DB]" onClick={(e) => e.stopPropagation()}>
             {/* Progress bar */}
-            <div className="w-full bg-gray-100 rounded-full h-1 mb-2">
+            <div className="w-full bg-[#E8E2DB] rounded-full h-1 mb-2">
               <div
-                className={`h-1 rounded-full transition-all ${checkedCount === totalCount ? 'bg-emerald-400' : 'bg-blue-400'}`}
+                className={`h-1 rounded-full transition-all ${checkedCount === totalCount ? 'bg-[#A8BA32]' : 'bg-[#C2D64A]'}`}
                 style={{ width: `${(checkedCount / totalCount) * 100}%` }}
               />
             </div>
@@ -187,9 +187,9 @@ export default function Card({ card, onClick, onComplete, isSelected, iconOverri
                     type="checkbox"
                     checked={item.done}
                     onChange={() => toggleCheckItem(idx)}
-                    className="w-3.5 h-3.5 rounded border-gray-300 text-blue-400 focus:ring-blue-300"
+                    className="w-3.5 h-3.5 rounded border-[#E0DBD5] text-[#C2D64A] focus:ring-[#EEF2D6]"
                   />
-                  <span className={`text-[12px] leading-snug ${item.done ? 'line-through text-gray-500' : 'text-gray-600'}`}>
+                  <span className={`text-[12px] leading-snug ${item.done ? 'line-through text-[#8E8E89]' : 'text-[#5C5C57]'}`}>
                     {item.text}
                   </span>
                 </label>

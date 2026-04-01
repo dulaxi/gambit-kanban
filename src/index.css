@@ -2,16 +2,30 @@
 
 @theme {
   --font-sans: 'Mona Sans Variable', 'Mona Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --color-primary-50: #e0f2fe;
-  --color-primary-100: #bae6fd;
-  --color-primary-200: #7dd3fc;
-  --color-primary-300: #38bdf8;
-  --color-primary-400: #0ea5e9;
-  --color-primary-500: #06b6d4;
-  --color-primary-600: #0891b2;
-  --color-primary-700: #0e7490;
-  --color-primary-800: #155e75;
-  --color-primary-900: #164e63;
+  --font-heading: 'Spectral', Georgia, serif;
+
+  /* Phosphor palette */
+  --color-cream: #F2EDE8;
+  --color-cream-dark: #E8E2DB;
+  --color-sand: #E0DBD5;
+  --color-ink: #1B1B18;
+  --color-charcoal: #5C5C57;
+  --color-stone: #8E8E89;
+  --color-mist: #C4BFB8;
+  --color-lime: #C2D64A;
+  --color-lime-dark: #A8BA32;
+  --color-lime-wash: #EEF2D6;
+  --color-copper: #C27A4A;
+  --color-copper-wash: #F2D9C7;
+  --color-honey: #D4A843;
+  --color-honey-wash: #F5EDCF;
+  --color-walnut: #8B7355;
+  --color-bark: #7A5C44;
+  --color-bark-wash: #F0E0D2;
+  --color-olive: #A8BA32;
+  --color-mauve: #A8969E;
+  --color-mauve-wash: #E8DDE2;
+
   --animate-fadeIn: fadeIn 1s ease forwards;
 }
 

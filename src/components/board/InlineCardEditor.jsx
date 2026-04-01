@@ -9,29 +9,29 @@ import IconPicker from './IconPicker'
 const LABEL_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'pink', 'gray']
 
 const LABEL_COLOR_CLASSES = {
-  red: 'bg-[#FFE0DB] text-[#CF222E]',
-  blue: 'bg-[#DAF0FF] text-[#3094FF]',
-  green: 'bg-[#D1FDE0] text-[#08872B]',
-  yellow: 'bg-[#FFF4D4] text-[#9A6700]',
-  purple: 'bg-[#EDD8FD] text-[#8534F3]',
-  pink: 'bg-[#FFD6EA] text-[#BF3989]',
-  gray: 'bg-[#E4EBE6] text-[#909692]',
+  red: 'bg-[#F2D9C7] text-[#8B5A33]',
+  blue: 'bg-[#DAE0F0] text-[#4A5578]',
+  green: 'bg-[#EEF2D6] text-[#6B7A12]',
+  yellow: 'bg-[#F5EDCF] text-[#8B7322]',
+  purple: 'bg-[#E8DDE2] text-[#6E5A65]',
+  pink: 'bg-[#F0E0D2] text-[#7A5C44]',
+  gray: 'bg-[#E8E2DB] text-[#5C5C57]',
 }
 
 const COLOR_DOT_CLASSES = {
-  red: 'bg-[#CF222E]',
-  blue: 'bg-[#3094FF]',
-  green: 'bg-[#08872B]',
-  yellow: 'bg-[#9A6700]',
-  purple: 'bg-[#8534F3]',
-  pink: 'bg-[#BF3989]',
-  gray: 'bg-[#909692]',
+  red: 'bg-[#8B5A33]',
+  blue: 'bg-[#4A5578]',
+  green: 'bg-[#6B7A12]',
+  yellow: 'bg-[#8B7322]',
+  purple: 'bg-[#6E5A65]',
+  pink: 'bg-[#7A5C44]',
+  gray: 'bg-[#5C5C57]',
 }
 
 const PRIORITY_OPTIONS = [
-  { value: 'low', label: 'Low', dot: 'bg-emerald-400' },
-  { value: 'medium', label: 'Medium', dot: 'bg-amber-400' },
-  { value: 'high', label: 'High', dot: 'bg-rose-400' },
+  { value: 'low', label: 'Low', dot: 'bg-[#A8BA32]' },
+  { value: 'medium', label: 'Medium', dot: 'bg-[#D4A843]' },
+  { value: 'high', label: 'High', dot: 'bg-[#C27A4A]' },
 ]
 
 export default function InlineCardEditor({ cardId, onDone }) {
@@ -114,14 +114,14 @@ export default function InlineCardEditor({ cardId, onDone }) {
   const currentPriority = PRIORITY_OPTIONS.find((p) => p.value === priority) || PRIORITY_OPTIONS[1]
 
   return (
-    <div className="rounded-xl border border-blue-200 bg-white shadow-md p-3 space-y-2.5">
+    <div className="rounded-xl border border-[#C2D64A] bg-white shadow-md p-3 space-y-2.5">
       {/* Icon + Task number */}
       <div className="flex items-center gap-2">
         <div className="relative">
           <button
             type="button"
             onClick={() => setShowIconPicker(!showIconPicker)}
-            className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"
+            className="w-7 h-7 rounded-lg bg-[#E8E2DB] flex items-center justify-center text-[#8E8E89] hover:bg-[#E0DBD5] transition-colors"
           >
             {card.icon ? (
               <DynamicIcon name={card.icon} className="w-4 h-4" />
@@ -138,7 +138,7 @@ export default function InlineCardEditor({ cardId, onDone }) {
           )}
         </div>
         {card.task_number > 0 && (
-          <span className="text-[11px] font-medium text-gray-600">Task #{card.task_number}</span>
+          <span className="text-[11px] font-medium text-[#5C5C57]">Task #{card.task_number}</span>
         )}
       </div>
 
@@ -149,7 +149,7 @@ export default function InlineCardEditor({ cardId, onDone }) {
         onChange={(e) => setTitle(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Task name..."
-        className="w-full text-[13px] font-medium text-gray-900 bg-transparent border-none focus:outline-none placeholder-gray-500"
+        className="w-full text-[13px] font-medium text-[#1B1B18] bg-transparent border-none focus:outline-none placeholder-[#8E8E89]"
       />
 
       {/* Quick fields row */}
@@ -159,20 +159,20 @@ export default function InlineCardEditor({ cardId, onDone }) {
           <button
             type="button"
             onClick={() => setShowPriority(!showPriority)}
-            className="flex items-center gap-1 text-[11px] text-gray-600 hover:bg-gray-100 px-1.5 py-1 rounded-lg transition-colors"
+            className="flex items-center gap-1 text-[11px] text-[#5C5C57] hover:bg-[#E8E2DB] px-1.5 py-1 rounded-lg transition-colors"
           >
             <span className={`w-2 h-2 rounded-full ${currentPriority.dot}`} />
             {currentPriority.label}
           </button>
           {showPriority && (
-            <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-10 w-28">
+            <div className="absolute left-0 top-full mt-1 bg-white border border-[#E0DBD5] rounded-xl shadow-lg py-1 z-10 w-28">
               {PRIORITY_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
                   onClick={() => { setPriority(opt.value); setShowPriority(false) }}
                   className={`flex items-center gap-2 w-full px-2.5 py-1 text-[11px] transition-colors ${
-                    priority === opt.value ? 'bg-gray-50 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50'
+                    priority === opt.value ? 'bg-[#F2EDE8] font-medium text-[#1B1B18]' : 'text-[#5C5C57] hover:bg-[#F2EDE8]'
                   }`}
                 >
                   <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
@@ -185,23 +185,23 @@ export default function InlineCardEditor({ cardId, onDone }) {
 
         {/* Assignee */}
         <div className="flex items-center gap-1">
-          <User className="w-3 h-3 text-gray-500" />
+          <User className="w-3 h-3 text-[#8E8E89]" />
           <input
             value={assignee}
             onChange={(e) => setAssignee(e.target.value)}
             placeholder="Assignee"
-            className="text-[11px] text-gray-600 bg-transparent border-none focus:outline-none placeholder-gray-500 w-16"
+            className="text-[11px] text-[#5C5C57] bg-transparent border-none focus:outline-none placeholder-[#8E8E89] w-16"
           />
         </div>
 
         {/* Due date */}
         <div className="flex items-center gap-1">
-          <Calendar className="w-3 h-3 text-gray-500" />
+          <Calendar className="w-3 h-3 text-[#8E8E89]" />
           <input
             type="date"
             value={dueDate ? dueDate.split('T')[0] : ''}
             onChange={(e) => setDueDate(e.target.value ? `${e.target.value}T23:59:59` : '')}
-            className="text-[11px] text-gray-600 bg-transparent border-none focus:outline-none"
+            className="text-[11px] text-[#5C5C57] bg-transparent border-none focus:outline-none"
           />
         </div>
       </div>
@@ -226,7 +226,7 @@ export default function InlineCardEditor({ cardId, onDone }) {
               onKeyDown={(e) => e.key === 'Enter' && addLabel()}
               placeholder="Label..."
               autoFocus
-              className="text-[11px] w-16 px-1.5 py-0.5 border border-gray-200 rounded-lg focus:border-blue-200 focus:outline-none"
+              className="text-[11px] w-16 px-1.5 py-0.5 border border-[#E0DBD5] rounded-lg focus:border-[#C2D64A] focus:outline-none"
             />
             <div className="flex gap-0.5">
               {LABEL_COLORS.map((c) => (
@@ -234,14 +234,14 @@ export default function InlineCardEditor({ cardId, onDone }) {
                   key={c}
                   type="button"
                   onClick={() => setNewLabelColor(c)}
-                  className={`w-3 h-3 rounded-full ${COLOR_DOT_CLASSES[c]} ${newLabelColor === c ? 'ring-1 ring-offset-1 ring-gray-400' : ''}`}
+                  className={`w-3 h-3 rounded-full ${COLOR_DOT_CLASSES[c]} ${newLabelColor === c ? 'ring-1 ring-offset-1 ring-[#C4BFB8]' : ''}`}
                 />
               ))}
             </div>
-            <button type="button" onClick={addLabel} className="text-gray-500 hover:text-gray-600">
+            <button type="button" onClick={addLabel} className="text-[#8E8E89] hover:text-[#5C5C57]">
               <Check className="w-3 h-3" />
             </button>
-            <button type="button" onClick={() => { setShowLabelForm(false); setNewLabelText('') }} className="text-gray-500 hover:text-gray-600">
+            <button type="button" onClick={() => { setShowLabelForm(false); setNewLabelText('') }} className="text-[#8E8E89] hover:text-[#5C5C57]">
               <X className="w-3 h-3" />
             </button>
           </div>
@@ -249,7 +249,7 @@ export default function InlineCardEditor({ cardId, onDone }) {
           <button
             type="button"
             onClick={() => setShowLabelForm(true)}
-            className="text-gray-500 hover:text-gray-600"
+            className="text-[#8E8E89] hover:text-[#5C5C57]"
           >
             <Tag className="w-3 h-3" />
           </button>
@@ -262,13 +262,13 @@ export default function InlineCardEditor({ cardId, onDone }) {
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Add description..."
         rows={2}
-        className="w-full text-[11px] text-gray-600 bg-gray-50 rounded-lg border border-gray-100 focus:border-blue-200 focus:outline-none px-2 py-1.5 resize-none placeholder-gray-500"
+        className="w-full text-[11px] text-[#5C5C57] bg-[#F2EDE8] rounded-lg border border-[#E8E2DB] focus:border-[#C2D64A] focus:outline-none px-2 py-1.5 resize-none placeholder-[#8E8E89]"
       />
 
       {/* Checklist */}
       <div className="space-y-1">
         {checklist.length > 0 && (
-          <div className="flex items-center gap-1 text-[10px] text-gray-500 font-medium">
+          <div className="flex items-center gap-1 text-[10px] text-[#8E8E89] font-medium">
             <ListChecks className="w-3 h-3" />
             <span>{checklist.filter((i) => i.done).length}/{checklist.length}</span>
           </div>
@@ -283,25 +283,25 @@ export default function InlineCardEditor({ cardId, onDone }) {
                 setChecklist(updated)
               }}
               className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                item.done ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 hover:border-gray-400'
+                item.done ? 'bg-[#C2D64A] border-[#C2D64A] text-white' : 'border-[#E0DBD5] hover:border-[#C4BFB8]'
               }`}
             >
               {item.done && <Check className="w-2.5 h-2.5" />}
             </button>
-            <span className={`text-[11px] flex-1 ${item.done ? 'line-through text-gray-500' : 'text-gray-600'}`}>
+            <span className={`text-[11px] flex-1 ${item.done ? 'line-through text-[#8E8E89]' : 'text-[#5C5C57]'}`}>
               {item.text}
             </span>
             <button
               type="button"
               onClick={() => setChecklist(checklist.filter((_, i) => i !== idx))}
-              className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-all"
+              className="opacity-0 group-hover:opacity-100 text-[#8E8E89] hover:text-[#7A5C44] transition-all"
             >
               <Trash2 className="w-3 h-3" />
             </button>
           </div>
         ))}
         <div className="flex items-center gap-1.5">
-          <Plus className="w-3 h-3 text-gray-500 shrink-0" />
+          <Plus className="w-3 h-3 text-[#8E8E89] shrink-0" />
           <input
             value={newCheckItem}
             onChange={(e) => setNewCheckItem(e.target.value)}
@@ -317,24 +317,24 @@ export default function InlineCardEditor({ cardId, onDone }) {
               }
             }}
             placeholder="Add checklist item..."
-            className="text-[11px] text-gray-600 bg-transparent border-none focus:outline-none placeholder-gray-500 flex-1"
+            className="text-[11px] text-[#5C5C57] bg-transparent border-none focus:outline-none placeholder-[#8E8E89] flex-1"
           />
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-gray-100">
+      <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-[#E8E2DB]">
         <button
           type="button"
           onClick={() => { deleteCard(cardId); onDone() }}
-          className="text-[11px] text-gray-500 hover:text-red-500 px-2 py-1 rounded-lg transition-colors"
+          className="text-[11px] text-[#8E8E89] hover:text-[#7A5C44] px-2 py-1 rounded-lg transition-colors"
         >
           Discard
         </button>
         <button
           type="button"
           onClick={handleSave}
-          className="text-[11px] font-medium text-white bg-gray-800 hover:bg-gray-900 px-3 py-1 rounded-lg transition-colors"
+          className="text-[11px] font-medium text-white bg-[#1B1B18] hover:bg-[#1B1B18] px-3 py-1 rounded-lg transition-colors"
         >
           Save
         </button>

@@ -23,17 +23,17 @@ export default function ConfirmModal({ title, message, confirmLabel = 'Delete', 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-5 h-5 text-red-500" />
+          <div className="w-9 h-9 rounded-full bg-[#F0E0D2] flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-5 h-5 text-[#7A5C44]" />
           </div>
-          <h3 id="confirm-title" className="text-sm font-semibold text-gray-900">{title}</h3>
+          <h3 id="confirm-title" className="text-sm font-semibold text-[#1B1B18]">{title}</h3>
         </div>
-        <p id="confirm-message" className="text-sm text-gray-600 mb-5 ml-12">{message}</p>
+        <p id="confirm-message" className="text-sm text-[#5C5C57] mb-5 ml-12">{message}</p>
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-[#5C5C57] hover:bg-[#E8E2DB] rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -41,7 +41,7 @@ export default function ConfirmModal({ title, message, confirmLabel = 'Delete', 
             ref={confirmRef}
             type="button"
             onClick={onConfirm}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-white bg-[#7A5C44] hover:bg-[#6B4D38] rounded-lg transition-colors"
           >
             {confirmLabel}
           </button>

@@ -25,7 +25,7 @@ export default function OfflineBanner() {
   if (online) return null
 
   return (
-    <div className="bg-amber-500 text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium">
+    <div className="bg-[#D4A843] text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium">
       <WifiOff className="w-4 h-4 shrink-0" />
       You're offline — changes may not be saved
     </div>

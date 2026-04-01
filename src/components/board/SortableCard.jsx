@@ -30,7 +30,7 @@ export default function SortableCard({ card, onClick, onComplete, isSelected }) 
           ref={setActivatorNodeRef}
           {...attributes}
           {...listeners}
-          className="flex items-center px-1 text-gray-300 active:text-gray-500 touch-none"
+          className="flex items-center px-1 text-[#E0DBD5] active:text-[#8E8E89] touch-none"
         >
           <GripVertical className="w-4 h-4" />
         </div>

@@ -67,7 +67,7 @@ function CommentBox({ commentText, setCommentText, addComment, cardId, card, boa
       <button
         type="button"
         onClick={handleSubmit}
-        className="px-3 py-1.5 text-xs font-medium bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
+        className="px-3 py-1.5 text-xs font-medium bg-[#1B1B18] text-white rounded-lg hover:bg-[#333] transition-colors"
       >
         Send
       </button>
@@ -90,9 +90,9 @@ const COLOR_DOT_CLASSES = {
 }
 
 const PRIORITY_OPTIONS = [
-  { value: 'low', label: 'Low', dot: 'bg-emerald-200' },
-  { value: 'medium', label: 'Medium', dot: 'bg-amber-200' },
-  { value: 'high', label: 'High', dot: 'bg-rose-200' },
+  { value: 'low', label: 'Low', dot: 'bg-[#EEF2D6]' },
+  { value: 'medium', label: 'Medium', dot: 'bg-[#F5EDCF]' },
+  { value: 'high', label: 'High', dot: 'bg-[#F2D9C7]' },
 ]
 
 export default function CardDetailPanel({ cardId, onClose }) {
@@ -187,7 +187,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
               setBoardMembers(data.map((m) => ({
                 user_id: m.profiles?.id || m.user_id,
                 display_name: m.profiles?.display_name || 'Unknown',
-                color: m.profiles?.color || 'bg-gray-300',
+                color: m.profiles?.color || 'bg-[#E0DBD5]',
               })))
             }
           })
@@ -338,7 +338,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
   const renderAvatar = (name, size = 'w-6 h-6', iconSize = 'w-3.5 h-3.5') => {
     const isMe = profile?.display_name && name.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
     if (isMe && profile.icon) {
-      const iconText = profile.color === 'bg-[#A0A0A0]' ? 'text-gray-900' : 'text-white'
+      const iconText = profile.color === 'bg-[#8E8E89]' ? 'text-[#1B1B18]' : 'text-white'
       return (
         <span className={`${size} rounded-full shrink-0 flex items-center justify-center ${iconText} ${profile.color}`}>
           <DynamicIcon name={profile.icon} className={iconSize} />
@@ -388,27 +388,27 @@ export default function CardDetailPanel({ cardId, onClose }) {
   }
 
   return (
-    <div className={`fixed bg-white border-l border-gray-200 flex flex-col z-20 ${
+    <div className={`fixed bg-white border-l border-[#E0DBD5] flex flex-col z-20 ${
       isMobile
         ? 'inset-0'
         : 'top-16 right-0 bottom-0 w-[340px] lg:w-[420px]'
     }`}>
       {/* Top bar */}
-      <div className="flex items-center justify-between px-5 py-2.5 border-b border-gray-100">
+      <div className="flex items-center justify-between px-5 py-2.5 border-b border-[#E8E2DB]">
         <div className="flex items-center gap-1">
           {isMobile && (
             <button
               type="button"
               onClick={handleSaveAndClose}
-              className="p-1.5 rounded-lg hover:bg-gray-100"
+              className="p-1.5 rounded-lg hover:bg-[#E8E2DB]"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+              <ArrowLeft className="w-5 h-5 text-[#5C5C57]" />
             </button>
           )}
           <button
             type="button"
             onClick={handleSave}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#5C5C57] hover:bg-[#E8E2DB] rounded-lg transition-colors"
           >
             <Check className="w-3.5 h-3.5" />
             Save
@@ -428,7 +428,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
               })
               toast.success('Saved as template')
             }}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-lg text-[#8E8E89] hover:text-[#A8BA32] hover:bg-[#E8E2DB] transition-colors"
             title="Save as template"
           >
             <Bookmark className="w-4 h-4" />
@@ -436,7 +436,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
           <button
             type="button"
             onClick={handleArchive}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-amber-600 hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-lg text-[#8E8E89] hover:text-[#D4A843] hover:bg-[#E8E2DB] transition-colors"
             title={card?.archived ? 'Unarchive' : 'Archive'}
           >
             {card?.archived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
@@ -444,7 +444,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
           <button
             type="button"
             onClick={handleDelete}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-red-600 hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-lg text-[#8E8E89] hover:text-[#7A5C44] hover:bg-[#E8E2DB] transition-colors"
             title="Delete"
           >
             <Trash2 className="w-4 h-4" />
@@ -453,7 +453,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
             <button
               type="button"
               onClick={handleSaveAndClose}
-              className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              className="p-1.5 rounded-lg text-[#8E8E89] hover:text-[#5C5C57] hover:bg-[#E8E2DB] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -471,22 +471,22 @@ export default function CardDetailPanel({ cardId, onClose }) {
               onClick={() => completeCard(cardId)}
               className="shrink-0"
             >
-              <CheckCircle2 className={`w-5 h-5 transition-colors ${card.completed ? 'text-emerald-400' : 'text-gray-500 hover:text-emerald-300'}`} />
+              <CheckCircle2 className={`w-5 h-5 transition-colors ${card.completed ? 'text-[#A8BA32]' : 'text-[#8E8E89] hover:text-[#C2D64A]'}`} />
             </button>
             {card.task_number > 0 && (
-              <span className="text-xs font-medium text-gray-600">Task #{card.task_number}</span>
+              <span className="text-xs font-medium text-[#5C5C57]">Task #{card.task_number}</span>
             )}
             {card.global_task_number > 0 && (
-              <span className="text-[10px] text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded-full">G-{card.global_task_number}</span>
+              <span className="text-[10px] text-[#8E8E89] bg-[#F2EDE8] px-1.5 py-0.5 rounded-full">G-{card.global_task_number}</span>
             )}
             {card.archived && (
-              <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">Archived</span>
+              <span className="text-[10px] font-medium text-[#8B7355] bg-[#F5EDCF] px-1.5 py-0.5 rounded-full">Archived</span>
             )}
           </div>
           <input
             value={title}
             onChange={(e) => { setTitle(e.target.value); scheduleSave() }}
-            className={`text-lg font-semibold bg-transparent border-none focus:outline-none w-full placeholder-gray-500 ${card.completed ? 'text-gray-500 line-through' : 'text-gray-900'}`}
+            className={`text-lg font-semibold bg-transparent border-none focus:outline-none w-full placeholder-[#8E8E89] ${card.completed ? 'text-[#8E8E89] line-through' : 'text-[#1B1B18]'}`}
             placeholder="Task name"
           />
         </div>
@@ -494,24 +494,24 @@ export default function CardDetailPanel({ cardId, onClose }) {
         {/* Fields */}
         <div className="px-5 space-y-0">
           {/* Icon */}
-          <div className="flex items-center py-2.5 border-t border-gray-100 relative">
-            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-500">
+          <div className="flex items-center py-2.5 border-t border-[#E8E2DB] relative">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-[#8E8E89]">
               <Smile className="w-4 h-4" />
               <span className="text-sm">Icon</span>
             </div>
             <button
               type="button"
               onClick={() => setShowIconPicker(!showIconPicker)}
-              className="flex items-center gap-2 text-sm hover:bg-gray-50 px-1.5 py-0.5 -mx-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-2 text-sm hover:bg-[#F2EDE8] px-1.5 py-0.5 -mx-1.5 rounded-lg transition-colors"
             >
-              <div className="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500">
+              <div className="w-6 h-6 rounded-lg bg-[#E8E2DB] flex items-center justify-center text-[#8E8E89]">
                 {card.icon ? (
                   <DynamicIcon name={card.icon} className="w-3.5 h-3.5" />
                 ) : (
                   <FileText className="w-3.5 h-3.5" />
                 )}
               </div>
-              <span className="text-gray-600">{card.icon || 'Default'}</span>
+              <span className="text-[#5C5C57]">{card.icon || 'Default'}</span>
             </button>
             {showIconPicker && (
               <IconPicker
@@ -523,8 +523,8 @@ export default function CardDetailPanel({ cardId, onClose }) {
           </div>
 
           {/* Assignee */}
-          <div className="flex items-center py-2.5 border-t border-gray-100 relative">
-            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-500">
+          <div className="flex items-center py-2.5 border-t border-[#E8E2DB] relative">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-[#8E8E89]">
               <User className="w-4 h-4" />
               <span className="text-sm">Assignee</span>
             </div>
@@ -535,15 +535,15 @@ export default function CardDetailPanel({ cardId, onClose }) {
                   setShowAssigneePicker(!showAssigneePicker)
                   setAssigneeSearch('')
                 }}
-                className="flex items-center gap-2 text-sm hover:bg-gray-50 px-1.5 py-0.5 -mx-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-2 text-sm hover:bg-[#F2EDE8] px-1.5 py-0.5 -mx-1.5 rounded-lg transition-colors"
               >
                 {assignee.trim() ? (
                   <>
                     {renderAvatar(assignee)}
-                    <span className="text-gray-700">{assignee}</span>
+                    <span className="text-[#5C5C57]">{assignee}</span>
                   </>
                 ) : (
-                  <span className="text-gray-500">No assignee</span>
+                  <span className="text-[#8E8E89]">No assignee</span>
                 )}
               </button>
             </div>
@@ -556,8 +556,8 @@ export default function CardDetailPanel({ cardId, onClose }) {
               const showAddOption = query && !exactMatch
 
               return (
-                <div className="absolute left-24 sm:left-32 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 w-56 overflow-hidden">
-                  <div className="p-2 border-b border-gray-100">
+                <div className="absolute left-24 sm:left-32 top-full mt-1 bg-white border border-[#E0DBD5] rounded-xl shadow-lg z-10 w-56 overflow-hidden">
+                  <div className="p-2 border-b border-[#E8E2DB]">
                     <input
                       value={assigneeSearch}
                       onChange={(e) => setAssigneeSearch(e.target.value)}
@@ -581,7 +581,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                       }}
                       autoFocus
                       placeholder="Search or add member..."
-                      className="w-full text-sm rounded-lg px-2.5 py-1.5 border border-gray-200 focus:border-blue-200 focus:outline-none placeholder-gray-500"
+                      className="w-full text-sm rounded-lg px-2.5 py-1.5 border border-[#E0DBD5] focus:border-[#C2D64A] focus:outline-none placeholder-[#8E8E89]"
                     />
                   </div>
                   <div className="max-h-48 overflow-y-auto py-1">
@@ -594,7 +594,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                           setAssigneeSearch('')
                           scheduleSave()
                         }}
-                        className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[#8E8E89] hover:bg-[#F2EDE8] transition-colors"
                       >
                         <X className="w-3.5 h-3.5" />
                         Unassign
@@ -612,8 +612,8 @@ export default function CardDetailPanel({ cardId, onClose }) {
                         }}
                         className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
                           assignee === member
-                            ? 'bg-gray-50 text-gray-900 font-medium'
-                            : 'text-gray-600 hover:bg-gray-50'
+                            ? 'bg-[#F2EDE8] text-[#1B1B18] font-medium'
+                            : 'text-[#5C5C57] hover:bg-[#F2EDE8]'
                         }`}
                       >
                         {renderAvatar(member)}
@@ -621,7 +621,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                       </button>
                     ))}
                     {filtered.length === 0 && !showAddOption && (
-                      <div className="px-3 py-2 text-sm text-gray-500">No members yet</div>
+                      <div className="px-3 py-2 text-sm text-[#8E8E89]">No members yet</div>
                     )}
                     {showAddOption && (
                       <button
@@ -634,7 +634,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                           setAssigneeSearch('')
                           scheduleSave()
                         }}
-                        className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 transition-colors border-t border-gray-100"
+                        className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[#A8BA32] hover:bg-[#EEF2D6] transition-colors border-t border-[#E8E2DB]"
                       >
                         <UserPlus className="w-4 h-4" />
                         Add "{assigneeSearch.trim()}"
@@ -647,8 +647,8 @@ export default function CardDetailPanel({ cardId, onClose }) {
           </div>
 
           {/* Due date */}
-          <div className="flex items-center py-2.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-500">
+          <div className="flex items-center py-2.5 border-t border-[#E8E2DB]">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-[#8E8E89]">
               <Calendar className="w-4 h-4" />
               <span className="text-sm">Due date</span>
             </div>
@@ -663,32 +663,32 @@ export default function CardDetailPanel({ cardId, onClose }) {
                 }}
                 onBlur={() => setEditingDueDate(false)}
                 autoFocus
-                className="text-sm text-gray-700 bg-transparent border-none focus:outline-none"
+                className="text-sm text-[#5C5C57] bg-transparent border-none focus:outline-none"
               />
             ) : (
               <button
                 type="button"
                 onClick={() => setEditingDueDate(true)}
-                className="text-sm hover:bg-gray-50 px-1.5 py-0.5 -mx-1.5 rounded-lg transition-colors"
+                className="text-sm hover:bg-[#F2EDE8] px-1.5 py-0.5 -mx-1.5 rounded-lg transition-colors"
               >
                 {dueDateDisplay ? (
                   <span className={
-                    dueDateDisplay === 'Yesterday' ? 'text-rose-500 font-medium' :
-                    dueDateDisplay === 'Today' ? 'text-amber-600 font-medium' :
-                    dueDateDisplay === 'Tomorrow' ? 'text-blue-500 font-medium' :
-                    dueDate && new Date(dueDate) < new Date() ? 'text-rose-500 font-medium' :
-                    'text-emerald-500 font-medium'
+                    dueDateDisplay === 'Yesterday' ? 'text-[#C27A4A] font-medium' :
+                    dueDateDisplay === 'Today' ? 'text-[#D4A843] font-medium' :
+                    dueDateDisplay === 'Tomorrow' ? 'text-[#A8BA32] font-medium' :
+                    dueDate && new Date(dueDate) < new Date() ? 'text-[#C27A4A] font-medium' :
+                    'text-[#A8BA32] font-medium'
                   }>{dueDateDisplay}</span>
                 ) : (
-                  <span className="text-gray-500">No due date</span>
+                  <span className="text-[#8E8E89]">No due date</span>
                 )}
               </button>
             )}
           </div>
 
           {/* Repeat */}
-          <div className="flex items-center py-2.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-500">
+          <div className="flex items-center py-2.5 border-t border-[#E8E2DB]">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-[#8E8E89]">
               <Repeat className="w-4 h-4" />
               <span className="text-sm">Repeat</span>
             </div>
@@ -696,12 +696,12 @@ export default function CardDetailPanel({ cardId, onClose }) {
               <button
                 type="button"
                 onClick={() => setShowRecurrencePicker(!showRecurrencePicker)}
-                className="text-sm text-gray-700 hover:bg-gray-50 px-2 py-0.5 rounded-lg transition-colors"
+                className="text-sm text-[#5C5C57] hover:bg-[#F2EDE8] px-2 py-0.5 rounded-lg transition-colors"
               >
                 {recurrenceLabel || 'None'}
               </button>
               {showRecurrencePicker && (
-                <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-20 w-52">
+                <div className="absolute left-0 top-full mt-1 bg-white border border-[#E0DBD5] rounded-xl shadow-lg py-1 z-20 w-52">
                   {[
                     { label: 'No repeat', interval: null, unit: null },
                     { label: 'Daily', interval: 1, unit: 'days' },
@@ -716,24 +716,24 @@ export default function CardDetailPanel({ cardId, onClose }) {
                         handleRecurrenceChange(opt.interval, opt.unit)
                         setShowRecurrencePicker(false)
                       }}
-                      className="w-full px-3 py-1.5 text-sm text-left text-gray-600 hover:bg-gray-50 transition-colors"
+                      className="w-full px-3 py-1.5 text-sm text-left text-[#5C5C57] hover:bg-[#F2EDE8] transition-colors"
                     >
                       {opt.label}
                     </button>
                   ))}
-                  <div className="border-t border-gray-100 px-3 py-2 flex items-center gap-2">
-                    <span className="text-xs text-gray-500">Every</span>
+                  <div className="border-t border-[#E8E2DB] px-3 py-2 flex items-center gap-2">
+                    <span className="text-xs text-[#8E8E89]">Every</span>
                     <input
                       type="number"
                       min="1"
                       value={customInterval}
                       onChange={(e) => setCustomInterval(parseInt(e.target.value) || 1)}
-                      className="w-12 text-sm px-1.5 py-0.5 border border-gray-200 rounded-lg text-center focus:outline-none focus:border-blue-200"
+                      className="w-12 text-sm px-1.5 py-0.5 border border-[#E0DBD5] rounded-lg text-center focus:outline-none focus:border-[#C2D64A]"
                     />
                     <select
                       value={customUnit}
                       onChange={(e) => setCustomUnit(e.target.value)}
-                      className="text-sm px-1.5 py-0.5 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-200"
+                      className="text-sm px-1.5 py-0.5 border border-[#E0DBD5] rounded-lg focus:outline-none focus:border-[#C2D64A]"
                     >
                       <option value="days">days</option>
                       <option value="weeks">weeks</option>
@@ -745,7 +745,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                         handleRecurrenceChange(customUnit === 'weeks' ? customInterval * 7 : customInterval, customUnit === 'weeks' ? 'days' : customUnit)
                         setShowRecurrencePicker(false)
                       }}
-                      className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                      className="text-xs font-medium text-[#A8BA32] hover:text-[#A8BA32]"
                     >
                       Set
                     </button>
@@ -756,36 +756,36 @@ export default function CardDetailPanel({ cardId, onClose }) {
           </div>
 
           {/* Projects */}
-          <div className="flex items-center py-2.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-500">
+          <div className="flex items-center py-2.5 border-t border-[#E8E2DB]">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-[#8E8E89]">
               <Briefcase className="w-4 h-4" />
               <span className="text-sm">Projects</span>
             </div>
-            <span className="text-sm text-gray-700">{boardName}</span>
+            <span className="text-sm text-[#5C5C57]">{boardName}</span>
           </div>
 
 
           {/* Fields section header */}
-          <div className="pt-4 pb-1 border-t border-gray-100">
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Fields</span>
+          <div className="pt-4 pb-1 border-t border-[#E8E2DB]">
+            <span className="text-xs font-medium text-[#8E8E89] uppercase tracking-wider">Fields</span>
           </div>
 
           {/* Priority */}
           <div className="flex items-center py-2.5 relative">
-            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-500">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-[#8E8E89]">
               <Flag className="w-4 h-4" />
               <span className="text-sm">Priority</span>
             </div>
             <button
               type="button"
               onClick={() => setShowPriorityPicker(!showPriorityPicker)}
-              className="flex items-center gap-2 text-sm hover:bg-gray-50 px-1.5 py-0.5 -mx-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-2 text-sm hover:bg-[#F2EDE8] px-1.5 py-0.5 -mx-1.5 rounded-lg transition-colors"
             >
               <span className={`w-2.5 h-2.5 rounded-full ${currentPriority.dot}`} />
-              <span className="text-gray-700">{currentPriority.label}</span>
+              <span className="text-[#5C5C57]">{currentPriority.label}</span>
             </button>
             {showPriorityPicker && (
-              <div className="absolute left-24 sm:left-32 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-10 w-36">
+              <div className="absolute left-24 sm:left-32 top-full mt-1 bg-white border border-[#E0DBD5] rounded-xl shadow-lg py-1 z-10 w-36">
                 {PRIORITY_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
@@ -797,8 +797,8 @@ export default function CardDetailPanel({ cardId, onClose }) {
                     }}
                     className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
                       priority === opt.value
-                        ? 'bg-gray-50 text-gray-900 font-medium'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-[#F2EDE8] text-[#1B1B18] font-medium'
+                        : 'text-[#5C5C57] hover:bg-[#F2EDE8]'
                     }`}
                   >
                     <span className={`w-2.5 h-2.5 rounded-full ${opt.dot}`} />
@@ -810,24 +810,24 @@ export default function CardDetailPanel({ cardId, onClose }) {
           </div>
 
           {/* Status */}
-          <div className="flex items-center py-2.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-500">
+          <div className="flex items-center py-2.5 border-t border-[#E8E2DB]">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-[#8E8E89]">
               <LayoutList className="w-4 h-4" />
               <span className="text-sm">Status</span>
             </div>
-            <span className="text-sm text-gray-700">{statusName}</span>
+            <span className="text-sm text-[#5C5C57]">{statusName}</span>
           </div>
 
           {/* Labels */}
-          <div className="flex items-start py-2.5 border-t border-gray-100">
-            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-gray-500 pt-0.5">
+          <div className="flex items-start py-2.5 border-t border-[#E8E2DB]">
+            <div className="flex items-center gap-2 w-24 sm:w-32 shrink-0 text-[#8E8E89] pt-0.5">
               <Tag className="w-4 h-4" />
               <span className="text-sm">Labels</span>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap gap-1.5">
                 {labels.length === 0 && !showLabelForm && (
-                  <span className="text-sm text-gray-500">—</span>
+                  <span className="text-sm text-[#8E8E89]">—</span>
                 )}
                 {labels.map((label, idx) => (
                   <span
@@ -854,7 +854,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                       onKeyDown={(e) => e.key === 'Enter' && addLabel()}
                       placeholder="Label text..."
                       autoFocus
-                      className="w-full text-sm rounded-lg px-2.5 py-1.5 border border-gray-200 focus:border-blue-200 focus:outline-none"
+                      className="w-full text-sm rounded-lg px-2.5 py-1.5 border border-[#E0DBD5] focus:border-[#C2D64A] focus:outline-none"
                     />
                     <div className="flex items-center justify-between">
                       <div className="flex gap-1.5">
@@ -873,10 +873,10 @@ export default function CardDetailPanel({ cardId, onClose }) {
                         ))}
                       </div>
                       <div className="flex gap-1">
-                        <button type="button" onClick={addLabel} className="p-1 bg-blue-300 text-white rounded hover:bg-blue-400">
+                        <button type="button" onClick={addLabel} className="p-1 bg-[#C2D64A] text-white rounded hover:bg-[#A8BA32]">
                           <Check className="w-3.5 h-3.5" />
                         </button>
-                        <button type="button" onClick={() => { setShowLabelForm(false); setNewLabelText('') }} className="p-1 text-gray-500 hover:text-gray-600">
+                        <button type="button" onClick={() => { setShowLabelForm(false); setNewLabelText('') }} className="p-1 text-[#8E8E89] hover:text-[#5C5C57]">
                           <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -886,7 +886,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                   <button
                     type="button"
                     onClick={() => setShowLabelForm(true)}
-                    className="flex items-center gap-0.5 text-xs text-gray-500 hover:text-gray-600 px-1.5 py-0.5"
+                    className="flex items-center gap-0.5 text-xs text-[#8E8E89] hover:text-[#5C5C57] px-1.5 py-0.5"
                   >
                     <Plus className="w-3 h-3" />
                   </button>
@@ -897,46 +897,46 @@ export default function CardDetailPanel({ cardId, onClose }) {
         </div>
 
         {/* Description */}
-        <div className="px-5 pt-5 pb-2 border-t border-gray-100 mt-1">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">Description</label>
+        <div className="px-5 pt-5 pb-2 border-t border-[#E8E2DB] mt-1">
+          <label className="text-xs font-medium text-[#8E8E89] uppercase tracking-wider mb-2 block">Description</label>
           <textarea
             value={description}
             onChange={(e) => { setDescription(e.target.value); scheduleSave() }}
             rows={4}
             placeholder="Add details about this task..."
-            className="w-full text-sm text-gray-700 rounded-lg px-3 py-2 resize-none border border-gray-200 focus:border-blue-200 focus:outline-none focus:ring-1 focus:ring-blue-50 placeholder-gray-500"
+            className="w-full text-sm text-[#5C5C57] rounded-lg px-3 py-2 resize-none border border-[#E0DBD5] focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6] placeholder-[#8E8E89]"
           />
         </div>
 
         {/* Comments */}
-        <div className="px-5 pt-4 pb-4 border-t border-gray-100">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 block">
+        <div className="px-5 pt-4 pb-4 border-t border-[#E8E2DB]">
+          <label className="text-xs font-medium text-[#8E8E89] uppercase tracking-wider mb-3 block">
             Comments
           </label>
           <div className="space-y-3 mb-3">
             {(comments || []).map((comment) => (
               <div key={comment.id} className="group">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-xs font-medium text-gray-700">{comment.author_name}</span>
+                  <span className="text-xs font-medium text-[#5C5C57]">{comment.author_name}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-gray-500">
+                    <span className="text-[10px] text-[#8E8E89]">
                       {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                     </span>
                     {comment.user_id === user?.id && (
                       <button
                         type="button"
                         onClick={() => deleteComment(comment.id, cardId)}
-                        className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-all"
+                        className="opacity-0 group-hover:opacity-100 text-[#8E8E89] hover:text-[#7A5C44] transition-all"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
                     )}
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 mt-0.5">
+                <p className="text-sm text-[#5C5C57] mt-0.5">
                   {comment.text.split(/(@\w[\w ]*)/g).map((part, i) =>
                     part.startsWith('@') ? (
-                      <span key={i} className="font-medium text-blue-600">{part}</span>
+                      <span key={i} className="font-medium text-[#A8BA32]">{part}</span>
                     ) : (
                       <span key={i}>{part}</span>
                     )
@@ -958,9 +958,9 @@ export default function CardDetailPanel({ cardId, onClose }) {
         </div>
 
         {/* Attachments */}
-        <div className="px-5 pt-3 pb-3 border-t border-gray-100">
+        <div className="px-5 pt-3 pb-3 border-t border-[#E8E2DB]">
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-2">
+            <label className="text-xs font-medium text-[#8E8E89] uppercase tracking-wider flex items-center gap-2">
               <Paperclip className="w-3.5 h-3.5" />
               Attachments
             </label>
@@ -968,7 +968,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="flex items-center gap-1 text-[11px] font-medium text-blue-500 hover:text-blue-600 disabled:opacity-50"
+              className="flex items-center gap-1 text-[11px] font-medium text-[#A8BA32] hover:text-[#A8BA32] disabled:opacity-50"
             >
               <Upload className="w-3 h-3" />
               {uploading ? 'Uploading...' : 'Add file'}
@@ -1002,13 +1002,13 @@ export default function CardDetailPanel({ cardId, onClose }) {
                     : `${(att.file_size / (1024 * 1024)).toFixed(1)} MB`
 
                 return (
-                  <div key={att.id} className="group flex items-center gap-2 py-1.5 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                      {isImage ? <Image className="w-3.5 h-3.5 text-blue-400" /> : <File className="w-3.5 h-3.5 text-gray-400" />}
+                  <div key={att.id} className="group flex items-center gap-2 py-1.5 px-2 -mx-2 rounded-lg hover:bg-[#F2EDE8] transition-colors">
+                    <div className="w-7 h-7 rounded-lg bg-[#E8E2DB] flex items-center justify-center shrink-0">
+                      {isImage ? <Image className="w-3.5 h-3.5 text-[#C2D64A]" /> : <File className="w-3.5 h-3.5 text-[#C4BFB8]" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-medium text-gray-700 truncate">{att.file_name}</p>
-                      <p className="text-[10px] text-gray-400">{sizeStr}</p>
+                      <p className="text-[12px] font-medium text-[#5C5C57] truncate">{att.file_name}</p>
+                      <p className="text-[10px] text-[#C4BFB8]">{sizeStr}</p>
                     </div>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
@@ -1017,7 +1017,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                           const url = await getAttachmentUrl(att.storage_path)
                           if (url) window.open(url, '_blank')
                         }}
-                        className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                        className="p-1 text-[#C4BFB8] hover:text-[#A8BA32] transition-colors"
                         title="Download"
                       >
                         <Download className="w-3.5 h-3.5" />
@@ -1026,7 +1026,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                         <button
                           type="button"
                           onClick={() => deleteAttachment(att.id, cardId, att.storage_path)}
-                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                          className="p-1 text-[#C4BFB8] hover:text-[#7A5C44] transition-colors"
                           title="Delete"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -1043,21 +1043,21 @@ export default function CardDetailPanel({ cardId, onClose }) {
         {/* Checklist */}
         <div className="px-5 pt-3 pb-5">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2 text-gray-500">
+            <div className="flex items-center gap-2 text-[#8E8E89]">
               <CheckSquare className="w-4 h-4" />
               <span className="text-xs font-medium uppercase tracking-wider">Checklist</span>
             </div>
             {checklist.length > 0 && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-[#8E8E89]">
                 {checkedCount}/{checklist.length}
               </span>
             )}
           </div>
 
           {checklist.length > 0 && (
-            <div className="w-full bg-gray-100 rounded-full h-1 mb-3">
+            <div className="w-full bg-[#E8E2DB] rounded-full h-1 mb-3">
               <div
-                className="bg-blue-300 h-1 rounded-full transition-all"
+                className="bg-[#C2D64A] h-1 rounded-full transition-all"
                 style={{
                   width: `${checklist.length > 0 ? (checkedCount / checklist.length) * 100 : 0}%`,
                 }}
@@ -1072,11 +1072,11 @@ export default function CardDetailPanel({ cardId, onClose }) {
                   type="checkbox"
                   checked={item.done}
                   onChange={() => toggleCheckItem(idx)}
-                  className="w-4 h-4 rounded border-gray-300 text-blue-300 focus:ring-blue-300"
+                  className="w-4 h-4 rounded border-[#E0DBD5] text-[#C2D64A] focus:ring-[#EEF2D6]"
                 />
                 <span
                   className={`flex-1 text-sm ${
-                    item.done ? 'line-through text-gray-500' : 'text-gray-700'
+                    item.done ? 'line-through text-[#8E8E89]' : 'text-[#5C5C57]'
                   }`}
                 >
                   {item.text}
@@ -1084,7 +1084,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                 <button
                   type="button"
                   onClick={() => removeCheckItem(idx)}
-                  className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-500 hover:text-red-500 transition-opacity"
+                  className="opacity-0 group-hover:opacity-100 p-0.5 text-[#8E8E89] hover:text-[#7A5C44] transition-opacity"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -1098,12 +1098,12 @@ export default function CardDetailPanel({ cardId, onClose }) {
               onChange={(e) => setNewCheckItem(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addCheckItem()}
               placeholder="Add an item..."
-              className="flex-1 text-sm rounded-lg px-2.5 py-1.5 border border-gray-200 focus:border-blue-200 focus:outline-none placeholder-gray-500"
+              className="flex-1 text-sm rounded-lg px-2.5 py-1.5 border border-[#E0DBD5] focus:border-[#C2D64A] focus:outline-none placeholder-[#8E8E89]"
             />
             <button
               type="button"
               onClick={addCheckItem}
-              className="px-2.5 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-2.5 py-1.5 text-xs font-medium bg-[#E8E2DB] text-[#5C5C57] rounded-lg hover:bg-[#E0DBD5] transition-colors"
             >
               Add
             </button>
@@ -1112,8 +1112,8 @@ export default function CardDetailPanel({ cardId, onClose }) {
 
         {/* Activity Log */}
         {activityItems && activityItems.length > 0 && (
-          <div className="px-5 pt-3 pb-5 border-t border-gray-100">
-            <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <div className="px-5 pt-3 pb-5 border-t border-[#E8E2DB]">
+            <label className="text-xs font-medium text-[#8E8E89] uppercase tracking-wider mb-3 flex items-center gap-2">
               <History className="w-3.5 h-3.5" />
               Activity
             </label>
@@ -1121,16 +1121,16 @@ export default function CardDetailPanel({ cardId, onClose }) {
               {activityItems.map((item) => (
                 <div key={item.id} className="flex items-start gap-2 text-[12px]">
                   <div className="mt-0.5 shrink-0">
-                    {item.action === 'created' && <Plus className="w-3 h-3 text-green-500" />}
-                    {item.action === 'moved' && <ArrowRight className="w-3 h-3 text-blue-500" />}
-                    {item.action === 'completed' && <CircleCheck className="w-3 h-3 text-emerald-500" />}
-                    {item.action === 'reopened' && <CircleDot className="w-3 h-3 text-amber-500" />}
-                    {item.action.startsWith('updated_') && <PencilLine className="w-3 h-3 text-gray-400" />}
-                    {item.action === 'renamed' && <PencilLine className="w-3 h-3 text-gray-400" />}
+                    {item.action === 'created' && <Plus className="w-3 h-3 text-[#A8BA32]" />}
+                    {item.action === 'moved' && <ArrowRight className="w-3 h-3 text-[#A8BA32]" />}
+                    {item.action === 'completed' && <CircleCheck className="w-3 h-3 text-[#A8BA32]" />}
+                    {item.action === 'reopened' && <CircleDot className="w-3 h-3 text-[#D4A843]" />}
+                    {item.action.startsWith('updated_') && <PencilLine className="w-3 h-3 text-[#C4BFB8]" />}
+                    {item.action === 'renamed' && <PencilLine className="w-3 h-3 text-[#C4BFB8]" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="font-medium text-gray-700">{item.actor_name}</span>{' '}
-                    <span className="text-gray-500">
+                    <span className="font-medium text-[#5C5C57]">{item.actor_name}</span>{' '}
+                    <span className="text-[#8E8E89]">
                       {item.action === 'created' && 'created this task'}
                       {item.action === 'moved' && `moved ${item.detail}`}
                       {item.action === 'completed' && 'marked complete'}
@@ -1140,7 +1140,7 @@ export default function CardDetailPanel({ cardId, onClose }) {
                       {item.action === 'updated_due_date' && `set due date to ${item.detail}`}
                       {item.action === 'renamed' && `renamed ${item.detail}`}
                     </span>
-                    <span className="text-gray-400 ml-1.5">
+                    <span className="text-[#C4BFB8] ml-1.5">
                       {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
                     </span>
                   </div>

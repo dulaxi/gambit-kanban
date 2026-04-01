@@ -134,11 +134,11 @@ export default function Header({ title }) {
   }, [mobileSearchOpen])
 
   return (
-    <header className="relative h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6">
+    <header className="relative h-16 bg-white border-b border-[#E0DBD5] flex items-center justify-between px-4 sm:px-6">
       {/* Mobile search overlay */}
       {!isDesktop && mobileSearchOpen ? (
         <div className="absolute inset-0 bg-white flex items-center gap-2 px-4 z-40" ref={searchRef}>
-          <Search className="w-4 h-4 text-gray-500 shrink-0" />
+          <Search className="w-4 h-4 text-[#8E8E89] shrink-0" />
           <input
             ref={mobileSearchRef}
             type="text"
@@ -152,37 +152,37 @@ export default function Header({ title }) {
             type="button"
             onClick={closeMobileSearch}
             aria-label="Close search"
-            className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-lg text-[#8E8E89] hover:bg-[#E8E2DB] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
 
           {/* Mobile search results */}
           {showDropdown && (
-            <div className="absolute left-0 right-0 top-full bg-white border-t border-gray-200 shadow-lg z-50 max-h-[70vh] overflow-y-auto">
+            <div className="absolute left-0 right-0 top-full bg-white border-t border-[#E0DBD5] shadow-lg z-50 max-h-[70vh] overflow-y-auto">
               {!hasResults && (
-                <p className="px-4 py-3 text-sm text-gray-500">No results found</p>
+                <p className="px-4 py-3 text-sm text-[#8E8E89]">No results found</p>
               )}
               {searchResults.cards.length > 0 && (
                 <div>
-                  <p className="px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">Tasks</p>
+                  <p className="px-3 py-1.5 text-[10px] font-semibold text-[#8E8E89] uppercase tracking-wider bg-[#F2EDE8]">Tasks</p>
                   {searchResults.cards.map((card) => (
                     <button
                       key={card.id}
                       type="button"
                       onClick={() => { handleCardResult(card); closeMobileSearch() }}
-                      className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-[#F2EDE8] transition-colors"
                     >
-                      <span className="text-[11px] font-mono text-gray-500 shrink-0">#{card.task_number}</span>
+                      <span className="text-[11px] font-mono text-[#8E8E89] shrink-0">#{card.task_number}</span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-gray-900 truncate">{card.title}</p>
+                        <p className="text-sm text-[#1B1B18] truncate">{card.title}</p>
                         {boards[card.board_id] && (
-                          <p className="text-[11px] text-gray-500 truncate">{boards[card.board_id].name}</p>
+                          <p className="text-[11px] text-[#8E8E89] truncate">{boards[card.board_id].name}</p>
                         )}
                       </div>
                       {card.priority && (
                         <span className={`w-2 h-2 rounded-full shrink-0 ${
-                          card.priority === 'high' ? 'bg-rose-400' : card.priority === 'medium' ? 'bg-amber-400' : 'bg-emerald-400'
+                          card.priority === 'high' ? 'bg-[#C27A4A]' : card.priority === 'medium' ? 'bg-[#D4A843]' : 'bg-[#A8BA32]'
                         }`} />
                       )}
                     </button>
@@ -191,16 +191,16 @@ export default function Header({ title }) {
               )}
               {searchResults.notes.length > 0 && (
                 <div>
-                  <p className="px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">Notes</p>
+                  <p className="px-3 py-1.5 text-[10px] font-semibold text-[#8E8E89] uppercase tracking-wider bg-[#F2EDE8]">Notes</p>
                   {searchResults.notes.map((note) => (
                     <button
                       key={note.id}
                       type="button"
                       onClick={() => { handleNoteResult(note); closeMobileSearch() }}
-                      className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-[#F2EDE8] transition-colors"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-gray-900 truncate">{note.title}</p>
+                        <p className="text-sm text-[#1B1B18] truncate">{note.title}</p>
                       </div>
                     </button>
                   ))}
@@ -217,15 +217,15 @@ export default function Header({ title }) {
           <button
             type="button"
             onClick={toggleMobileMenu}
-            className="p-1.5 -ml-1.5 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+            className="p-1.5 -ml-1.5 rounded-lg text-[#5C5C57] hover:bg-[#E8E2DB] transition-colors"
           >
             <LayoutGrid className="w-[18px] h-[18px]" />
           </button>
         )}
         {isDesktop ? (
-          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+          <h1 className="text-xl font-semibold text-[#1B1B18] font-heading">{title}</h1>
         ) : (
-          <span className="text-sm font-medium text-gray-600 truncate">{title}</span>
+          <span className="text-sm font-medium text-[#5C5C57] truncate">{title}</span>
         )}
       </div>
       </>
@@ -234,43 +234,43 @@ export default function Header({ title }) {
       {/* Center: search (desktop only) */}
       {isDesktop && (
         <div className="relative hidden sm:block sm:w-64 lg:w-80" ref={searchRef}>
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8E8E89]" />
           <input
             type="text"
             placeholder="Search tasks, notes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setSearchFocused(true)}
-            className="w-full pl-10 pr-4 py-2 text-sm rounded-xl bg-gray-100 border border-gray-200 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-100"
+            className="w-full pl-10 pr-4 py-2 text-sm rounded-xl bg-[#E8E2DB] border border-[#E0DBD5] focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6]"
           />
 
           {/* Search results dropdown */}
           {showDropdown && (
-            <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden max-h-80 overflow-y-auto animate-dropdown">
+            <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-[#E0DBD5] rounded-xl shadow-lg z-50 overflow-hidden max-h-80 overflow-y-auto animate-dropdown">
               {!hasResults && (
-                <p className="px-4 py-3 text-sm text-gray-500">No results found</p>
+                <p className="px-4 py-3 text-sm text-[#8E8E89]">No results found</p>
               )}
 
               {searchResults.cards.length > 0 && (
                 <div>
-                  <p className="px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">Tasks</p>
+                  <p className="px-3 py-1.5 text-[10px] font-semibold text-[#8E8E89] uppercase tracking-wider bg-[#F2EDE8]">Tasks</p>
                   {searchResults.cards.map((card) => (
                     <button
                       key={card.id}
                       type="button"
                       onClick={() => handleCardResult(card)}
-                      className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-[#F2EDE8] transition-colors"
                     >
-                      <span className="text-[11px] font-mono text-gray-500 shrink-0">#{card.task_number}</span>
+                      <span className="text-[11px] font-mono text-[#8E8E89] shrink-0">#{card.task_number}</span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-gray-900 truncate">{card.title}</p>
+                        <p className="text-sm text-[#1B1B18] truncate">{card.title}</p>
                         {boards[card.board_id] && (
-                          <p className="text-[11px] text-gray-500 truncate">{boards[card.board_id].name}</p>
+                          <p className="text-[11px] text-[#8E8E89] truncate">{boards[card.board_id].name}</p>
                         )}
                       </div>
                       {card.priority && (
                         <span className={`w-2 h-2 rounded-full shrink-0 ${
-                          card.priority === 'high' ? 'bg-rose-400' : card.priority === 'medium' ? 'bg-amber-400' : 'bg-emerald-400'
+                          card.priority === 'high' ? 'bg-[#C27A4A]' : card.priority === 'medium' ? 'bg-[#D4A843]' : 'bg-[#A8BA32]'
                         }`} />
                       )}
                     </button>
@@ -280,16 +280,16 @@ export default function Header({ title }) {
 
               {searchResults.notes.length > 0 && (
                 <div>
-                  <p className="px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">Notes</p>
+                  <p className="px-3 py-1.5 text-[10px] font-semibold text-[#8E8E89] uppercase tracking-wider bg-[#F2EDE8]">Notes</p>
                   {searchResults.notes.map((note) => (
                     <button
                       key={note.id}
                       type="button"
                       onClick={() => handleNoteResult(note)}
-                      className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-[#F2EDE8] transition-colors"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-gray-900 truncate">{note.title}</p>
+                        <p className="text-sm text-[#1B1B18] truncate">{note.title}</p>
                       </div>
                     </button>
                   ))}
@@ -308,7 +308,7 @@ export default function Header({ title }) {
             type="button"
             onClick={() => setMobileSearchOpen(true)}
             aria-label="Search"
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg text-[#8E8E89] hover:bg-[#E8E2DB] transition-colors"
           >
             <Search className="w-[18px] h-[18px]" />
           </button>
@@ -320,25 +320,25 @@ export default function Header({ title }) {
             type="button"
             onClick={() => setNotifOpen(!notifOpen)}
             aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
-            className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+            className="relative p-2 rounded-lg text-[#8E8E89] hover:bg-[#E8E2DB] transition-colors"
           >
             <Bell className="w-[18px] h-[18px]" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute top-1 right-1 w-4 h-4 bg-[#C27A4A] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden animate-dropdown">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
-                <span className="text-sm font-semibold text-gray-900">Notifications</span>
+            <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-[#E0DBD5] rounded-xl shadow-lg z-50 overflow-hidden animate-dropdown">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#E8E2DB]">
+                <span className="text-sm font-semibold text-[#1B1B18]">Notifications</span>
                 {unreadCount > 0 && (
                   <button
                     type="button"
                     onClick={markAllAsRead}
-                    className="text-[11px] font-medium text-blue-500 hover:text-blue-600"
+                    className="text-[11px] font-medium text-[#A8BA32] hover:text-[#A8BA32]"
                   >
                     Mark all read
                   </button>
@@ -346,13 +346,13 @@ export default function Header({ title }) {
               </div>
               <div className="max-h-72 overflow-y-auto">
                 {notifications.length === 0 && (
-                  <p className="px-4 py-6 text-sm text-gray-500 text-center">No notifications yet</p>
+                  <p className="px-4 py-6 text-sm text-[#8E8E89] text-center">No notifications yet</p>
                 )}
                 {notifications.map((n) => {
-                  const icon = n.type === 'mention' ? <AtSign className="w-3.5 h-3.5 text-blue-500" />
-                    : n.type === 'assigned' ? <UserPlus className="w-3.5 h-3.5 text-emerald-500" />
-                    : n.type === 'moved' ? <ArrowRight className="w-3.5 h-3.5 text-purple-500" />
-                    : <MessageSquare className="w-3.5 h-3.5 text-gray-400" />
+                  const icon = n.type === 'mention' ? <AtSign className="w-3.5 h-3.5 text-[#A8BA32]" />
+                    : n.type === 'assigned' ? <UserPlus className="w-3.5 h-3.5 text-[#A8BA32]" />
+                    : n.type === 'moved' ? <ArrowRight className="w-3.5 h-3.5 text-[#A8969E]" />
+                    : <MessageSquare className="w-3.5 h-3.5 text-[#C4BFB8]" />
 
                   return (
                     <button
@@ -369,20 +369,20 @@ export default function Header({ title }) {
                           }, 100)
                         }
                       }}
-                      className={`flex items-start gap-2.5 w-full px-4 py-2.5 text-left hover:bg-gray-50 transition-colors ${!n.read ? 'bg-blue-50/50' : ''}`}
+                      className={`flex items-start gap-2.5 w-full px-4 py-2.5 text-left hover:bg-[#F2EDE8] transition-colors ${!n.read ? 'bg-[#EEF2D6]/50' : ''}`}
                     >
                       <div className="mt-0.5 shrink-0">{icon}</div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[12px] text-gray-700">
+                        <p className="text-[12px] text-[#5C5C57]">
                           <span className="font-medium">{n.actor_name || 'Someone'}</span>{' '}
                           {n.title}
                         </p>
-                        {n.body && <p className="text-[11px] text-gray-500 truncate mt-0.5">{n.body}</p>}
-                        <p className="text-[10px] text-gray-400 mt-0.5">
+                        {n.body && <p className="text-[11px] text-[#8E8E89] truncate mt-0.5">{n.body}</p>}
+                        <p className="text-[10px] text-[#C4BFB8] mt-0.5">
                           {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                         </p>
                       </div>
-                      {!n.read && <span className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 shrink-0" />}
+                      {!n.read && <span className="mt-1.5 w-2 h-2 rounded-full bg-[#C2D64A] shrink-0" />}
                     </button>
                   )
                 })}
@@ -397,13 +397,13 @@ export default function Header({ title }) {
           onClick={() => setMenuOpen(!menuOpen)}
           className={`w-9 h-9 rounded-full flex items-center justify-center cursor-pointer ${
             isDesktop
-              ? profile?.icon ? `${profile.color === 'bg-[#A0A0A0]' ? 'text-gray-900' : 'text-white'} ${profile.color || 'bg-gray-300'}` : 'bg-gray-100'
+              ? profile?.icon ? `${profile.color === 'bg-[#8E8E89]' ? 'text-[#1B1B18]' : 'text-white'} ${profile.color || 'bg-[#E0DBD5]'}` : 'bg-[#E8E2DB]'
               : ''
           }`}
         >
           {!isDesktop ? (
             <span
-              className="material-symbols-outlined text-gray-900"
+              className="material-symbols-outlined text-[#1B1B18]"
               style={{ fontSize: '22px', lineHeight: '22px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
             >
               owl
@@ -411,15 +411,15 @@ export default function Header({ title }) {
           ) : profile?.icon ? (
             <DynamicIcon name={profile.icon} className="w-5 h-5" />
           ) : (
-            <User className="w-5 h-5 text-gray-600" />
+            <User className="w-5 h-5 text-[#5C5C57]" />
           )}
         </button>
 
         {menuOpen && (
-          <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-30 w-48 animate-dropdown">
-            <div className="px-3 py-2 border-b border-gray-100">
-              <p className="text-sm font-medium text-gray-900 truncate">{profile?.display_name || 'User'}</p>
-              <p className="text-xs text-gray-500 truncate">{profile?.email || ''}</p>
+          <div className="absolute right-0 top-full mt-2 bg-white border border-[#E0DBD5] rounded-xl shadow-lg py-1 z-30 w-48 animate-dropdown">
+            <div className="px-3 py-2 border-b border-[#E8E2DB]">
+              <p className="text-sm font-medium text-[#1B1B18] truncate">{profile?.display_name || 'User'}</p>
+              <p className="text-xs text-[#8E8E89] truncate">{profile?.email || ''}</p>
             </div>
             <button
               type="button"
@@ -427,7 +427,7 @@ export default function Header({ title }) {
                 setMenuOpen(false)
                 navigate('/settings')
               }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[#5C5C57] hover:bg-[#F2EDE8]"
             >
               <Settings className="w-4 h-4" />
               Settings
@@ -435,7 +435,7 @@ export default function Header({ title }) {
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-50"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[#7A5C44] hover:bg-[#F2EDE8]"
             >
               <LogOut className="w-4 h-4" />
               Sign out

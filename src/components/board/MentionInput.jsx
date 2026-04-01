@@ -86,21 +86,21 @@ export default function MentionInput({ value, onChange, onSubmit, members, place
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="w-full text-sm px-3 py-1.5 rounded-lg border border-gray-200 focus:border-blue-200 focus:outline-none placeholder-gray-500"
+        className="w-full text-sm px-3 py-1.5 rounded-lg border border-[#E0DBD5] focus:border-[#C2D64A] focus:outline-none placeholder-[#8E8E89]"
       />
 
       {showSuggestions && (
-        <div className="absolute bottom-full mb-1 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+        <div className="absolute bottom-full mb-1 left-0 right-0 bg-white border border-[#E0DBD5] rounded-lg shadow-lg z-50 overflow-hidden">
           {suggestions.map((m, i) => (
             <button
               key={m.user_id}
               type="button"
               onClick={() => insertMention(m)}
               className={`flex items-center gap-2 w-full px-3 py-2 text-left text-sm transition-colors ${
-                i === selectedIdx ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
+                i === selectedIdx ? 'bg-[#EEF2D6] text-[#A8BA32]' : 'text-[#5C5C57] hover:bg-[#F2EDE8]'
               }`}
             >
-              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white ${m.color || 'bg-gray-300'}`}>
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white ${m.color || 'bg-[#E0DBD5]'}`}>
                 {(m.display_name || '?')[0].toUpperCase()}
               </div>
               <span className="font-medium">{m.display_name}</span>

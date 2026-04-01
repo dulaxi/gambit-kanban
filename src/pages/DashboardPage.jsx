@@ -28,7 +28,7 @@ function TaskRow({ card, boardName, isOverdue, onClick }) {
     <button
       onClick={onClick}
       className={`w-full flex items-center gap-3 bg-white rounded-xl border shadow-sm px-4 py-3 text-left cursor-pointer hover:shadow-md transition-shadow ${
-        isOverdue ? 'border-red-200/80' : 'border-gray-200/80'
+        isOverdue ? 'border-[#E0DBD5]/80' : 'border-[#E0DBD5]/80'
       }`}
     >
       {/* Priority dot */}
@@ -39,12 +39,12 @@ function TaskRow({ card, boardName, isOverdue, onClick }) {
       />
 
       {/* Task number */}
-      <span className="text-[11px] font-mono font-medium text-gray-500 shrink-0">
+      <span className="text-[11px] font-mono font-medium text-[#8E8E89] shrink-0">
         #GB-{card.global_task_number || card.task_number}
       </span>
 
       {/* Title */}
-      <span className="text-sm font-medium text-gray-900 flex-1 truncate">
+      <span className="text-sm font-medium text-[#1B1B18] flex-1 truncate">
         {card.title}
       </span>
 
@@ -64,12 +64,12 @@ function TaskRow({ card, boardName, isOverdue, onClick }) {
 
       {/* Board name pill (hidden on mobile) */}
       {boardName && (
-        <span className="hidden sm:inline-block text-[10px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">
+        <span className="hidden sm:inline-block text-[10px] font-medium text-[#8E8E89] bg-[#E8E2DB] px-2 py-0.5 rounded-full shrink-0">
           {boardName}
         </span>
       )}
 
-      <ArrowRight className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+      <ArrowRight className="w-3.5 h-3.5 text-[#8E8E89] shrink-0" />
     </button>
   )
 }
@@ -132,7 +132,7 @@ export default function DashboardPage() {
   // ---- Loading state ------------------------------------------------
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500 text-sm">
+      <div className="flex items-center justify-center h-64 text-[#8E8E89] text-sm">
         Loading...
       </div>
     )
@@ -145,21 +145,21 @@ export default function DashboardPage() {
     <div className="max-w-4xl mx-auto">
       {/* 1. Greeting Banner */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-[#1B1B18] font-heading">
           {getGreeting()},{' '}
-          <span className="bg-gradient-to-r from-[#103783] to-[#9BAFD9] bg-clip-text text-transparent">
+          <span className="text-[#A8BA32]">
             {displayName}
           </span>
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-[#8E8E89] mt-1">
           {format(new Date(), 'EEEE, MMMM d')}
         </p>
 
         {/* Summary pill */}
         {hasFocusCards && (
-          <span className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full bg-white border border-gray-200 shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs text-gray-600">
+          <span className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full bg-white border border-[#E0DBD5] shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#A8BA32] animate-pulse" />
+            <span className="text-xs text-[#5C5C57]">
               {dueToday > 0 && (
                 <>
                   <span className="font-medium">{dueToday}</span> due today
@@ -168,8 +168,8 @@ export default function DashboardPage() {
               {dueToday > 0 && overdue > 0 && <span className="mx-1">&middot;</span>}
               {overdue > 0 && (
                 <>
-                  <span className="font-medium text-red-500">{overdue}</span>{' '}
-                  <span className="text-red-500">overdue</span>
+                  <span className="font-medium text-[#7A5C44]">{overdue}</span>{' '}
+                  <span className="text-[#7A5C44]">overdue</span>
                 </>
               )}
             </span>
@@ -180,13 +180,13 @@ export default function DashboardPage() {
       {/* 2. Stat tiles */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
         {[
-          { label: 'Due Today', value: dueToday, color: 'text-gray-900' },
-          { label: 'Overdue', value: overdue, color: overdue > 0 ? 'text-red-600' : 'text-gray-900' },
-          { label: 'In Progress', value: inProgress, color: 'text-gray-900' },
-          { label: 'Completed', value: completed, color: 'text-gray-900' },
+          { label: 'Due Today', value: dueToday, color: 'text-[#1B1B18]' },
+          { label: 'Overdue', value: overdue, color: overdue > 0 ? 'text-[#7A5C44]' : 'text-[#1B1B18]' },
+          { label: 'In Progress', value: inProgress, color: 'text-[#1B1B18]' },
+          { label: 'Completed', value: completed, color: 'text-[#1B1B18]' },
         ].map((stat) => (
-          <div key={stat.label} className="bg-white rounded-xl border border-gray-200/80 px-4 py-3">
-            <p className="text-[11px] font-medium text-gray-500 uppercase tracking-wide">{stat.label}</p>
+          <div key={stat.label} className="bg-white rounded-xl border border-[#E0DBD5]/80 px-4 py-3">
+            <p className="text-[11px] font-medium text-[#8E8E89] uppercase tracking-wide">{stat.label}</p>
             <p className={`text-2xl font-bold mt-0.5 ${stat.color}`}>{stat.value}</p>
           </div>
         ))}
@@ -196,8 +196,8 @@ export default function DashboardPage() {
       {dueTodayCards.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-sm font-semibold text-gray-900">Due Today</h2>
-            <span className="text-[10px] font-semibold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">
+            <h2 className="text-sm font-semibold text-[#1B1B18]">Due Today</h2>
+            <span className="text-[10px] font-semibold bg-[#E8E2DB] text-[#5C5C57] px-1.5 py-0.5 rounded-full">
               {dueTodayCards.length}
             </span>
           </div>
@@ -219,8 +219,8 @@ export default function DashboardPage() {
       {overdueCards.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-sm font-semibold text-red-500">Overdue</h2>
-            <span className="text-[10px] font-semibold bg-red-50 text-red-500 px-1.5 py-0.5 rounded-full">
+            <h2 className="text-sm font-semibold text-[#7A5C44]">Overdue</h2>
+            <span className="text-[10px] font-semibold bg-[#F0E0D2] text-[#7A5C44] px-1.5 py-0.5 rounded-full">
               {overdueCards.length}
             </span>
           </div>
@@ -240,7 +240,7 @@ export default function DashboardPage() {
 
       {/* 5. Empty state */}
       {!hasFocusCards && (
-        <div className="flex items-center justify-center gap-2 mb-10 py-6 text-gray-500 text-sm">
+        <div className="flex items-center justify-center gap-2 mb-10 py-6 text-[#8E8E89] text-sm">
           <CheckCircle2 className="w-4 h-4" />
           <span>Nothing due today &mdash; you&rsquo;re all clear</span>
         </div>
@@ -248,17 +248,17 @@ export default function DashboardPage() {
 
       {/* 6. Board Summary Grid */}
       <div className="mb-10">
-        <h2 className="text-sm font-semibold text-gray-900 mb-4">Your Boards</h2>
+        <h2 className="text-sm font-semibold text-[#1B1B18] mb-4">Your Boards</h2>
 
         {boardSummaries.length === 0 ? (
           <div className="text-center py-10">
-            <p className="text-gray-500 text-sm mb-4">
+            <p className="text-[#8E8E89] text-sm mb-4">
               Create your first board to get started
             </p>
             <button
               onClick={handleNewBoard}
               disabled={creatingBoard}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1B1B18] text-white text-sm font-medium rounded-lg hover:bg-[#333] transition-colors cursor-pointer disabled:opacity-50"
             >
               <Plus className="w-4 h-4" />
               {creatingBoard ? 'Creating...' : 'New Board'}
@@ -273,22 +273,22 @@ export default function DashboardPage() {
                   setActiveBoard(board.id)
                   navigate('/boards')
                 }}
-                className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-4 text-left cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-white rounded-2xl border border-[#E0DBD5]/80 shadow-sm p-4 text-left cursor-pointer hover:shadow-md transition-shadow"
               >
                 {/* Board header */}
                 <div className="flex items-center gap-2.5 mb-3">
                   <span className="text-lg shrink-0">
                     {board.icon ? (
-                      <DynamicIcon name={board.icon} className="w-5 h-5 text-gray-600" />
+                      <DynamicIcon name={board.icon} className="w-5 h-5 text-[#5C5C57]" />
                     ) : (
                       <span>&#128203;</span>
                     )}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate">
+                    <p className="text-sm font-semibold text-[#1B1B18] truncate">
                       {board.name}
                     </p>
-                    <p className="text-[11px] text-gray-500">
+                    <p className="text-[11px] text-[#8E8E89]">
                       {board.totalCards} task{board.totalCards !== 1 ? 's' : ''}
                     </p>
                   </div>
@@ -296,7 +296,7 @@ export default function DashboardPage() {
 
                 {/* Progress bar */}
                 {board.totalCards > 0 && (
-                  <div className="h-1.5 rounded-full overflow-hidden bg-gray-100 flex mb-2">
+                  <div className="h-1.5 rounded-full overflow-hidden bg-[#E8E2DB] flex mb-2">
                     {board.columns.map((col, i) =>
                       col.count > 0 ? (
                         <div
@@ -317,7 +317,7 @@ export default function DashboardPage() {
                     {board.columns.map((col, i) => (
                       <span
                         key={col.id}
-                        className="flex items-center gap-1 text-[10px] text-gray-500"
+                        className="flex items-center gap-1 text-[10px] text-[#8E8E89]"
                       >
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${
@@ -332,7 +332,7 @@ export default function DashboardPage() {
 
                 {/* Updated ago */}
                 {board.lastUpdated && (
-                  <p className="text-[10px] text-gray-500">
+                  <p className="text-[10px] text-[#8E8E89]">
                     Updated{' '}
                     {formatDistanceToNow(new Date(board.lastUpdated), {
                       addSuffix: true,

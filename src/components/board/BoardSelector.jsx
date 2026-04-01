@@ -37,15 +37,15 @@ function FilterPill({ label, active, children }) {
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors ${
           active
-            ? 'bg-blue-50 text-blue-600 border border-blue-200'
-            : 'bg-gray-100 text-gray-600 border border-transparent hover:bg-gray-200'
+            ? 'bg-[#EEF2D6] text-[#A8BA32] border border-[#C2D64A]'
+            : 'bg-[#E8E2DB] text-[#5C5C57] border border-transparent hover:bg-[#E0DBD5]'
         }`}
       >
         {label}
         <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && (
-        <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-40 min-w-[160px]">
+        <div className="absolute left-0 top-full mt-1 bg-white border border-[#E0DBD5] rounded-xl shadow-lg py-1 z-40 min-w-[160px]">
           {children}
         </div>
       )}
@@ -55,9 +55,9 @@ function FilterPill({ label, active, children }) {
 
 function PriorityFilter({ filters, setFilters }) {
   const priorities = [
-    { value: 'low', label: 'Low', color: 'bg-emerald-400' },
-    { value: 'medium', label: 'Medium', color: 'bg-amber-400' },
-    { value: 'high', label: 'High', color: 'bg-rose-400' },
+    { value: 'low', label: 'Low', color: 'bg-[#A8BA32]' },
+    { value: 'medium', label: 'Medium', color: 'bg-[#D4A843]' },
+    { value: 'high', label: 'High', color: 'bg-[#C27A4A]' },
   ]
   const selected = filters?.priority || []
 
@@ -75,10 +75,10 @@ function PriorityFilter({ filters, setFilters }) {
           key={p.value}
           type="button"
           onClick={() => toggle(p.value)}
-          className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[#5C5C57] hover:bg-[#F2EDE8] transition-colors"
         >
           <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
-            selected.includes(p.value) ? 'bg-blue-500 border-blue-500' : 'border-gray-300'
+            selected.includes(p.value) ? 'bg-[#C2D64A] border-[#C2D64A]' : 'border-[#E0DBD5]'
           }`}>
             {selected.includes(p.value) && <Check className="w-2.5 h-2.5 text-white" />}
           </span>
@@ -100,7 +100,7 @@ function AssigneeFilter({ filters, setFilters, assignees }) {
   return (
     <FilterPill label="Assignee" active={!!selected}>
       {assignees.length === 0 ? (
-        <div className="px-3 py-2 text-xs text-gray-500">No assignees</div>
+        <div className="px-3 py-2 text-xs text-[#8E8E89]">No assignees</div>
       ) : (
         assignees.map((name) => (
           <button
@@ -108,10 +108,10 @@ function AssigneeFilter({ filters, setFilters, assignees }) {
             type="button"
             onClick={() => select(name)}
             className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
-              selected === name ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+              selected === name ? 'bg-[#EEF2D6] text-[#A8BA32]' : 'text-[#5C5C57] hover:bg-[#F2EDE8]'
             }`}
           >
-            <span className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-medium text-gray-600 shrink-0">
+            <span className="w-5 h-5 rounded-full bg-[#E0DBD5] flex items-center justify-center text-[10px] font-medium text-[#5C5C57] shrink-0">
               {name.charAt(0).toUpperCase()}
             </span>
             {name}
@@ -133,29 +133,29 @@ function LabelFilter({ filters, setFilters, labels }) {
   }
 
   const labelColors = {
-    red: 'bg-[#FFE0DB] text-[#CF222E]',
-    blue: 'bg-[#DAF0FF] text-[#3094FF]',
-    green: 'bg-[#D1FDE0] text-[#08872B]',
-    yellow: 'bg-[#FFF4D4] text-[#9A6700]',
-    purple: 'bg-[#EDD8FD] text-[#8534F3]',
-    pink: 'bg-[#FFD6EA] text-[#BF3989]',
-    gray: 'bg-[#E4EBE6] text-[#909692]',
+    red: 'bg-[#F2D9C7] text-[#8B5A33]',
+    blue: 'bg-[#DAE0F0] text-[#4A5578]',
+    green: 'bg-[#EEF2D6] text-[#6B7A12]',
+    yellow: 'bg-[#F5EDCF] text-[#8B7322]',
+    purple: 'bg-[#E8DDE2] text-[#6E5A65]',
+    pink: 'bg-[#F0E0D2] text-[#7A5C44]',
+    gray: 'bg-[#E8E2DB] text-[#5C5C57]',
   }
 
   return (
     <FilterPill label="Label" active={selected.length > 0}>
       {labels.length === 0 ? (
-        <div className="px-3 py-2 text-xs text-gray-500">No labels</div>
+        <div className="px-3 py-2 text-xs text-[#8E8E89]">No labels</div>
       ) : (
         labels.map((lbl) => (
           <button
             key={lbl.text}
             type="button"
             onClick={() => toggle(lbl.text)}
-            className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[#5C5C57] hover:bg-[#F2EDE8] transition-colors"
           >
             <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
-              selected.includes(lbl.text) ? 'bg-blue-500 border-blue-500' : 'border-gray-300'
+              selected.includes(lbl.text) ? 'bg-[#C2D64A] border-[#C2D64A]' : 'border-[#E0DBD5]'
             }`}>
               {selected.includes(lbl.text) && <Check className="w-2.5 h-2.5 text-white" />}
             </span>
@@ -190,7 +190,7 @@ function DueFilter({ filters, setFilters }) {
           type="button"
           onClick={() => select(opt.value)}
           className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
-            selected === opt.value ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+            selected === opt.value ? 'bg-[#EEF2D6] text-[#A8BA32]' : 'text-[#5C5C57] hover:bg-[#F2EDE8]'
           }`}
         >
           {opt.label}
@@ -337,9 +337,9 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
             <button
               type="button"
               onClick={() => setOpen(!open)}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#5C5C57] bg-white border border-[#E0DBD5] rounded-xl hover:bg-[#F2EDE8] transition-colors"
             >
-              <span className="w-5 h-5 flex items-center justify-center text-gray-500">
+              <span className="w-5 h-5 flex items-center justify-center text-[#8E8E89]">
                 {activeBoardId === '__all__' ? (
                   <Layers className="w-4 h-4" />
                 ) : activeBoard?.icon ? (
@@ -350,14 +350,14 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
               </span>
               <span>{activeBoardId === '__all__' ? 'All Tasks' : activeBoard?.name || 'Select board'}</span>
               <ChevronDown
-                className={`w-4 h-4 text-gray-600 transition-transform ${
+                className={`w-4 h-4 text-[#5C5C57] transition-transform ${
                   open ? 'rotate-180' : ''
                 }`}
               />
             </button>
 
             {open && (
-              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-30 w-64">
+              <div className="absolute left-0 top-full mt-1 bg-white border border-[#E0DBD5] rounded-xl shadow-lg py-1 z-30 w-64">
                 {/* All Tasks option */}
                 <button
                   type="button"
@@ -367,16 +367,16 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
                   }}
                   className={`flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm transition-colors ${
                     activeBoardId === '__all__'
-                      ? 'bg-blue-50 text-gray-900 font-medium'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'bg-[#EEF2D6] text-[#1B1B18] font-medium'
+                      : 'text-[#5C5C57] hover:bg-[#F2EDE8]'
                   }`}
                 >
-                  <span className="w-5 h-5 flex items-center justify-center text-gray-500 shrink-0">
+                  <span className="w-5 h-5 flex items-center justify-center text-[#8E8E89] shrink-0">
                     <Layers className="w-4 h-4" />
                   </span>
                   All Tasks
                 </button>
-                <div className="border-t border-gray-200 my-1" />
+                <div className="border-t border-[#E0DBD5] my-1" />
                 {boardList.map((board) => (
                   <button
                     key={board.id}
@@ -387,11 +387,11 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
                     }}
                     className={`flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm transition-colors ${
                       board.id === activeBoardId
-                        ? 'bg-blue-50 text-gray-900 font-medium'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-[#EEF2D6] text-[#1B1B18] font-medium'
+                        : 'text-[#5C5C57] hover:bg-[#F2EDE8]'
                     }`}
                   >
-                    <span className="w-5 h-5 flex items-center justify-center text-gray-500 shrink-0">
+                    <span className="w-5 h-5 flex items-center justify-center text-[#8E8E89] shrink-0">
                       {board.icon ? (
                         <DynamicIcon name={board.icon} className="w-4 h-4" />
                       ) : (
@@ -402,7 +402,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
                   </button>
                 ))}
 
-                <div className="border-t border-gray-200 mt-1 pt-1">
+                <div className="border-t border-[#E0DBD5] mt-1 pt-1">
                   {isCreating ? (
                     <div className="px-3 py-1.5 space-y-2">
                       <div className="flex items-center gap-2">
@@ -411,7 +411,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
                           <button
                             type="button"
                             onClick={() => setShowIconPicker(!showIconPicker)}
-                            className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors shrink-0"
+                            className="w-8 h-8 rounded-lg bg-[#E8E2DB] flex items-center justify-center text-[#8E8E89] hover:bg-[#E0DBD5] transition-colors shrink-0"
                           >
                             {newIcon ? (
                               <DynamicIcon name={newIcon} className="w-4 h-4" />
@@ -433,7 +433,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
                           onChange={(e) => setNewName(e.target.value)}
                           onKeyDown={handleCreateKeyDown}
                           placeholder="Board name..."
-                          className="flex-1 text-sm rounded-lg px-2 py-1.5 border border-gray-200 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-100"
+                          className="flex-1 text-sm rounded-lg px-2 py-1.5 border border-[#E0DBD5] focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6]"
                         />
                       </div>
                       <div className="flex items-center gap-1 flex-wrap">
@@ -447,8 +447,8 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
                             }}
                             className={`px-2 py-0.5 text-[11px] rounded-md border transition-colors ${
                               selectedTemplate.name === t.name
-                                ? 'bg-blue-50 border-blue-200 text-blue-600 font-medium'
-                                : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                                ? 'bg-[#EEF2D6] border-[#C2D64A] text-[#A8BA32] font-medium'
+                                : 'border-[#E0DBD5] text-[#8E8E89] hover:bg-[#F2EDE8]'
                             }`}
                           >
                             {t.name}
@@ -460,7 +460,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
                     <button
                       type="button"
                       onClick={() => setIsCreating(true)}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[#8E8E89] hover:bg-[#F2EDE8] hover:text-[#1B1B18]"
                     >
                       <Plus className="w-4 h-4" />
                       New board
@@ -476,7 +476,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
             <button
               type="button"
               onClick={() => setShowShareModal(true)}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[#5C5C57] bg-white border border-[#E0DBD5] rounded-xl hover:bg-[#F2EDE8] transition-colors"
             >
               <Users className="w-4 h-4" />
               Share
@@ -492,7 +492,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
                   type="button"
                   onClick={() => setSortBy(opt.value)}
                   className={`flex items-center justify-between gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
-                    sortBy === opt.value ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                    sortBy === opt.value ? 'bg-[#EEF2D6] text-[#A8BA32] font-medium' : 'text-[#5C5C57] hover:bg-[#F2EDE8]'
                   }`}
                 >
                   {opt.label}
@@ -509,14 +509,14 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
               onClick={() => setShowFilters(!showFilters)}
               className={`relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl border transition-colors ${
                 showFilters || activeFilterCount > 0
-                  ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'
-                  : 'text-gray-600 bg-white border-gray-200 hover:bg-gray-50'
+                  ? 'bg-[#EEF2D6] text-[#A8BA32] border-[#C2D64A] hover:bg-[#EEF2D6]'
+                  : 'text-[#5C5C57] bg-white border-[#E0DBD5] hover:bg-[#F2EDE8]'
               }`}
             >
               <Filter className="w-4 h-4" />
               Filter
               {activeFilterCount > 0 && (
-                <span className="flex items-center justify-center w-4 h-4 text-[10px] font-semibold text-white bg-blue-500 rounded-full">
+                <span className="flex items-center justify-center w-4 h-4 text-[10px] font-semibold text-white bg-[#C2D64A] rounded-full">
                   {activeFilterCount}
                 </span>
               )}
@@ -530,8 +530,8 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
               onClick={() => setShowArchived(!showArchived)}
               className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl border transition-colors ${
                 showArchived
-                  ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'
-                  : 'text-gray-600 bg-white border-gray-200 hover:bg-gray-50'
+                  ? 'bg-[#F5EDCF] text-[#D4A843] border-[#D4A843] hover:bg-[#F5EDCF]'
+                  : 'text-[#5C5C57] bg-white border-[#E0DBD5] hover:bg-[#F2EDE8]'
               }`}
             >
               <Archive className="w-4 h-4" />
@@ -551,7 +551,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
               <button
                 type="button"
                 onClick={clearFilters}
-                className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-gray-500 hover:text-gray-600 transition-colors"
+                className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-[#8E8E89] hover:text-[#5C5C57] transition-colors"
               >
                 <X className="w-3 h-3" />
                 Clear all
@@ -561,10 +561,10 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
         )}
         {/* Archived cards panel */}
         {showArchived && archivedCards.length > 0 && (
-          <div className="bg-amber-50/50 border border-amber-200 rounded-xl p-3">
+          <div className="bg-[#F5EDCF]/50 border border-[#D4A843] rounded-xl p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-amber-700 uppercase tracking-wider">Archived Tasks</span>
-              <button type="button" onClick={() => setShowArchived(false)} className="text-amber-500 hover:text-amber-700">
+              <span className="text-xs font-medium text-[#8B7355] uppercase tracking-wider">Archived Tasks</span>
+              <button type="button" onClick={() => setShowArchived(false)} className="text-[#D4A843] hover:text-[#8B7355]">
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -572,14 +572,14 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
               {archivedCards.map((card) => (
                 <div key={card.id} className="flex items-center justify-between py-1.5 px-2 bg-white rounded-lg group">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-gray-700 truncate">{card.title}</p>
-                    <p className="text-[10px] text-gray-400">{columns[card.column_id]?.title || 'Unknown section'}</p>
+                    <p className="text-sm text-[#5C5C57] truncate">{card.title}</p>
+                    <p className="text-[10px] text-[#C4BFB8]">{columns[card.column_id]?.title || 'Unknown section'}</p>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       type="button"
                       onClick={() => unarchiveCard(card.id)}
-                      className="p-1 text-gray-400 hover:text-emerald-500 transition-colors"
+                      className="p-1 text-[#C4BFB8] hover:text-[#A8BA32] transition-colors"
                       title="Restore"
                     >
                       <ArchiveRestore className="w-3.5 h-3.5" />
@@ -587,7 +587,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
                     <button
                       type="button"
                       onClick={() => deleteCard(card.id)}
-                      className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                      className="p-1 text-[#C4BFB8] hover:text-[#7A5C44] transition-colors"
                       title="Delete permanently"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

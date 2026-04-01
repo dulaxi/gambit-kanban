@@ -130,7 +130,7 @@ export default function Sidebar() {
         />
       )}
       <aside
-        className={`fixed top-0 left-0 h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-200 z-40 ${
+        className={`fixed top-0 left-0 h-screen bg-white border-r border-[#E0DBD5] flex flex-col transition-all duration-200 z-40 ${
           isDesktop
             ? collapsed
               ? 'w-16'
@@ -139,10 +139,10 @@ export default function Sidebar() {
         }`}
       >
       {/* Logo */}
-      <div className="flex items-center gap-2 px-4 h-16 border-b border-gray-200">
+      <div className="flex items-center gap-2 px-4 h-16 border-b border-[#E0DBD5]">
         <GambitLogo />
         {!showCollapsed && (
-          <span className="text-lg font-bold text-gray-900 tracking-tight">
+          <span className="text-lg font-bold text-[#1B1B18] tracking-tight font-heading">
             Gambit
           </span>
         )}
@@ -158,8 +158,8 @@ export default function Sidebar() {
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
               isActive
-                ? 'bg-blue-50 text-gray-900'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-[#EEF2D6] text-[#1B1B18]'
+                : 'text-[#5C5C57] hover:bg-[#E8E2DB]'
             } ${showCollapsed ? 'justify-center' : ''}`
           }
         >
@@ -174,8 +174,8 @@ export default function Sidebar() {
             className={({ isActive }) =>
               `flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-blue-50 text-gray-900'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-[#EEF2D6] text-[#1B1B18]'
+                  : 'text-[#5C5C57] hover:bg-[#E8E2DB]'
               }`
             }
           >
@@ -187,8 +187,8 @@ export default function Sidebar() {
               onClick={() => setBoardsOpen(!boardsOpen)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full ${
                 isBoardsActive
-                  ? 'bg-blue-50 text-gray-900'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-[#EEF2D6] text-[#1B1B18]'
+                  : 'text-[#5C5C57] hover:bg-[#E8E2DB]'
               }`}
             >
               <Kanban className="w-5 h-5 shrink-0" />
@@ -201,18 +201,18 @@ export default function Sidebar() {
             </button>
 
             {boardsOpen && (
-              <div className="ml-5 mt-1 pl-3 border-l border-gray-200 space-y-0.5">
+              <div className="ml-5 mt-1 pl-3 border-l border-[#E0DBD5] space-y-0.5">
                 {/* All Tasks — permanent entry */}
                 <div
                   onClick={() => handleSelectBoard('__all__')}
                   className={`flex items-center justify-between w-full px-3 py-1.5 rounded-lg text-sm transition-colors group cursor-pointer ${
                     isBoardsActive && activeBoardId === '__all__'
-                      ? 'text-gray-900 font-medium bg-blue-50'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      ? 'text-[#1B1B18] font-medium bg-[#EEF2D6]'
+                      : 'text-[#5C5C57] hover:text-[#1B1B18] hover:bg-[#E8E2DB]'
                   }`}
                 >
                   <span className="flex items-center gap-2 truncate">
-                    <Layers className="w-4 h-4 text-gray-500 shrink-0" />
+                    <Layers className="w-4 h-4 text-[#8E8E89] shrink-0" />
                     <span className="truncate">All Tasks</span>
                   </span>
                 </div>
@@ -225,8 +225,8 @@ export default function Sidebar() {
                       onClick={() => handleSelectBoard(board.id)}
                       className={`flex items-center justify-between w-full px-3 py-1.5 rounded-lg text-sm transition-colors group cursor-pointer relative ${
                         isBoardsActive && activeBoardId === board.id
-                          ? 'text-gray-900 font-medium bg-blue-50'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                          ? 'text-[#1B1B18] font-medium bg-[#EEF2D6]'
+                          : 'text-[#5C5C57] hover:text-[#1B1B18] hover:bg-[#E8E2DB]'
                       }`}
                     >
                       <span className="flex items-center gap-2 truncate">
@@ -236,13 +236,13 @@ export default function Sidebar() {
                             e.stopPropagation()
                             setIconPickerBoardId(iconPickerBoardId === board.id ? null : board.id)
                           }}
-                          className="shrink-0 hover:bg-gray-200 rounded p-0.5 transition-colors"
+                          className="shrink-0 hover:bg-[#E0DBD5] rounded p-0.5 transition-colors"
                           title="Change icon"
                         >
                           {board.icon ? (
-                            <DynamicIcon name={board.icon} className="w-4 h-4 text-gray-500" />
+                            <DynamicIcon name={board.icon} className="w-4 h-4 text-[#8E8E89]" />
                           ) : (
-                            <Kanban className="w-4 h-4 text-gray-500" />
+                            <Kanban className="w-4 h-4 text-[#8E8E89]" />
                           )}
                         </button>
                         {renamingBoardId === board.id ? (
@@ -265,7 +265,7 @@ export default function Sidebar() {
                               setRenamingBoardId(null)
                             }}
                             onClick={(e) => e.stopPropagation()}
-                            className="flex-1 text-sm bg-white border border-blue-400 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-100 min-w-0"
+                            className="flex-1 text-sm bg-white border border-[#C2D64A] rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-[#EEF2D6] min-w-0"
                           />
                         ) : (
                           <span
@@ -284,8 +284,8 @@ export default function Sidebar() {
                         <Star
                           className={`w-3.5 h-3.5 transition-all cursor-pointer ${
                             isFav
-                              ? 'text-amber-400 fill-amber-400'
-                              : 'text-gray-500 opacity-0 group-hover:opacity-100 hover:text-amber-400'
+                              ? 'text-[#D4A843] fill-[#D4A843]'
+                              : 'text-[#8E8E89] opacity-0 group-hover:opacity-100 hover:text-[#D4A843]'
                           }`}
                           onClick={(e) => {
                             e.stopPropagation()
@@ -294,7 +294,7 @@ export default function Sidebar() {
                         />
                         {Object.keys(ownedBoards).length > 1 && (
                           <Trash2
-                            className="w-3.5 h-3.5 text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 shrink-0"
+                            className="w-3.5 h-3.5 text-[#8E8E89] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 shrink-0"
                             onClick={(e) => handleDeleteBoard(e, board.id)}
                           />
                         )}
@@ -333,13 +333,13 @@ export default function Sidebar() {
                         }
                       }}
                       placeholder="Board name..."
-                      className="w-full px-2 py-1 text-sm rounded-md border border-gray-200 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-100"
+                      className="w-full px-2 py-1 text-sm rounded-md border border-[#E0DBD5] focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6]"
                     />
                   </div>
                 ) : (
                   <button
                     onClick={() => setCreating(true)}
-                    className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-sm text-[#8E8E89] hover:text-[#1B1B18] hover:bg-[#E8E2DB] transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>New board</span>
@@ -357,15 +357,15 @@ export default function Sidebar() {
             className={({ isActive }) =>
               `flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-blue-50 text-gray-900'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-[#EEF2D6] text-[#1B1B18]'
+                  : 'text-[#5C5C57] hover:bg-[#E8E2DB]'
               }`
             }
           >
             <span className="relative">
               <Users className="w-5 h-5 shrink-0" />
               {invitationCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute -top-1.5 -right-1.5 bg-[#C2D64A] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                   {invitationCount > 9 ? '9+' : invitationCount}
                 </span>
               )}
@@ -377,14 +377,14 @@ export default function Sidebar() {
               onClick={() => setWorkspaceOpen(!workspaceOpen)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full ${
                 location.pathname.startsWith('/workspace')
-                  ? 'bg-blue-50 text-gray-900'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-[#EEF2D6] text-[#1B1B18]'
+                  : 'text-[#5C5C57] hover:bg-[#E8E2DB]'
               }`}
             >
               <span className="relative">
                 <Users className="w-5 h-5 shrink-0" />
                 {invitationCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-1.5 bg-[#C2D64A] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {invitationCount > 9 ? '9+' : invitationCount}
                   </span>
                 )}
@@ -398,22 +398,22 @@ export default function Sidebar() {
             </button>
 
             {workspaceOpen && (
-              <div className="ml-5 mt-1 pl-3 border-l border-gray-200 space-y-0.5">
+              <div className="ml-5 mt-1 pl-3 border-l border-[#E0DBD5] space-y-0.5">
                 {/* Invitations link */}
                 <div
                   onClick={() => { navigate('/workspace'); closeMobileMenu() }}
                   className={`flex items-center justify-between w-full px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer ${
                     location.pathname === '/workspace' && !activeBoardId?.startsWith('ws_')
-                      ? 'text-gray-900 font-medium bg-blue-50'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      ? 'text-[#1B1B18] font-medium bg-[#EEF2D6]'
+                      : 'text-[#5C5C57] hover:text-[#1B1B18] hover:bg-[#E8E2DB]'
                   }`}
                 >
                   <span className="flex items-center gap-2 truncate">
-                    <Briefcase className="w-4 h-4 text-gray-500 shrink-0" />
+                    <Briefcase className="w-4 h-4 text-[#8E8E89] shrink-0" />
                     <span className="truncate">Overview</span>
                   </span>
                   {invitationCount > 0 && (
-                    <span className="text-[10px] font-semibold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full">
+                    <span className="text-[10px] font-semibold bg-[#EEF2D6] text-[#A8BA32] px-1.5 py-0.5 rounded-full">
                       {invitationCount}
                     </span>
                   )}
@@ -426,15 +426,15 @@ export default function Sidebar() {
                     onClick={() => { setActiveBoard(board.id); navigate('/boards'); closeMobileMenu() }}
                     className={`flex items-center w-full px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer ${
                       isBoardsActive && activeBoardId === board.id
-                        ? 'text-gray-900 font-medium bg-blue-50'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                        ? 'text-[#1B1B18] font-medium bg-[#EEF2D6]'
+                        : 'text-[#5C5C57] hover:text-[#1B1B18] hover:bg-[#E8E2DB]'
                     }`}
                   >
                     <span className="flex items-center gap-2 truncate">
                       {board.icon ? (
-                        <DynamicIcon name={board.icon} className="w-4 h-4 text-gray-500 shrink-0" />
+                        <DynamicIcon name={board.icon} className="w-4 h-4 text-[#8E8E89] shrink-0" />
                       ) : (
-                        <Kanban className="w-4 h-4 text-gray-500 shrink-0" />
+                        <Kanban className="w-4 h-4 text-[#8E8E89] shrink-0" />
                       )}
                       <span className="truncate">{board.name}</span>
                     </span>
@@ -454,8 +454,8 @@ export default function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-blue-50 text-gray-900'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-[#EEF2D6] text-[#1B1B18]'
+                  : 'text-[#5C5C57] hover:bg-[#E8E2DB]'
               } ${showCollapsed ? 'justify-center' : ''}`
             }
           >
@@ -466,15 +466,15 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom section */}
-      <div className="border-t border-gray-200 py-4 px-2 space-y-1">
+      <div className="border-t border-[#E0DBD5] py-4 px-2 space-y-1">
         <NavLink
           to="/settings"
           onClick={closeMobileMenu}
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
               isActive
-                ? 'bg-blue-50 text-gray-900'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-[#EEF2D6] text-[#1B1B18]'
+                : 'text-[#5C5C57] hover:bg-[#E8E2DB]'
             } ${showCollapsed ? 'justify-center' : ''}`
           }
         >
@@ -485,7 +485,7 @@ export default function Sidebar() {
         {isDesktop && (
           <button
             onClick={toggle}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors w-full ${
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#5C5C57] hover:bg-[#E8E2DB] transition-colors w-full ${
               collapsed ? 'justify-center' : ''
             }`}
           >

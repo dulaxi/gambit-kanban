@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
@@ -41,6 +41,7 @@ export default function AppLayout() {
   const fetchNotifications = useNotificationStore((s) => s.fetchNotifications)
   const subscribeToNotifications = useNotificationStore((s) => s.subscribeToNotifications)
   const [showMigration, setShowMigration] = useState(false)
+  const remindersShown = useRef(false)
   const [migrating, setMigrating] = useState(false)
 
   useEffect(() => {
@@ -68,7 +69,9 @@ export default function AppLayout() {
           return
         }
 
-        // Due date reminders — check for overdue and due-today tasks
+        // Due date reminders — run once per session
+        if (remindersShown.current) return
+        remindersShown.current = true
         const profile = useAuthStore.getState().profile
         const displayName = profile?.display_name || ''
         const cards = useBoardStore.getState().cards
@@ -165,7 +168,7 @@ export default function AppLayout() {
   const title = pageTitles[basePath] || 'Gambit'
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F2EDE8]">
       <OfflineBanner />
       <Sidebar />
       <div
@@ -177,24 +180,24 @@ export default function AppLayout() {
         <main className={`p-4 sm:p-6 ${!isDesktop ? 'pb-20' : ''}`}>
           {/* Migration banner */}
           {showMigration && (
-            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+            <div className="mb-4 bg-[#EEF2D6] border border-[#C2D64A] rounded-xl p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-900">Local data detected</p>
-                <p className="text-xs text-blue-700 mt-0.5">
+                <p className="text-sm font-medium text-[#1B1B18]">Local data detected</p>
+                <p className="text-xs text-[#5C5C57] mt-0.5">
                   Import your existing boards and notes into your account?
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleSkipMigration}
-                  className="px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium text-[#5C5C57] hover:bg-[#E8E2DB] rounded-lg transition-colors"
                 >
                   Skip
                 </button>
                 <button
                   onClick={handleMigrate}
                   disabled={migrating}
-                  className="px-3 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium bg-[#1B1B18] text-white rounded-lg hover:bg-[#333] disabled:opacity-50 transition-colors"
                 >
                   {migrating ? 'Importing...' : 'Import data'}
                 </button>

@@ -107,15 +107,15 @@ export default function BoardShareModal({ board, onClose }) {
           : 'rounded-2xl w-full max-w-md mx-4'
       }`}>
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E2DB]">
           <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-gray-600" />
-            <h2 className="text-base font-semibold text-gray-900">Share "{board.name}"</h2>
+            <Users className="w-5 h-5 text-[#5C5C57]" />
+            <h2 className="text-base font-semibold text-[#1B1B18]">Share "{board.name}"</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+            className="p-1.5 rounded-lg text-[#8E8E89] hover:text-[#5C5C57] hover:bg-[#E8E2DB]"
           >
             <X className="w-4 h-4" />
           </button>
@@ -123,36 +123,36 @@ export default function BoardShareModal({ board, onClose }) {
 
         {/* Invite form */}
         {isOwner && (
-          <form onSubmit={handleInvite} className="px-5 py-3 border-b border-gray-100">
+          <form onSubmit={handleInvite} className="px-5 py-3 border-b border-[#E8E2DB]">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8E8E89]" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); setError('') }}
                   placeholder="Invite by email..."
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-gray-200 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-100"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-[#E0DBD5] focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6]"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="flex items-center gap-1.5 px-3 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 bg-[#1B1B18] text-white text-sm font-medium rounded-xl hover:bg-[#1B1B18] disabled:opacity-50 transition-colors"
               >
                 <UserPlus className="w-4 h-4" />
                 Invite
               </button>
             </div>
             {error && (
-              <p className="text-xs text-red-500 mt-1.5">{error}</p>
+              <p className="text-xs text-[#7A5C44] mt-1.5">{error}</p>
             )}
           </form>
         )}
 
         {/* Members list */}
         <div className="px-5 py-3 max-h-64 overflow-y-auto">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+          <p className="text-xs font-medium text-[#8E8E89] uppercase tracking-wider mb-2">
             Members ({members.length})
           </p>
           <div className="space-y-1">
@@ -162,19 +162,19 @@ export default function BoardShareModal({ board, onClose }) {
                 className="flex items-center justify-between py-2 group"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold ${m.profiles?.color || 'bg-gray-300'}`}>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold ${m.profiles?.color || 'bg-[#E0DBD5]'}`}>
                     {(m.profiles?.display_name || '?')[0].toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-[#1B1B18] truncate">
                       {m.profiles?.display_name || 'Unknown'}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">{m.profiles?.email}</p>
+                    <p className="text-xs text-[#8E8E89] truncate">{m.profiles?.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {m.role === 'owner' ? (
-                    <span className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                    <span className="flex items-center gap-1 text-xs text-[#D4A843] bg-[#F5EDCF] px-2 py-0.5 rounded-full">
                       <Crown className="w-3 h-3" />
                       Owner
                     </span>
@@ -182,12 +182,12 @@ export default function BoardShareModal({ board, onClose }) {
                     <button
                       type="button"
                       onClick={() => handleRemoveMember(m.user_id)}
-                      className="p-1 text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="p-1 text-[#8E8E89] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   ) : (
-                    <span className="text-xs text-gray-500">Member</span>
+                    <span className="text-xs text-[#8E8E89]">Member</span>
                   )}
                 </div>
               </div>
@@ -197,7 +197,7 @@ export default function BoardShareModal({ board, onClose }) {
           {/* Pending invitations */}
           {invitations.length > 0 && (
             <>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mt-4 mb-2">
+              <p className="text-xs font-medium text-[#8E8E89] uppercase tracking-wider mt-4 mb-2">
                 Pending Invitations ({invitations.length})
               </p>
               <div className="space-y-1">
@@ -207,16 +207,16 @@ export default function BoardShareModal({ board, onClose }) {
                     className="flex items-center justify-between py-2 group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
-                        <Mail className="w-3.5 h-3.5 text-gray-500" />
+                      <div className="w-7 h-7 rounded-full bg-[#E8E2DB] flex items-center justify-center">
+                        <Mail className="w-3.5 h-3.5 text-[#8E8E89]" />
                       </div>
-                      <p className="text-sm text-gray-600">{inv.invited_email}</p>
+                      <p className="text-sm text-[#5C5C57]">{inv.invited_email}</p>
                     </div>
                     {isOwner && (
                       <button
                         type="button"
                         onClick={() => handleCancelInvitation(inv.id)}
-                        className="p-1 text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="p-1 text-[#8E8E89] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>

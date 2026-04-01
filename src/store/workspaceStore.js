@@ -115,7 +115,7 @@ export const useWorkspaceStore = create((set, get) => ({
           return {
             ...m.boards,
             ownerName: ownerProfile?.display_name || 'Unknown',
-            ownerColor: ownerProfile?.color || 'bg-gray-300',
+            ownerColor: ownerProfile?.color || 'bg-[#E0DBD5]',
             memberCount: countMap[m.board_id] || 0,
           }
         })
