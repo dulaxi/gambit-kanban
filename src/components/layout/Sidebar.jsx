@@ -142,7 +142,7 @@ export default function Sidebar() {
       <div className="flex items-center gap-2 px-4 h-16 border-b border-[#E0DBD5]">
         <GambitLogo />
         {!showCollapsed && (
-          <span className="text-lg font-bold text-[#1B1B18] tracking-tight font-heading">
+          <span className="text-lg font-bold text-[#1B1B18] tracking-tight font-logo">
             Gambit
           </span>
         )}

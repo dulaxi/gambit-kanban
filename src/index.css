@@ -3,6 +3,7 @@
 @theme {
   --font-sans: 'Mona Sans Variable', 'Mona Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-heading: 'Spectral', Georgia, serif;
+  --font-logo: 'Google Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
   /* Phosphor palette */
   --color-cream: #F2EDE8;
@@ -64,6 +65,12 @@
   outline-offset: 2px;
 }
 
+/* Text selection */
+::selection {
+  background: #EEF2D6;
+  color: #1B1B18;
+}
+
 /* Scrollbar styling — hidden until hovering the scrollable area */
 ::-webkit-scrollbar {
   width: 6px;
@@ -82,12 +89,12 @@
 
 *:hover > ::-webkit-scrollbar-thumb,
 *:hover::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(27, 27, 24, 0.12);
 }
 
 *:hover > ::-webkit-scrollbar-thumb:hover,
 *:hover::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(27, 27, 24, 0.25);
 }
 
 /* Mobile safe areas for bottom tab bar (iOS notch/home indicator) */

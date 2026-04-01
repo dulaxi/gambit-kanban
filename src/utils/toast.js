@@ -7,86 +7,70 @@ const BASE = {
   borderRadius: '10px',
   padding: '10px 14px',
   boxShadow: '0 4px 24px rgba(27,27,24,0.10)',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  maxWidth: '380px',
+  width: '420px',
+  maxWidth: '420px',
   border: '1px solid #1B1B18',
 }
 
-function icon(name) {
+function materialIcon(name, color) {
   return createElement('span', {
     className: 'material-symbols-outlined',
     style: {
       fontSize: '18px',
       lineHeight: '18px',
+      flexShrink: 0,
       fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24",
+      color,
     },
   }, name)
 }
 
+function dismissBtn(id, color) {
+  return createElement('button', {
+    onClick: () => toast.dismiss(id),
+    style: {
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: 0,
+      marginLeft: 'auto',
+      flexShrink: 0,
+      display: 'flex',
+      alignItems: 'center',
+      opacity: 0.7,
+    },
+    onMouseEnter: (e) => { e.currentTarget.style.opacity = 1 },
+    onMouseLeave: (e) => { e.currentTarget.style.opacity = 0.7 },
+  }, materialIcon('cancel', color))
+}
+
+function render(message, iconName, colors, t) {
+  return createElement('div', {
+    style: { display: 'flex', alignItems: 'center', gap: '10px', width: '100%' },
+  },
+    materialIcon(iconName, colors.color),
+    createElement('span', { style: { flex: 1, textAlign: 'left' } }, message),
+    dismissBtn(t.id, colors.color),
+  )
+}
+
+function make(iconName, bg, color, duration) {
+  const colors = { color }
+  return (message, opts) =>
+    toast((t) => render(message, iconName, colors, t), {
+      duration,
+      ...opts,
+      style: { ...BASE, background: bg, color },
+    })
+}
+
 export const showToast = {
-  success: (message, opts) =>
-    toast(message, {
-      duration: 3000,
-      ...opts,
-      icon: icon('check_circle'),
-      style: { ...BASE, background: '#C2D64A', color: '#1B1B18' },
-    }),
-
-  error: (message, opts) =>
-    toast(message, {
-      duration: 4000,
-      ...opts,
-      icon: icon('error'),
-      style: { ...BASE, background: '#C27A4A', color: '#FAF8F6' },
-    }),
-
-  delete: (message, opts) =>
-    toast(message, {
-      duration: 5000,
-      ...opts,
-      icon: icon('delete'),
-      style: { ...BASE, background: '#C27A4A', color: '#FAF8F6' },
-    }),
-
-  archive: (message, opts) =>
-    toast(message, {
-      duration: 3000,
-      ...opts,
-      icon: icon('archive'),
-      style: { ...BASE, background: '#A8969E', color: '#E8DDE2' },
-    }),
-
-  restore: (message, opts) =>
-    toast(message, {
-      duration: 3000,
-      ...opts,
-      icon: icon('undo'),
-      style: { ...BASE, background: '#C2D64A', color: '#1B1B18' },
-    }),
-
-  info: (message, opts) =>
-    toast(message, {
-      duration: 3000,
-      ...opts,
-      icon: icon('info'),
-      style: { ...BASE, background: '#FAF8F6', color: '#5C5C57' },
-    }),
-
-  warn: (message, opts) =>
-    toast(message, {
-      duration: 4000,
-      ...opts,
-      icon: icon('warning'),
-      style: { ...BASE, background: '#D4A843', color: '#1B1B18' },
-    }),
-
-  overdue: (message, opts) =>
-    toast(message, {
-      duration: 5000,
-      ...opts,
-      icon: icon('alarm'),
-      style: { ...BASE, background: '#C27A4A', color: '#FAF8F6' },
-    }),
+  success: make('check_circle', '#C2D64A', '#1B1B18', 3000),
+  error:   make('error',        '#C27A4A', '#FAF8F6', 4000),
+  delete:  make('delete',       '#C27A4A', '#FAF8F6', 5000),
+  archive: make('archive',      '#A8969E', '#E8DDE2', 3000),
+  restore: make('undo',         '#C2D64A', '#1B1B18', 3000),
+  info:    make('info',         '#FAF8F6', '#5C5C57', 3000),
+  warn:    make('warning',      '#D4A843', '#1B1B18', 4000),
+  overdue: make('alarm',        '#C27A4A', '#FAF8F6', 5000),
 }

@@ -32,8 +32,14 @@ function undoableDelete(message) {
         if (c.textContent.includes(message) && !c.querySelector(`[data-undo-id]`)) {
           const btn = document.createElement('button')
           btn.setAttribute('data-undo-id', id)
-          btn.style.cssText = 'color:#FAF8F6;font-weight:700;font-size:12px;font-family:SF Mono,Menlo,monospace;background:none;border:none;cursor:pointer;margin-left:auto;white-space:nowrap;text-decoration:underline'
-          btn.textContent = 'Undo'
+          btn.style.cssText = 'color:#FAF8F6;background:none;border:none;cursor:pointer;margin-left:auto;display:flex;align-items:center;opacity:0.8'
+          btn.onmouseenter = () => { btn.style.opacity = 1 }
+          btn.onmouseleave = () => { btn.style.opacity = 0.8 }
+          const ico = document.createElement('span')
+          ico.className = 'material-symbols-outlined'
+          ico.style.cssText = "font-size:18px;line-height:18px;font-variation-settings:'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24"
+          ico.textContent = 'undo'
+          btn.appendChild(ico)
           c.style.display = 'flex'
           c.style.alignItems = 'center'
           c.style.gap = '4px'

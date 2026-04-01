@@ -9,14 +9,14 @@ import { LABEL_BG, PRIORITY_DOT, getGreeting } from '../utils/formatting'
 import { computeTaskStats, computeBoardSummaries } from '../utils/cardStats'
 
 const SEGMENT_COLORS = [
-  'bg-[#9BAFD9]',
-  'bg-[#8A9FCC]',
-  'bg-[#7A8FBF]',
-  'bg-[#6A7FB2]',
-  'bg-[#4D6899]',
-  'bg-[#395285]',
-  'bg-[#264078]',
-  'bg-[#103783]',
+  'bg-[#C2D64A]',
+  'bg-[#A8BA32]',
+  'bg-[#D4A843]',
+  'bg-[#C27A4A]',
+  'bg-[#A8969E]',
+  'bg-[#8E8E89]',
+  'bg-[#8A9A2B]',
+  'bg-[#B08F3A]',
 ]
 
 
