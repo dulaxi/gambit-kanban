@@ -1,10 +1,11 @@
+import { memo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 import Card from './Card'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 
-export default function SortableCard({ card, onClick, onComplete, isSelected }) {
+export default memo(function SortableCard({ card, onClick, onComplete, isSelected }) {
   const isMobile = useIsMobile()
   const {
     attributes,
@@ -46,4 +47,4 @@ export default function SortableCard({ card, onClick, onComplete, isSelected }) 
       <Card card={card} onClick={onClick} onComplete={onComplete} isSelected={isSelected} />
     </div>
   )
-}
+})

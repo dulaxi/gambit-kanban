@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { format, isPast, isToday, isTomorrow, isYesterday, parseISO } from 'date-fns'
 import { Calendar, CheckSquare, AlignLeft, CheckCircle2, FileText } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
@@ -7,7 +7,7 @@ import { useSettingsStore } from '../../store/settingsStore'
 import DynamicIcon from './DynamicIcon'
 import { LABEL_BG, PRIORITY_DOT, getAvatarColor, getInitials } from '../../utils/formatting'
 
-export default function Card({ card, onClick, onComplete, isSelected, iconOverride }) {
+export default memo(function Card({ card, onClick, onComplete, isSelected, iconOverride }) {
   const { title, description, labels, priority, due_date: dueDate, checklist, assignee_name: assignee, task_number: taskNumber, completed, icon } = card
   const displayIcon = iconOverride || icon
   const updateCard = useBoardStore((s) => s.updateCard)
@@ -200,4 +200,4 @@ export default function Card({ card, onClick, onComplete, isSelected, iconOverri
       </div>
     </div>
   )
-}
+})

@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { useBoardStore } from '../store/boardStore'
 import BoardSelector from '../components/board/BoardSelector'
 import BoardView from '../components/board/BoardView'
@@ -39,19 +39,19 @@ export default function BoardsPage() {
     }
   }, [activeBoardId, columns, addCard])
 
-  const handleCardClick = (cardId) => {
+  const handleCardClick = useCallback((cardId) => {
     setInlineCardId(null)
     setEditingCardId(cardId)
-  }
+  }, [])
 
-  const handleCreateCard = (cardId) => {
+  const handleCreateCard = useCallback((cardId) => {
     setEditingCardId(null)
     setInlineCardId(cardId)
-  }
+  }, [])
 
-  const handleInlineDone = () => {
+  const handleInlineDone = useCallback(() => {
     setInlineCardId(null)
-  }
+  }, [])
 
   return (
     <div
