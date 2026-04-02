@@ -28,13 +28,13 @@ export default function BoardsPage() {
       const cardId = await addCard(activeBoardId, firstCol.id, { title: '' })
       if (cardId) setInlineCardId(cardId)
     }
-    window.addEventListener('gambit:open-card', openCard)
-    window.addEventListener('gambit:close-panel', closePanel)
-    window.addEventListener('gambit:new-card', newCard)
+    window.addEventListener('kolumn:open-card', openCard)
+    window.addEventListener('kolumn:close-panel', closePanel)
+    window.addEventListener('kolumn:new-card', newCard)
     return () => {
-      window.removeEventListener('gambit:open-card', openCard)
-      window.removeEventListener('gambit:close-panel', closePanel)
-      window.removeEventListener('gambit:new-card', newCard)
+      window.removeEventListener('kolumn:open-card', openCard)
+      window.removeEventListener('kolumn:close-panel', closePanel)
+      window.removeEventListener('kolumn:new-card', newCard)
     }
   }, [activeBoardId, columns, addCard])
 

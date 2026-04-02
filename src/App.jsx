@@ -23,7 +23,7 @@ function UndoListener() {
     const undoBtn = e.target.closest('[data-undo-id]')
     if (undoBtn) {
       const id = undoBtn.getAttribute('data-undo-id')
-      window.dispatchEvent(new CustomEvent(`gambit:undo:${id}`))
+      window.dispatchEvent(new CustomEvent(`kolumn:undo:${id}`))
     }
   }, [])
 

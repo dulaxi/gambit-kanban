@@ -33,7 +33,7 @@ export default function LoginPage() {
             className="material-symbols-outlined text-black mx-auto mb-3 block"
             style={{ fontSize: '40px', lineHeight: '40px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
           >owl</span>
-          <h1 className="text-2xl font-bold text-[#1B1B18] font-logo">Gambit</h1>
+          <h1 className="text-2xl font-bold text-[#1B1B18] font-logo">Kolumn</h1>
           <p className="text-sm text-[#5C5C57] mt-1">Sign in to your account</p>
         </div>
 

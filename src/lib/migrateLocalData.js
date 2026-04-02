@@ -5,8 +5,8 @@ import { supabase } from './supabase'
  * after a user's first login. Returns true if migration was performed.
  */
 export async function migrateLocalData() {
-  const boardsRaw = localStorage.getItem('gambit-boards')
-  const notesRaw = localStorage.getItem('gambit-notes')
+  const boardsRaw = localStorage.getItem('kolumn-boards')
+  const notesRaw = localStorage.getItem('kolumn-notes')
 
   if (!boardsRaw && !notesRaw) return false
 
@@ -107,8 +107,8 @@ export async function migrateLocalData() {
 
   // Clear localStorage after successful migration
   if (migrated) {
-    localStorage.removeItem('gambit-boards')
-    localStorage.removeItem('gambit-notes')
+    localStorage.removeItem('kolumn-boards')
+    localStorage.removeItem('kolumn-notes')
   }
 
   return migrated
@@ -118,5 +118,5 @@ export async function migrateLocalData() {
  * Check if there is local data that could be migrated
  */
 export function hasLocalData() {
-  return !!(localStorage.getItem('gambit-boards') || localStorage.getItem('gambit-notes'))
+  return !!(localStorage.getItem('kolumn-boards') || localStorage.getItem('kolumn-notes'))
 }

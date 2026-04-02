@@ -105,7 +105,7 @@ export default function Header({ title }) {
     navigate('/boards')
     // Dispatch a custom event so BoardsPage can open this card
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('gambit:open-card', { detail: { cardId: card.id } }))
+      window.dispatchEvent(new CustomEvent('kolumn:open-card', { detail: { cardId: card.id } }))
     }, 100)
   }
 
@@ -365,7 +365,7 @@ export default function Header({ title }) {
                           setNotifOpen(false)
                           navigate('/boards')
                           setTimeout(() => {
-                            window.dispatchEvent(new CustomEvent('gambit:open-card', { detail: { cardId: n.card_id } }))
+                            window.dispatchEvent(new CustomEvent('kolumn:open-card', { detail: { cardId: n.card_id } }))
                           }, 100)
                         }
                       }}

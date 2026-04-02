@@ -144,7 +144,7 @@ export default function AppLayout() {
 
       // Esc — close detail panel / blur search
       if (e.key === 'Escape') {
-        window.dispatchEvent(new CustomEvent('gambit:close-panel'))
+        window.dispatchEvent(new CustomEvent('kolumn:close-panel'))
         const active = document.activeElement
         if (active?.tagName === 'INPUT' || active?.tagName === 'TEXTAREA') {
           active.blur()
@@ -156,7 +156,7 @@ export default function AppLayout() {
 
       // N — new card (only on boards page)
       if (e.key === 'n' && location.pathname.startsWith('/boards')) {
-        window.dispatchEvent(new CustomEvent('gambit:new-card'))
+        window.dispatchEvent(new CustomEvent('kolumn:new-card'))
       }
     }
     document.addEventListener('keydown', handler)
@@ -165,7 +165,7 @@ export default function AppLayout() {
 
   // Match the base path for title
   const basePath = '/' + (location.pathname.split('/')[1] || '')
-  const title = pageTitles[basePath] || 'Gambit'
+  const title = pageTitles[basePath] || 'Kolumn'
 
   return (
     <div className="min-h-screen bg-white">

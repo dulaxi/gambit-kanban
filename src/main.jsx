@@ -16,11 +16,11 @@ import { useAuthStore } from './store/authStore'
 
 // Global error handlers — catch unhandled errors and rejections
 window.addEventListener('error', (event) => {
-  console.error('[Gambit] Unhandled error:', event.error || event.message)
+  console.error('[Kolumn] Unhandled error:', event.error || event.message)
 })
 
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('[Gambit] Unhandled promise rejection:', event.reason)
+  console.error('[Kolumn] Unhandled promise rejection:', event.reason)
 })
 
 // Register service worker for PWA

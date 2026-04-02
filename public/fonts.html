@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Font Comparison</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Lora:wght@400;600;700&family=Cormorant+Garamond:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Crimson+Pro:wght@400;600;700&family=Libre+Baskerville:wght@400;700&family=EB+Garamond:wght@400;600;700&family=Spectral:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, sans-serif; background: #F2EDE8; color: #1B1B18; padding: 40px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    p.sub { color: #8E8E89; font-size: 14px; margin-bottom: 40px; }
+    .font-card { background: white; border: 1px solid #E0DBD5; border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+    .font-name { font-size: 12px; font-weight: 600; color: #8E8E89; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: -apple-system, sans-serif; }
+    .sample-heading { font-size: 28px; font-weight: 700; color: #1B1B18; margin-bottom: 4px; }
+    .sample-sub { font-size: 20px; font-weight: 600; color: #5C5C57; margin-bottom: 4px; }
+    .sample-body { font-size: 16px; font-weight: 400; color: #8E8E89; }
+    .sample-ui { display: flex; gap: 16px; margin-top: 12px; align-items: center; font-family: -apple-system, sans-serif; }
+    .sample-ui .page-title { font-size: 20px; font-weight: 600; color: #1B1B18; }
+    .sample-ui .greeting { font-size: 24px; font-weight: 700; color: #1B1B18; }
+    .sample-ui .lime { color: #C2D64A; }
+    .sample-ui .logo { font-size: 18px; font-weight: 700; color: #1B1B18; }
+  </style>
+</head>
+<body>
+  <h1>Pick a heading font</h1>
+  <p class="sub">More handwritten / warm serif options — see how each looks in Kolumn context</p>
+
+  <div class="font-card">
+    <div class="font-name">1. Fraunces (current)</div>
+    <div class="sample-heading" style="font-family: 'Fraunces'">Good morning, Alex</div>
+    <div class="sample-sub" style="font-family: 'Fraunces'">Dashboard &middot; Settings &middot; Calendar</div>
+    <div class="sample-body" style="font-family: 'Fraunces'">Organize tasks, collaborate with your team</div>
+    <div class="sample-ui">
+      <span class="logo" style="font-family: 'Fraunces'">Kolumn</span>
+      <span class="page-title" style="font-family: 'Fraunces'">Boards</span>
+      <span class="greeting" style="font-family: 'Fraunces'">Good evening, <span class="lime">Dula</span></span>
+    </div>
+  </div>
+
+  <div class="font-card">
+    <div class="font-name">2. Lora — warm, slightly calligraphic</div>
+    <div class="sample-heading" style="font-family: 'Lora'">Good morning, Alex</div>
+    <div class="sample-sub" style="font-family: 'Lora'">Dashboard &middot; Settings &middot; Calendar</div>
+    <div class="sample-body" style="font-family: 'Lora'">Organize tasks, collaborate with your team</div>
+    <div class="sample-ui">
+      <span class="logo" style="font-family: 'Lora'">Kolumn</span>
+      <span class="page-title" style="font-family: 'Lora'">Boards</span>
+      <span class="greeting" style="font-family: 'Lora'">Good evening, <span class="lime">Dula</span></span>
+    </div>
+  </div>
+
+  <div class="font-card">
+    <div class="font-name">3. Cormorant Garamond — elegant, handwritten feel</div>
+    <div class="sample-heading" style="font-family: 'Cormorant Garamond'">Good morning, Alex</div>
+    <div class="sample-sub" style="font-family: 'Cormorant Garamond'">Dashboard &middot; Settings &middot; Calendar</div>
+    <div class="sample-body" style="font-family: 'Cormorant Garamond'">Organize tasks, collaborate with your team</div>
+    <div class="sample-ui">
+      <span class="logo" style="font-family: 'Cormorant Garamond'">Kolumn</span>
+      <span class="page-title" style="font-family: 'Cormorant Garamond'">Boards</span>
+      <span class="greeting" style="font-family: 'Cormorant Garamond'">Good evening, <span class="lime">Dula</span></span>
+    </div>
+  </div>
+
+  <div class="font-card">
+    <div class="font-name">4. Playfair Display — classic, high contrast</div>
+    <div class="sample-heading" style="font-family: 'Playfair Display'">Good morning, Alex</div>
+    <div class="sample-sub" style="font-family: 'Playfair Display'">Dashboard &middot; Settings &middot; Calendar</div>
+    <div class="sample-body" style="font-family: 'Playfair Display'">Organize tasks, collaborate with your team</div>
+    <div class="sample-ui">
+      <span class="logo" style="font-family: 'Playfair Display'">Kolumn</span>
+      <span class="page-title" style="font-family: 'Playfair Display'">Boards</span>
+      <span class="greeting" style="font-family: 'Playfair Display'">Good evening, <span class="lime">Dula</span></span>
+    </div>
+  </div>
+
+  <div class="font-card">
+    <div class="font-name">5. Crimson Pro — warm, readable, bookish</div>
+    <div class="sample-heading" style="font-family: 'Crimson Pro'">Good morning, Alex</div>
+    <div class="sample-sub" style="font-family: 'Crimson Pro'">Dashboard &middot; Settings &middot; Calendar</div>
+    <div class="sample-body" style="font-family: 'Crimson Pro'">Organize tasks, collaborate with your team</div>
+    <div class="sample-ui">
+      <span class="logo" style="font-family: 'Crimson Pro'">Kolumn</span>
+      <span class="page-title" style="font-family: 'Crimson Pro'">Boards</span>
+      <span class="greeting" style="font-family: 'Crimson Pro'">Good evening, <span class="lime">Dula</span></span>
+    </div>
+  </div>
+
+  <div class="font-card">
+    <div class="font-name">6. Libre Baskerville — sturdy, warm classic</div>
+    <div class="sample-heading" style="font-family: 'Libre Baskerville'">Good morning, Alex</div>
+    <div class="sample-sub" style="font-family: 'Libre Baskerville'">Dashboard &middot; Settings &middot; Calendar</div>
+    <div class="sample-body" style="font-family: 'Libre Baskerville'">Organize tasks, collaborate with your team</div>
+    <div class="sample-ui">
+      <span class="logo" style="font-family: 'Libre Baskerville'">Kolumn</span>
+      <span class="page-title" style="font-family: 'Libre Baskerville'">Boards</span>
+      <span class="greeting" style="font-family: 'Libre Baskerville'">Good evening, <span class="lime">Dula</span></span>
+    </div>
+  </div>
+
+  <div class="font-card">
+    <div class="font-name">7. EB Garamond — thin, literary, organic</div>
+    <div class="sample-heading" style="font-family: 'EB Garamond'">Good morning, Alex</div>
+    <div class="sample-sub" style="font-family: 'EB Garamond'">Dashboard &middot; Settings &middot; Calendar</div>
+    <div class="sample-body" style="font-family: 'EB Garamond'">Organize tasks, collaborate with your team</div>
+    <div class="sample-ui">
+      <span class="logo" style="font-family: 'EB Garamond'">Kolumn</span>
+      <span class="page-title" style="font-family: 'EB Garamond'">Boards</span>
+      <span class="greeting" style="font-family: 'EB Garamond'">Good evening, <span class="lime">Dula</span></span>
+    </div>
+  </div>
+
+  <div class="font-card">
+    <div class="font-name">8. Spectral — warm, slightly quirky, Google-made</div>
+    <div class="sample-heading" style="font-family: 'Spectral'">Good morning, Alex</div>
+    <div class="sample-sub" style="font-family: 'Spectral'">Dashboard &middot; Settings &middot; Calendar</div>
+    <div class="sample-body" style="font-family: 'Spectral'">Organize tasks, collaborate with your team</div>
+    <div class="sample-ui">
+      <span class="logo" style="font-family: 'Spectral'">Kolumn</span>
+      <span class="page-title" style="font-family: 'Spectral'">Boards</span>
+      <span class="greeting" style="font-family: 'Spectral'">Good evening, <span class="lime">Dula</span></span>
+    </div>
+  </div>
+</body>
+</html>

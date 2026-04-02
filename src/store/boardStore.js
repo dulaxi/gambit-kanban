@@ -7,7 +7,7 @@ import { useAuthStore } from './authStore'
 import { addRecurrenceInterval } from '../utils/dateUtils'
 import { createRateLimiter, sanitizeText, sanitizeTitle, sanitizeDescription } from '../utils/rateLimit'
 
-const ACTIVE_BOARD_KEY = 'gambit_active_board'
+const ACTIVE_BOARD_KEY = 'kolumn_active_board'
 
 // Rate limiters for mutation actions
 const cardCreateLimiter = createRateLimiter(10, 10000)   // 10 cards per 10s
@@ -55,10 +55,10 @@ function undoableDelete(message) {
       toast.dismiss(id)
       resolve(false)
     }
-    window.addEventListener(`gambit:undo:${id}`, handler, { once: true })
+    window.addEventListener(`kolumn:undo:${id}`, handler, { once: true })
 
     setTimeout(() => {
-      window.removeEventListener(`gambit:undo:${id}`, handler)
+      window.removeEventListener(`kolumn:undo:${id}`, handler)
       if (!settled) { settled = true; resolve(true) }
     }, 5000)
   })

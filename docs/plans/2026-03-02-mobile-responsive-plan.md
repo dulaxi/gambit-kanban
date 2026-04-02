@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Make Gambit Kanban fully responsive across phone, tablet, and desktop with a hybrid approach — CSS responsive layouts + bottom tab bar for mobile navigation.
+**Goal:** Make Kolumn Kanban fully responsive across phone, tablet, and desktop with a hybrid approach — CSS responsive layouts + bottom tab bar for mobile navigation.
 
 **Architecture:** CSS-first responsive using Tailwind breakpoints (`sm:`, `md:`, `lg:`). A `useMediaQuery` hook drives conditional logic (DnD disable, nav shell). Sidebar becomes a drawer overlay below `lg:`. Bottom tab bar replaces sidebar navigation on mobile/tablet. Detail panel becomes full-screen sheet on phone, narrower side panel on tablet.
 

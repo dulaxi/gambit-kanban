@@ -385,7 +385,7 @@ export default function LandingPage() {
               className="material-symbols-outlined text-[#1B1B18]"
               style={{ fontSize: '26px', lineHeight: '26px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
             >owl</span>
-            <span className="text-lg font-bold text-[#1B1B18] tracking-tight font-logo">Gambit</span>
+            <span className="text-lg font-bold text-[#1B1B18] tracking-tight font-logo">Kolumn</span>
           </div>
           <div className="flex items-center gap-2">
             <Link
@@ -451,7 +451,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex-1 flex justify-center">
                   <div className="px-4 py-1 rounded-md bg-white border border-[#E0DBD5] text-[10px] text-[#8E8E89] font-medium">
-                    gambit.app/boards/product-launch
+                    kolumn.app/boards/product-launch
                   </div>
                 </div>
                 <div className="w-12" />
@@ -633,7 +633,7 @@ export default function LandingPage() {
               className="material-symbols-outlined"
               style={{ fontSize: '16px', lineHeight: '16px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
             >owl</span>
-            <span className="font-medium font-logo">Gambit</span>
+            <span className="font-medium font-logo">Kolumn</span>
             <span className="text-[#8E8E89] mx-1">&middot;</span>
             <span>Built for teams that ship.</span>
           </div>

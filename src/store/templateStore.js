@@ -20,6 +20,6 @@ export const useTemplateStore = create(
         }))
       },
     }),
-    { name: 'gambit_card_templates' }
+    { name: 'kolumn_card_templates' }
   )
 )

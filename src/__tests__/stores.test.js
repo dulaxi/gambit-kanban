@@ -51,7 +51,7 @@ describe('boardStore', () => {
   test('setActiveBoard updates state and localStorage', () => {
     useBoardStore.getState().setActiveBoard('b1')
     expect(useBoardStore.getState().activeBoardId).toBe('b1')
-    expect(localStorage.getItem('gambit_active_board')).toBe('b1')
+    expect(localStorage.getItem('kolumn_active_board')).toBe('b1')
   })
 
   test('deleteBoard removes board, its columns, and cards', async () => {

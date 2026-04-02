@@ -48,7 +48,7 @@ export default function SettingsPage() {
 
   const handleExport = () => {
     const data = {}
-    const keys = ['gambit-boards', 'gambit-notes', 'gambit-settings']
+    const keys = ['kolumn-boards', 'kolumn-notes', 'kolumn-settings']
     keys.forEach((key) => {
       const value = localStorage.getItem(key)
       if (value) {
@@ -62,7 +62,7 @@ export default function SettingsPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `gambit-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `kolumn-backup-${new Date().toISOString().slice(0, 10)}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -78,7 +78,7 @@ export default function SettingsPage() {
     reader.onload = (event) => {
       try {
         const data = JSON.parse(event.target.result)
-        const validKeys = ['gambit-boards', 'gambit-notes', 'gambit-settings']
+        const validKeys = ['kolumn-boards', 'kolumn-notes', 'kolumn-settings']
         let imported = 0
 
         validKeys.forEach((key) => {
@@ -104,9 +104,9 @@ export default function SettingsPage() {
   }
 
   const handleClearData = () => {
-    localStorage.removeItem('gambit-boards')
-    localStorage.removeItem('gambit-notes')
-    localStorage.removeItem('gambit-settings')
+    localStorage.removeItem('kolumn-boards')
+    localStorage.removeItem('kolumn-notes')
+    localStorage.removeItem('kolumn-settings')
     window.location.reload()
   }
 

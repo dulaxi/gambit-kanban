@@ -1,8 +1,8 @@
-# Gambit — Project Context
+# Kolumn — Project Context
 
 ## Overview
 
-Gambit is a multi-user Kanban project management dashboard inspired by Asana's UI patterns. Built with React 19 + Vite + Tailwind CSS v4 + Supabase (Postgres + Auth).
+Kolumn is a multi-user Kanban project management dashboard inspired by Asana's UI patterns. Built with React 19 + Vite + Tailwind CSS v4 + Supabase (Postgres + Auth).
 
 ## Tech Stack
 

@@ -1,6 +1,6 @@
 {
-  "name": "Gambit",
-  "short_name": "Gambit",
+  "name": "Kolumn",
+  "short_name": "Kolumn",
   "description": "A modern Kanban project management dashboard",
   "start_url": "/dashboard",
   "display": "standalone",

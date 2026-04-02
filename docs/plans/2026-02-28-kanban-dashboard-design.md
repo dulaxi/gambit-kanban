@@ -1,8 +1,8 @@
-# Gambit — Personal Kanban Dashboard Design
+# Kolumn — Personal Kanban Dashboard Design
 
 ## Overview
 
-Gambit is a personal Kanban-style task management web app inspired by the [SnowUI Dashboard UI Kit](https://www.figma.com/community/file/1210542873091115123/dashboard-ui-kit-dashboard-free-admin-dashboard). It features a clean sidebar navigation, drag-and-drop Kanban boards, and additional productivity pages (calendar, notes, analytics).
+Kolumn is a personal Kanban-style task management web app inspired by the [SnowUI Dashboard UI Kit](https://www.figma.com/community/file/1210542873091115123/dashboard-ui-kit-dashboard-free-admin-dashboard). It features a clean sidebar navigation, drag-and-drop Kanban boards, and additional productivity pages (calendar, notes, analytics).
 
 ## Requirements
 
@@ -39,7 +39,7 @@ Gambit is a personal Kanban-style task management web app inspired by the [SnowU
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ Gambit                                                          │
+│ Kolumn                                                          │
 ├──────────┬──────────────────────────────────────────────────────┤
 │          │  Header: Page Title + Search + Profile Avatar        │
 │ SIDEBAR  ├──────────────────────────────────────────────────────┤
@@ -60,7 +60,7 @@ Gambit is a personal Kanban-style task management web app inspired by the [SnowU
 
 - Fixed left panel, ~240px wide
 - Collapsible to icon-only mode (~64px) with toggle button
-- Logo/app name "Gambit" at top
+- Logo/app name "Kolumn" at top
 - Navigation items with Lucide icons:
   - Dashboard, Boards, Calendar, Notes, Analytics
   - Settings (separated by divider, pushed to bottom)

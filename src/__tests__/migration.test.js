@@ -33,13 +33,13 @@ describe('hasLocalData', () => {
     expect(hasLocalData()).toBe(false)
   })
 
-  test('returns true when gambit-boards exists', () => {
-    localStorage.setItem('gambit-boards', '{}')
+  test('returns true when kolumn-boards exists', () => {
+    localStorage.setItem('kolumn-boards', '{}')
     expect(hasLocalData()).toBe(true)
   })
 
-  test('returns true when gambit-notes exists', () => {
-    localStorage.setItem('gambit-notes', '{}')
+  test('returns true when kolumn-notes exists', () => {
+    localStorage.setItem('kolumn-notes', '{}')
     expect(hasLocalData()).toBe(true)
   })
 })
@@ -50,18 +50,18 @@ describe('migrateLocalData', () => {
   })
 
   test('clears localStorage after successful migration', async () => {
-    localStorage.setItem('gambit-boards', JSON.stringify({
+    localStorage.setItem('kolumn-boards', JSON.stringify({
       state: {
         boards: { b1: { name: 'Test', columns: [], icon: null, nextTaskNumber: 1 } },
         cards: {},
       },
     }))
     await migrateLocalData()
-    expect(localStorage.getItem('gambit-boards')).toBeNull()
+    expect(localStorage.getItem('kolumn-boards')).toBeNull()
   })
 
   test('returns true after migration', async () => {
-    localStorage.setItem('gambit-notes', JSON.stringify({
+    localStorage.setItem('kolumn-notes', JSON.stringify({
       state: {
         notes: { n1: { title: 'Note', content: 'Hello' } },
       },
@@ -71,7 +71,7 @@ describe('migrateLocalData', () => {
 
   test('calls supabase insert for boards and notes', async () => {
     const { supabase } = await import('../lib/supabase')
-    localStorage.setItem('gambit-boards', JSON.stringify({
+    localStorage.setItem('kolumn-boards', JSON.stringify({
       state: {
         boards: { b1: { name: 'Board', columns: [{ title: 'To Do', cardIds: [] }], icon: 'star', nextTaskNumber: 1 } },
         cards: {},

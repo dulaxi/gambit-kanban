@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Add board-level quick filters, text-only card comments, and scheduled recurring tasks to Gambit.
+**Goal:** Add board-level quick filters, text-only card comments, and scheduled recurring tasks to Kolumn.
 
 **Architecture:** Three independent features sharing no state. Filters are purely client-side (local component state filtering cards before render). Comments use a new `card_comments` DB table fetched lazily per card. Recurring tasks add columns to `cards` and a client-side check on app load that spawns overdue recurring copies.
 

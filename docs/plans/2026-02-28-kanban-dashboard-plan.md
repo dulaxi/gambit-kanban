@@ -1,4 +1,4 @@
-# Gambit Kanban Dashboard Implementation Plan
+# Kolumn Kanban Dashboard Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
@@ -79,7 +79,7 @@ Add to `<head>` in `index.html`:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<title>Gambit</title>
+<title>Kolumn</title>
 ```
 
 **Step 6: Create minimal App.jsx**
@@ -88,7 +88,7 @@ Add to `<head>` in `index.html`:
 function App() {
   return (
     <div className="font-sans text-gray-900 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold p-8">Gambit</h1>
+      <h1 className="text-2xl font-bold p-8">Kolumn</h1>
     </div>
   )
 }
@@ -102,7 +102,7 @@ export default App
 npm run dev
 ```
 
-Expected: App renders at localhost:5173 with "Gambit" heading in Inter font on gray-50 background.
+Expected: App renders at localhost:5173 with "Kolumn" heading in Inter font on gray-50 background.
 
 **Step 8: Commit**
 
@@ -352,7 +352,7 @@ export const useBoardStore = create(
       getAllCards: () => Object.values(get().cards),
     }),
     {
-      name: 'gambit-boards',
+      name: 'kolumn-boards',
     }
   )
 )
@@ -374,7 +374,7 @@ export const useSettingsStore = create(
         set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
     }),
     {
-      name: 'gambit-settings',
+      name: 'kolumn-settings',
     }
   )
 )
@@ -455,7 +455,7 @@ export default function Sidebar() {
         <Swords className="w-7 h-7 text-primary-600 shrink-0" />
         {!collapsed && (
           <span className="text-lg font-bold text-gray-900 tracking-tight">
-            Gambit
+            Kolumn
           </span>
         )}
       </div>
@@ -579,7 +579,7 @@ export default function AppLayout() {
 
   // Match the base path for title
   const basePath = '/' + (location.pathname.split('/')[1] || '')
-  const title = pageTitles[basePath] || 'Gambit'
+  const title = pageTitles[basePath] || 'Kolumn'
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -666,7 +666,7 @@ Delete `src/assets/react.svg` and `public/vite.svg` if present.
 
 **Step 6: Verify layout**
 
-Run `npm run dev`. Expected: sidebar on left with Gambit logo, nav items, collapsible. Header with page title, search, avatar. Content area shows placeholder. Clicking nav items changes the route and header title. Collapsing sidebar animates to 64px icon-only mode.
+Run `npm run dev`. Expected: sidebar on left with Kolumn logo, nav items, collapsible. Header with page title, search, avatar. Content area shows placeholder. Clicking nav items changes the route and header title. Collapsing sidebar animates to 64px icon-only mode.
 
 **Step 7: Commit**
 
@@ -2210,7 +2210,7 @@ export const useNoteStore = create(
 
       getAllNotes: () => Object.values(get().notes),
     }),
-    { name: 'gambit-notes' }
+    { name: 'kolumn-notes' }
   )
 )
 ```
@@ -2560,9 +2560,9 @@ export default function SettingsPage() {
 
   const handleExport = () => {
     const data = {
-      boards: localStorage.getItem('gambit-boards'),
-      notes: localStorage.getItem('gambit-notes'),
-      settings: localStorage.getItem('gambit-settings'),
+      boards: localStorage.getItem('kolumn-boards'),
+      notes: localStorage.getItem('kolumn-notes'),
+      settings: localStorage.getItem('kolumn-settings'),
       exportedAt: new Date().toISOString(),
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -2571,7 +2571,7 @@ export default function SettingsPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `gambit-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `kolumn-backup-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -2583,10 +2583,10 @@ export default function SettingsPage() {
     reader.onload = (event) => {
       try {
         const data = JSON.parse(event.target.result)
-        if (data.boards) localStorage.setItem('gambit-boards', data.boards)
-        if (data.notes) localStorage.setItem('gambit-notes', data.notes)
+        if (data.boards) localStorage.setItem('kolumn-boards', data.boards)
+        if (data.notes) localStorage.setItem('kolumn-notes', data.notes)
         if (data.settings)
-          localStorage.setItem('gambit-settings', data.settings)
+          localStorage.setItem('kolumn-settings', data.settings)
         setImportStatus('success')
         setTimeout(() => window.location.reload(), 1000)
       } catch {
@@ -2597,9 +2597,9 @@ export default function SettingsPage() {
   }
 
   const handleClearAll = () => {
-    localStorage.removeItem('gambit-boards')
-    localStorage.removeItem('gambit-notes')
-    localStorage.removeItem('gambit-settings')
+    localStorage.removeItem('kolumn-boards')
+    localStorage.removeItem('kolumn-notes')
+    localStorage.removeItem('kolumn-settings')
     window.location.reload()
   }
 

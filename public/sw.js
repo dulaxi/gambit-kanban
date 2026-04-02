@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gambit-v1'
+const CACHE_NAME = 'kolumn-v1'
 
 // Cache static assets on install
 self.addEventListener('install', (event) => {

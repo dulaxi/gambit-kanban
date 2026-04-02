@@ -25,7 +25,7 @@ export const useSettingsStore = create(
       isFavorite: (boardId) => get().favoriteBoards.includes(boardId),
     }),
     {
-      name: 'gambit-settings',
+      name: 'kolumn-settings',
     }
   )
 )

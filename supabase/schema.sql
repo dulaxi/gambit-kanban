@@ -1,4 +1,4 @@
--- Gambit Kanban: Full database schema
+-- Kolumn Kanban: Full database schema
 -- Run this in the Supabase SQL Editor (Dashboard > SQL Editor > New Query)
 
 -- ============================================================

@@ -25,7 +25,7 @@ import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
 import ConfirmModal from '../board/ConfirmModal'
 
-function GambitLogo({ size = 28 }) {
+function KolumnLogo({ size = 28 }) {
   return (
     <span
       className="material-symbols-outlined text-black shrink-0"
@@ -129,10 +129,10 @@ export default function Sidebar() {
       >
       {/* Logo */}
       <div className="flex items-center gap-2 px-4 h-16 border-b border-[#E0DBD5]">
-        <GambitLogo />
+        <KolumnLogo />
         {!showCollapsed && (
           <span className="text-lg font-bold text-[#1B1B18] tracking-tight font-logo">
-            Gambit
+            Kolumn
           </span>
         )}
       </div>
