@@ -61,13 +61,13 @@ const GHOST_CARD_PATTERNS = [
 
 function SkeletonPreview({ columns }) {
   return (
-    <div className="flex gap-3 overflow-x-auto p-1">
+    <div className="flex gap-2 p-1">
       {columns.map((col, ci) => {
         const pattern = GHOST_CARD_PATTERNS[ci % GHOST_CARD_PATTERNS.length]
         return (
           <div
             key={col}
-            className="flex-1 min-w-[120px] max-w-[180px] rounded-xl border border-[#E0DBD5] bg-white/60 p-3"
+            className="flex-1 min-w-0 rounded-xl border border-[#E0DBD5] bg-white/60 p-2.5"
           >
             <div className="text-[11px] font-medium text-[#8E8E89] truncate mb-3">
               {col}
@@ -161,7 +161,7 @@ export default function CreateBoardModal({ onClose }) {
           className={`bg-[#FAF8F6] shadow-2xl flex flex-col overflow-hidden ${
             isMobile
               ? 'fixed inset-0 rounded-none'
-              : 'rounded-2xl w-[720px] max-h-[85vh]'
+              : 'rounded-2xl w-[900px] max-h-[85vh]'
           }`}
           onClick={(e) => e.stopPropagation()}
         >
