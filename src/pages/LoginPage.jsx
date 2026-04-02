@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { LogIn } from 'lucide-react'
+import { LogIn, SquareKanban } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -29,10 +29,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#F2EDE8] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <span
-            className="material-symbols-outlined text-black mx-auto mb-3 block"
-            style={{ fontSize: '40px', lineHeight: '40px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-          >owl</span>
+          <SquareKanban className="w-10 h-10 text-black mx-auto mb-3" strokeWidth={1.75} />
           <h1 className="text-2xl font-bold text-[#1B1B18] font-logo">Kolumn</h1>
           <p className="text-sm text-[#5C5C57] mt-1">Sign in to your account</p>
         </div>

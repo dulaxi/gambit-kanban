@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { Mail, ArrowLeft } from 'lucide-react'
+import { Mail, ArrowLeft, SquareKanban } from 'lucide-react'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -28,10 +28,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-[#F2EDE8] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <span
-            className="material-symbols-outlined text-black mx-auto mb-3 block"
-            style={{ fontSize: '40px', lineHeight: '40px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-          >owl</span>
+          <SquareKanban className="w-10 h-10 text-black mx-auto mb-3" strokeWidth={1.75} />
           <h1 className="text-2xl font-bold text-[#1B1B18] font-heading">Reset password</h1>
           <p className="text-sm text-[#5C5C57] mt-1">
             {sent ? 'Check your email for a reset link' : 'Enter your email to receive a reset link'}

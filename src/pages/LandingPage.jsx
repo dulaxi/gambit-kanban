@@ -7,7 +7,7 @@ import {
   ArrowRight, Columns3, Users, Zap, Calendar, StickyNote,
   Share2, BarChart3, GripVertical, Tag, CheckSquare, Clock,
   Shield, Sparkles, MousePointerClick, ArrowUpRight,
-  Check, Square, AlignLeft, User,
+  Check, Square, AlignLeft, User, SquareKanban,
 } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 
@@ -381,10 +381,7 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 bg-[#F2EDE8]/80 backdrop-blur-xl border-b border-[#E0DBD5]/50">
         <div className="flex items-center justify-between px-6 sm:px-10 py-3.5 max-w-6xl mx-auto">
           <div className="flex items-center gap-2.5">
-            <span
-              className="material-symbols-outlined text-[#1B1B18]"
-              style={{ fontSize: '26px', lineHeight: '26px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-            >owl</span>
+            <SquareKanban className="w-[26px] h-[26px] text-[#1B1B18]" strokeWidth={1.75} />
             <span className="text-lg font-bold text-[#1B1B18] tracking-tight font-logo">Kolumn</span>
           </div>
           <div className="flex items-center gap-2">
@@ -461,10 +458,7 @@ export default function LandingPage() {
               <div className="flex items-start">
                 {/* Mini sidebar */}
                 <div className="hidden sm:flex w-12 bg-[#F2EDE8] border-r border-[#E8E2DB] py-4 flex-col items-center gap-3 shrink-0 min-h-[380px]">
-                  <span
-                    className="material-symbols-outlined text-[#8E8E89]"
-                    style={{ fontSize: '18px', lineHeight: '18px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-                  >owl</span>
+                  <SquareKanban className="w-[18px] h-[18px] text-[#8E8E89]" strokeWidth={1.75} />
                   <div className="w-5 h-[1px] bg-[#E0DBD5] my-1" />
                   <div className="w-6 h-6 rounded-md bg-[#C2D64A]/20 flex items-center justify-center">
                     <Columns3 className="w-3.5 h-3.5 text-[#5C5C57]" />
@@ -629,10 +623,7 @@ export default function LandingPage() {
       <footer className="px-6 sm:px-10 pb-8 pt-4 max-w-5xl mx-auto">
         <div className="border-t border-[#E0DBD5] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs text-[#8E8E89]">
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: '16px', lineHeight: '16px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-            >owl</span>
+            <SquareKanban className="w-4 h-4 text-[#8E8E89]" strokeWidth={1.75} />
             <span className="font-medium font-logo">Kolumn</span>
             <span className="text-[#8E8E89] mx-1">&middot;</span>
             <span>Built for teams that ship.</span>

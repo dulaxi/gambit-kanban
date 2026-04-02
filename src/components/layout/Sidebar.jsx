@@ -21,23 +21,13 @@ import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import { useIsDesktop } from '../../hooks/useMediaQuery'
 import { useWorkspaceStore } from '../../store/workspaceStore'
+import { SquareKanban as KolumnIcon } from 'lucide-react'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
 import ConfirmModal from '../board/ConfirmModal'
 
 function KolumnLogo({ size = 28 }) {
-  return (
-    <span
-      className="material-symbols-outlined text-black shrink-0"
-      style={{
-        fontSize: `${size}px`,
-        lineHeight: `${size}px`,
-        fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
-      }}
-    >
-      owl
-    </span>
-  )
+  return <KolumnIcon className="shrink-0 text-black" style={{ width: size, height: size }} strokeWidth={1.75} />
 }
 
 const navItems = [

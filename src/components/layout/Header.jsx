@@ -1,4 +1,4 @@
-import { Search, User, LogOut, Settings, LayoutGrid, Bell, AtSign, UserPlus, MessageSquare, ArrowRight, X } from 'lucide-react'
+import { Search, User, LogOut, Settings, LayoutGrid, Bell, AtSign, UserPlus, MessageSquare, ArrowRight, X, SquareKanban } from 'lucide-react'
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
@@ -402,12 +402,7 @@ export default function Header({ title }) {
           }`}
         >
           {!isDesktop ? (
-            <span
-              className="material-symbols-outlined text-[#1B1B18]"
-              style={{ fontSize: '22px', lineHeight: '22px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-            >
-              owl
-            </span>
+            <SquareKanban className="w-[22px] h-[22px] text-[#1B1B18]" strokeWidth={1.75} />
           ) : profile?.icon ? (
             <DynamicIcon name={profile.icon} className="w-5 h-5" />
           ) : (
