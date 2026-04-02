@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
+import { LayoutGrid } from 'lucide-react'
 import { useBoardStore } from '../store/boardStore'
 import BoardSelector from '../components/board/BoardSelector'
 import BoardView from '../components/board/BoardView'
 import AllBoardsView from '../components/board/AllBoardsView'
+import CreateBoardModal from '../components/board/CreateBoardModal'
 
 const CardDetailPanel = lazy(() => import('../components/board/CardDetailPanel'))
 
@@ -11,7 +13,9 @@ export default function BoardsPage() {
   const [inlineCardId, setInlineCardId] = useState(null)
   const [filters, setFilters] = useState({ priority: [], assignee: null, label: [], due: null })
   const [sortBy, setSortBy] = useState('manual')
+  const [showCreateModal, setShowCreateModal] = useState(false)
   const activeBoardId = useBoardStore((s) => s.activeBoardId)
+  const boards = useBoardStore((s) => s.boards)
 
   const addCard = useBoardStore((s) => s.addCard)
   const columns = useBoardStore((s) => s.columns)
@@ -29,13 +33,16 @@ export default function BoardsPage() {
       const cardId = await addCard(activeBoardId, firstCol.id, { title: '' })
       if (cardId) setInlineCardId(cardId)
     }
+    const openCreate = () => setShowCreateModal(true)
     window.addEventListener('kolumn:open-card', openCard)
     window.addEventListener('kolumn:close-panel', closePanel)
     window.addEventListener('kolumn:new-card', newCard)
+    window.addEventListener('kolumn:create-board', openCreate)
     return () => {
       window.removeEventListener('kolumn:open-card', openCard)
       window.removeEventListener('kolumn:close-panel', closePanel)
       window.removeEventListener('kolumn:new-card', newCard)
+      window.removeEventListener('kolumn:create-board', openCreate)
     }
   }, [activeBoardId, columns, addCard])
 
@@ -60,7 +67,7 @@ export default function BoardsPage() {
       }`}
     >
       <div className="mb-4 shrink-0">
-        <BoardSelector filters={filters} setFilters={setFilters} sortBy={sortBy} setSortBy={setSortBy} />
+        <BoardSelector filters={filters} setFilters={setFilters} sortBy={sortBy} setSortBy={setSortBy} onCreateBoard={() => setShowCreateModal(true)} />
       </div>
 
       <div className="flex-1 min-h-0">
@@ -80,9 +87,25 @@ export default function BoardsPage() {
             filters={filters}
             sortBy={sortBy}
           />
+        ) : Object.keys(boards).length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center px-6">
+            <div className="w-14 h-14 rounded-2xl bg-[#E8E2DB] flex items-center justify-center mb-4">
+              <LayoutGrid className="w-7 h-7 text-[#8E8E89]" />
+            </div>
+            <h2 className="text-lg font-semibold text-[#1B1B18] mb-1">Create your first board</h2>
+            <p className="text-sm text-[#8E8E89] mb-5 max-w-xs">Organize tasks into columns that match your workflow.</p>
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[#1B1B18] hover:bg-[#333] rounded-xl transition-colors"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              New Board
+            </button>
+          </div>
         ) : (
           <div className="flex items-center justify-center h-full text-[#8E8E89]">
-            Create a board to get started
+            Select a board to get started
           </div>
         )}
       </div>
@@ -95,6 +118,10 @@ export default function BoardsPage() {
             onClose={() => setEditingCardId(null)}
           />
         </Suspense>
+      )}
+
+      {showCreateModal && (
+        <CreateBoardModal onClose={() => setShowCreateModal(false)} />
       )}
     </div>
   )
