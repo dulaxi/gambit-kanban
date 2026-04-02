@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBoardStore } from '../store/boardStore'
 import { useAuthStore } from '../store/authStore'
-import { format, formatDistanceToNow, parseISO, subDays, startOfDay, isToday } from 'date-fns'
+import { format, formatDistanceToNow, parseISO, subDays, startOfDay, isToday, isTomorrow, isPast, addDays, isBefore } from 'date-fns'
 import { Plus, CheckCircle2 } from 'lucide-react'
 import DynamicIcon from '../components/board/DynamicIcon'
 import { PRIORITY_DOT, getGreeting } from '../utils/formatting'
@@ -32,21 +32,7 @@ function getDailyIndex(arr) {
   return day % arr.length
 }
 
-/* ── Completion ring SVG ── */
-function CompletionRing({ percent, color, size = 42 }) {
-  const r = (size / 2) - 4
-  const circ = 2 * Math.PI * r
-  const offset = circ - (percent / 100) * circ
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#E8E2DB" strokeWidth={3} />
-      {percent > 0 && (
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={3}
-          strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round" />
-      )}
-    </svg>
-  )
-}
+const SEGMENT_COLORS = ['#d2d6c5', '#a4b55b', '#8BA32E', '#7A5C44', '#5C5C57', '#3c402b', '#1B1B18']
 
 /* ── Streak day square ── */
 function StreakDay({ label, status }) {
@@ -62,39 +48,107 @@ function StreakDay({ label, status }) {
   )
 }
 
-/* ── Focus card ── */
-function FocusCard({ card, rank, isOverdue, boardName, onClick, onComplete }) {
+/* ── Calendar heatmap (numbered with task badges) ── */
+function CalendarHeatmap({ cards, profile }) {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const firstDow = new Date(year, month, 1).getDay()
+  const startOffset = firstDow === 0 ? 6 : firstDow - 1
+
+  const displayName = profile?.display_name
+
+  const dayCounts = {}
+  Object.values(cards).forEach((c) => {
+    if (!c.due_date || c.archived) return
+    if (displayName && c.assignee_name !== displayName) return
+    const d = c.due_date.split('T')[0]
+    const [y, m] = d.split('-').map(Number)
+    if (y === year && m - 1 === month) {
+      const day = parseInt(d.split('-')[2], 10)
+      dayCounts[day] = (dayCounts[day] || 0) + 1
+    }
+  })
+
+  const doneCounts = {}
+  Object.values(cards).forEach((c) => {
+    if (!c.updated_at || !c.completed) return
+    if (displayName && c.assignee_name !== displayName) return
+    const d = c.updated_at.split('T')[0]
+    const [y, m] = d.split('-').map(Number)
+    if (y === year && m - 1 === month) {
+      const day = parseInt(d.split('-')[2], 10)
+      doneCounts[day] = (doneCounts[day] || 0) + 1
+    }
+  })
+
+  const todayDate = now.getDate()
+  const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+
+  function getRingColor(day) {
+    const count = dayCounts[day] || 0
+    const done = doneCounts[day] || 0
+    if (count === 0) return null
+    if (day > todayDate) return '#A8BA32'
+    if (done > 0 && done >= count) return '#A8BA32'
+    if (done > 0) return '#D4A843'
+    return '#C27A4A'
+  }
+
+  const cells = []
+  for (let i = 0; i < startOffset; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+
+  return (
+    <div>
+      <div className="grid grid-cols-7 gap-[3px] mb-[3px]">
+        {dayLabels.map((l, i) => (
+          <div key={i} className="text-[9px] font-bold text-[#C4BFB8] text-center">{l}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-[3px]">
+        {cells.map((day, i) => {
+          if (!day) return <div key={i} />
+          const isToday = day === todayDate
+          const isWeekend = (() => { const d = new Date(year, month, day); return d.getDay() === 0 || d.getDay() === 6 })()
+          const ring = getRingColor(day)
+          const hasTasks = (dayCounts[day] || 0) > 0
+          return (
+            <div
+              key={i}
+              className="aspect-square rounded-full flex items-center justify-center"
+              style={{
+                fontSize: '11px',
+                fontWeight: isToday ? 700 : hasTasks ? 600 : 500,
+                color: isToday ? '#C2D64A' : hasTasks ? '#1B1B18' : isWeekend ? '#C4BFB8' : '#8E8E89',
+                background: isToday ? '#1B1B18' : 'transparent',
+                outline: ring && !isToday ? `2px solid ${ring}` : 'none',
+                outlineOffset: '-2px',
+              }}
+              title={`${dayCounts[day] || 0} tasks, ${doneCounts[day] || 0} done`}
+            >
+              {day}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+/* ── Timeline task row ── */
+function TimelineTask({ card, onClick, onComplete }) {
   return (
     <div
       onClick={onClick}
-      className="flex items-center gap-3 px-4 py-3.5 bg-white border border-[#E0DBD5] rounded-[14px] mb-2 cursor-pointer hover:shadow-sm hover:border-[#C4BFB8] transition-all"
+      className="flex items-center gap-2 py-1 pl-2.5 cursor-pointer group"
     >
-      <span className="w-[22px] h-[22px] rounded-[7px] bg-[#1B1B18] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-        {rank}
-      </span>
-      <span className={`w-[7px] h-[7px] rounded-full shrink-0 ${PRIORITY_DOT[card.priority] || PRIORITY_DOT.medium}`} />
-      <div className="flex-1 min-w-0">
-        <div className="text-[13px] font-medium text-[#1B1B18] truncate">{card.title}</div>
-        <div className="text-[10px] text-[#8E8E89]">
-          {boardName} · #GB-{card.global_task_number || card.task_number}
-        </div>
-      </div>
-      <span className={`text-[9px] font-semibold px-[7px] py-[2px] rounded-[5px] shrink-0 ${
-        isOverdue ? 'bg-[#F0E0D2] text-[#7A5C44]' : 'bg-[#EEF2D6] text-[#6B7A12]'
-      }`}>
-        {isOverdue
-          ? `${Math.ceil((Date.now() - parseISO(card.due_date).getTime()) / 86400000)}d overdue`
-          : 'due today'}
-      </span>
+      <span className="flex-1 text-[12px] font-medium text-[#1B1B18] truncate group-hover:text-[#A8BA32] transition-colors">{card.title}</span>
       <button
         onClick={(e) => { e.stopPropagation(); onComplete() }}
-        className="w-[22px] h-[22px] rounded-full border-2 border-[#E0DBD5] flex items-center justify-center shrink-0 hover:border-[#A8BA32] hover:bg-[#EEF2D6] transition-all cursor-pointer group"
-      >
-        <span
-          className="material-symbols-outlined text-[#A8BA32] opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ fontSize: '14px', lineHeight: '14px', fontVariationSettings: "'FILL' 1, 'wght' 500" }}
-        >check</span>
-      </button>
+        className="w-[13px] h-[13px] rounded-full border-[1.5px] border-[#E0DBD5] shrink-0 hover:border-[#A8BA32] hover:bg-[#EEF2D6] transition-all cursor-pointer"
+      />
     </div>
   )
 }
@@ -146,6 +200,35 @@ export default function DashboardPage() {
     () => computeBoardSummaries(boards, columns, cards, profile?.display_name),
     [boards, columns, cards, profile]
   )
+
+  // Timeline groups
+  const timelineGroups = useMemo(() => {
+    const displayName = profile?.display_name
+    const myCards = Object.values(cards).filter((c) =>
+      !c.completed && !c.archived && c.due_date &&
+      (!displayName || c.assignee_name === displayName)
+    )
+    const now = new Date()
+    const endOfWeek = addDays(startOfDay(now), 7 - now.getDay())
+
+    const groups = []
+    const overdueList = myCards.filter((c) => { const d = parseISO(c.due_date); return isPast(d) && !isToday(d) })
+    const todayList = myCards.filter((c) => isToday(parseISO(c.due_date)))
+    const tomorrowList = myCards.filter((c) => isTomorrow(parseISO(c.due_date)))
+    const thisWeekList = myCards.filter((c) => {
+      const d = parseISO(c.due_date)
+      return !isPast(d) && !isToday(d) && !isTomorrow(d) && isBefore(d, endOfWeek)
+    })
+
+    const byDue = (a, b) => new Date(a.due_date) - new Date(b.due_date)
+
+    if (overdueList.length > 0) groups.push({ label: 'Overdue', color: '#C27A4A', cards: overdueList.sort(byDue) })
+    if (todayList.length > 0) groups.push({ label: `Today — ${format(now, 'EEEE, MMM d')}`, color: '#D4A843', cards: todayList.sort(byDue) })
+    if (tomorrowList.length > 0) groups.push({ label: `Tomorrow — ${format(addDays(now, 1), 'EEEE, MMM d')}`, color: '#A8BA32', cards: tomorrowList.sort(byDue) })
+    if (thisWeekList.length > 0) groups.push({ label: 'This Week', color: '#E0DBD5', cards: thisWeekList.sort(byDue) })
+
+    return groups
+  }, [cards, columns, profile])
 
   // Recent activity from card updates
   const recentActivity = useMemo(() => {
@@ -222,7 +305,8 @@ export default function DashboardPage() {
     return '#C27A4A'
   }
 
-  if (loading) {
+  const hasData = Object.keys(boards).length > 0 || Object.keys(cards).length > 0
+  if (loading && !hasData) {
     return (
       <div className="flex items-center justify-center h-64 text-[#8E8E89] text-sm">
         Loading...
@@ -232,195 +316,167 @@ export default function DashboardPage() {
 
   const tip = TIPS[getDailyIndex(TIPS)]
   const quote = QUOTES[getDailyIndex(QUOTES)]
-  const totalFocus = focusCards.length
   const boardCount = Object.keys(boards).length
 
   return (
-    <div className="max-w-[880px]">
-      {/* ─── Masthead ─── */}
-      <div className="mb-1">
-        <div className="text-[11px] tracking-[2px] uppercase text-[#8E8E89] mb-2">
-          {format(new Date(), 'EEEE, MMMM d, yyyy')} · Week {format(new Date(), 'I')}
+    <div className="w-full flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 7rem)' }}>
+      {/* ─── Header ─── */}
+      <div className="flex items-start justify-between mb-5">
+        <div>
+          <div className="text-[11px] tracking-[1.5px] uppercase text-[#8E8E89] mb-1">
+            {format(new Date(), 'EEEE, MMMM d')}
+          </div>
+          <h1 className="text-[26px] sm:text-[30px] font-bold text-[#1B1B18] font-heading leading-tight">
+            {getGreeting()}, <span className="text-[#A8BA32]">{displayName}</span>
+          </h1>
+          <p className="text-[14px] text-[#5C5C57] font-heading italic mt-0.5">
+            Here's what your day looks like.
+          </p>
         </div>
-        <h1 className="text-[24px] sm:text-[30px] font-bold text-[#1B1B18] font-heading leading-tight">
-          {getGreeting()}, <span className="text-[#A8BA32]">{displayName}</span>
-        </h1>
-        <p className="text-[15px] text-[#5C5C57] font-heading italic mt-0.5">
-          Here's what your day looks like.
-        </p>
-      </div>
-
-      {/* ─── Forecast strip ─── */}
-      <div className="flex items-center flex-wrap gap-x-5 gap-y-1 py-2 mb-4">
-        <div className="flex items-center gap-1.5 text-[13px]">
-          <span className="material-symbols-outlined text-[18px] text-[#D4A843]"
-            style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>sunny</span>
-          <span><strong>{dueToday}</strong> due today</span>
-        </div>
-        <div className="w-px h-5 bg-[#E0DBD5]" />
-        <div className="flex items-center gap-1.5 text-[13px]">
-          <span className="material-symbols-outlined text-[18px] text-[#C27A4A]"
-            style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>warning</span>
-          <span><strong>{overdue}</strong> overdue</span>
-        </div>
-        <div className="w-px h-5 bg-[#E0DBD5]" />
-        <div className="flex items-center gap-1.5 text-[13px]">
-          <span className="material-symbols-outlined text-[18px] text-[#A8BA32]"
-            style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>task_alt</span>
-          <span><strong>{completedYesterday}</strong> completed yesterday</span>
-        </div>
-        <div className="w-px h-5 bg-[#E0DBD5]" />
-        <div className="flex items-center gap-1.5 text-[13px]">
-          <span className="material-symbols-outlined text-[18px] text-[#8E8E89]"
-            style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>dashboard</span>
-          <span><strong>{boardCount}</strong> boards</span>
-        </div>
-      </div>
-
-      {/* ─── Streak ─── */}
-      <div className="flex items-center gap-3 bg-[#FAF8F6] border border-[#E0DBD5] rounded-[14px] px-3.5 py-2.5 mb-4">
-        <div className="flex gap-1">
-          {streakWeek.map((d, i) => (
-            <StreakDay key={i} label={d.label} status={d.status} />
-          ))}
-        </div>
-        <div className="text-[12px] text-[#5C5C57]">
-          {streak > 0 ? (
-            <><strong className="text-[#1B1B18]">{streak}-day streak!</strong> Complete a task today to keep it going.</>
-          ) : (
-            <>Complete a task today to start a streak!</>
-          )}
+        <div className="hidden sm:flex items-center gap-2 pt-2">
+          <div className="flex items-center gap-1.5 bg-white border border-[#E0DBD5] rounded-xl px-3 py-1.5 shadow-sm font-mono text-[12px] text-[#1B1B18]">
+            <span className="text-[14px] font-bold text-[#D4A843]">{dueToday}</span> due today
+          </div>
+          <div className="flex items-center gap-1.5 bg-white border border-[#E0DBD5] rounded-xl px-3 py-1.5 shadow-sm font-mono text-[12px] text-[#1B1B18]">
+            <span className="text-[14px] font-bold text-[#C27A4A]">{overdue}</span> overdue
+          </div>
+          <div className="flex items-center gap-1.5 bg-white border border-[#E0DBD5] rounded-xl px-3 py-1.5 shadow-sm font-mono text-[12px] text-[#1B1B18]">
+            <span className="text-[14px] font-bold text-[#A8BA32]">{completedYesterday}</span> done y'day
+          </div>
         </div>
       </div>
 
       {/* ─── Main grid ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 flex-1 min-h-0 overflow-hidden">
         {/* LEFT COLUMN */}
-        <div>
-          {/* Focus Queue */}
-          <div className="mb-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[1.5px] text-[#8E8E89] mb-3">
-              <span className="material-symbols-outlined text-[16px] text-[#C27A4A]"
-                style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>priority_high</span>
-              Focus
-              {totalFocus > 0 && (
-                <span className="bg-[#E8E2DB] text-[#5C5C57] px-[7px] py-px rounded-full text-[10px] tracking-normal font-semibold">
-                  {totalFocus}
-                </span>
-              )}
-            </div>
-
-            {totalFocus === 0 ? (
-              <div className="flex items-center justify-center gap-2 py-8 text-[#8E8E89] text-[13px] border border-dashed border-[#E0DBD5] rounded-[14px]">
-                <CheckCircle2 className="w-4 h-4 text-[#A8BA32]" />
-                Nothing due today — you're all clear!
-              </div>
-            ) : (
-              focusCards.map((card, i) => (
-                <FocusCard
-                  key={card.id}
-                  card={card}
-                  rank={i + 1}
-                  isOverdue={overdueCards.includes(card)}
-                  boardName={getBoardName(card.board_id)}
-                  onClick={() => navigateToCard(card)}
-                  onComplete={() => completeCard(card)}
-                />
-              ))
-            )}
-          </div>
-
+        <div className="flex flex-col gap-4 min-h-0 overflow-hidden">
           {/* Boards */}
-          <div>
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[1.5px] text-[#8E8E89] mb-3">
-              <span className="material-symbols-outlined text-[16px] text-[#8E8E89]"
-                style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>space_dashboard</span>
-              Your Boards
-            </div>
-
+          <div className="shrink-0">
+            <div className="text-[10px] font-mono font-semibold text-[#C4BFB8] uppercase tracking-[1.5px] mb-3">Boards</div>
             {boardSummaries.length === 0 ? (
               <div className="text-center py-10">
                 <p className="text-[#8E8E89] text-sm mb-4">Create your first board to get started</p>
-                <button
-                  onClick={handleNewBoard}
-                  disabled={creatingBoard}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1B1B18] text-white text-sm font-medium rounded-lg hover:bg-[#333] transition-colors cursor-pointer disabled:opacity-50"
-                >
+                <button onClick={handleNewBoard} disabled={creatingBoard}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1B1B18] text-white text-sm font-medium rounded-lg hover:bg-[#333] transition-colors cursor-pointer disabled:opacity-50">
                   <Plus className="w-4 h-4" />
                   {creatingBoard ? 'Creating...' : 'New Board'}
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {boardSummaries.map((board) => {
-                  const doneCol = board.columns.find((c) => c.title.toLowerCase() === 'done')
-                  const doneCount = doneCol?.count || 0
-                  const percent = board.totalCards > 0 ? Math.round((doneCount / board.totalCards) * 100) : 0
-                  return (
-                    <button
-                      key={board.id}
-                      onClick={() => { setActiveBoard(board.id); navigate('/boards') }}
-                      className="flex items-center gap-3 bg-white border border-[#E0DBD5] rounded-[14px] px-4 py-3.5 text-left cursor-pointer hover:shadow-sm hover:border-[#C4BFB8] transition-all"
-                    >
-                      <div className="shrink-0">
-                        <CompletionRing percent={percent} color={getRingColor(percent)} />
+                {boardSummaries.slice(0, 4).map((board) => (
+                  <button
+                    key={board.id}
+                    onClick={() => { setActiveBoard(board.id); navigate('/boards') }}
+                    className="bg-white border border-[#E0DBD5] rounded-xl p-3.5 text-left cursor-pointer hover:shadow-sm hover:border-[#C4BFB8] transition-all"
+                  >
+                    <div className="flex items-center gap-2 mb-2.5">
+                      {board.icon && <DynamicIcon name={board.icon} className="w-[18px] h-[18px] text-[#5C5C57]" />}
+                      <span className="text-[13px] font-bold text-[#1B1B18] flex-1 truncate">{board.name}</span>
+                      <span className="text-[11px] text-[#8E8E89]">{board.totalCards} tasks</span>
+                    </div>
+                    {board.totalCards > 0 && (
+                      <div className="h-1 rounded-full overflow-hidden flex bg-[#E8E2DB] mb-2">
+                        {board.columns.map((col, i) =>
+                          col.count > 0 ? (
+                            <div key={col.id} className="h-full" style={{ width: `${(col.count / board.totalCards) * 100}%`, background: SEGMENT_COLORS[i % SEGMENT_COLORS.length] }} />
+                          ) : null
+                        )}
                       </div>
-                      <div className="min-w-0">
-                        <div className="text-[13px] font-semibold text-[#1B1B18] truncate flex items-center gap-1.5">
-                          {board.icon && <DynamicIcon name={board.icon} className="w-3.5 h-3.5 text-[#5C5C57]" />}
-                          {board.name}
-                        </div>
-                        <div className="text-[10px] text-[#8E8E89]">
-                          {doneCount}/{board.totalCards} · {percent}%
-                          {percent === 100 && ' ✓'}
-                        </div>
+                    )}
+                    {board.columns.length > 0 && (
+                      <div className="flex flex-wrap gap-x-2.5 gap-y-0.5 mb-1.5">
+                        {board.columns.map((col, i) => (
+                          <span key={col.id} className="flex items-center gap-1 text-[10px] text-[#8E8E89]">
+                            <span className="w-[5px] h-[5px] rounded-full" style={{ background: SEGMENT_COLORS[i % SEGMENT_COLORS.length] }} />
+                            {col.title}
+                          </span>
+                        ))}
                       </div>
-                    </button>
-                  )
-                })}
+                    )}
+                    {board.lastUpdated && (
+                      <div className="text-[10px] font-mono text-[#C4BFB8]">
+                        Updated {formatDistanceToNow(new Date(board.lastUpdated), { addSuffix: true })}
+                      </div>
+                    )}
+                  </button>
+                ))}
               </div>
             )}
+          </div>
+
+          {/* Up next */}
+          <div className="flex-1 min-h-0 flex flex-col">
+            <div className="text-[10px] font-mono font-semibold text-[#C4BFB8] uppercase tracking-[1.5px] mb-3 shrink-0">Up next</div>
+            <div className="flex-1 min-h-0 overflow-y-auto">
+            {timelineGroups.length === 0 ? (
+              <div className="flex items-center justify-center gap-2 py-6 text-[#8E8E89] text-[13px]">
+                <CheckCircle2 className="w-4 h-4 text-[#A8BA32]" />
+                Nothing upcoming — you're all clear!
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {timelineGroups.map((group) => (
+                  <div key={group.label}>
+                    <div className="flex items-center gap-1.5 text-[9px] font-mono font-semibold uppercase tracking-[1px] py-0.5" style={{ color: group.color }}>
+                      <span className="w-[5px] h-[5px] rounded-full" style={{ background: group.color }} />
+                      {group.label}
+                    </div>
+                    {group.cards.map((card) => (
+                      <TimelineTask
+                        key={card.id}
+                        card={card}
+                        onClick={() => navigateToCard(card)}
+                        onComplete={() => completeCard(card)}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+            </div>
           </div>
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="flex flex-col gap-3">
-          {/* Activity */}
-          <div className="bg-[#FAF8F6] border border-[#E0DBD5] rounded-2xl p-3.5 lg:sticky lg:top-6">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[1.5px] text-[#8E8E89] mb-3.5">
-              <span className="material-symbols-outlined text-[16px] text-[#8E8E89]"
-                style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>history</span>
-              Activity
-            </div>
-            {recentActivity.length === 0 ? (
-              <p className="text-[12px] text-[#8E8E89] py-4 text-center">No recent activity</p>
-            ) : (
-              recentActivity.map((a, i) => (
-                <ActivityItem key={i} {...a} />
-              ))
-            )}
+        <div className="flex flex-col gap-4 min-h-0 overflow-hidden">
+          {/* Calendar */}
+          <div className="bg-white border border-[#E0DBD5] rounded-xl p-3.5 shadow-sm shrink-0">
+            <div className="text-[13px] font-bold text-[#1B1B18] mb-3">{format(new Date(), 'MMMM')}</div>
+            <CalendarHeatmap cards={cards} profile={profile} />
           </div>
 
-          {/* Tip of the day */}
-          <div className="bg-white border border-[#E0DBD5] rounded-[14px] p-4">
-            <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-[1.5px] text-[#D4A843] mb-2">
-              <span className="material-symbols-outlined text-[14px]"
-                style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>lightbulb</span>
-              Tip of the day
+          {/* Activity */}
+          <div className="flex-1 min-h-0 flex flex-col">
+            <div className="text-[10px] font-mono font-semibold text-[#C4BFB8] uppercase tracking-[1.5px] mb-2.5 shrink-0">Activity</div>
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              {recentActivity.length === 0 ? (
+                <p className="text-[12px] text-[#8E8E89] py-4 text-center">No recent activity</p>
+              ) : (
+                recentActivity.map((a, i) => (
+                  <ActivityItem key={i} {...a} />
+                ))
+              )}
             </div>
-            <p className="text-[13px] text-[#5C5C57] leading-relaxed font-heading italic">
-              "{tip}"
-            </p>
           </div>
         </div>
       </div>
 
-      {/* ─── Quote footer ─── */}
-      <div className="text-center mt-6 pt-4 border-t border-[#E8E2DB]">
-        <blockquote className="text-[14px] text-[#8E8E89] font-heading italic max-w-md mx-auto mb-1">
+      {/* ─── Footer ─── */}
+      <div className="flex items-center justify-between pt-3 border-t border-[#E8E2DB] shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-[3px]">
+            {streakWeek.map((d, i) => (
+              <StreakDay key={i} label={d.label} status={d.status} />
+            ))}
+          </div>
+          <span className="text-[11px] text-[#8E8E89]">
+            {streak > 0 ? <><strong className="text-[#1B1B18]">{streak}</strong> day streak</> : 'Start a streak!'}
+          </span>
+        </div>
+        <span className="text-[12px] text-[#C4BFB8] font-heading italic">
           "{quote.text}"
-        </blockquote>
-        <cite className="text-[11px] text-[#C4BFB8] not-italic">— {quote.author}</cite>
+        </span>
       </div>
     </div>
   )

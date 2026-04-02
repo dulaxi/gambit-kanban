@@ -3,6 +3,7 @@
 @theme {
   --font-sans: 'Mona Sans Variable', 'Mona Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-heading: 'Spectral', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', SFMono-Regular, Menlo, monospace;
   --font-logo: 'Google Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
   /* Phosphor palette */

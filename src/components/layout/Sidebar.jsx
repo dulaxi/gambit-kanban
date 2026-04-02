@@ -15,7 +15,6 @@ import {
   Layers,
   Users,
   Briefcase,
-  Star,
 } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useBoardStore } from '../../store/boardStore'
@@ -75,22 +74,12 @@ export default function Sidebar() {
   const [renameValue, setRenameValue] = useState('')
   const [confirmDeleteBoardId, setConfirmDeleteBoardId] = useState(null)
 
-  const favoriteBoards = useSettingsStore((s) => s.favoriteBoards)
-  const toggleFavorite = useSettingsStore((s) => s.toggleFavorite)
-
   // Only show boards the user owns in the Boards dropdown (shared boards go under Workspace)
   const ownedBoards = Object.fromEntries(
     Object.entries(allBoards).filter(([, b]) => b.owner_id === user?.id)
   )
 
-  // Sort boards: favorites first, then the rest
-  const sortedOwnedBoards = Object.values(ownedBoards).sort((a, b) => {
-    const aFav = favoriteBoards.includes(a.id)
-    const bFav = favoriteBoards.includes(b.id)
-    if (aFav && !bFav) return -1
-    if (!aFav && bFav) return 1
-    return 0
-  })
+  const sortedOwnedBoards = Object.values(ownedBoards)
 
   const isBoardsActive = location.pathname.startsWith('/boards')
 
@@ -182,42 +171,35 @@ export default function Sidebar() {
           </NavLink>
         ) : (
           <div>
-            <button
-              onClick={() => setBoardsOpen(!boardsOpen)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full ${
+            <div
+              className={`flex items-center rounded-lg transition-colors ${
                 isBoardsActive
                   ? 'bg-[#EEF2D6] text-[#1B1B18]'
                   : 'text-[#5C5C57] hover:bg-[#E8E2DB]'
               }`}
             >
-              <Kanban className="w-5 h-5 shrink-0" />
-              <span className="flex-1 text-left">Boards</span>
-              {boardsOpen ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronRight className="w-4 h-4" />
-              )}
-            </button>
+              <button
+                onClick={() => { handleSelectBoard('__all__'); closeMobileMenu() }}
+                className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium flex-1 cursor-pointer"
+              >
+                <Kanban className="w-5 h-5 shrink-0" />
+                <span className="flex-1 text-left">Boards</span>
+              </button>
+              <button
+                onClick={() => setBoardsOpen(!boardsOpen)}
+                className="p-1.5 mr-1 rounded-lg hover:bg-[#E0DBD5] transition-colors cursor-pointer"
+              >
+                {boardsOpen ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+              </button>
+            </div>
 
             {boardsOpen && (
               <div className="ml-5 mt-1 pl-3 border-l border-[#E0DBD5] space-y-0.5">
-                {/* All Tasks — permanent entry */}
-                <div
-                  onClick={() => handleSelectBoard('__all__')}
-                  className={`flex items-center justify-between w-full px-3 py-1.5 rounded-lg text-sm transition-colors group cursor-pointer ${
-                    isBoardsActive && activeBoardId === '__all__'
-                      ? 'text-[#1B1B18] font-medium bg-[#EEF2D6]'
-                      : 'text-[#5C5C57] hover:text-[#1B1B18] hover:bg-[#E8E2DB]'
-                  }`}
-                >
-                  <span className="flex items-center gap-2 truncate">
-                    <Layers className="w-4 h-4 text-[#8E8E89] shrink-0" />
-                    <span className="truncate">All Tasks</span>
-                  </span>
-                </div>
-
                 {sortedOwnedBoards.map((board) => {
-                  const isFav = favoriteBoards.includes(board.id)
                   return (
                     <div
                       key={board.id}
@@ -280,17 +262,6 @@ export default function Sidebar() {
                         )}
                       </span>
                       <span className="flex items-center gap-0.5 shrink-0">
-                        <Star
-                          className={`w-3.5 h-3.5 transition-all cursor-pointer ${
-                            isFav
-                              ? 'text-[#D4A843] fill-[#D4A843]'
-                              : 'text-[#8E8E89] opacity-0 group-hover:opacity-100 hover:text-[#D4A843]'
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            toggleFavorite(board.id)
-                          }}
-                        />
                         {Object.keys(ownedBoards).length > 1 && (
                           <Trash2
                             className="w-3.5 h-3.5 text-[#8E8E89] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 shrink-0"
