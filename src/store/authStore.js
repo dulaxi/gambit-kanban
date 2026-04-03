@@ -8,10 +8,14 @@ export const useAuthStore = create((set, get) => ({
   loading: true,
 
   initialize: async () => {
-    // Register auth listener FIRST (synchronously) so no events are missed
-    // between getSession() call and listener registration
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    // Use onAuthStateChange as the sole session source (Supabase v2 best practice).
+    // INITIAL_SESSION fires synchronously on registration, replacing getSession().
+    // This avoids the internal auth lock deadlock that occurs when both are used.
+    let initialResolved = false
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       set({ user: session?.user || null, session })
+
       if (session?.user) {
         try {
           await get().fetchProfile()
@@ -21,25 +25,21 @@ export const useAuthStore = create((set, get) => ({
       } else {
         set({ profile: null })
       }
+
+      // Mark loading complete after the first event (INITIAL_SESSION)
+      if (!initialResolved) {
+        initialResolved = true
+        set({ loading: false })
+      }
     })
 
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error) {
-        console.error('Failed to get session:', error)
-      } else if (session) {
-        set({ user: session.user, session })
-        try {
-          await get().fetchProfile()
-        } catch (profileErr) {
-          console.error('Failed to fetch profile:', profileErr)
-        }
+    // Safety net: if INITIAL_SESSION never fires (shouldn't happen), unblock after 3s
+    setTimeout(() => {
+      if (!initialResolved) {
+        initialResolved = true
+        set({ loading: false })
       }
-    } catch (err) {
-      console.error('Auth initialization failed:', err)
-    } finally {
-      set({ loading: false })
-    }
+    }, 3000)
   },
 
   fetchProfile: async () => {
