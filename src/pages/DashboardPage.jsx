@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useBoardStore } from '../store/boardStore'
 import { useAuthStore } from '../store/authStore'
 import { format, formatDistanceToNow, parseISO, subDays, startOfDay, isToday, isTomorrow, isPast, addDays, isBefore } from 'date-fns'
-import { Plus, CheckCircle2 } from 'lucide-react'
+import { Plus, CheckCircle2, Target, LayoutGrid, Users, BarChart3 } from 'lucide-react'
 import DynamicIcon from '../components/board/DynamicIcon'
 import { PRIORITY_DOT, getGreeting } from '../utils/formatting'
 import { computeTaskStats, computeBoardSummaries } from '../utils/cardStats'
@@ -317,6 +317,69 @@ export default function DashboardPage() {
   const tip = TIPS[getDailyIndex(TIPS)]
   const quote = QUOTES[getDailyIndex(QUOTES)]
   const boardCount = Object.keys(boards).length
+
+  // ─── First-time user dashboard ───
+  if (boardCount === 0) {
+    return (
+      <div className="w-full flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 7rem)' }}>
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <div className="text-[11px] tracking-[1.5px] uppercase text-[#8E8E89] mb-1">
+              {format(new Date(), 'EEEE, MMMM d')}
+            </div>
+            <h1 className="text-[26px] sm:text-[30px] font-bold text-[#1B1B18] font-heading leading-tight">
+              Welcome, <span className="text-[#A8BA32]">{displayName}</span>
+            </h1>
+            <p className="text-[14px] text-[#5C5C57] font-heading italic mt-0.5">
+              Let's get you set up.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center -mt-12">
+          <div className="w-14 h-14 rounded-2xl bg-[#EEF2D6] flex items-center justify-center mb-5">
+            <Target className="w-7 h-7 text-[#A8BA32]" />
+          </div>
+          <h2 className="text-lg font-bold text-[#1B1B18] mb-1.5">Your dashboard lives here</h2>
+          <p className="text-sm text-[#8E8E89] text-center max-w-sm mb-6">
+            Stats, calendar, timeline, and activity will fill in as you create boards and complete tasks.
+          </p>
+          <button
+            onClick={handleNewBoard}
+            disabled={creatingBoard}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1B1B18] text-white text-sm font-medium rounded-xl hover:bg-[#333] transition-colors cursor-pointer disabled:opacity-50"
+          >
+            <Plus className="w-4 h-4" />
+            {creatingBoard ? 'Creating...' : 'Create your first board'}
+          </button>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-10 max-w-lg w-full">
+            <div className="bg-white border border-[#E0DBD5] rounded-xl p-4 text-center">
+              <LayoutGrid className="w-5 h-5 text-[#A8BA32] mx-auto mb-2" />
+              <div className="text-[12px] font-semibold text-[#1B1B18] mb-0.5">Boards</div>
+              <div className="text-[11px] text-[#8E8E89]">Organize tasks into columns</div>
+            </div>
+            <div className="bg-white border border-[#E0DBD5] rounded-xl p-4 text-center">
+              <Users className="w-5 h-5 text-[#D4A843] mx-auto mb-2" />
+              <div className="text-[12px] font-semibold text-[#1B1B18] mb-0.5">Collaborate</div>
+              <div className="text-[11px] text-[#8E8E89]">Invite your team to boards</div>
+            </div>
+            <div className="bg-white border border-[#E0DBD5] rounded-xl p-4 text-center">
+              <BarChart3 className="w-5 h-5 text-[#C27A4A] mx-auto mb-2" />
+              <div className="text-[12px] font-semibold text-[#1B1B18] mb-0.5">Track</div>
+              <div className="text-[11px] text-[#8E8E89]">Stats and streaks appear here</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center pt-3 border-t border-[#E8E2DB] shrink-0">
+          <span className="text-[12px] text-[#C4BFB8] font-heading italic">
+            "{quote.text}" — {quote.author}
+          </span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 7rem)' }}>
