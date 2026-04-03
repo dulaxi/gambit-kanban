@@ -108,7 +108,7 @@ export default function DashboardPage() {
                   className="bg-white border border-[#E0DBD5] rounded-xl p-4 text-left cursor-pointer hover:shadow-sm hover:border-[#C4BFB8] transition-all"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    {board.icon && <DynamicIcon name={board.icon} className="w-[18px] h-[18px] text-[#5C5C57]" />}
+                    <DynamicIcon name={board.icon || 'kanban'} className="w-4 h-4 text-[#5C5C57]" />
                     <span className="text-[13px] font-bold text-[#1B1B18] flex-1 truncate">{board.name}</span>
                     <span className="text-[11px] text-[#8E8E89]">{board.totalCards}</span>
                   </div>
