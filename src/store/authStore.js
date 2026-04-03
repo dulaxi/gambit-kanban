@@ -26,7 +26,12 @@ export const useAuthStore = create((set, get) => ({
       set({ loading: false })
     }
 
+    // Listen for future auth changes (token refresh, sign-out from another tab, etc.)
+    // NOT used for initial signUp/signIn — those set state explicitly from their response.
     supabase.auth.onAuthStateChange(async (event, session) => {
+      // Skip INITIAL_SESSION — we already handled it via getSession() above
+      if (event === 'INITIAL_SESSION') return
+
       set({ user: session?.user || null, session })
       if (session?.user) {
         try {
@@ -53,6 +58,11 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  // signUp and signIn explicitly set user/session from the API response.
+  // This is intentional — we do NOT rely on onAuthStateChange for the
+  // initial state after auth. onAuthStateChange handles later events
+  // (token refresh, sign-out from another tab, etc.)
+
   signUp: async (email, password, displayName) => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -62,6 +72,10 @@ export const useAuthStore = create((set, get) => ({
       },
     })
     if (error) throw error
+    if (!data.session) {
+      throw new Error('Please check your email to confirm your account.')
+    }
+    set({ user: data.session.user, session: data.session })
     return data
   },
 
@@ -71,13 +85,11 @@ export const useAuthStore = create((set, get) => ({
       password,
     })
     if (error) throw error
+    set({ user: data.session.user, session: data.session })
     return data
   },
 
   signOut: () => {
-    // Clear state immediately so the UI redirects instantly.
-    // Use scope:'local' to only clear the local session (no network call),
-    // avoiding conflicts with a subsequent signIn.
     set({ user: null, session: null, profile: null })
     supabase.auth.signOut({ scope: 'local' }).catch((err) => {
       console.error('Sign out error:', err)

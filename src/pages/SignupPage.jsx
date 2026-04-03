@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { UserPlus, SquareKanban } from 'lucide-react'
@@ -9,8 +9,13 @@ export default function SignupPage() {
   const [displayName, setDisplayName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [slow, setSlow] = useState(false)
+  const slowTimer = useRef(null)
   const signUp = useAuthStore((s) => s.signUp)
   const navigate = useNavigate()
+
+  // Clean up timer on unmount
+  useEffect(() => () => clearTimeout(slowTimer.current), [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -20,13 +25,18 @@ export default function SignupPage() {
       return
     }
     setLoading(true)
+    setSlow(false)
+    // Show "still working" after 3s so user knows it's not stuck
+    slowTimer.current = setTimeout(() => setSlow(true), 3000)
     try {
       await signUp(email, password, displayName || email.split('@')[0])
-      navigate('/dashboard')
+      navigate('/dashboard', { replace: true })
     } catch (err) {
       setError(err.message)
     } finally {
+      clearTimeout(slowTimer.current)
       setLoading(false)
+      setSlow(false)
     }
   }
 
@@ -88,7 +98,7 @@ export default function SignupPage() {
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1B1B18] text-white text-sm font-medium rounded-xl hover:bg-[#333] transition-colors disabled:opacity-50"
           >
             <UserPlus className="w-4 h-4" />
-            {loading ? 'Creating account...' : 'Sign up'}
+            {slow ? 'Setting up your workspace...' : loading ? 'Creating account...' : 'Sign up'}
           </button>
         </form>
 

@@ -47,7 +47,7 @@ describe('LoginPage', () => {
   })
 
   test('navigates to dashboard on success', async () => {
-    mockSignIn.mockResolvedValueOnce({})
+    mockSignIn.mockResolvedValueOnce({ session: { user: { id: 'u1' } } })
     render(<LoginPage />)
 
     await userEvent.type(screen.getByPlaceholderText('you@example.com'), 'test@test.com')
@@ -55,7 +55,7 @@ describe('LoginPage', () => {
     screen.getByRole('button', { name: /sign in/i }).click()
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard')
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true })
     })
   })
 
@@ -100,7 +100,7 @@ describe('SignupPage', () => {
   })
 
   test('navigates on success', async () => {
-    mockSignUp.mockResolvedValueOnce({})
+    mockSignUp.mockResolvedValueOnce({ session: { user: { id: 'u1' } } })
     render(<SignupPage />)
 
     await userEvent.type(screen.getByPlaceholderText('Your name'), 'Alice')
@@ -109,7 +109,7 @@ describe('SignupPage', () => {
     screen.getByRole('button', { name: /sign up/i }).click()
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard')
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true })
     })
   })
 })
