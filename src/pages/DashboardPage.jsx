@@ -100,7 +100,7 @@ export default function DashboardPage() {
             <p className="text-sm text-[#8E8E89] text-center max-w-sm mb-6">
               Jump into a board, or create a new one.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg w-full mb-6">
+            <div className={`grid gap-3 max-w-lg w-full mb-6 ${boardSummaries.length === 1 ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
               {boardSummaries.slice(0, 4).map((board) => (
                 <button
                   key={board.id}
