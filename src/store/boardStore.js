@@ -35,10 +35,9 @@ function undoableDelete(message) {
           btn.style.cssText = 'color:#FAF8F6;background:none;border:none;cursor:pointer;margin-left:auto;display:flex;align-items:center;opacity:0.8'
           btn.onmouseenter = () => { btn.style.opacity = 1 }
           btn.onmouseleave = () => { btn.style.opacity = 0.8 }
-          const ico = document.createElement('span')
-          ico.className = 'material-symbols-outlined'
-          ico.style.cssText = "font-size:18px;line-height:18px;font-variation-settings:'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24"
-          ico.textContent = 'undo'
+          const ico = document.createElement('i')
+          ico.className = 'ph ph-arrow-counter-clockwise'
+          ico.style.cssText = 'font-size:18px;line-height:18px'
           btn.appendChild(ico)
           c.style.display = 'flex'
           c.style.alignItems = 'center'
@@ -153,6 +152,10 @@ export const useBoardStore = create((set, get) => ({
   setActiveBoard: (boardId) => {
     localStorage.setItem(ACTIVE_BOARD_KEY, boardId)
     set({ activeBoardId: boardId })
+    // Re-subscribe with the new board filter so realtime is scoped correctly
+    if (get().subscriptions.length > 0) {
+      get().subscribeToBoards()
+    }
   },
 
   addBoard: async (name, icon, customColumns) => {
@@ -403,28 +406,23 @@ export const useBoardStore = create((set, get) => ({
     }
 
     try {
-      const { data: card, error } = await supabase
-        .from('cards')
-        .insert(cardInsert)
-        .select()
-        .single()
+      // Run card insert and task number increment in parallel (independent operations)
+      const [cardRes, numRes] = await Promise.all([
+        supabase.from('cards').insert(cardInsert).select().single(),
+        supabase.from('boards').update({ next_task_number: taskNumber + 1 }).eq('id', boardId),
+      ])
 
-      if (error || !card) {
-        console.error('Failed to create card:', error)
+      if (numRes.error) {
+        console.error('Failed to increment task number:', numRes.error)
+      }
+
+      if (cardRes.error || !cardRes.data) {
+        console.error('Failed to create card:', cardRes.error)
         showToast.error('Failed to create task')
         return null
       }
 
-      // Increment board task number
-      const { error: numError } = await supabase
-        .from('boards')
-        .update({ next_task_number: taskNumber + 1 })
-        .eq('id', boardId)
-
-      if (numError) {
-        console.error('Failed to increment task number:', numError)
-      }
-
+      const card = cardRes.data
       set((state) => ({
         cards: { ...state.cards, [card.id]: card },
         boards: {
@@ -1039,6 +1037,9 @@ export const useBoardStore = create((set, get) => ({
       existing.forEach((sub) => supabase.removeChannel(sub))
     }
 
+    const activeBoardId = get().activeBoardId
+
+    // Boards table: unfiltered (need to see renames/deletes across all boards)
     const boardsSub = supabase
       .channel('boards-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'boards' }, (payload) => {
@@ -1051,40 +1052,85 @@ export const useBoardStore = create((set, get) => ({
           return { boards: { ...state.boards, [board.id]: board } }
         })
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'columns' }, (payload) => {
-        set((state) => {
-          if (payload.eventType === 'DELETE') {
-            const { [payload.old.id]: _, ...rest } = state.columns
-            return { columns: rest }
-          }
-          const col = payload.new
-          return { columns: { ...state.columns, [col.id]: col } }
-        })
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, (payload) => {
-        // Skip card position updates during drag to prevent interference
-        if (get()._isDragging && payload.eventType !== 'DELETE') return
-        set((state) => {
-          if (payload.eventType === 'DELETE') {
-            const { [payload.old.id]: _, ...rest } = state.cards
-            return { cards: rest }
-          }
-          const card = payload.new
-          return { cards: { ...state.cards, [card.id]: card } }
-        })
-      })
       .subscribe((status, err) => {
         if (status === 'CHANNEL_ERROR') {
-          console.error('Realtime subscription error:', err)
+          console.error('Realtime boards subscription error:', err)
           showToast.warn('Live updates disconnected — refresh to resync')
-        }
-        if (status === 'TIMED_OUT') {
-          console.error('Realtime subscription timed out')
-          showToast.warn('Live updates timed out — refresh to resync')
         }
       })
 
-    set({ subscriptions: [boardsSub] })
+    // Columns + Cards: filtered to active board (reduces noise for multi-board users)
+    const subs = [boardsSub]
+    if (activeBoardId && activeBoardId !== '__all__') {
+      const boardDetailSub = supabase
+        .channel(`board-detail-${activeBoardId}`)
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'columns',
+          filter: `board_id=eq.${activeBoardId}`,
+        }, (payload) => {
+          set((state) => {
+            if (payload.eventType === 'DELETE') {
+              const { [payload.old.id]: _, ...rest } = state.columns
+              return { columns: rest }
+            }
+            const col = payload.new
+            return { columns: { ...state.columns, [col.id]: col } }
+          })
+        })
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'cards',
+          filter: `board_id=eq.${activeBoardId}`,
+        }, (payload) => {
+          if (get()._isDragging && payload.eventType !== 'DELETE') return
+          set((state) => {
+            if (payload.eventType === 'DELETE') {
+              const { [payload.old.id]: _, ...rest } = state.cards
+              return { cards: rest }
+            }
+            const card = payload.new
+            return { cards: { ...state.cards, [card.id]: card } }
+          })
+        })
+        .subscribe((status, err) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.error('Realtime board detail subscription error:', err)
+          }
+          if (status === 'TIMED_OUT') {
+            console.error('Realtime board detail subscription timed out')
+            showToast.warn('Live updates timed out — refresh to resync')
+          }
+        })
+      subs.push(boardDetailSub)
+    } else {
+      // "__all__" view or no active board: subscribe to all columns and cards
+      const allDetailSub = supabase
+        .channel('all-detail-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'columns' }, (payload) => {
+          set((state) => {
+            if (payload.eventType === 'DELETE') {
+              const { [payload.old.id]: _, ...rest } = state.columns
+              return { columns: rest }
+            }
+            const col = payload.new
+            return { columns: { ...state.columns, [col.id]: col } }
+          })
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, (payload) => {
+          if (get()._isDragging && payload.eventType !== 'DELETE') return
+          set((state) => {
+            if (payload.eventType === 'DELETE') {
+              const { [payload.old.id]: _, ...rest } = state.cards
+              return { cards: rest }
+            }
+            const card = payload.new
+            return { cards: { ...state.cards, [card.id]: card } }
+          })
+        })
+        .subscribe()
+      subs.push(allDetailSub)
+    }
+
+    set({ subscriptions: subs })
   },
 
   unsubscribeAll: () => {

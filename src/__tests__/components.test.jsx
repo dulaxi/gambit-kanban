@@ -106,17 +106,14 @@ describe('Card', () => {
   })
 })
 
-// ─── DynamicIcon ──────────────────────────────────────────────
-// DynamicIcon is mocked above for Card tests, so we test getAllIconNames
-// from the real module in a separate import
+// ─── Phosphor Icons data ─────────────────────────────────────
 
-describe('getAllIconNames', () => {
-  test('returns lucide icons only when library is lucide', async () => {
-    // Dynamic import to get real module (not the mock)
-    const mod = await vi.importActual('../components/board/DynamicIcon')
-    const names = mod.getAllIconNames('lucide')
-    expect(names.length).toBeGreaterThan(100)
-    expect(names).toContain('FileText')
+describe('phosphorIcons', () => {
+  test('ALL_PHOSPHOR_ICONS contains curated icons', async () => {
+    const { ALL_PHOSPHOR_ICONS } = await import('../data/phosphorIcons')
+    expect(ALL_PHOSPHOR_ICONS.length).toBeGreaterThan(100)
+    expect(ALL_PHOSPHOR_ICONS).toContain('rocket')
+    expect(ALL_PHOSPHOR_ICONS).toContain('star')
   })
 })
 

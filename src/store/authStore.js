@@ -8,6 +8,21 @@ export const useAuthStore = create((set, get) => ({
   loading: true,
 
   initialize: async () => {
+    // Register auth listener FIRST (synchronously) so no events are missed
+    // between getSession() call and listener registration
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      set({ user: session?.user || null, session })
+      if (session?.user) {
+        try {
+          await get().fetchProfile()
+        } catch (err) {
+          console.error('Failed to fetch profile on auth change:', err)
+        }
+      } else {
+        set({ profile: null })
+      }
+    })
+
     try {
       const { data: { session }, error } = await supabase.auth.getSession()
       if (error) {
@@ -25,19 +40,6 @@ export const useAuthStore = create((set, get) => ({
     } finally {
       set({ loading: false })
     }
-
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      set({ user: session?.user || null, session })
-      if (session?.user) {
-        try {
-          await get().fetchProfile()
-        } catch (err) {
-          console.error('Failed to fetch profile on auth change:', err)
-        }
-      } else {
-        set({ profile: null })
-      }
-    })
   },
 
   fetchProfile: async () => {

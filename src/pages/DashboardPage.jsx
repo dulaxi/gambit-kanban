@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBoardStore } from '../store/boardStore'
 import { useAuthStore } from '../store/authStore'
@@ -7,6 +7,9 @@ import { Plus, Target, LayoutGrid, Users, BarChart3 } from 'lucide-react'
 import DynamicIcon from '../components/board/DynamicIcon'
 import { getGreeting } from '../utils/formatting'
 import { computeBoardSummaries } from '../utils/cardStats'
+
+// Prefetch the boards route during idle time — users almost always navigate here next
+const prefetchBoards = () => { import('./BoardsPage') }
 
 const QUOTES = [
   { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
@@ -39,6 +42,16 @@ export default function DashboardPage() {
     [boards, columns, cards, profile]
   )
 
+
+  useEffect(() => {
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(prefetchBoards)
+      return () => cancelIdleCallback(id)
+    } else {
+      const id = setTimeout(prefetchBoards, 200)
+      return () => clearTimeout(id)
+    }
+  }, [])
 
   const quote = QUOTES[getDailyIndex(QUOTES)]
   const boardCount = Object.keys(boards).length
