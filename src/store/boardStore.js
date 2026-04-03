@@ -161,41 +161,37 @@ export const useBoardStore = create((set, get) => ({
   addBoard: async (name, icon, customColumns) => {
     if (!boardCreateLimiter()) { showToast.warn('Too many boards created — slow down'); return null }
     const sanitizedName = sanitizeTitle(name) || 'Untitled Board'
-    const { data: { user } } = await supabase.auth.getUser()
+
+    // Read user from auth store instead of making a network call
+    const user = useAuthStore.getState().user
     if (!user) return null
 
-    // Generate ID client-side to avoid .select() on insert
-    // (PostgREST can't return the row because the SELECT RLS policy
-    // depends on board_members, which is populated by an AFTER INSERT trigger)
     const boardId = crypto.randomUUID()
 
+    // Step 1: Insert board (trigger auto-adds owner to board_members)
     const { error } = await supabase
       .from('boards')
       .insert({ id: boardId, name: sanitizedName, icon: icon || null, owner_id: user.id })
 
     if (error) return null
 
-    // Fetch the board back (trigger has committed board_members by now)
-    const { data: board } = await supabase
-      .from('boards')
-      .select()
-      .eq('id', boardId)
-      .single()
-
-    if (!board) return null
-
-    // Create columns (custom or default)
+    // Step 2: Fetch board back + insert columns in parallel
+    // (board fetch needed because RLS SELECT depends on board_members trigger)
     const defaultColumns = customColumns || ['To Do', 'In Progress', 'Review', 'Done']
     const colInserts = defaultColumns.map((title, i) => ({
-      board_id: board.id,
+      board_id: boardId,
       title,
       position: i,
     }))
 
-    const { data: cols } = await supabase
-      .from('columns')
-      .insert(colInserts)
-      .select()
+    const [boardRes, colsRes] = await Promise.all([
+      supabase.from('boards').select().eq('id', boardId).single(),
+      supabase.from('columns').insert(colInserts).select(),
+    ])
+
+    const board = boardRes.data
+    const cols = colsRes.data
+    if (!board) return null
 
     localStorage.setItem(ACTIVE_BOARD_KEY, board.id)
     set((state) => {
