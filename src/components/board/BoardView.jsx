@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Plus, X } from 'lucide-react'
 import {
   DndContext,
@@ -33,10 +33,13 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
   const setDragging = useBoardStore((s) => s.setDragging)
   const completeCard = useBoardStore((s) => s.completeCard)
 
-  // Get columns for this board, sorted by position
-  const boardColumns = Object.values(allColumns)
-    .filter((c) => c.board_id === boardId)
-    .sort((a, b) => a.position - b.position)
+  // Memoize: only recompute when columns object or boardId changes
+  const boardColumns = useMemo(
+    () => Object.values(allColumns)
+      .filter((c) => c.board_id === boardId)
+      .sort((a, b) => a.position - b.position),
+    [allColumns, boardId]
+  )
 
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } })

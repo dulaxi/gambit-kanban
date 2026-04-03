@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { Plus, MoreHorizontal, Pencil, Trash2, Gauge, ChevronDown, Bookmark, X } from 'lucide-react'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
@@ -58,15 +58,21 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
 
   const { setNodeRef: setDroppableRef } = useDroppable({ id: column.id })
 
-  // Get cards for this column, sorted by position
-  const columnCards = Object.values(allCards)
-    .filter((c) => c.column_id === column.id && !c.archived)
-    .sort((a, b) => a.position - b.position)
+  // Memoize: only recompute when cards object or column.id changes
+  const columnCards = useMemo(
+    () => Object.values(allCards)
+      .filter((c) => c.column_id === column.id && !c.archived)
+      .sort((a, b) => a.position - b.position),
+    [allCards, column.id]
+  )
 
   // Apply filters then sort (keep columnCards intact for DnD)
-  const filteredCards = sortCards(filterCards(columnCards, filters), sortBy)
+  const filteredCards = useMemo(
+    () => sortCards(filterCards(columnCards, filters), sortBy),
+    [columnCards, filters, sortBy]
+  )
 
-  const cardIds = columnCards.map((c) => c.id)
+  const cardIds = useMemo(() => columnCards.map((c) => c.id), [columnCards])
   const wipLimit = column.wip_limit
   const overWip = wipLimit && columnCards.length > wipLimit
 

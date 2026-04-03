@@ -59,8 +59,19 @@ export default function AppLayout() {
   // Fetch data and set up real-time when authenticated
   useEffect(() => {
     if (user) {
-      fetchBoards().then(() => {
+      // Fire all independent fetches in parallel
+      Promise.all([
+        fetchBoards(),
+        fetchNotes(),
+        fetchInvitations(),
+        fetchSharedBoards(),
+        fetchNotifications(),
+      ]).then(() => {
+        // Subscribe to realtime AFTER data is loaded to avoid stale overwrites
+        subscribeToBoards()
+
         spawnRecurringTasks()
+
         // Due date reminders — run once per session
         if (remindersShown.current) return
         remindersShown.current = true
@@ -87,11 +98,7 @@ export default function AppLayout() {
           showToast.warn(`${dueToday} task${dueToday > 1 ? 's' : ''} due today`)
         }
       })
-      fetchNotes()
-      fetchInvitations()
-      fetchSharedBoards()
-      subscribeToBoards()
-      fetchNotifications()
+
       const unsubNotifications = subscribeToNotifications()
 
       // Check for local data migration

@@ -422,7 +422,7 @@ export default function Header({ title }) {
                 setMenuOpen(false)
                 navigate('/settings')
               }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[#5C5C57] hover:bg-[#F2EDE8]"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[#5C5C57] hover:bg-[#F2EDE8] cursor-pointer"
             >
               <Settings className="w-4 h-4" />
               Settings
@@ -430,7 +430,7 @@ export default function Header({ title }) {
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[#7A5C44] hover:bg-[#F2EDE8]"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[#7A5C44] hover:bg-[#F2EDE8] cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               Sign out
