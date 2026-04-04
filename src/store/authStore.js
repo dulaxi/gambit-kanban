@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
+import * as Sentry from '@sentry/react'
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -29,6 +30,7 @@ export const useAuthStore = create((set, get) => ({
     supabase.auth.onAuthStateChange(async (event, session) => {
       set({ user: session?.user || null, session })
       if (session?.user) {
+        Sentry.setUser({ id: session.user.id, email: session.user.email })
         try {
           await get().fetchProfile()
         } catch (err) {
@@ -81,6 +83,7 @@ export const useAuthStore = create((set, get) => ({
       console.error('Sign out error:', err)
     }
     set({ user: null, session: null, profile: null })
+    Sentry.setUser(null)
   },
 
   resetPassword: async (email) => {

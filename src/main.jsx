@@ -13,6 +13,17 @@ import '@fontsource/ibm-plex-mono/600.css'
 import './index.css'
 import App from './App.jsx'
 import { useAuthStore } from './store/authStore'
+import * as Sentry from '@sentry/react'
+import { env } from './lib/env'
+
+// Initialize Sentry (no-op if DSN not configured)
+if (env.sentryDsn) {
+  Sentry.init({
+    dsn: env.sentryDsn,
+    environment: import.meta.env.MODE,
+    sampleRate: 1.0,
+  })
+}
 
 // Global error handlers — catch unhandled errors and rejections
 window.addEventListener('error', (event) => {

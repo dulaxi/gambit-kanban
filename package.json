@@ -19,6 +19,7 @@
     "@fontsource/google-sans": "^5.2.1",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/spectral": "^5.2.8",
+    "@sentry/react": "^10.47.0",
     "@supabase/supabase-js": "^2.98.0",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.575.0",
