@@ -813,6 +813,13 @@ export const useBoardStore = create((set, get) => ({
     }
   },
 
+  logCardMove: (cardId, fromColumnId, toColumnId) => {
+    const state = get()
+    const fromCol = state.columns[fromColumnId]
+    const toCol = state.columns[toColumnId]
+    logActivity(cardId, 'moved', `${fromCol?.title || 'Unknown'} → ${toCol?.title || 'Unknown'}`)
+  },
+
   // ============================================================
   // GETTERS
   // ============================================================

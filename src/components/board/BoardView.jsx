@@ -32,6 +32,7 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
   const persistCardPositions = useBoardStore((s) => s.persistCardPositions)
   const setDragging = useBoardStore((s) => s.setDragging)
   const completeCard = useBoardStore((s) => s.completeCard)
+  const logCardMove = useBoardStore((s) => s.logCardMove)
 
   // Memoize: only recompute when columns object or boardId changes
   const boardColumns = useMemo(
@@ -40,6 +41,8 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
       .sort((a, b) => a.position - b.position),
     [allColumns, boardId]
   )
+
+  const dragOriginRef = useRef(null)
 
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } })
@@ -59,9 +62,13 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
   }, [isAddingColumn])
 
   const handleDragStart = useCallback((event) => {
-    setActiveCardId(event.active.id)
+    const cardId = event.active.id
+    const state = useBoardStore.getState()
+    const card = state.cards[cardId]
+    dragOriginRef.current = card ? { cardId, columnId: card.column_id } : null
+    setActiveCardId(cardId)
     setDragging(true)
-    affectedCardsRef.current = new Set([event.active.id])
+    affectedCardsRef.current = new Set([cardId])
   }, [setDragging])
 
   const getColumns = useCallback(() => {
@@ -181,9 +188,20 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
 
       // Persist all affected cards to Supabase
       persistCardPositions([...affectedCardsRef.current])
+
+      // Log activity if card moved to a different column
+      if (dragOriginRef.current) {
+        const { cardId: draggedId, columnId: origColumnId } = dragOriginRef.current
+        const currentCard = useBoardStore.getState().cards[draggedId]
+        if (currentCard && currentCard.column_id !== origColumnId) {
+          logCardMove(draggedId, origColumnId, currentCard.column_id)
+        }
+        dragOriginRef.current = null
+      }
+
       affectedCardsRef.current = new Set()
     },
-    [boardId, getColumns, findCol, getColumnCards, moveCardLocal, persistCardPositions, setDragging]
+    [boardId, getColumns, findCol, getColumnCards, moveCardLocal, persistCardPositions, setDragging, logCardMove]
   )
 
   if (!board) {

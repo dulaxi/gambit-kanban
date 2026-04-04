@@ -22,14 +22,15 @@ const ACTION_TEXT = {
 }
 
 export default function CardDetailActivity({ activityItems }) {
-  if (!activityItems || activityItems.length === 0) return null
-
   return (
     <div className="px-5 pt-3 pb-5 border-t border-[#E8E2DB]">
       <label className="text-xs font-medium text-[#8E8E89] uppercase tracking-wider mb-3 flex items-center gap-2">
         <History className="w-3.5 h-3.5" />
         Activity
       </label>
+      {!activityItems || activityItems.length === 0 ? (
+        <p className="text-xs text-[#C4BFB8]">No activity yet</p>
+      ) : (
       <div className="space-y-2">
         {activityItems.map((item) => (
           <div key={item.id} className="flex items-start gap-2 text-[12px]">
@@ -51,6 +52,7 @@ export default function CardDetailActivity({ activityItems }) {
           </div>
         ))}
       </div>
+      )}
     </div>
   )
 }

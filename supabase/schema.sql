@@ -98,6 +98,20 @@ as $$
   select board_id from public.board_members where user_id = auth.uid()
 $$;
 
+-- Helper: bypasses RLS to look up card IDs the user can access
+create or replace function public.get_my_card_ids()
+returns setof uuid
+language sql
+security definer
+stable
+set search_path = ''
+as $$
+  select c.id from public.cards c
+  where c.board_id in (
+    select board_id from public.board_members where user_id = auth.uid()
+  )
+$$;
+
 -- Helper: bypasses RLS to look up boards the user is invited to
 create or replace function public.get_my_invited_board_ids()
 returns setof uuid
@@ -423,25 +437,15 @@ alter table public.card_comments enable row level security;
 
 create policy "Members can view comments"
   on public.card_comments for select
-  using (
-    card_id in (
-      select c.id from public.cards c
-      where c.board_id in (
-        select board_id from public.board_members where user_id = auth.uid()
-      )
-    )
-  );
+  to authenticated
+  using (card_id in (select get_my_card_ids()));
 
 create policy "Members can create comments"
   on public.card_comments for insert
+  to authenticated
   with check (
     user_id = auth.uid()
-    and card_id in (
-      select c.id from public.cards c
-      where c.board_id in (
-        select board_id from public.board_members where user_id = auth.uid()
-      )
-    )
+    and card_id in (select get_my_card_ids())
   );
 
 create policy "Users can delete own comments"
@@ -475,26 +479,14 @@ alter table public.card_activity enable row level security;
 create policy "Members can view card activity"
   on public.card_activity for select
   to authenticated
-  using (
-    card_id in (
-      select c.id from public.cards c
-      where c.board_id in (
-        select board_id from public.board_members where user_id = auth.uid()
-      )
-    )
-  );
+  using (card_id in (select get_my_card_ids()));
 
 create policy "Members can create card activity"
   on public.card_activity for insert
   to authenticated
   with check (
     user_id = auth.uid()
-    and card_id in (
-      select c.id from public.cards c
-      where c.board_id in (
-        select board_id from public.board_members where user_id = auth.uid()
-      )
-    )
+    and card_id in (select get_my_card_ids())
   );
 
 -- ============================================================
@@ -518,26 +510,14 @@ alter table public.card_attachments enable row level security;
 create policy "Members can view attachments"
   on public.card_attachments for select
   to authenticated
-  using (
-    card_id in (
-      select c.id from public.cards c
-      where c.board_id in (
-        select board_id from public.board_members where user_id = auth.uid()
-      )
-    )
-  );
+  using (card_id in (select get_my_card_ids()));
 
 create policy "Members can upload attachments"
   on public.card_attachments for insert
   to authenticated
   with check (
     user_id = auth.uid()
-    and card_id in (
-      select c.id from public.cards c
-      where c.board_id in (
-        select board_id from public.board_members where user_id = auth.uid()
-      )
-    )
+    and card_id in (select get_my_card_ids())
   );
 
 create policy "Users can delete own attachments"
