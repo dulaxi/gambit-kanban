@@ -76,12 +76,12 @@ export default function DashboardPage() {
       {/* ─── Content ─── */}
       <div className="flex-1 flex flex-col items-center justify-center">
         {/* Header — centered */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-12 -mt-10">
           <div className="text-[11px] tracking-[1.5px] uppercase text-[#8E8E89] mb-1">
             {format(new Date(), 'EEEE, MMMM d')}
           </div>
-          <h1 className="text-[26px] sm:text-[30px] font-bold text-[#1B1B18] leading-tight">
-            <span className="font-logo">{boardCount === 0 ? 'Welcome' : getGreeting()},</span> <span className="text-[#A8BA32] font-heading">{displayName}</span>
+          <h1 className="text-[26px] sm:text-[30px] font-normal text-[#1B1B18] leading-tight">
+            <span className="font-logo">{boardCount === 0 ? 'Welcome' : getGreeting()},</span> <span className="text-[#A8BA32] font-heading text-[1.14em]">{displayName}</span>
           </h1>
           <p className="text-[14px] text-[#5C5C57] font-heading italic mt-0.5">
             {boardCount === 0 ? "Let's get you set up." : 'Here\u2019s your home base.'}
@@ -92,7 +92,7 @@ export default function DashboardPage() {
             <div className="w-14 h-14 rounded-2xl bg-[#EEF2D6] flex items-center justify-center mb-5">
               <Target className="w-7 h-7 text-[#A8BA32]" />
             </div>
-            <h2 className="text-lg font-bold text-[#1B1B18] mb-1.5 font-logo">Your dashboard lives here</h2>
+            <h2 className="text-lg font-normal text-[#1B1B18] mb-1.5 font-logo">Your dashboard lives here</h2>
             <p className="text-sm text-[#8E8E89] text-center max-w-sm mb-6">
               Stats, calendar, timeline, and activity will fill in as you create boards and complete tasks.
             </p>
@@ -106,7 +106,7 @@ export default function DashboardPage() {
           </>
         ) : (
           <>
-            <h2 className="text-lg font-bold text-[#1B1B18] mb-1.5 font-logo">Your boards</h2>
+            <h2 className="inline-flex items-center gap-1.5 text-lg font-normal text-[#1B1B18] mb-1.5 font-logo px-3 py-0.5 bg-[#A8BA32] rounded-lg"><Kanban className="w-4.5 h-4.5" />Your boards</h2>
             <p className="text-sm text-[#8E8E89] text-center max-w-sm mb-6">
               Jump into a board, or create a new one.
             </p>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
                     ) : (
                       <Kanban className="w-4 h-4 text-[#8E8E89]" />
                     )}
-                    <span className="text-[13px] font-bold text-[#1B1B18] flex-1 truncate">{board.name}</span>
+                    <span className="text-[13px] font-normal text-[#1B1B18] flex-1 truncate">{board.name}</span>
                     <span className="text-[11px] text-[#8E8E89]">{board.totalCards}</span>
                   </div>
                   {board.totalCards > 0 && (

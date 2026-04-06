@@ -1,5 +1,5 @@
-import { Link, Navigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import '@fontsource/crimson-pro/400.css'
 import '@fontsource/crimson-pro/600.css'
 import '@fontsource/crimson-pro/700.css'
@@ -10,8 +10,16 @@ import {
   Share2, BarChart3, GripVertical, Tag, CheckSquare, Clock,
   Shield, Sparkles, MousePointerClick, ArrowUpRight,
   Check, Square, AlignLeft, User,
+  LayoutDashboard, Settings, ChevronsRight, SquareKanban, Kanban as LucideKanban,
 } from 'lucide-react'
 import { Kanban } from '@phosphor-icons/react'
+import {
+  DndContext, DragOverlay, pointerWithin, rectIntersection,
+  PointerSensor, useSensor, useSensors, useDroppable,
+} from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import SortableCard from '../components/board/SortableCard'
+import Card from '../components/board/Card'
 import { useAuthStore } from '../store/authStore'
 
 /* ── Mock board data for hero preview ── */
@@ -355,6 +363,285 @@ function MockDetailPanel() {
   )
 }
 
+/* ── Demo board data ── */
+const DEMO_COLUMNS = [
+  { id: 'demo-col-1', title: 'To Do', position: 0 },
+  { id: 'demo-col-2', title: 'In Progress', position: 1 },
+]
+
+const DEMO_CARDS_INIT = [
+  {
+    id: 'demo-1', title: 'Design system tokens', description: 'Define color, spacing, and typography tokens for the component library',
+    column_id: 'demo-col-1', position: 0, priority: 'high', task_number: 1, completed: false,
+    labels: [{ text: 'Design', color: 'purple' }], checklist: null, due_date: null, assignee_name: null, icon: null, board_id: 'demo', archived: false,
+  },
+  {
+    id: 'demo-2', title: 'Set up CI pipeline', description: '',
+    column_id: 'demo-col-1', position: 1, priority: 'medium', task_number: 2, completed: false,
+    labels: [{ text: 'DevOps', color: 'blue' }], checklist: null, due_date: '2026-04-10', assignee_name: 'Marcus', icon: null, board_id: 'demo', archived: false,
+  },
+  {
+    id: 'demo-3', title: 'Write onboarding docs', description: '',
+    column_id: 'demo-col-1', position: 2, priority: 'low', task_number: 3, completed: false,
+    labels: [{ text: 'Docs', color: 'yellow' }], checklist: [{ text: 'Intro guide', done: true }, { text: 'API reference', done: false }, { text: 'Tutorials', done: false }], due_date: null, assignee_name: null, icon: null, board_id: 'demo', archived: false,
+  },
+  {
+    id: 'demo-4', title: 'Auth flow redesign', description: 'Migrate from session-based to JWT tokens with refresh flow',
+    column_id: 'demo-col-2', position: 0, priority: 'high', task_number: 4, completed: false,
+    labels: [{ text: 'Feature', color: 'green' }], checklist: [{ text: 'JWT setup', done: true }, { text: 'Refresh flow', done: true }, { text: 'Session migration', done: false }], due_date: null, assignee_name: 'Aisha', icon: null, board_id: 'demo', archived: false,
+  },
+  {
+    id: 'demo-5', title: 'API rate limiting', description: '',
+    column_id: 'demo-col-2', position: 1, priority: 'medium', task_number: 5, completed: false,
+    labels: [{ text: 'Backend', color: 'red' }], checklist: null, due_date: '2026-04-08', assignee_name: 'Marcus', icon: null, board_id: 'demo', archived: false,
+  },
+]
+
+function DemoBoard() {
+  const [cards, setCards] = useState(DEMO_CARDS_INIT)
+  const [activeCardId, setActiveCardId] = useState(null)
+  const cardsRef = useRef(cards)
+  cardsRef.current = cards
+
+  const sensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  const sensors = useSensors(sensor)
+
+  const getColumnCards = useCallback((colId) =>
+    cards.filter((c) => c.column_id === colId).sort((a, b) => a.position - b.position),
+  [cards])
+
+  const collisionDetection = useCallback((args) => {
+    const p = pointerWithin(args)
+    return p.length > 0 ? p : rectIntersection(args)
+  }, [])
+
+  const findTargetColumn = useCallback((overId) => {
+    if (DEMO_COLUMNS.find((col) => col.id === overId)) return overId
+    const overCard = cardsRef.current.find((c) => c.id === overId)
+    return overCard?.column_id || null
+  }, [])
+
+  const handleDragStart = useCallback((event) => {
+    setActiveCardId(event.active.id)
+  }, [])
+
+  const handleDragOver = useCallback((event) => {
+    const { active, over } = event
+    if (!over) return
+
+    const overColId = findTargetColumn(over.id)
+    if (!overColId) return
+
+    setCards((prev) => {
+      const activeCard = prev.find((c) => c.id === active.id)
+      if (!activeCard || activeCard.column_id === overColId) return prev
+
+      const fromCards = prev.filter((c) => c.column_id === activeCard.column_id && c.id !== active.id)
+      const toCards = prev.filter((c) => c.column_id === overColId)
+      const overIndex = toCards.findIndex((c) => c.id === over.id)
+      const insertAt = overIndex >= 0 ? overIndex : toCards.length
+      toCards.splice(insertAt, 0, { ...activeCard, column_id: overColId })
+
+      const updated = {}
+      fromCards.forEach((c, i) => { updated[c.id] = { ...c, position: i } })
+      toCards.forEach((c, i) => { updated[c.id] = { ...c, position: i } })
+
+      return prev.map((c) => updated[c.id] || c)
+    })
+  }, [findTargetColumn])
+
+  const handleDragEnd = useCallback((event) => {
+    const { active, over } = event
+    setActiveCardId(null)
+    if (!over) return
+
+    const overColId = findTargetColumn(over.id)
+    if (!overColId) return
+
+    setCards((prev) => {
+      const activeCard = prev.find((c) => c.id === active.id)
+      if (!activeCard) return prev
+
+      const targetColId = activeCard.column_id === overColId ? overColId : overColId
+
+      const colCards = prev
+        .filter((c) => c.column_id === targetColId && c.id !== active.id)
+        .sort((a, b) => a.position - b.position)
+
+      const overIndex = colCards.findIndex((c) => c.id === over.id)
+      const insertIndex = overIndex >= 0 ? overIndex : colCards.length
+      colCards.splice(insertIndex, 0, { ...activeCard, column_id: targetColId })
+
+      const updatedIds = new Set(colCards.map((c) => c.id))
+      return [
+        ...prev.filter((c) => !updatedIds.has(c.id)),
+        ...colCards.map((c, i) => ({ ...c, position: i })),
+      ]
+    })
+  }, [findTargetColumn])
+
+  const activeCard = activeCardId ? cards.find((c) => c.id === activeCardId) : null
+
+  function DroppableColumn({ col, colCards }) {
+    const { setNodeRef } = useDroppable({ id: col.id })
+    return (
+      <div ref={setNodeRef} className="flex-1 min-w-0 flex flex-col h-full">
+        <div className="flex items-center justify-between px-1 mb-2">
+          <span className="text-sm font-semibold text-[#1B1B18] font-logo">{col.title}</span>
+          <span className="text-xs text-[#8E8E89]">{colCards.length}</span>
+        </div>
+        <SortableContext items={colCards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col gap-2 flex-1 rounded-xl p-1">
+            {colCards.map((card) => (
+              <SortableCard key={card.id} card={card} onClick={() => {}} onComplete={() => {}} isSelected={false} />
+            ))}
+          </div>
+        </SortableContext>
+      </div>
+    )
+  }
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={collisionDetection}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="flex gap-3 h-full">
+        {DEMO_COLUMNS.map((col) => (
+          <DroppableColumn key={col.id} col={col} colCards={getColumnCards(col.id)} />
+        ))}
+      </div>
+      <DragOverlay dropAnimation={null}>
+        {activeCard && <Card card={activeCard} onClick={() => {}} onComplete={() => {}} isSelected={false} />}
+      </DragOverlay>
+    </DndContext>
+  )
+}
+
+function HeroAuthCard() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [mode, setMode] = useState('email') // 'email' | 'signup' | 'signin'
+  const signUp = useAuthStore((s) => s.signUp)
+  const signIn = useAuthStore((s) => s.signIn)
+  const navigate = useNavigate()
+
+  const handleEmailContinue = (e) => {
+    e.preventDefault()
+    if (!email) return
+    setMode('signup')
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setSubmitting(true)
+    try {
+      if (mode === 'signup') {
+        if (password.length < 6) { setError('Password must be at least 6 characters'); setSubmitting(false); return }
+        await signUp(email, password, name || email.split('@')[0])
+      } else {
+        await signIn(email, password)
+      }
+      navigate('/dashboard', { replace: true })
+    } catch (err) {
+      if (mode === 'signup' && err.message?.includes('already')) {
+        setMode('signin')
+        setError('Account exists — enter your password to sign in')
+      } else {
+        setError(err.message)
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="max-w-sm">
+      <div className="bg-white border border-[#E0DBD5] rounded-2xl p-5 shadow-[0_4px_24px_0_rgba(0,0,0,0.04),0_2px_64px_0_rgba(0,0,0,0.02)] space-y-4">
+        {error && (
+          <div className="text-sm text-[#7A5C44] bg-[#F0E0D2] rounded-xl px-3 py-2">
+            {error}
+          </div>
+        )}
+
+        {mode === 'email' ? (
+          <form onSubmit={handleEmailContinue} className="space-y-3">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+              className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[#E0DBD5] hover:border-[#C2D64A]/50 focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6] transition-colors"
+            />
+            <button
+              type="submit"
+              className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#1B1B18] text-white text-sm font-medium rounded-[0.6rem] transition-transform will-change-transform ease-[cubic-bezier(0.165,0.85,0.45,1)] duration-150 hover:scale-y-[1.015] hover:scale-x-[1.005]"
+            >
+              Continue with email
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <p className="text-center text-xs text-[#8E8E89] pt-1">
+              Already have an account?{' '}
+              <Link to="/login" className="text-[#5C5C57] underline underline-offset-2 decoration-[#E0DBD5] hover:decoration-[#5C5C57] transition-colors">
+                Sign in
+              </Link>
+            </p>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="flex items-center gap-2 px-3 py-2 bg-[#F2EDE8] rounded-[0.6rem] text-sm text-[#5C5C57]">
+              <span className="truncate flex-1">{email}</span>
+              <button type="button" onClick={() => { setMode('email'); setError('') }} className="text-xs text-[#8E8E89] hover:text-[#5C5C57] shrink-0">
+                Change
+              </button>
+            </div>
+            {mode === 'signup' && (
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                autoFocus
+                className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[#E0DBD5] hover:border-[#C2D64A]/50 focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6] transition-colors"
+              />
+            )}
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={mode === 'signup' ? 'Create a password' : 'Enter your password'}
+              required
+              autoFocus={mode === 'signin'}
+              className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[#E0DBD5] hover:border-[#C2D64A]/50 focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6] transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#1B1B18] text-white text-sm font-medium rounded-[0.6rem] transition-transform will-change-transform ease-[cubic-bezier(0.165,0.85,0.45,1)] duration-150 hover:scale-y-[1.015] hover:scale-x-[1.005] disabled:opacity-50 disabled:pointer-events-none"
+            >
+              {submitting ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
+            </button>
+            <p className="text-center text-xs text-[#8E8E89] pt-1">
+              {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
+              <button type="button" onClick={() => { setMode(mode === 'signup' ? 'signin' : 'signup'); setError('') }} className="text-[#5C5C57] underline underline-offset-2 decoration-[#E0DBD5] hover:decoration-[#5C5C57] transition-colors">
+                {mode === 'signup' ? 'Sign in' : 'Sign up'}
+              </button>
+            </p>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function LandingPage() {
   const user = useAuthStore((s) => s.user)
   const loading = useAuthStore((s) => s.loading)
@@ -406,94 +693,90 @@ export default function LandingPage() {
 
       {/* ─── Hero ─── */}
       <section className="relative overflow-hidden">
-        <div className="px-6 sm:px-10 pt-16 pb-8 max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EEF2D6] text-[#6B7A12] text-xs font-normal mb-6">
-              <Sparkles className="w-3.5 h-3.5" />
-              100% free — no credit card required
-            </span>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-normal text-[#1B1B18] tracking-tight leading-[1.08] mb-5">
-              Project management
-              <br />
-              that feels{' '}
-              <span className="text-[#8BA32E] font-heading text-[1.09em]">effortless</span>
-            </h1>
-            <p className="text-base sm:text-lg text-[#5C5C57] max-w-lg mx-auto mb-8 leading-relaxed">
-              A clean Kanban workspace for teams that value focus over features.
-              Organize, collaborate, and ship — without the clutter.
-            </p>
-            <div className="flex items-center justify-center gap-3">
-              <Link
-                to="/signup"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#1B1B18] text-white text-sm font-normal rounded-lg hover:bg-[#333] transition-all"
-              >
-                Get started free
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/login"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#5C5C57] text-sm font-normal rounded-lg border border-[#E0DBD5] hover:border-[#E0DBD5] hover:bg-[#F2EDE8] transition-all"
-              >
-                Sign in
-              </Link>
+        <div className="px-6 sm:px-10 pb-8 max-w-[90rem] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Left — Copy (center-aligned) */}
+            <div className="flex w-full min-h-[85vh] items-center">
+            <div className="text-center flex flex-col items-center w-full">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EEF2D6] text-[#6B7A12] text-xs font-normal mb-6">
+                <Sparkles className="w-3.5 h-3.5" />
+                100% free — no credit card required
+              </span>
+              <h1 className="text-5xl sm:text-6xl lg:text-[3.5rem] xl:text-6xl font-normal text-[#1B1B18] tracking-tight leading-[1.08] mb-5">
+                Project management
+                <br />
+                that feels{' '}
+                <span className="text-[#8BA32E] font-heading text-[1.09em]">effortless</span>
+              </h1>
+              <p className="text-base sm:text-lg text-[#5C5C57] max-w-lg mb-8 leading-relaxed">
+                A clean Kanban workspace for teams that value focus over features.
+                Organize, collaborate, and ship — without the clutter.
+              </p>
+              <HeroAuthCard />
+              <p className="mt-6 text-sm text-[#8E8E89]">
+                Trusted by early adopters · launching 2026
+              </p>
             </div>
-            <p className="mt-6 text-sm text-[#8E8E89]">
-              Trusted by early adopters · launching 2026
-            </p>
-          </div>
+            </div>
 
-          {/* ─── Mock Board Preview ─── */}
-          <div className="relative max-w-5xl mx-auto">
-            <div className="rounded-2xl border border-[#E0DBD5]/80 bg-white shadow-2xl shadow-[#E0DBD5]/60 overflow-hidden">
-              {/* Browser title bar */}
-              <div className="flex items-center gap-2 px-4 py-2.5 bg-[#F2EDE8] border-b border-[#E8E2DB]">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-                  <span className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
-                  <span className="w-3 h-3 rounded-full bg-[#28C840]" />
-                </div>
-                <div className="flex-1 flex justify-center">
-                  <div className="px-4 py-1 rounded-md bg-white border border-[#E0DBD5] text-[10px] text-[#8E8E89] font-medium">
-                    kolumn.app/boards/product-launch
+            {/* Right — Live Demo Board */}
+            <div className="hidden lg:flex justify-center items-center w-full">
+              <div className="rounded-2xl w-full h-[85vh] min-h-[500px] overflow-hidden border border-[#E0DBD5]/80 bg-[#FEFDFD] shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
+              <div className="relative w-full h-full flex flex-col">
+                {/* Browser title bar */}
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-[#F2EDE8] border-b border-[#E8E2DB]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                    <span className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+                    <span className="w-3 h-3 rounded-full bg-[#28C840]" />
                   </div>
-                </div>
-                <div className="w-12" />
-              </div>
-
-              {/* Board content */}
-              <div className="flex items-start">
-                {/* Mini sidebar */}
-                <div className="hidden sm:flex w-12 bg-[#F2EDE8] border-r border-[#E8E2DB] py-4 flex-col items-center gap-3 shrink-0 min-h-[380px]">
-                  <Kanban size={18} weight="regular" className="text-[#8E8E89]" />
-                  <div className="w-5 h-[1px] bg-[#E0DBD5] my-1" />
-                  <div className="w-6 h-6 rounded-md bg-[#C2D64A]/20 flex items-center justify-center">
-                    <Columns3 className="w-3.5 h-3.5 text-[#5C5C57]" />
+                  <div className="flex-1 flex justify-center">
+                    <div className="px-4 py-1 rounded-md bg-white border border-[#E0DBD5] text-[10px] text-[#8E8E89] font-medium">
+                      kolumn.app/boards/product-launch
+                    </div>
                   </div>
-                  <div className="w-6 h-6 rounded-md flex items-center justify-center">
-                    <Calendar className="w-3.5 h-3.5 text-[#8E8E89]" />
-                  </div>
-                  <div className="w-6 h-6 rounded-md flex items-center justify-center">
-                    <StickyNote className="w-3.5 h-3.5 text-[#8E8E89]" />
-                  </div>
-                  <div className="w-6 h-6 rounded-md flex items-center justify-center">
-                    <BarChart3 className="w-3.5 h-3.5 text-[#8E8E89]" />
-                  </div>
-                  <div className="mt-auto w-6 h-6 rounded-md flex items-center justify-center">
-                    <User className="w-3.5 h-3.5 text-[#8E8E89]" />
-                  </div>
+                  <div className="w-12" />
                 </div>
 
-                {/* Columns */}
-                <div className="flex-1 p-4 overflow-x-auto">
-                  <div className="flex gap-3">
-                    {mockColumns.map((col) => (
-                      <MockColumn key={col.title} column={col} />
-                    ))}
+                {/* Board content */}
+                <div className="flex flex-1 overflow-hidden">
+                  {/* Mini sidebar — matches real collapsed Sidebar.jsx */}
+                  <div className="flex w-16 bg-[#FAF8F6] border-r border-[#E0DBD5] flex-col shrink-0 h-full">
+                    <div className="flex items-center justify-center h-16 border-b border-[#E0DBD5]">
+                      <Kanban size={26} weight="fill" className="text-[#8BA32E]" />
+                    </div>
+                    <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
+                      <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#5C5C57]">
+                        <LayoutDashboard className="w-5 h-5 shrink-0" />
+                      </div>
+                      <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium bg-[#EEF2D6] text-[#1B1B18]">
+                        <LucideKanban className="w-5 h-5 shrink-0" />
+                      </div>
+                      <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#5C5C57]">
+                        <Calendar className="w-5 h-5 shrink-0" />
+                      </div>
+                      <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#5C5C57]">
+                        <StickyNote className="w-5 h-5 shrink-0" />
+                      </div>
+                    </nav>
+                    <div className="border-t border-[#E0DBD5] py-4 px-2 space-y-1">
+                      <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#5C5C57]">
+                        <Settings className="w-5 h-5 shrink-0" />
+                      </div>
+                      <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#5C5C57]">
+                        <ChevronsRight className="w-5 h-5" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Live columns */}
+                  <div className="flex-1 p-4 overflow-x-auto overflow-y-auto h-full">
+                    <DemoBoard />
                   </div>
                 </div>
               </div>
+              </div>
             </div>
-
           </div>
         </div>
       </section>

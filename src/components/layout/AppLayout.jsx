@@ -181,7 +181,7 @@ export default function AppLayout() {
     : pageTitles[basePath] || 'Kolumn'
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#FEFDFD]">
       <OfflineBanner />
       <InlineErrorBoundary name="sidebar">
         <Sidebar />
