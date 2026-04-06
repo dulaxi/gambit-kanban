@@ -130,9 +130,9 @@ export default function CreateBoardModal({ onClose }) {
 
     setCreating(true)
     try {
-      await addBoard(trimmed, icon, template.columns)
-      onClose()
-    } catch {
+      const id = await addBoard(trimmed, icon, template.columns)
+      if (id) onClose()
+    } finally {
       setCreating(false)
     }
   }, [name, icon, template, creating, addBoard, onClose])

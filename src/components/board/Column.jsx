@@ -111,10 +111,13 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
           checklist: (template.checklist || []).map((item) => ({ text: item.text, done: false })),
         }
       : { title: 'Untitled task', assignee: profile?.display_name || '', dueDate: today }
-    const cardId = await addCard(boardId, column.id, cardData)
-    if (onCreateCard && cardId) onCreateCard(cardId)
-    setCreating(false)
-    setShowTemplates(false)
+    try {
+      const cardId = await addCard(boardId, column.id, cardData)
+      if (onCreateCard && cardId) onCreateCard(cardId)
+    } finally {
+      setCreating(false)
+      setShowTemplates(false)
+    }
   }
 
   const handleRename = () => {
