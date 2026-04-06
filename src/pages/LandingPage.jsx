@@ -1,9 +1,5 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import '@fontsource/crimson-pro/400.css'
-import '@fontsource/crimson-pro/600.css'
-import '@fontsource/crimson-pro/700.css'
-import '@fontsource/crimson-pro/800.css'
 import '@fontsource-variable/plus-jakarta-sans'
 import {
   ArrowRight, Columns3, Users, Zap, Calendar, StickyNote,
@@ -702,7 +698,7 @@ export default function LandingPage() {
                 <Sparkles className="w-3.5 h-3.5" />
                 100% free — no credit card required
               </span>
-              <h1 className="text-5xl sm:text-6xl lg:text-[3.5rem] xl:text-6xl font-normal text-[#1B1B18] tracking-tight leading-[1.08] mb-5">
+              <h1 className="text-5xl sm:text-6xl lg:text-[3.5rem] xl:text-6xl font-light text-[#1B1B18] tracking-tight leading-[1.08] mb-5">
                 Project management
                 <br />
                 that feels{' '}

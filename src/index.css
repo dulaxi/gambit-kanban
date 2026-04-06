@@ -2,7 +2,7 @@
 
 @theme {
   --font-sans: 'Mona Sans Variable', 'Mona Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-heading: 'Crimson Pro', Georgia, serif;
+  --font-heading: 'Sentient', Georgia, serif;
   --font-mono: 'IBM Plex Mono', 'SF Mono', SFMono-Regular, Menlo, monospace;
   --font-logo: 'Google Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
@@ -62,7 +62,7 @@
 .landing-font h2,
 .landing-font h3,
 .landing-font .font-heading {
-  font-family: 'Crimson Pro', Georgia, serif;
+  font-family: 'Sentient', Georgia, serif;
 }
 
 /* Text selection */
