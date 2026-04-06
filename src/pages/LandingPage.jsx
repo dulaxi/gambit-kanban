@@ -273,7 +273,7 @@ function MockDetailPanel() {
       {/* Header */}
       <div className="px-5 pt-5 pb-3 border-b border-[#E8E2DB]">
         <div className="text-[10px] text-[#8E8E89] font-medium mb-1">{card.taskNumber}</div>
-        <h3 className="text-sm font-bold text-[#1B1B18] leading-snug">{card.title}</h3>
+        <h3 className="text-sm font-bold text-[#1B1B18] leading-snug" style={{ fontFamily: 'var(--font-logo)' }}>{card.title}</h3>
       </div>
 
       {/* Body */}
@@ -766,7 +766,7 @@ export default function LandingPage() {
                   </div>
 
                   {/* Live columns */}
-                  <div className="flex-1 p-4 overflow-x-auto overflow-y-auto h-full">
+                  <div className="flex-1 p-4 overflow-x-auto overflow-y-auto h-full font-sans">
                     <DemoBoard />
                   </div>
                 </div>
