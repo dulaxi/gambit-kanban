@@ -702,7 +702,7 @@ export default function LandingPage() {
                 Project management
                 <br />
                 that feels{' '}
-                <span className="text-[#8BA32E] font-heading text-[1.09em]">effortless</span>
+                <span className="text-[#8BA32E] font-heading">effortless</span>
               </h1>
               <p className="text-base sm:text-lg text-[#5C5C57] max-w-lg mb-8 leading-relaxed">
                 A clean Kanban workspace for teams that value focus over features.
@@ -796,7 +796,7 @@ export default function LandingPage() {
           <div>
             <h2 className="text-3xl sm:text-4xl font-normal text-[#1B1B18] tracking-tight mb-3">
               Every detail,{' '}
-              <span className="text-[#8BA32E] font-heading text-[1.09em]">one click away</span>
+              <span className="text-[#8BA32E] font-heading">one click away</span>
             </h2>
             <p className="text-sm text-[#5C5C57] leading-relaxed mb-6">
               Click any card to open a rich detail panel. Add descriptions, track progress with checklists,
@@ -829,7 +829,7 @@ export default function LandingPage() {
       {/* ─── Features Grid ─── */}
       <section className="px-6 sm:px-10 py-16 max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <h2 className="text-3xl sm:text-4xl font-normal text-[#1B1B18] tracking-tight mb-2">Built for how teams <span className="text-[#8BA32E] font-heading text-[1.09em]">actually work</span></h2>
+          <h2 className="text-3xl sm:text-4xl font-normal text-[#1B1B18] tracking-tight mb-2">Built for how teams <span className="text-[#8BA32E] font-heading">actually work</span></h2>
           <p className="text-sm text-[#5C5C57] max-w-md mx-auto">No bloat, no learning curve. Just the tools that matter — designed to feel invisible.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -853,7 +853,7 @@ export default function LandingPage() {
         <div className="bg-white border border-[#E0DBD5]/80 rounded-2xl p-6 sm:p-8 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-normal text-[#1B1B18]">Everything you <span className="text-[#8BA32E] font-heading text-[1.09em]">need</span></h2>
+              <h2 className="text-xl font-normal text-[#1B1B18]">Everything you <span className="text-[#8BA32E] font-heading">need</span></h2>
               <p className="text-xs text-[#8E8E89] mt-0.5">All the tools, none of the complexity.</p>
             </div>
             <Link
@@ -889,7 +889,7 @@ export default function LandingPage() {
         <div className="relative">
         <div className="w-10 h-[1px] bg-[#E0DBD5] mx-auto mb-10" />
         <h2 className="text-3xl sm:text-4xl font-normal text-[#1B1B18] tracking-tight mb-3">
-          Your team's <span className="text-[#8BA32E] font-heading text-[1.09em]">next move</span> starts here
+          Your team's <span className="text-[#8BA32E] font-heading">next move</span> starts here
         </h2>
         <p className="text-sm text-[#5C5C57] max-w-sm mx-auto mb-8 leading-relaxed">
           Set up your first board in under 60 seconds. No credit card, no setup wizard.
