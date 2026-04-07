@@ -21,13 +21,13 @@ import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import { useIsDesktop } from '../../hooks/useMediaQuery'
 import { useWorkspaceStore } from '../../store/workspaceStore'
-import { SquareKanban as KolumnIcon } from 'lucide-react'
+import { Kanban as PhosphorKanban } from '@phosphor-icons/react'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
 import ConfirmModal from '../board/ConfirmModal'
 
 function KolumnLogo({ size = 28 }) {
-  return <KolumnIcon className="shrink-0 text-black" style={{ width: size, height: size }} strokeWidth={1.75} />
+  return <PhosphorKanban size={size} weight="fill" className="shrink-0 text-[#8BA32E]" />
 }
 
 const navItems = [

@@ -142,16 +142,16 @@ RLS: Users can only access boards they're members of. Notes are private per user
 ## Design System
 
 ### Colors
-- **Background**: `bg-gray-50`
-- **Cards**: `bg-white` with `border-gray-200`, `shadow-sm`, `rounded-xl`
-- **Label palette** (GitHub brand colors):
-  - Red: `bg-[#FFE0DB] text-[#CF222E]`
-  - Blue: `bg-[#DAF0FF] text-[#3094FF]`
-  - Green: `bg-[#D1FDE0] text-[#08872B]`
-  - Yellow: `bg-[#FFF4D4] text-[#9A6700]`
-  - Purple: `bg-[#EDD8FD] text-[#8534F3]`
-  - Pink: `bg-[#FFD6EA] text-[#BF3989]`
-  - Gray: `bg-[#E4EBE6] text-[#909692]`
+- **Background**: `bg-[#FEFDFD]` (between sidebar cream and white)
+- **Cards**: `bg-white` with `border-[#E0DBD5]`, `shadow-sm`, `rounded-xl`
+- **Label palette** (Phosphor warm/desaturated — see `src/utils/formatting.js` for source of truth):
+  - Red: `bg-[#F2D9C7] text-[#8B5A33]`
+  - Blue: `bg-[#DAE0F0] text-[#4A5578]`
+  - Green: `bg-[#EEF2D6] text-[#6B7A12]`
+  - Yellow: `bg-[#F5EDCF] text-[#8B7322]`
+  - Purple: `bg-[#E8DDE2] text-[#6E5A65]`
+  - Pink: `bg-[#F0E0D2] text-[#7A5C44]`
+  - Gray: `bg-[#E8E2DB] text-[#5C5C57]`
 - **Priority dots**: `bg-emerald-400` (low), `bg-amber-400` (medium), `bg-rose-400` (high)
 
 ## Important Notes
