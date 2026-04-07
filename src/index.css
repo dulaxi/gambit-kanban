@@ -65,6 +65,29 @@
   font-family: 'Sentient', Georgia, serif;
 }
 
+/* Typing cursor blink (used in DraftNotes typing animation on landing) */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* AI shimmer reveal — text is hidden where the rainbow band hasn't passed yet.
+   The band is the leading edge of the reveal. Driven by --reveal CSS variable. */
+.ai-shimmer-reveal {
+  background: linear-gradient(90deg,
+    #1B1B18 calc(var(--reveal, 0%) - 12%),
+    #C2D64A calc(var(--reveal, 0%) - 4%),
+    #D4A843 calc(var(--reveal, 0%) - 1%),
+    #C27A4A calc(var(--reveal, 0%) + 1%),
+    #A8969E calc(var(--reveal, 0%) + 4%),
+    transparent calc(var(--reveal, 0%) + 12%)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
 /* Text selection */
 ::selection {
   background: #EEF2D6;
