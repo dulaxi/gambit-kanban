@@ -35,7 +35,17 @@ export const useAuthStore = create((set, get) => ({
 
     // Listen for future auth changes (token refresh, sign-out from another tab, etc.)
     // NOT used for initial signUp/signIn — those set state explicitly from their response.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    //
+    // CRITICAL: This callback runs WHILE the auth lock is held (Supabase fires
+    // SIGNED_IN from inside _recoverAndRefresh on tab visibility change, which
+    // is wrapped in _acquireLock). Awaiting another Supabase call here causes
+    // a recursive lock deadlock — the inner call waits for the outer lock,
+    // which waits for this callback, which waits for the inner call. After 5s
+    // the inner lock times out, every subsequent supabase call errors out, and
+    // the user perceives the app as "frozen". So this handler must be sync —
+    // any async work that touches Supabase must be deferred to a microtask
+    // outside the lock context via setTimeout(0).
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       // Skip INITIAL_SESSION — we already handled it via getSession() above
       if (event === 'INITIAL_SESSION') return
 
@@ -46,18 +56,18 @@ export const useAuthStore = create((set, get) => ({
       if (session?.user && currentUser?.id === session.user.id) {
         set({ session })
         if (event !== 'TOKEN_REFRESHED') {
-          try { await get().fetchProfile() } catch {}
+          // Defer fetchProfile to escape the auth lock — see comment above
+          setTimeout(() => { get().fetchProfile().catch(() => {}) }, 0)
         }
         return
       }
 
       set({ user: session?.user || null, session })
       if (session?.user) {
-        try {
-          await get().fetchProfile()
-        } catch (err) {
-          logError('Failed to fetch profile on auth change:', err)
-        }
+        // Defer fetchProfile to escape the auth lock — see comment above
+        setTimeout(() => {
+          get().fetchProfile().catch((err) => logError('Failed to fetch profile on auth change:', err))
+        }, 0)
       } else {
         set({ profile: null })
       }
