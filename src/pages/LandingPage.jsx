@@ -1152,8 +1152,7 @@ export default function LandingPage() {
             <span className="text-[#8BA32E] font-heading">kanban out</span>
           </h2>
           <p className="text-sm text-[#5C5C57] leading-relaxed">
-            Type what's on your mind — bullet points, abbreviations, casual notes. Kolumn's AI reads it
-            and builds a structured board with tasks, labels, deadlines, priorities, and checklists.
+            Type how you think. Bullets, abbreviations, scribbles — Kolumn structures it for you.
             No templates, no setup.
           </p>
         </div>
