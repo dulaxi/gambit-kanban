@@ -5,7 +5,7 @@ import {
   ArrowRight, Columns3, Users, Zap, Calendar, StickyNote,
   Share2, BarChart3, GripVertical, Tag, CheckSquare, Clock,
   Shield, Sparkles, MousePointerClick, ArrowUpRight,
-  Check, Square, AlignLeft, User,
+  Check, Square, AlignLeft, User, Plus, FileText, CheckCircle2,
   LayoutDashboard, Settings, ChevronsRight, SquareKanban, Kanban as LucideKanban,
 } from 'lucide-react'
 import { Kanban } from '@phosphor-icons/react'
@@ -358,6 +358,421 @@ function MockDetailPanel() {
     </div>
   )
 }
+
+/* ── Realistic app demo: card creation + detail panel flow ── */
+const APP_DEMO_TITLE = 'Auth flow redesign'
+const APP_DEMO_DESCRIPTION = 'Migrate the auth system from session cookies to JWT tokens with refresh rotation.'
+const APP_DEMO_CHECKLIST = [
+  'Research JWT libraries',
+  'Design token refresh flow',
+  'Implement auth middleware',
+  'Update protected routes',
+  'Add token rotation',
+  'Write integration tests',
+]
+
+// Animation timeline — milliseconds from loop start
+const APP_T = {
+  // Phase 1: cursor enters scene from offscreen
+  CURSOR_TO_ADD: 700,
+  CURSOR_AT_ADD: 1100,
+  // Phase 2: click → editor opens
+  CLICK_ADD: 1100,
+  EDITOR_OPEN: 1250,
+  // Phase 3: title types into editor
+  TITLE_START: 1500,
+  TITLE_END: 3300,
+  // Phase 4: enter pressed → card created (editor → real card)
+  CARD_CREATED: 3600,
+  // Phase 5: cursor moves to card
+  CURSOR_TO_CARD: 4100,
+  CURSOR_AT_CARD: 4500,
+  // Phase 6: click → panel opens
+  CLICK_CARD: 4500,
+  PANEL_OPEN: 4650,
+  PANEL_OPEN_END: 5250,
+  // Phase 7: priority cycles low → medium → high
+  PRIORITY_LOW: 5500,
+  PRIORITY_MEDIUM: 5750,
+  PRIORITY_HIGH: 6000,
+  // Phase 8: labels appear
+  LABEL_1: 6200,
+  LABEL_2: 6400,
+  // Phase 9: assignee + due date
+  ASSIGNEE: 6600,
+  DUE_DATE: 6800,
+  // Phase 10: description types into panel textarea
+  DESC_START: 7100,
+  DESC_END: 9300,
+  // Phase 11: checklist items cascade in
+  CHECK_VISIBLE_START: 9600,
+  CHECK_VISIBLE_GAP: 180,
+  // Phase 12: items get auto-checked
+  CHECK_DONE_START: 11000,
+  CHECK_DONE_GAP: 280,
+  // Phase 13: hold complete state, then loop
+  TOTAL: 14500,
+}
+
+const APP_PRIORITY_DOT = { high: 'bg-[#C27A4A]', medium: 'bg-[#D4A843]', low: 'bg-[#A8BA32]' }
+
+/* Mock visual replica of the real Card component (simplified for landing) */
+function MockRealCard({ title, priority, showLabel1, showLabel2, checkedCount, totalCount, isHighlighted }) {
+  const dotColor = priority ? APP_PRIORITY_DOT[priority] : 'bg-[#E0DBD5]'
+  return (
+    <div
+      className={`w-full rounded-xl border shadow-sm text-left flex transition-all ${
+        isHighlighted ? 'bg-[#EEF2D6]/60 border-[#EEF2D6]' : 'bg-white border-[#E0DBD5]'
+      }`}
+    >
+      {/* Icon — left center */}
+      <div className="flex items-center pl-3 shrink-0">
+        <div className="w-7 h-7 rounded-lg bg-[#E8E2DB] flex items-center justify-center text-[#8E8E89]">
+          <FileText className="w-4 h-4" />
+        </div>
+      </div>
+      {/* Content */}
+      <div className="flex-1 min-w-0 pl-2.5 pr-3.5 py-3">
+        {/* Labels */}
+        {(showLabel1 || showLabel2) && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {showLabel1 && (
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#D1FDE0] text-[#08872B]">Feature</span>
+            )}
+            {showLabel2 && (
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#FFE0DB] text-[#CF222E]">Backend</span>
+            )}
+          </div>
+        )}
+        {/* Task # row */}
+        <div className="flex items-center gap-1.5 mb-0.5">
+          <CheckCircle2 className="w-4 h-4 text-[#8E8E89] shrink-0" />
+          <span className="text-[11px] font-medium text-[#5C5C57]">Task #24</span>
+          <span className={`w-2 h-2 rounded-full ${dotColor} transition-colors`} />
+        </div>
+        {/* Title */}
+        <p className="text-[13px] font-medium leading-snug text-[#1B1B18]">{title}</p>
+        {/* Bottom badges */}
+        {totalCount > 0 && (
+          <div className="flex items-center gap-1.5 mt-2.5">
+            <span className="text-[10px] font-medium flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E8E2DB] text-[#8E8E89]">
+              <CheckSquare className="w-3 h-3" />
+              {checkedCount}/{totalCount}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* Mock inline editor — matches the real InlineCardEditor visual (simplified) */
+function MockInlineEditor({ typedTitle, isTyping }) {
+  return (
+    <div className="rounded-xl border border-[#C2D64A] bg-white shadow-md p-3 space-y-2.5">
+      <div className="flex items-center gap-2">
+        <div className="w-7 h-7 rounded-lg bg-[#E8E2DB] flex items-center justify-center text-[#8E8E89]">
+          <FileText className="w-4 h-4" />
+        </div>
+        <span className="text-[11px] text-[#8E8E89] font-medium">Task #24</span>
+      </div>
+      <div className="text-[13px] font-medium text-[#1B1B18] min-h-[20px]">
+        {typedTitle || <span className="text-[#8E8E89]">Task name</span>}
+        {isTyping && <span className="inline-block w-[1.5px] h-[12px] bg-[#1B1B18] ml-px align-middle animate-pulse" />}
+      </div>
+      <div className="flex items-center gap-1.5 pt-1 border-t border-[#E8E2DB]">
+        <span className="text-[10px] text-[#8E8E89] flex items-center gap-1">
+          <User className="w-3 h-3" /> Assignee
+        </span>
+        <span className="text-[10px] text-[#8E8E89] flex items-center gap-1">
+          <Calendar className="w-3 h-3" /> Date
+        </span>
+      </div>
+    </div>
+  )
+}
+
+/* Animated cursor SVG */
+function AnimatedCursor({ x, y, visible, clicking }) {
+  return (
+    <div
+      className={`absolute z-30 pointer-events-none transition-all ease-out ${visible ? 'opacity-100' : 'opacity-0'}`}
+      style={{
+        left: `${x}px`,
+        top: `${y}px`,
+        transitionDuration: '700ms',
+        transitionProperty: 'left, top, opacity',
+      }}
+    >
+      <svg width="22" height="22" viewBox="0 0 20 20" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))' }}>
+        <path d="M3 2L17 11L10 12L7 19L3 2Z" fill="#1B1B18" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+      </svg>
+      {clicking && (
+        <span className="absolute -top-2 -left-2 w-9 h-9 rounded-full bg-[#A8BA32] opacity-40 animate-ping" />
+      )}
+    </div>
+  )
+}
+
+function AppDemoFlow() {
+  const [elapsed, setElapsed] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setElapsed((prev) => (prev + 30 >= APP_T.TOTAL ? 0 : prev + 30))
+    }, 30)
+    return () => clearInterval(id)
+  }, [])
+
+  // Phase booleans
+  const editorOpen = elapsed >= APP_T.EDITOR_OPEN && elapsed < APP_T.CARD_CREATED
+  const cardExists = elapsed >= APP_T.CARD_CREATED
+  const panelOpen = elapsed >= APP_T.PANEL_OPEN
+  const cardHighlighted = panelOpen
+
+  // Title typing
+  const titleCharsShown = elapsed < APP_T.TITLE_START
+    ? 0
+    : elapsed >= APP_T.TITLE_END
+      ? APP_DEMO_TITLE.length
+      : Math.floor(((elapsed - APP_T.TITLE_START) / (APP_T.TITLE_END - APP_T.TITLE_START)) * APP_DEMO_TITLE.length)
+  const typedTitle = APP_DEMO_TITLE.slice(0, titleCharsShown)
+  const isTypingTitle = titleCharsShown > 0 && titleCharsShown < APP_DEMO_TITLE.length
+
+  // Description typing (only after panel opens)
+  const descCharsShown = elapsed < APP_T.DESC_START
+    ? 0
+    : elapsed >= APP_T.DESC_END
+      ? APP_DEMO_DESCRIPTION.length
+      : Math.floor(((elapsed - APP_T.DESC_START) / (APP_T.DESC_END - APP_T.DESC_START)) * APP_DEMO_DESCRIPTION.length)
+  const typedDesc = APP_DEMO_DESCRIPTION.slice(0, descCharsShown)
+  const isTypingDesc = descCharsShown > 0 && descCharsShown < APP_DEMO_DESCRIPTION.length
+
+  // Priority cycles low → medium → high
+  const priority =
+    elapsed < APP_T.PRIORITY_LOW ? null
+    : elapsed < APP_T.PRIORITY_MEDIUM ? 'low'
+    : elapsed < APP_T.PRIORITY_HIGH ? 'medium'
+    : 'high'
+
+  const showLabel1 = elapsed >= APP_T.LABEL_1
+  const showLabel2 = elapsed >= APP_T.LABEL_2
+  const showAssignee = elapsed >= APP_T.ASSIGNEE
+  const showDueDate = elapsed >= APP_T.DUE_DATE
+
+  // Checklist visibility cascade
+  const checkVisible = elapsed < APP_T.CHECK_VISIBLE_START
+    ? 0
+    : Math.min(APP_DEMO_CHECKLIST.length, Math.floor((elapsed - APP_T.CHECK_VISIBLE_START) / APP_T.CHECK_VISIBLE_GAP) + 1)
+  const checkedCount = elapsed < APP_T.CHECK_DONE_START
+    ? 0
+    : Math.min(3, Math.floor((elapsed - APP_T.CHECK_DONE_START) / APP_T.CHECK_DONE_GAP) + 1)
+
+  // Cursor position (in pixels relative to demo body top-left)
+  let cursorX, cursorY, cursorVisible
+  if (elapsed < APP_T.CURSOR_TO_ADD) {
+    cursorX = -40; cursorY = 200; cursorVisible = false
+  } else if (elapsed < APP_T.EDITOR_OPEN + 100) {
+    cursorX = 90; cursorY = 280; cursorVisible = true // at "Add task"
+  } else if (elapsed < APP_T.CURSOR_TO_CARD) {
+    cursorX = 90; cursorY = 280; cursorVisible = false // hidden while typing
+  } else if (elapsed < APP_T.PANEL_OPEN + 100) {
+    cursorX = 130; cursorY = 110; cursorVisible = true // moved up to the new card
+  } else {
+    cursorX = 130; cursorY = 110; cursorVisible = false // hidden after panel opens
+  }
+
+  // Click pulse on cursor
+  const clickingAdd = elapsed >= APP_T.CLICK_ADD - 80 && elapsed < APP_T.EDITOR_OPEN + 200
+  const clickingCard = elapsed >= APP_T.CLICK_CARD - 80 && elapsed < APP_T.PANEL_OPEN + 200
+  const isClicking = clickingAdd || clickingCard
+
+  return (
+    <div className="w-full max-w-4xl">
+      <div className="relative rounded-2xl border border-[#E0DBD5]/80 bg-[#FAF8F6] shadow-2xl shadow-[#E0DBD5]/60 overflow-hidden">
+        {/* Browser chrome */}
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-[#F2EDE8] border-b border-[#E8E2DB]">
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+            <span className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+            <span className="w-3 h-3 rounded-full bg-[#28C840]" />
+          </div>
+          <div className="flex-1 flex justify-center">
+            <div className="px-4 py-1 rounded-md bg-white border border-[#E0DBD5] text-[10px] text-[#8E8E89] font-medium">
+              kolumn.app/boards/product-launch
+            </div>
+          </div>
+          <div className="w-12" />
+        </div>
+
+        {/* Board area */}
+        <div className="relative flex font-sans" style={{ minHeight: '500px' }}>
+          {/* Column on the left */}
+          <div className="w-72 p-4 shrink-0">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#C2D64A]" />
+                <span className="text-xs font-bold text-[#5C5C57] uppercase tracking-wider">In Progress</span>
+              </div>
+              <span className="text-xs text-[#8E8E89]">{cardExists ? 1 : 0}</span>
+            </div>
+
+            <div className="space-y-2">
+              {/* Inline editor (active during create flow) */}
+              {editorOpen && <MockInlineEditor typedTitle={typedTitle} isTyping={isTypingTitle} />}
+
+              {/* Real card (after creation) */}
+              {cardExists && (
+                <MockRealCard
+                  title={APP_DEMO_TITLE}
+                  priority={priority}
+                  showLabel1={showLabel1}
+                  showLabel2={showLabel2}
+                  checkedCount={checkedCount}
+                  totalCount={panelOpen ? APP_DEMO_CHECKLIST.length : 0}
+                  isHighlighted={cardHighlighted}
+                />
+              )}
+
+              {/* Add task button (hidden when editor is open) */}
+              {!editorOpen && (
+                <div
+                  className={`w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg transition-colors ${
+                    elapsed >= APP_T.CURSOR_AT_ADD - 100 && elapsed < APP_T.EDITOR_OPEN
+                      ? 'bg-[#EEF2D6] text-[#1B1B18]'
+                      : 'text-[#8E8E89]'
+                  }`}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add task
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Detail panel — slides in from the right when panelOpen */}
+          <div
+            className={`absolute top-0 bottom-0 right-0 bg-white border-l border-[#E0DBD5] transform transition-transform duration-500 ease-out ${
+              panelOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+            style={{ width: '420px' }}
+          >
+            {/* Top bar */}
+            <div className="flex items-center justify-between px-5 py-2.5 border-b border-[#E8E2DB]">
+              <div className="flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-[#5C5C57]" />
+                <span className="text-xs font-medium text-[#5C5C57]">Save</span>
+              </div>
+              <span className="text-[#8E8E89] text-xs">×</span>
+            </div>
+
+            {/* Body */}
+            <div className="px-5 py-4 space-y-4 overflow-hidden">
+              {/* Task # + title */}
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <CheckCircle2 className="w-4 h-4 text-[#8E8E89]" />
+                  <span className="text-[11px] font-medium text-[#5C5C57]">Task #24</span>
+                </div>
+                <div className="text-base font-semibold text-[#1B1B18]" style={{ fontFamily: 'var(--font-logo)' }}>
+                  {APP_DEMO_TITLE}
+                </div>
+              </div>
+
+              {/* Meta grid */}
+              <div className="grid grid-cols-2 gap-3 pb-3 border-b border-[#E8E2DB]">
+                <div>
+                  <div className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider mb-1">Assignee</div>
+                  <div className={`flex items-center gap-1.5 transition-all duration-500 ${showAssignee ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'}`}>
+                    <span className="w-5 h-5 rounded-full bg-[#1B1B18] text-white text-[9px] font-bold flex items-center justify-center">A</span>
+                    <span className="text-[11px] text-[#5C5C57] font-medium">Alex Chen</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider mb-1">Due Date</div>
+                  <div className={`flex items-center gap-1 transition-all duration-500 ${showDueDate ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'}`}>
+                    <Calendar className="w-3 h-3 text-[#8E8E89]" />
+                    <span className="text-[11px] text-[#5C5C57] font-medium">Mar 12, 2026</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider mb-1">Priority</div>
+                  <div className={`flex items-center gap-1.5 transition-opacity duration-300 ${priority ? 'opacity-100' : 'opacity-0'}`}>
+                    <span className={`w-2 h-2 rounded-full transition-colors duration-300 ${priority ? APP_PRIORITY_DOT[priority] : 'bg-transparent'}`} />
+                    <span className="text-[11px] text-[#5C5C57] font-medium capitalize">{priority || '—'}</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider mb-1">Labels</div>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className={`text-[8px] font-semibold px-1.5 py-0.5 rounded-full bg-[#D1FDE0] text-[#08872B] transition-all duration-300 ${showLabel1 ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                      Feature
+                    </span>
+                    <span className={`text-[8px] font-semibold px-1.5 py-0.5 rounded-full bg-[#FFE0DB] text-[#CF222E] transition-all duration-300 ${showLabel2 ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
+                      Backend
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <div className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider mb-1.5">Description</div>
+                <div className="text-[11px] text-[#5C5C57] leading-relaxed min-h-[40px] rounded-lg border border-[#E0DBD5] px-3 py-2">
+                  {typedDesc || <span className="text-[#8E8E89]">Add details about this task...</span>}
+                  {isTypingDesc && <span className="inline-block w-[1.5px] h-[10px] bg-[#5C5C57] ml-px align-middle animate-pulse" />}
+                </div>
+              </div>
+
+              {/* Checklist */}
+              <div className={`transition-opacity duration-300 ${checkVisible > 0 ? 'opacity-100' : 'opacity-0'}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider">Checklist</div>
+                  <span className="text-[9px] font-semibold text-[#5C5C57]">{checkedCount}/{APP_DEMO_CHECKLIST.length}</span>
+                </div>
+                <div className="h-1 bg-[#E8E2DB] rounded-full overflow-hidden mb-2.5">
+                  <div
+                    className="h-full bg-[#A8BA32] rounded-full transition-all duration-500"
+                    style={{ width: `${(checkedCount / APP_DEMO_CHECKLIST.length) * 100}%` }}
+                  />
+                </div>
+                <div className="space-y-1">
+                  {APP_DEMO_CHECKLIST.map((item, idx) => {
+                    const isChecked = idx < checkedCount
+                    const isVisible = idx < checkVisible
+                    return (
+                      <div
+                        key={item}
+                        className={`flex items-center gap-2 py-0.5 transition-all duration-300 ${
+                          isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'
+                        }`}
+                      >
+                        {isChecked ? (
+                          <div className="w-3.5 h-3.5 rounded bg-[#A8BA32] flex items-center justify-center shrink-0">
+                            <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                          </div>
+                        ) : (
+                          <Square className="w-3.5 h-3.5 text-[#8E8E89] shrink-0" />
+                        )}
+                        <span className={`text-[11px] ${isChecked ? 'text-[#8E8E89] line-through' : 'text-[#5C5C57]'}`}>
+                          {item}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Animated cursor (overlay) */}
+          <AnimatedCursor x={cursorX} y={cursorY} visible={cursorVisible} clicking={isClicking} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 
 /* ── Demo board data ── */
 const DEMO_COLUMNS = [
@@ -790,39 +1205,39 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Card Detail Showcase ─── */}
-      <section className="px-6 sm:px-10 py-14 max-w-5xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-          {/* Left — text */}
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-normal text-[#1B1B18] tracking-tight mb-3">
-              Every detail,{' '}
-              <span className="text-[#8BA32E] font-heading">one click away</span>
-            </h2>
-            <p className="text-sm text-[#5C5C57] leading-relaxed mb-6">
-              Click any card to open a rich detail panel. Add descriptions, track progress with checklists,
-              assign teammates, set priorities, and manage due dates — all without leaving your board.
-            </p>
-            <div className="space-y-3">
-              {[
-                { icon: AlignLeft, text: 'Rich descriptions with full context for every task' },
-                { icon: CheckSquare, text: 'Checklists with progress tracking and completion state' },
-                { icon: Tag, text: 'Color-coded labels and priority levels at a glance' },
-                { icon: Users, text: 'Assign tasks to teammates with one click' },
-              ].map((item) => (
-                <div key={item.text} className="flex items-start gap-2.5">
-                  <div className="w-6 h-6 rounded-lg bg-[#C2D64A]/20 flex items-center justify-center shrink-0 mt-0.5">
-                    <item.icon className="w-3.5 h-3.5 text-[#1B1B18]" />
-                  </div>
-                  <p className="text-[13px] text-[#5C5C57] leading-relaxed">{item.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+      <section className="px-6 sm:px-10 py-14 max-w-6xl mx-auto">
+        {/* Heading + intro centered */}
+        <div className="text-center mb-8 max-w-2xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-normal text-[#1B1B18] tracking-tight mb-3">
+            Every detail,{' '}
+            <span className="text-[#8BA32E] font-heading">one click away</span>
+          </h2>
+          <p className="text-sm text-[#5C5C57] leading-relaxed">
+            Click any card to open a rich detail panel. Add descriptions, track progress with checklists,
+            assign teammates, set priorities, and manage due dates — all without leaving your board.
+          </p>
+        </div>
 
-          {/* Right — mock detail panel */}
-          <div className="flex justify-center lg:justify-end">
-            <MockDetailPanel />
-          </div>
+        {/* Feature bullets — horizontal row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-10 max-w-4xl mx-auto">
+          {[
+            { icon: AlignLeft, text: 'Rich descriptions with full context' },
+            { icon: CheckSquare, text: 'Checklists with progress tracking' },
+            { icon: Tag, text: 'Color-coded labels and priorities' },
+            { icon: Users, text: 'Assign tasks with one click' },
+          ].map((item) => (
+            <div key={item.text} className="flex items-start gap-2.5">
+              <div className="w-6 h-6 rounded-lg bg-[#C2D64A]/20 flex items-center justify-center shrink-0 mt-0.5">
+                <item.icon className="w-3.5 h-3.5 text-[#1B1B18]" />
+              </div>
+              <p className="text-[12px] text-[#5C5C57] leading-relaxed">{item.text}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Full-width animated app demo */}
+        <div className="flex justify-center">
+          <AppDemoFlow />
         </div>
       </section>
 
