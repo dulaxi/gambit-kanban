@@ -482,6 +482,28 @@ const CARDS_END = CARDS_START + (AI_CARDS.length - 1) * CARD_STAGGER + CARD_SWEE
 const FINAL_HOLD = 2200
 const TIMELINE_TOTAL = CARDS_END + FINAL_HOLD
 
+// Slack demo timeline — independent phases mirroring the existing demo's structure
+const SLACK_LOOP_CARRY = 300         // initial "carry-over" showing prev loop's cards
+const SLACK_MSG_LAND_DUR = 400       // per-message slide + fade duration
+const SLACK_MSG_GAP = 350            // gap between messages landing
+const SLACK_MSG_1_START = SLACK_LOOP_CARRY
+const SLACK_MSG_1_END = SLACK_MSG_1_START + SLACK_MSG_LAND_DUR
+const SLACK_MSG_2_START = SLACK_MSG_1_END + SLACK_MSG_GAP
+const SLACK_MSG_2_END = SLACK_MSG_2_START + SLACK_MSG_LAND_DUR
+const SLACK_MSG_3_START = SLACK_MSG_2_END + SLACK_MSG_GAP
+const SLACK_MSG_3_END = SLACK_MSG_3_START + SLACK_MSG_LAND_DUR
+const SLACK_CARDS_FADE_OUT_DUR = 200 // cards from prev loop fade out as first msg lands
+const SLACK_CARDS_GAP = 400          // pause after last message before cards start
+const SLACK_CARDS_START = SLACK_MSG_3_END + SLACK_CARDS_GAP
+const SLACK_CARD_SWEEP = 750         // intentionally matches existing CARD_SWEEP
+const SLACK_CARD_STAGGER = 600       // intentionally matches existing CARD_STAGGER
+const SLACK_CARDS_END = SLACK_CARDS_START + (AI_CARDS.length - 1) * SLACK_CARD_STAGGER + SLACK_CARD_SWEEP
+const SLACK_HOLD_DUR = 1800          // hold with both panels visible
+const SLACK_MSG_FADE_OUT_DUR = 400   // messages fade out near end of timeline
+const SLACK_MSG_FADE_OUT_START = SLACK_CARDS_END + SLACK_HOLD_DUR
+const SLACK_FINAL_HOLD = SLACK_HOLD_DUR + SLACK_MSG_FADE_OUT_DUR
+const SLACK_TIMELINE_TOTAL = SLACK_CARDS_END + SLACK_FINAL_HOLD
+
 function computeMirrorLayerOpacity(elapsed) {
   if (elapsed < MIRROR_START) return 0
   if (elapsed < MIRROR_FULL) return (elapsed - MIRROR_START) / MIRROR_FADE_IN_DUR
