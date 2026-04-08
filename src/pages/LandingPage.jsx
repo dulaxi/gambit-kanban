@@ -437,6 +437,32 @@ const AI_CARDS = [
   },
 ]
 
+// Slack thread demo — messages reverse-engineered from AI_CARDS above
+// so each message's extractable signals map to AI_CARDS[i]'s fields.
+const SLACK_MESSAGES = [
+  {
+    sender: 'Priya',
+    avatar: 'P',
+    timestamp: '2:14 PM',
+    text: '@aisha hero section feels plain — sarah flagged it on the call, can you redo it? high prio',
+    mentions: ['@aisha'],
+  },
+  {
+    sender: 'Priya',
+    avatar: 'P',
+    timestamp: '2:15 PM',
+    text: "also pricing page needs building — 3 tiers with monthly/annual toggle, founder's call",
+    mentions: [],
+  },
+  {
+    sender: 'Priya',
+    avatar: 'P',
+    timestamp: '2:16 PM',
+    text: '@marcus stripe integration by fri — checkout, webhooks, customer portal. high prio, legal flagged it',
+    mentions: ['@marcus'],
+  },
+]
+
 // Master timeline phases
 const TOTAL_MIRROR_LINES = 2 + DRAFT_LINES.length
 const MIRROR_GAP = 150
