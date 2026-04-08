@@ -903,6 +903,33 @@ function SlackExtractedCards({ elapsed }) {
   )
 }
 
+function SlackThreadDemo() {
+  const [elapsed, setElapsed] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => {
+      setElapsed((prev) => (prev + 50 >= SLACK_TIMELINE_TOTAL ? 0 : prev + 50))
+    }, 50)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <div className="w-full max-w-5xl">
+      <div
+        className="relative overflow-hidden w-full rounded-2xl bg-[#DAE0F0]"
+        style={{ boxShadow: 'inset 0 0 0 1px #E0DBD5' }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 p-4 md:p-8">
+          <CreamWindow className="aspect-[4/3] md:aspect-[4/4.5]">
+            <SlackThread elapsed={elapsed} />
+          </CreamWindow>
+          <CreamWindow className="aspect-[4/5]">
+            <SlackExtractedCards elapsed={elapsed} />
+          </CreamWindow>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ── Demo board data ── */
 const DEMO_COLUMNS = [
   { id: 'demo-col-1', title: 'To Do', position: 0 },
