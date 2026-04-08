@@ -177,17 +177,6 @@ const features = [
   },
 ]
 
-const tools = [
-  { icon: Calendar, title: 'Calendar', desc: 'Timeline view for all tasks' },
-  { icon: StickyNote, title: 'Notes', desc: 'Capture ideas and context' },
-  { icon: Share2, title: 'Sharing', desc: 'One-click team invites' },
-  { icon: Tag, title: 'Labels', desc: 'Color-coded categorization' },
-  { icon: CheckSquare, title: 'Checklists', desc: 'Subtask tracking' },
-  { icon: BarChart3, title: 'Dashboard', desc: 'Progress at a glance' },
-  { icon: GripVertical, title: 'Drag & Drop', desc: 'Fluid card management' },
-  { icon: Clock, title: 'Due Dates', desc: 'Never miss a deadline' },
-]
-
 /* ── Priority dot ── */
 function PriorityDot({ priority }) {
   if (!priority) return null
