@@ -7,6 +7,7 @@ import {
   Shield, Sparkles, MousePointerClick, ArrowUpRight,
   Check, Square, AlignLeft, User, Plus, FileText, CheckCircle2,
   LayoutDashboard, Settings, ChevronsRight, SquareKanban, Kanban as LucideKanban,
+  AtSign, AlertCircle, Hash,
 } from 'lucide-react'
 import { Kanban, Browser, Tag as PhosphorTag, CreditCard } from '@phosphor-icons/react'
 import {
