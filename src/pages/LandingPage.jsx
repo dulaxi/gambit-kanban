@@ -1419,38 +1419,40 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Tools Strip ─── */}
-      <section className="px-6 sm:px-10 py-14 max-w-5xl mx-auto">
-        <div className="bg-white border border-[#E0DBD5]/80 rounded-2xl p-6 sm:p-8 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-normal text-[#1B1B18]">Everything you <span className="text-[#8BA32E] font-heading">need</span></h2>
-              <p className="text-xs text-[#8E8E89] mt-0.5">All the tools, none of the complexity.</p>
-            </div>
-            <Link
-              to="/signup"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-normal text-[#5C5C57] hover:text-[#1B1B18] transition-colors"
-            >
-              Try it free
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {tools.map((t) => (
-              <div
-                key={t.title}
-                className="flex items-center gap-3 p-3 rounded-xl bg-[#F2EDE8] hover:bg-[#E8E2DB] transition-colors group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#C2D64A]/20 flex items-center justify-center shrink-0 transition-colors">
-                  <t.icon className="w-4 h-4 text-[#1B1B18]" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-normal text-[#1B1B18] truncate">{t.title}</div>
-                  <div className="text-[10px] text-[#8E8E89] truncate">{t.desc}</div>
-                </div>
+      {/* ─── Slack Thread Showcase ─── */}
+      <section className="px-6 sm:px-10 py-14 max-w-6xl mx-auto">
+        {/* Heading + intro centered */}
+        <div className="text-center mb-8 max-w-2xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-normal text-[#1B1B18] tracking-tight mb-3">
+            We read the{' '}
+            <span className="text-[#8BA32E] font-heading">room</span>
+          </h2>
+          <p className="text-sm text-[#5C5C57] leading-relaxed">
+            Your team already talks in Slack. Kolumn listens, picks out the asks,
+            and drops them on the board.
+          </p>
+        </div>
+
+        {/* Feature bullets — horizontal row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-10 max-w-4xl mx-auto">
+          {[
+            { icon: AtSign, text: 'Assignees from @mentions' },
+            { icon: Clock, text: 'Deadlines from casual phrases' },
+            { icon: AlertCircle, text: 'Priority from urgency cues' },
+            { icon: Hash, text: 'Labels from topic cues' },
+          ].map((item) => (
+            <div key={item.text} className="flex items-start gap-2.5">
+              <div className="w-6 h-6 rounded-lg bg-[#C2D64A]/20 flex items-center justify-center shrink-0 mt-0.5">
+                <item.icon className="w-3.5 h-3.5 text-[#1B1B18]" />
               </div>
-            ))}
-          </div>
+              <p className="text-[12px] text-[#5C5C57] leading-relaxed">{item.text}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Full-width animated demo */}
+        <div className="flex justify-center">
+          <SlackThreadDemo />
         </div>
       </section>
 
