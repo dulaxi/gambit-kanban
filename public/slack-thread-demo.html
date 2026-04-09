@@ -125,16 +125,25 @@
                 <span class="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-[#28C840]"></span>
                 <div class="flex items-center gap-1.5 ml-3">
-                  <span class="w-4 h-4 rounded-sm bg-white/15 flex items-center justify-center text-[9px] font-bold text-white">N</span>
-                  <span class="text-[11px] font-semibold text-white/90 tracking-tight">Northstar HQ</span>
+                  <svg class="w-4 h-4" viewBox="0 0 270 270" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="m99.4 151.2c0 7.1-5.8 12.9-12.9 12.9-7.1 0-12.9-5.8-12.9-12.9 0-7.1 5.8-12.9 12.9-12.9h12.9zm6.5 0c0-7.1 5.8-12.9 12.9-12.9 7.1 0 12.9 5.8 12.9 12.9v32.3c0 7.1-5.8 12.9-12.9 12.9-7.1 0-12.9-5.8-12.9-12.9z" fill="#E01E5A"/>
+                    <path d="m118.8 99.4c-7.1 0-12.9-5.8-12.9-12.9 0-7.1 5.8-12.9 12.9-12.9 7.1 0 12.9 5.8 12.9 12.9v12.9zm0 6.5c7.1 0 12.9 5.8 12.9 12.9 0 7.1-5.8 12.9-12.9 12.9h-32.3c-7.1 0-12.9-5.8-12.9-12.9 0-7.1 5.8-12.9 12.9-12.9z" fill="#36C5F0"/>
+                    <path d="m170.6 118.8c0-7.1 5.8-12.9 12.9-12.9 7.1 0 12.9 5.8 12.9 12.9 0 7.1-5.8 12.9-12.9 12.9h-12.9zm-6.5 0c0 7.1-5.8 12.9-12.9 12.9-7.1 0-12.9-5.8-12.9-12.9v-32.3c0-7.1 5.8-12.9 12.9-12.9 7.1 0 12.9 5.8 12.9 12.9z" fill="#2EB67D"/>
+                    <path d="m151.2 170.6c7.1 0 12.9 5.8 12.9 12.9 0 7.1-5.8 12.9-12.9 12.9-7.1 0-12.9-5.8-12.9-12.9v-12.9zm0-6.5c-7.1 0-12.9-5.8-12.9-12.9 0-7.1 5.8-12.9 12.9-12.9h32.3c7.1 0 12.9 5.8 12.9 12.9 0 7.1-5.8 12.9-12.9 12.9z" fill="#ECB22E"/>
+                  </svg>
+                  <span class="text-[11px] font-semibold text-white/90 tracking-tight">Slack</span>
                 </div>
               </div>
               <div class="flex-1 overflow-hidden relative">
                 <div class="px-5 sm:px-6 pt-4 sm:pt-5 flex flex-col gap-2 select-none h-full">
-                  <!-- Channel header — Slack crisp: darker hash, dark name, lighter divider -->
-                  <div class="flex items-center gap-1.5 pb-2 border-b border-[#E8E8E8]">
-                    <svg class="w-3.5 h-3.5 text-[#616061]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg>
-                    <span class="text-[13px] font-bold text-[#1D1C1D]">launch-prep</span>
+                  <!-- Channel header — Slack 2024: channel name + topic subtitle, lighter divider -->
+                  <div class="pb-2 border-b border-[#E8E8E8]">
+                    <div class="flex items-center gap-1.5">
+                      <svg class="w-3.5 h-3.5 text-[#616061]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg>
+                      <span class="text-[13px] font-bold text-[#1D1C1D]">launch-prep</span>
+                      <svg class="w-2.5 h-2.5 text-[#616061] ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <p class="text-[10px] text-[#616061] ml-[19px] mt-0.5 truncate">Sprint prep, blockers, and launch readiness</p>
                   </div>
                   <!-- Messages — populated by JS so opacity/scale animate -->
                   <div id="slack-messages" class="flex flex-col gap-3 pt-1"></div>
@@ -407,7 +416,26 @@
       return frag
     }
 
-    function buildMessageRow(msg) {
+    // Slack 2024: consecutive messages from the same sender are grouped —
+    // the avatar, name, and timestamp appear only on the first message.
+    // Continuation rows show just the body, pulled close with negative margin.
+    function buildMessageRow(msg, isGroupedContinuation) {
+      const body = h('p', { class: 'text-[12px] text-[#1D1C1D] leading-relaxed break-words' })
+      body.appendChild(buildMessageTextFragment(msg.text, msg.mentions))
+
+      if (isGroupedContinuation) {
+        // Invisible 7px-wide spacer where the avatar would be — keeps the
+        // body column aligned with the avatar'd row above.
+        const spacer = h('div', { class: 'w-7 shrink-0' })
+        return h('div', {
+          class: 'flex gap-2.5 -mt-2',
+          style: 'transform-origin: left center;',
+        }, [
+          spacer,
+          h('div', { class: 'flex-1 min-w-0' }, body),
+        ])
+      }
+
       const avatarInner = slackLogo()
       const avatar = h('div', {
         class: 'w-7 h-7 rounded-md shrink-0 flex items-center justify-center bg-white border border-[#E0DBD5] p-1',
@@ -417,9 +445,6 @@
         h('span', { class: 'text-[13px] font-bold text-[#1D1C1D]' }, msg.sender),
         h('span', { class: 'text-[10px] text-[#616061]' }, msg.timestamp),
       ])
-
-      const body = h('p', { class: 'text-[12px] text-[#1D1C1D] leading-relaxed break-words' })
-      body.appendChild(buildMessageTextFragment(msg.text, msg.mentions))
 
       return h('div', {
         class: 'flex gap-2.5',
@@ -504,8 +529,9 @@
 
     /* ── Mount ── */
     const messagesRoot = document.getElementById('slack-messages')
-    const messageEls = SLACK_MESSAGES.map((msg) => {
-      const el = buildMessageRow(msg)
+    const messageEls = SLACK_MESSAGES.map((msg, idx) => {
+      const isGroupedContinuation = idx > 0 && SLACK_MESSAGES[idx - 1].sender === msg.sender
+      const el = buildMessageRow(msg, isGroupedContinuation)
       messagesRoot.appendChild(el)
       return el
     })
