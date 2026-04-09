@@ -1963,11 +1963,11 @@ export default function LandingPage() {
         {/* Heading + intro centered */}
         <div className="text-center mb-8 max-w-2xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-normal text-[#1B1B18] tracking-tight mb-3">
-            Chaos in,{' '}
-            <span className="text-[#8BA32E] font-heading">kanban out</span>
+            Notes in,{' '}
+            <span className="text-[#8BA32E] font-heading">Kanban out</span>
           </h2>
           <p className="text-sm text-[#5C5C57] leading-relaxed">
-            Notes, Slack threads, emails, standup updates — Kolumn reads the mess and drops
+            Type how you think. Kolumn reads notes, threads, and emails — then drops
             structured tasks on the board.
           </p>
         </div>
