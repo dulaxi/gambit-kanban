@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
+import SearchDialog from '../SearchDialog'
 import BottomTabBar from './BottomTabBar'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useIsDesktop } from '../../hooks/useMediaQuery'
@@ -29,6 +30,21 @@ export default function AppLayout() {
   const theme = useSettingsStore((s) => s.theme)
   const font = useSettingsStore((s) => s.font)
   const isDesktop = useIsDesktop()
+  const [searchOpen, setSearchOpen] = useState(false)
+
+  // Open search dialog from sidebar or Ctrl+K
+  useEffect(() => {
+    const openSearch = () => setSearchOpen(true)
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setSearchOpen(true) }
+    }
+    window.addEventListener('kolumn:focus-search', openSearch)
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('kolumn:focus-search', openSearch)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
   const location = useLocation()
   const user = useAuthStore((s) => s.user)
   const fetchBoards = useBoardStore((s) => s.fetchBoards)
@@ -182,13 +198,14 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-[var(--surface-board)]">
+      <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
       <OfflineBanner />
       <InlineErrorBoundary name="sidebar">
         <Sidebar />
       </InlineErrorBoundary>
       <div
         className={`transition-all duration-200 ${
-          isDesktop ? (collapsed ? 'ml-16' : 'ml-64') : 'ml-0'
+          isDesktop ? (collapsed ? 'ml-12' : 'ml-[287px]') : 'ml-0'
         }`}
       >
         <InlineErrorBoundary name="header">

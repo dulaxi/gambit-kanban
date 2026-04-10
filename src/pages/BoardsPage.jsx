@@ -3,7 +3,6 @@ import { LayoutGrid } from 'lucide-react'
 import { useBoardStore } from '../store/boardStore'
 import BoardSelector from '../components/board/BoardSelector'
 import BoardView from '../components/board/BoardView'
-import AllBoardsView from '../components/board/AllBoardsView'
 import CreateBoardModal from '../components/board/CreateBoardModal'
 
 const CardDetailPanel = lazy(() => import('../components/board/CardDetailPanel'))
@@ -79,12 +78,7 @@ export default function BoardsPage() {
       </div>
 
       <div className="flex-1 min-h-0">
-        {activeBoardId === '__all__' ? (
-          <AllBoardsView
-            onCardClick={handleCardClick}
-            selectedCardId={editingCardId}
-          />
-        ) : activeBoardId ? (
+        {activeBoardId && activeBoardId !== '__all__' ? (
           <BoardView
             boardId={activeBoardId}
             onCardClick={handleCardClick}

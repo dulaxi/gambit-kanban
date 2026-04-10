@@ -11,6 +11,7 @@ export const useSettingsStore = create(
       favoriteBoards: [],
       toggleSidebar: () =>
         set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+      setSidebarCollapsed: (val) => set({ sidebarCollapsed: val }),
       toggleMobileMenu: () => set((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
       closeMobileMenu: () => set({ mobileMenuOpen: false }),
       setTheme: (theme) => {

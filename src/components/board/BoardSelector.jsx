@@ -17,10 +17,10 @@ function FilterPill({ label, active, children }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors ${
+        className={`flex items-center gap-1.5 h-8 px-2.5 text-sm rounded-lg border-[0.5px] transition-all duration-75 cursor-pointer active:scale-[0.995] ${
           active
-            ? 'bg-[var(--accent-lime-wash)] text-[#A8BA32] border border-[var(--border-focus)]'
-            : 'bg-[var(--surface-hover)] text-[var(--text-secondary)] border border-transparent hover:bg-[#E0DBD5]'
+            ? 'bg-[var(--accent-lime-wash)] text-[#A8BA32] border-[var(--border-focus)]'
+            : 'bg-[var(--surface-card)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
         }`}
       >
         {label}
@@ -255,97 +255,14 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
     <>
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <div className="relative" ref={dropdownRef}>
-            <button
-              type="button"
-              onClick={() => setOpen(!open)}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[var(--text-secondary)] bg-[var(--surface-card)] border border-[var(--border-default)] rounded-xl hover:bg-[var(--surface-raised)] transition-colors"
-            >
-              <span className="w-5 h-5 flex items-center justify-center text-[var(--text-muted)]">
-                {activeBoardId === '__all__' ? (
-                  <Layers className="w-4 h-4" />
-                ) : activeBoard?.icon ? (
-                  <DynamicIcon name={activeBoard.icon} className="w-4 h-4" />
-                ) : (
-                  <LayoutGrid className="w-4 h-4" />
-                )}
-              </span>
-              <span>{activeBoardId === '__all__' ? 'All Tasks' : activeBoard?.name || 'Select board'}</span>
-              <ChevronDown
-                className={`w-4 h-4 text-[var(--text-secondary)] transition-transform ${
-                  open ? 'rotate-180' : ''
-                }`}
-              />
-            </button>
-
-            {open && (
-              <div className="absolute left-0 top-full mt-1 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-xl shadow-lg py-1 z-30 w-64">
-                {/* All Tasks option */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveBoard('__all__')
-                    setOpen(false)
-                  }}
-                  className={`flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm transition-colors ${
-                    activeBoardId === '__all__'
-                      ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)] font-medium'
-                      : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
-                  }`}
-                >
-                  <span className="w-5 h-5 flex items-center justify-center text-[var(--text-muted)] shrink-0">
-                    <Layers className="w-4 h-4" />
-                  </span>
-                  All Tasks
-                </button>
-                <div className="border-t border-[var(--border-default)] my-1" />
-                {boardList.map((board) => (
-                  <button
-                    key={board.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveBoard(board.id)
-                      setOpen(false)
-                    }}
-                    className={`flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm transition-colors ${
-                      board.id === activeBoardId
-                        ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)] font-medium'
-                        : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
-                    }`}
-                  >
-                    <span className="w-5 h-5 flex items-center justify-center text-[var(--text-muted)] shrink-0">
-                      {board.icon ? (
-                        <DynamicIcon name={board.icon} className="w-4 h-4" />
-                      ) : (
-                        <LayoutGrid className="w-4 h-4" />
-                      )}
-                    </span>
-                    {board.name}
-                  </button>
-                ))}
-
-                <div className="border-t border-[var(--border-default)] mt-1 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => { setOpen(false); onCreateBoard() }}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)] cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" />
-                    New board
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Share button — visible for board owners */}
           {activeBoard && activeBoardId !== '__all__' && isOwner && (
             <button
               type="button"
               onClick={() => setShowShareModal(true)}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[var(--text-secondary)] bg-[var(--surface-card)] border border-[var(--border-default)] rounded-xl hover:bg-[var(--surface-raised)] transition-colors"
+              className="flex items-center gap-1.5 h-8 px-2.5 text-sm text-[var(--text-secondary)] bg-[var(--surface-card)] border-[0.5px] border-[var(--border-default)] rounded-lg hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-all duration-75 cursor-pointer active:scale-[0.995]"
             >
-              <Users className="w-4 h-4" />
+              <Users className="w-4 h-4 -ml-0.5" />
               Share
             </button>
           )}
@@ -374,13 +291,13 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl border transition-colors ${
+              className={`relative flex items-center gap-1.5 h-8 px-2.5 text-sm rounded-lg border-[0.5px] transition-all duration-75 cursor-pointer active:scale-[0.995] ${
                 showFilters || activeFilterCount > 0
-                  ? 'bg-[var(--accent-lime-wash)] text-[#A8BA32] border-[var(--border-focus)] hover:bg-[var(--accent-lime-wash)]'
-                  : 'text-[var(--text-secondary)] bg-[var(--surface-card)] border-[var(--border-default)] hover:bg-[var(--surface-raised)]'
+                  ? 'bg-[var(--accent-lime-wash)] text-[#A8BA32] border-[var(--border-focus)]'
+                  : 'text-[var(--text-secondary)] bg-[var(--surface-card)] border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
               }`}
             >
-              <Filter className="w-4 h-4" />
+              <Filter className="w-4 h-4 -ml-0.5" />
               Filter
               {activeFilterCount > 0 && (
                 <span className="flex items-center justify-center w-4 h-4 text-[10px] font-semibold text-white bg-[#C2D64A] rounded-full">
@@ -395,13 +312,13 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
             <button
               type="button"
               onClick={() => setShowArchived(!showArchived)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl border transition-colors ${
+              className={`flex items-center gap-1.5 h-8 px-2.5 text-sm rounded-lg border-[0.5px] transition-all duration-75 cursor-pointer active:scale-[0.995] ${
                 showArchived
-                  ? 'bg-[#F5EDCF] text-[#D4A843] border-[#D4A843] hover:bg-[#F5EDCF]'
-                  : 'text-[var(--text-secondary)] bg-[var(--surface-card)] border-[var(--border-default)] hover:bg-[var(--surface-raised)]'
+                  ? 'bg-[#F5EDCF] text-[#D4A843] border-[#D4A843]'
+                  : 'text-[var(--text-secondary)] bg-[var(--surface-card)] border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
               }`}
             >
-              <Archive className="w-4 h-4" />
+              <Archive className="w-4 h-4 -ml-0.5" />
               Archived ({archivedCards.length})
             </button>
           )}

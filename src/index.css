@@ -34,7 +34,7 @@
 /* ── Semantic theme tokens ── */
 :root, [data-theme="light"] {
   --surface-page: #FAF8F6;
-  --surface-board: #FEFDFD;
+  --surface-board: #FAF8F6;
   --surface-card: #FFFFFF;
   --surface-sidebar: #FAF8F6;
   --surface-raised: #F2EDE8;

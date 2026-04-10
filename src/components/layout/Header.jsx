@@ -18,6 +18,7 @@ export default function Header({ title }) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const mobileSearchRef = useRef(null)
+  const searchInputRef = useRef(null)
   const menuRef = useClickOutside(() => setMenuOpen(false))
   const searchRef = useClickOutside(() => setSearchFocused(false))
   const notifRef = useClickOutside(() => setNotifOpen(false))
@@ -193,7 +194,7 @@ export default function Header({ title }) {
           </button>
         )}
         {isDesktop ? (
-          <h1 className="text-xl font-semibold text-[var(--text-primary)] font-heading">{title}</h1>
+          <h1 className="text-xl font-normal text-[var(--text-primary)] font-heading">{title}</h1>
         ) : (
           <span className="text-sm font-medium text-[var(--text-secondary)] truncate">{title}</span>
         )}
@@ -201,75 +202,6 @@ export default function Header({ title }) {
       </>
       )}
 
-      {/* Center: search (desktop only) */}
-      {isDesktop && (
-        <div className="relative hidden sm:block sm:w-64 lg:w-80" ref={searchRef}>
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-          <input
-            type="text"
-            aria-label="Search tasks and notes"
-            placeholder="Search tasks, notes..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            className="w-full pl-10 pr-4 py-2 text-sm rounded-xl bg-[var(--surface-hover)] border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)]"
-          />
-
-          {/* Search results dropdown */}
-          {showDropdown && (
-            <div className="absolute top-full mt-2 left-0 right-0 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-xl shadow-lg z-50 overflow-hidden max-h-80 overflow-y-auto animate-dropdown">
-              {!hasResults && (
-                <p className="px-4 py-3 text-sm text-[var(--text-muted)]">No results found</p>
-              )}
-
-              {searchResults.cards.length > 0 && (
-                <div>
-                  <p className="px-3 py-1.5 text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider bg-[var(--surface-raised)]">Tasks</p>
-                  {searchResults.cards.map((card) => (
-                    <button
-                      key={card.id}
-                      type="button"
-                      onClick={() => handleCardResult(card)}
-                      className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-[var(--surface-raised)] transition-colors"
-                    >
-                      <span className="text-[11px] font-mono text-[var(--text-muted)] shrink-0">#{card.task_number}</span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm text-[var(--text-primary)] truncate">{card.title}</p>
-                        {boards[card.board_id] && (
-                          <p className="text-[11px] text-[var(--text-muted)] truncate">{boards[card.board_id].name}</p>
-                        )}
-                      </div>
-                      {card.priority && (
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${
-                          card.priority === 'high' ? 'bg-[#C27A4A]' : card.priority === 'medium' ? 'bg-[#D4A843]' : 'bg-[#A8BA32]'
-                        }`} />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {searchResults.notes.length > 0 && (
-                <div>
-                  <p className="px-3 py-1.5 text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider bg-[var(--surface-raised)]">Notes</p>
-                  {searchResults.notes.map((note) => (
-                    <button
-                      key={note.id}
-                      type="button"
-                      onClick={() => handleNoteResult(note)}
-                      className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-[var(--surface-raised)] transition-colors"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm text-[var(--text-primary)] truncate">{note.title}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Right: search (mobile) + notifications + avatar */}
       <div className="flex items-center gap-1">

@@ -1,11 +1,12 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   LayoutDashboard,
   Kanban,
   Calendar,
   StickyNote,
   Settings,
+  Search,
   ChevronsLeft,
   ChevronsRight,
   ChevronDown,
@@ -15,18 +16,19 @@ import {
   Layers,
   Users,
   Briefcase,
+  GripVertical,
 } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
-import { useIsDesktop } from '../../hooks/useMediaQuery'
+import { useIsDesktop, useMediaQuery } from '../../hooks/useMediaQuery'
 import { useWorkspaceStore } from '../../store/workspaceStore'
-import { Kanban as PhosphorKanban } from '@phosphor-icons/react'
+import { Kanban as PhosphorKanban, SidebarSimple } from '@phosphor-icons/react'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
 import ConfirmModal from '../board/ConfirmModal'
 
-function KolumnLogo({ size = 28 }) {
+function KolumnLogo({ size = 30 }) {
   return <PhosphorKanban size={size} weight="fill" className="shrink-0 text-[#8BA32E]" />
 }
 
@@ -40,9 +42,16 @@ export default function Sidebar() {
   const invitationCount = useWorkspaceStore((s) => s.invitations.length)
   const collapsed = useSettingsStore((s) => s.sidebarCollapsed)
   const toggle = useSettingsStore((s) => s.toggleSidebar)
+  const setSidebarCollapsed = useSettingsStore((s) => s.setSidebarCollapsed)
   const mobileMenuOpen = useSettingsStore((s) => s.mobileMenuOpen)
   const closeMobileMenu = useSettingsStore((s) => s.closeMobileMenu)
   const isDesktop = useIsDesktop()
+  const isWide = useMediaQuery('(min-width: 1280px)')
+
+  // Auto-collapse on narrow desktop viewports (1024–1280px)
+  useEffect(() => {
+    if (isDesktop) setSidebarCollapsed(!isWide)
+  }, [isDesktop, isWide, setSidebarCollapsed])
   const user = useAuthStore((s) => s.user)
   const allBoards = useBoardStore((s) => s.boards)
   const activeBoardId = useBoardStore((s) => s.activeBoardId)
@@ -81,7 +90,7 @@ export default function Sidebar() {
     setConfirmDeleteBoardId(boardId)
   }
 
-  // On mobile, sidebar is always expanded (w-64) since collapse toggle is hidden
+  // On mobile, sidebar is always expanded (w-[287px]) since collapse toggle is hidden
   const showCollapsed = isDesktop && collapsed
 
   return (
@@ -97,345 +106,254 @@ export default function Sidebar() {
         className={`fixed top-0 left-0 h-screen bg-[var(--surface-sidebar)] border-r border-[var(--border-default)] flex flex-col transition-all duration-200 z-40 ${
           isDesktop
             ? collapsed
-              ? 'w-16'
-              : 'w-64'
-            : `w-64 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`
+              ? 'w-12'
+              : 'w-[287px]'
+            : `w-[287px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`
         }`}
       >
       {/* Logo */}
-      <div className="flex items-center gap-2 px-4 h-16 border-b border-[var(--border-default)]">
-        <KolumnLogo />
+      <div className={`flex items-center ${showCollapsed ? 'justify-center px-1 h-12' : 'gap-2 px-4 h-16'}`}>
+        <KolumnLogo size={showCollapsed ? 22 : 30} />
         {!showCollapsed && (
-          <span className="text-lg font-bold text-[var(--text-primary)] tracking-tight font-logo">
+          <span className="text-[23px] font-[450] text-[var(--text-primary)] tracking-tight leading-none font-logo">
             Kolumn
           </span>
         )}
       </div>
 
       {/* Nav items */}
-      <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
-        {/* Dashboard */}
-        <NavLink
-          to="/dashboard"
-          onClick={closeMobileMenu}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              isActive
-                ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
-            } ${showCollapsed ? 'justify-center' : ''}`
-          }
-        >
-          <LayoutDashboard className="w-5 h-5 shrink-0" />
-          {!showCollapsed && <span>Dashboard</span>}
-        </NavLink>
-
-        {/* Boards with dropdown */}
-        {showCollapsed ? (
-          <NavLink
-            to="/boards"
-            className={({ isActive }) =>
-              `flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
-              }`
-            }
+      <nav className={`flex-1 pt-2 overflow-y-auto ${showCollapsed ? 'px-1' : 'px-2'}`}>
+        {/* ── Flat top nav ── */}
+        <div className="flex flex-col gap-px">
+          {/* Search */}
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('kolumn:focus-search'))}
+            title={showCollapsed ? 'Search' : undefined}
+            className={`flex items-center h-8 rounded-lg text-sm transition-colors duration-75 overflow-hidden text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)] ${showCollapsed ? 'justify-center px-2' : 'gap-3 py-1.5 px-4'}`}
           >
-            <Kanban className="w-5 h-5 shrink-0" />
-          </NavLink>
-        ) : (
-          <div>
-            <div
-              className={`flex items-center rounded-lg transition-colors ${
-                isBoardsActive
-                  ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
-              }`}
+            <span className="relative flex items-center justify-center" style={{ width: 16, height: 16 }}>
+              <Search className="w-4 h-4 shrink-0" />
+            </span>
+            {!showCollapsed && <span className="truncate flex-1 text-left">Search</span>}
+          </button>
+
+          {[
+            { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+            { to: '/workspace', icon: Users, label: 'Workspace', badge: invitationCount },
+            { to: '/calendar', icon: Calendar, label: 'Calendar' },
+            { to: '/notes', icon: StickyNote, label: 'Notes' },
+          ].map(({ to, icon: Icon, label, badge }) => (
+            <NavLink
+              key={to}
+              to={to}
+              onClick={closeMobileMenu}
+              title={showCollapsed ? label : undefined}
+              className={({ isActive }) =>
+                `flex items-center h-8 rounded-lg text-sm transition-colors duration-75 overflow-hidden ${
+                  isActive
+                    ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)]'
+                } ${showCollapsed ? 'justify-center px-2' : 'gap-3 py-1.5 px-4'}`
+              }
             >
-              <button
-                onClick={() => { handleSelectBoard('__all__'); closeMobileMenu() }}
-                className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium flex-1 cursor-pointer"
-              >
-                <Kanban className="w-5 h-5 shrink-0" />
-                <span className="flex-1 text-left">Boards</span>
-              </button>
-              <button
-                onClick={() => setBoardsOpen(!boardsOpen)}
-                aria-label={boardsOpen ? 'Collapse boards' : 'Expand boards'}
-                className="p-1.5 mr-1 rounded-lg hover:bg-[var(--border-default)] transition-colors cursor-pointer"
-              >
-                {boardsOpen ? (
-                  <ChevronDown className="w-4 h-4" />
-                ) : (
-                  <ChevronRight className="w-4 h-4" />
+              <span className="relative flex items-center justify-center" style={{ width: 16, height: 16 }}>
+                <Icon className="w-4 h-4 shrink-0" />
+                {showCollapsed && badge > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-[#C2D64A] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {badge > 9 ? '9+' : badge}
+                  </span>
                 )}
+              </span>
+              {!showCollapsed && (
+                <>
+                  <span className="truncate flex-1">{label}</span>
+                  {badge > 0 && (
+                    <span className="text-[10px] font-semibold bg-[var(--accent-lime-wash)] text-[#A8BA32] px-1.5 py-0.5 rounded-full">
+                      {badge}
+                    </span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
+
+        {/* ── Boards section ── */}
+        {!showCollapsed && (
+          <div className="pt-4">
+            <div className="flex items-center justify-between px-4 mb-1">
+              <span className="text-xs text-[var(--text-muted)] select-none">Boards</span>
+              <button
+                type="button"
+                onClick={() => {
+                  navigate('/boards')
+                  let attempts = 0
+                  let handled = false
+                  const onHandled = () => { handled = true }
+                  window.addEventListener('kolumn:create-board-ack', onHandled, { once: true })
+                  const tryDispatch = () => {
+                    if (handled) { window.removeEventListener('kolumn:create-board-ack', onHandled); return }
+                    window.dispatchEvent(new CustomEvent('kolumn:create-board'))
+                    if (++attempts < 10) setTimeout(tryDispatch, 100)
+                  }
+                  setTimeout(tryDispatch, 50)
+                  closeMobileMenu()
+                }}
+                className="p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
+                title="New board"
+              >
+                <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            {boardsOpen && (
-              <div className="ml-5 mt-1 pl-3 border-l border-[var(--border-default)] space-y-0.5">
-                {sortedOwnedBoards.map((board) => {
-                  return (
+            <div className="flex flex-col gap-px">
+              {sortedOwnedBoards.map((board) => (
+                <div
+                  key={board.id}
+                  onClick={() => handleSelectBoard(board.id)}
+                  className={`flex items-center justify-between w-full h-8 py-1.5 px-4 rounded-lg text-sm transition-colors duration-75 group cursor-pointer relative overflow-hidden ${
+                    isBoardsActive && activeBoardId === board.id
+                      ? 'text-[var(--text-primary)] bg-[var(--accent-lime-wash)]'
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)]'
+                  }`}
+                >
+                  <span className="flex items-center gap-3 truncate">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setIconPickerBoardId(iconPickerBoardId === board.id ? null : board.id)
+                      }}
+                      className="shrink-0 hover:bg-[var(--border-default)] rounded p-0.5 transition-colors flex items-center justify-center"
+                      style={{ width: 16, height: 16 }}
+                      title="Change icon"
+                    >
+                      {board.icon ? (
+                        <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                      ) : (
+                        <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                      )}
+                    </button>
+                    {renamingBoardId === board.id ? (
+                      <input
+                        autoFocus
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const trimmed = renameValue.trim()
+                            if (trimmed) renameBoard(board.id, trimmed)
+                            setRenamingBoardId(null)
+                          } else if (e.key === 'Escape') {
+                            setRenamingBoardId(null)
+                          }
+                        }}
+                        onBlur={() => {
+                          const trimmed = renameValue.trim()
+                          if (trimmed) renameBoard(board.id, trimmed)
+                          setRenamingBoardId(null)
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 text-sm bg-[var(--surface-card)] border border-[var(--border-focus)] rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)] min-w-0"
+                      />
+                    ) : (
+                      <span
+                        onDoubleClick={(e) => {
+                          e.stopPropagation()
+                          setRenamingBoardId(board.id)
+                          setRenameValue(board.name)
+                        }}
+                        className="truncate"
+                      >
+                        {board.name}
+                      </span>
+                    )}
+                  </span>
+                  <span className="flex items-center gap-0.5 shrink-0">
+                    <Trash2
+                      role="button"
+                      aria-label={`Delete board ${board.name}`}
+                      className="w-3.5 h-3.5 text-[var(--text-muted)] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 shrink-0"
+                      onClick={(e) => handleDeleteBoard(e, board.id)}
+                    />
+                  </span>
+                  {iconPickerBoardId === board.id && (
+                    <div className="absolute left-0 top-full z-40" onClick={(e) => e.stopPropagation()}>
+                      <IconPicker
+                        value={board.icon}
+                        onChange={(icon) => updateBoardIcon(board.id, icon)}
+                        onClose={() => setIconPickerBoardId(null)}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Shared boards */}
+              {sharedBoards.length > 0 && (
+                <>
+                  <div className="flex items-center px-4 pt-3 mb-1">
+                    <span className="text-xs text-[var(--text-muted)] select-none">Shared with me</span>
+                  </div>
+                  {sharedBoards.map((board) => (
                     <div
                       key={board.id}
-                      onClick={() => handleSelectBoard(board.id)}
-                      className={`flex items-center justify-between w-full px-3 py-1.5 rounded-lg text-sm transition-colors group cursor-pointer relative ${
+                      onClick={() => { setActiveBoard(board.id); navigate('/boards'); closeMobileMenu() }}
+                      className={`flex items-center w-full h-8 py-1.5 px-4 rounded-lg text-sm transition-colors duration-75 cursor-pointer overflow-hidden ${
                         isBoardsActive && activeBoardId === board.id
-                          ? 'text-[var(--text-primary)] font-medium bg-[var(--accent-lime-wash)]'
-                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+                          ? 'text-[var(--text-primary)] bg-[var(--accent-lime-wash)]'
+                          : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)]'
                       }`}
                     >
-                      <span className="flex items-center gap-2 truncate">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setIconPickerBoardId(iconPickerBoardId === board.id ? null : board.id)
-                          }}
-                          className="shrink-0 hover:bg-[var(--border-default)] rounded p-0.5 transition-colors"
-                          title="Change icon"
-                        >
+                      <span className="flex items-center gap-3 truncate">
+                        <span className="flex items-center justify-center shrink-0" style={{ width: 16, height: 16 }}>
                           {board.icon ? (
                             <DynamicIcon name={board.icon} className="w-4 h-4 text-[var(--text-muted)]" />
                           ) : (
                             <Kanban className="w-4 h-4 text-[var(--text-muted)]" />
                           )}
-                        </button>
-                        {renamingBoardId === board.id ? (
-                          <input
-                            autoFocus
-                            value={renameValue}
-                            onChange={(e) => setRenameValue(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                const trimmed = renameValue.trim()
-                                if (trimmed) renameBoard(board.id, trimmed)
-                                setRenamingBoardId(null)
-                              } else if (e.key === 'Escape') {
-                                setRenamingBoardId(null)
-                              }
-                            }}
-                            onBlur={() => {
-                              const trimmed = renameValue.trim()
-                              if (trimmed) renameBoard(board.id, trimmed)
-                              setRenamingBoardId(null)
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex-1 text-sm bg-[var(--surface-card)] border border-[var(--border-focus)] rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)] min-w-0"
-                          />
-                        ) : (
-                          <span
-                            onDoubleClick={(e) => {
-                              e.stopPropagation()
-                              setRenamingBoardId(board.id)
-                              setRenameValue(board.name)
-                            }}
-                            className="truncate"
-                          >
-                            {board.name}
-                          </span>
-                        )}
+                        </span>
+                        <span className="truncate">{board.name}</span>
                       </span>
-                      <span className="flex items-center gap-0.5 shrink-0">
-                        <Trash2
-                          role="button"
-                          aria-label={`Delete board ${board.name}`}
-                          className="w-3.5 h-3.5 text-[var(--text-muted)] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 shrink-0"
-                          onClick={(e) => handleDeleteBoard(e, board.id)}
-                        />
-                      </span>
-                      {iconPickerBoardId === board.id && (
-                        <div className="absolute left-0 top-full z-40" onClick={(e) => e.stopPropagation()}>
-                          <IconPicker
-                            value={board.icon}
-                            onChange={(icon) => updateBoardIcon(board.id, icon)}
-                            onClose={() => setIconPickerBoardId(null)}
-                          />
-                        </div>
-                      )}
                     </div>
-                  )
-                })}
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigate('/boards')
-                    // Retry dispatch until BoardsPage listener is mounted
-                    let attempts = 0
-                    let handled = false
-                    const onHandled = () => { handled = true }
-                    window.addEventListener('kolumn:create-board-ack', onHandled, { once: true })
-                    const tryDispatch = () => {
-                      if (handled) { window.removeEventListener('kolumn:create-board-ack', onHandled); return }
-                      window.dispatchEvent(new CustomEvent('kolumn:create-board'))
-                      if (++attempts < 10) setTimeout(tryDispatch, 100)
-                    }
-                    setTimeout(tryDispatch, 50)
-                    closeMobileMenu()
-                  }}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>New board</span>
-                </button>
-              </div>
-            )}
+                  ))}
+                </>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Workspace with dropdown */}
-        {showCollapsed ? (
+        {/* Collapsed: just show Boards icon */}
+        {showCollapsed && (
           <NavLink
-            to="/workspace"
+            to="/boards"
+            title="Boards"
             className={({ isActive }) =>
-              `flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              `flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
                   : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
               }`
             }
           >
-            <span className="relative">
-              <Users className="w-5 h-5 shrink-0" />
-              {invitationCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-[#C2D64A] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {invitationCount > 9 ? '9+' : invitationCount}
-                </span>
-              )}
-            </span>
+            <Kanban className="w-4 h-4 shrink-0" />
           </NavLink>
-        ) : (
-          <div>
-            <button
-              onClick={() => setWorkspaceOpen(!workspaceOpen)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full ${
-                location.pathname.startsWith('/workspace')
-                  ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
-              }`}
-            >
-              <span className="relative">
-                <Users className="w-5 h-5 shrink-0" />
-                {invitationCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-[#C2D64A] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                    {invitationCount > 9 ? '9+' : invitationCount}
-                  </span>
-                )}
-              </span>
-              <span className="flex-1 text-left">Workspace</span>
-              {workspaceOpen ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronRight className="w-4 h-4" />
-              )}
-            </button>
-
-            {workspaceOpen && (
-              <div className="ml-5 mt-1 pl-3 border-l border-[var(--border-default)] space-y-0.5">
-                {/* Invitations link */}
-                <div
-                  onClick={() => { navigate('/workspace'); closeMobileMenu() }}
-                  className={`flex items-center justify-between w-full px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer ${
-                    location.pathname === '/workspace'
-                      ? 'text-[var(--text-primary)] font-medium bg-[var(--accent-lime-wash)]'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
-                  }`}
-                >
-                  <span className="flex items-center gap-2 truncate">
-                    <Briefcase className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-                    <span className="truncate">Overview</span>
-                  </span>
-                  {invitationCount > 0 && (
-                    <span className="text-[10px] font-semibold bg-[var(--accent-lime-wash)] text-[#A8BA32] px-1.5 py-0.5 rounded-full">
-                      {invitationCount}
-                    </span>
-                  )}
-                </div>
-
-                {/* Shared boards */}
-                {sharedBoards.map((board) => (
-                  <div
-                    key={board.id}
-                    onClick={() => { setActiveBoard(board.id); navigate('/boards'); closeMobileMenu() }}
-                    className={`flex items-center w-full px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer ${
-                      isBoardsActive && activeBoardId === board.id
-                        ? 'text-[var(--text-primary)] font-medium bg-[var(--accent-lime-wash)]'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2 truncate">
-                      {board.icon ? (
-                        <DynamicIcon name={board.icon} className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-                      ) : (
-                        <Kanban className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-                      )}
-                      <span className="truncate">{board.name}</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         )}
-
-        {/* Other nav items */}
-        {navItems.slice(1).map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            onClick={closeMobileMenu}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
-              } ${showCollapsed ? 'justify-center' : ''}`
-            }
-          >
-            <Icon className="w-5 h-5 shrink-0" />
-            {!showCollapsed && <span>{label}</span>}
-          </NavLink>
-        ))}
       </nav>
 
-      {/* Bottom section */}
-      <div className="border-t border-[var(--border-default)] py-4 px-2 space-y-1">
-        <NavLink
-          to="/settings"
-          onClick={closeMobileMenu}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              isActive
-                ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
-            } ${showCollapsed ? 'justify-center' : ''}`
-          }
-        >
-          <Settings className="w-5 h-5 shrink-0" />
-          {!showCollapsed && <span>Settings</span>}
-        </NavLink>
-
-        {isDesktop && (
+      {/* Collapse toggle — bottom right */}
+      {isDesktop && (
+        <div className={`flex items-center ${showCollapsed ? 'justify-center py-3' : 'justify-end px-3 py-3'}`}>
           <button
             onClick={toggle}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors w-full ${
-              collapsed ? 'justify-center' : ''
-            }`}
+            className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
           >
-            {collapsed ? (
-              <ChevronsRight className="w-5 h-5" />
-            ) : (
-              <>
-                <ChevronsLeft className="w-5 h-5" />
-                <span>Collapse</span>
-              </>
-            )}
+            <SidebarSimple size={18} weight="regular" />
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </aside>
 
     {confirmDeleteBoardId && (
