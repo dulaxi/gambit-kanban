@@ -1,11 +1,11 @@
 import { useState, memo } from 'react'
 import { format, isPast, isToday, isTomorrow, isYesterday, parseISO } from 'date-fns'
-import { Calendar, CheckSquare, AlignLeft, CheckCircle2, FileText } from 'lucide-react'
+import { Calendar, CheckSquare, CheckCircle2, FileText } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import DynamicIcon from './DynamicIcon'
-import { LABEL_BG, PRIORITY_DOT, getAvatarColor, getInitials } from '../../utils/formatting'
+import { LABEL_BG_QUIET, PRIORITY_DOT, getAvatarColor, getInitials } from '../../utils/formatting'
 
 export default memo(function Card({ card, onClick, onComplete, isSelected, iconOverride }) {
   const { title, description, labels, priority, due_date: dueDate, checklist, assignee_name: assignee, task_number: taskNumber, completed, icon } = card
@@ -39,20 +39,22 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
       aria-label={`Task: ${title}`}
       onClick={() => onClick(card.id)}
       style={font === 'sf-mono' ? { fontFamily: "'SF Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace" } : undefined}
-      className={`w-full rounded-xl border shadow-sm transition-all text-left cursor-pointer flex focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-1 ${
+      className={`w-full rounded-xl border-[0.5px] transition-all text-left cursor-pointer flex focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-1 group ${
         isSelected
-          ? 'bg-[var(--accent-lime-wash)]/60 border-[var(--accent-lime-wash)]'
-          : 'bg-[var(--surface-card)] border-[var(--border-default)] hover:shadow-md'
+          ? 'bg-[var(--accent-lime-wash)]/40 border-[var(--accent-lime)]'
+          : 'bg-[var(--surface-card)] border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:shadow-[0_1px_2px_0_rgba(0,0,0,0.04)]'
       }`}
     >
       {/* Icon — left center */}
       <div className="flex items-center pl-3 shrink-0">
-        <div className="w-7 h-7 rounded-lg bg-[var(--surface-hover)] flex items-center justify-center text-[var(--text-muted)]">
-          {displayIcon ? (
-            <DynamicIcon name={displayIcon} className="w-4 h-4" />
-          ) : (
-            <FileText className="w-4 h-4" />
-          )}
+        <div className="w-6 h-6 rounded-[6.48px] border-0.5 border-[var(--border-default)] bg-[var(--surface-card)] shadow-sm flex items-center justify-center">
+          <div className="w-4 h-4 flex items-center justify-center">
+            {displayIcon ? (
+              <DynamicIcon name={displayIcon} className="w-4 h-4 text-[var(--text-muted)]" />
+            ) : (
+              <FileText className="w-4 h-4 text-[var(--text-faint)]" />
+            )}
+          </div>
         </div>
       </div>
 
@@ -60,12 +62,12 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
       <div className="flex-1 min-w-0 pl-2.5 pr-3.5 py-3">
         {/* Labels row */}
         {labels?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-2">
+          <div className="flex flex-wrap gap-1 mb-1.5">
             {labels.map((label) => (
               <span
                 key={`${label.text}-${label.color}`}
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                  LABEL_BG[label.color] || LABEL_BG.gray
+                className={`text-[9px] font-medium px-1.5 py-px rounded-md ${
+                  LABEL_BG_QUIET[label.color] || LABEL_BG_QUIET.gray
                 }`}
               >
                 {label.text}
@@ -143,7 +145,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
 
             {hasDescription && (
               <span className="text-[10px] text-[var(--text-muted)] flex items-center">
-                <AlignLeft className="w-3 h-3" />
+                <FileText className="w-3 h-3" />
               </span>
             )}
           </div>
