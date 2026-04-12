@@ -5,7 +5,7 @@ import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import DynamicIcon from './DynamicIcon'
-import { LABEL_BG_QUIET, PRIORITY_DOT, getAvatarColor, getInitials } from '../../utils/formatting'
+import { LABEL_BG, PRIORITY_DOT, getAvatarColor, getInitials } from '../../utils/formatting'
 
 export default memo(function Card({ card, onClick, onComplete, isSelected, iconOverride }) {
   const { title, description, labels, priority, due_date: dueDate, checklist, assignee_name: assignee, task_number: taskNumber, completed, icon } = card
@@ -39,20 +39,20 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
       aria-label={`Task: ${title}`}
       onClick={() => onClick(card.id)}
       style={font === 'sf-mono' ? { fontFamily: "'SF Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace" } : undefined}
-      className={`w-full rounded-xl border-[0.5px] transition-all text-left cursor-pointer flex focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-1 group ${
+      className={`w-full rounded-xl border-[0.5px] transition-all text-left cursor-pointer flex focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-1 group shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] ${
         isSelected
           ? 'bg-[var(--accent-lime-wash)]/40 border-[var(--accent-lime)]'
-          : 'bg-[var(--surface-card)] border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:shadow-[0_1px_2px_0_rgba(0,0,0,0.04)]'
+          : 'bg-[var(--surface-card)] border-[var(--border-default)] hover:shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]'
       }`}
     >
       {/* Icon — left center */}
       <div className="flex items-center pl-3 shrink-0">
-        <div className="w-6 h-6 rounded-[6.48px] border-0.5 border-[var(--border-default)] bg-[var(--surface-card)] shadow-sm flex items-center justify-center">
+        <div className="w-6 h-6 rounded-[6.48px] border-0.5 border-[var(--border-default)] bg-[var(--color-cream)] shadow-sm flex items-center justify-center">
           <div className="w-4 h-4 flex items-center justify-center">
             {displayIcon ? (
-              <DynamicIcon name={displayIcon} className="w-4 h-4 text-[var(--text-muted)]" />
+              <DynamicIcon name={displayIcon} className="w-4 h-4 text-[var(--color-mist)]" />
             ) : (
-              <FileText className="w-4 h-4 text-[var(--text-faint)]" />
+              <FileText className="w-4 h-4 text-[var(--color-mist)]" />
             )}
           </div>
         </div>
@@ -66,8 +66,8 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
             {labels.map((label) => (
               <span
                 key={`${label.text}-${label.color}`}
-                className={`text-[9px] font-medium px-1.5 py-px rounded-md ${
-                  LABEL_BG_QUIET[label.color] || LABEL_BG_QUIET.gray
+                className={`text-[10px] font-semibold font-pill px-2 py-0.5 rounded-full ${
+                  LABEL_BG[label.color] || LABEL_BG.gray
                 }`}
               >
                 {label.text}
@@ -87,12 +87,12 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
             aria-label={completed ? 'Mark as incomplete' : 'Mark as complete'}
             className="shrink-0"
           >
-            <CheckCircle2 className={`w-3.5 h-3.5 transition-colors ${completed ? 'text-[#A8BA32]' : 'text-[var(--text-faint)] group-hover:text-[var(--text-muted)] hover:text-[#C2D64A]'}`} />
+            <CheckCircle2 className={`w-4 h-4 transition-colors ${completed ? 'text-[#A8BA32]' : 'text-[var(--text-faint)] group-hover:text-[var(--text-muted)] hover:text-[#C2D64A]'}`} />
           </button>
           {taskNumber && (
-            <span className="text-[10px] font-medium text-[var(--text-faint)]">#{taskNumber}</span>
+            <span className="text-[11px] font-medium text-[var(--text-faint)]">#{taskNumber}</span>
           )}
-          <span className={`w-1.5 h-1.5 rounded-full ${priDot}`} title={priority} />
+          <span className={`w-2 h-2 rounded-full ${priDot}`} title={priority} />
         </div>
         <p className={`text-[13px] font-medium leading-snug ${completed ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-primary)]'}`}>
           {title}
@@ -100,7 +100,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
 
         {/* Description preview */}
         {hasDescription && (
-          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed mt-1 line-clamp-2">
+          <p className="text-[12px] text-[var(--text-muted)] leading-relaxed mt-1 line-clamp-2">
             {description}
           </p>
         )}
@@ -110,12 +110,14 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
           <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)]">
             {dueDateObj && (
               <span
-                className={`flex items-center gap-1 ${
+                className={`text-[10px] font-semibold font-pill flex items-center gap-1 px-2 py-0.5 rounded-full ${
                   isYesterday(dueDateObj) || (isPast(dueDateObj) && !isToday(dueDateObj))
-                    ? 'text-[#C27A4A]'
+                    ? 'bg-[#F2D9C7] text-[#C27A4A]'
                     : isToday(dueDateObj)
-                    ? 'text-[#D4A843]'
-                    : ''
+                    ? 'bg-[#F5EDCF] text-[#D4A843]'
+                    : isTomorrow(dueDateObj)
+                    ? 'bg-[#EEF2D6] text-[#A8BA32]'
+                    : 'bg-[#EEF2D6] text-[#A8BA32]'
                 }`}
               >
                 <Calendar className="w-3 h-3" />
@@ -130,10 +132,10 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
                   e.stopPropagation()
                   setChecklistOpen(!checklistOpen)
                 }}
-                className={`flex items-center gap-1 transition-colors ${
+                className={`text-[10px] font-semibold font-pill flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors ${
                   checkedCount === totalCount
-                    ? 'text-[var(--accent-lime-dark)]'
-                    : 'hover:text-[var(--text-secondary)]'
+                    ? 'bg-[#EEF2D6] text-[#A8BA32]'
+                    : 'bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[#E0DBD5]'
                 }`}
               >
                 <CheckSquare className="w-3 h-3" />
@@ -148,14 +150,14 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
             const iconText = profile?.color === 'bg-[#8E8E89]' ? 'text-[#1B1B18]' : 'text-white'
             return isMe && profile.icon ? (
               <span
-                className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center ${iconText} ${profile.color}`}
+                className={`w-6 h-6 rounded-full shrink-0 flex items-center justify-center ${iconText} ${profile.color}`}
                 title={assignee}
               >
-                <DynamicIcon name={profile.icon} className="w-3 h-3" />
+                <DynamicIcon name={profile.icon} className="w-3.5 h-3.5" />
               </span>
             ) : (
               <span
-                className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[9px] font-bold text-white ${getAvatarColor(assignee)}`}
+                className={`w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white ${getAvatarColor(assignee)}`}
                 title={assignee}
               >
                 {getInitials(assignee)}
