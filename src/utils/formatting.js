@@ -8,6 +8,16 @@ export const LABEL_BG = {
   gray: 'bg-[var(--label-gray-bg)] text-[var(--label-gray-text)]',
 }
 
+export const LABEL_BG_QUIET = {
+  red: 'bg-[var(--label-red-bg)]/60 text-[var(--label-red-text)]',
+  blue: 'bg-[var(--label-blue-bg)]/60 text-[var(--label-blue-text)]',
+  green: 'bg-[var(--label-green-bg)]/60 text-[var(--label-green-text)]',
+  yellow: 'bg-[var(--label-yellow-bg)]/60 text-[var(--label-yellow-text)]',
+  purple: 'bg-[var(--label-purple-bg)]/60 text-[var(--label-purple-text)]',
+  pink: 'bg-[var(--label-pink-bg)]/60 text-[var(--label-pink-text)]',
+  gray: 'bg-[var(--label-gray-bg)]/60 text-[var(--label-gray-text)]',
+}
+
 export const PRIORITY_DOT = {
   low: 'bg-[#A8BA32]',
   medium: 'bg-[#D4A843]',
