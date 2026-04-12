@@ -87,12 +87,12 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
             aria-label={completed ? 'Mark as incomplete' : 'Mark as complete'}
             className="shrink-0"
           >
-            <CheckCircle2 className={`w-4 h-4 transition-colors ${completed ? 'text-[#A8BA32]' : 'text-[var(--text-muted)] hover:text-[#C2D64A]'}`} />
+            <CheckCircle2 className={`w-3.5 h-3.5 transition-colors ${completed ? 'text-[#A8BA32]' : 'text-[var(--text-faint)] group-hover:text-[var(--text-muted)] hover:text-[#C2D64A]'}`} />
           </button>
           {taskNumber && (
-            <span className="text-[11px] font-medium text-[var(--text-secondary)]">Task #{taskNumber}</span>
+            <span className="text-[10px] font-medium text-[var(--text-faint)]">#{taskNumber}</span>
           )}
-          <span className={`w-2 h-2 rounded-full ${priDot}`} title={priority} />
+          <span className={`w-1.5 h-1.5 rounded-full ${priDot}`} title={priority} />
         </div>
         <p className={`text-[13px] font-medium leading-snug ${completed ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-primary)]'}`}>
           {title}
@@ -100,24 +100,22 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
 
         {/* Description preview */}
         {hasDescription && (
-          <p className="text-[12px] text-[var(--text-muted)] leading-relaxed mt-1 line-clamp-2">
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed mt-1 line-clamp-2">
             {description}
           </p>
         )}
 
-        {/* Bottom row: badges + assignee */}
-        <div className="flex items-center justify-between gap-2 mt-2.5">
-          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+        {/* Bottom row: metadata + assignee */}
+        <div className="flex items-center justify-between gap-2 mt-2">
+          <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)]">
             {dueDateObj && (
               <span
-                className={`text-[10px] font-medium flex items-center gap-1 px-2 py-0.5 rounded-full ${
+                className={`flex items-center gap-1 ${
                   isYesterday(dueDateObj) || (isPast(dueDateObj) && !isToday(dueDateObj))
-                    ? 'bg-[#F2D9C7] text-[#C27A4A]'
+                    ? 'text-[#C27A4A]'
                     : isToday(dueDateObj)
-                    ? 'bg-[#F5EDCF] text-[#D4A843]'
-                    : isTomorrow(dueDateObj)
-                    ? 'bg-[#EEF2D6] text-[#A8BA32]'
-                    : 'bg-[#EEF2D6] text-[#A8BA32]'
+                    ? 'text-[#D4A843]'
+                    : ''
                 }`}
               >
                 <Calendar className="w-3 h-3" />
@@ -132,21 +130,15 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
                   e.stopPropagation()
                   setChecklistOpen(!checklistOpen)
                 }}
-                className={`text-[10px] font-medium flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors ${
+                className={`flex items-center gap-1 transition-colors ${
                   checkedCount === totalCount
-                    ? 'bg-[#EEF2D6] text-[#A8BA32]'
-                    : 'bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[#E0DBD5]'
+                    ? 'text-[var(--accent-lime-dark)]'
+                    : 'hover:text-[var(--text-secondary)]'
                 }`}
               >
                 <CheckSquare className="w-3 h-3" />
                 {checkedCount}/{totalCount}
               </button>
-            )}
-
-            {hasDescription && (
-              <span className="text-[10px] text-[var(--text-muted)] flex items-center">
-                <FileText className="w-3 h-3" />
-              </span>
             )}
           </div>
 
@@ -156,14 +148,14 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
             const iconText = profile?.color === 'bg-[#8E8E89]' ? 'text-[#1B1B18]' : 'text-white'
             return isMe && profile.icon ? (
               <span
-                className={`w-6 h-6 rounded-full shrink-0 flex items-center justify-center ${iconText} ${profile.color}`}
+                className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center ${iconText} ${profile.color}`}
                 title={assignee}
               >
-                <DynamicIcon name={profile.icon} className="w-3.5 h-3.5" />
+                <DynamicIcon name={profile.icon} className="w-3 h-3" />
               </span>
             ) : (
               <span
-                className={`w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white ${getAvatarColor(assignee)}`}
+                className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[9px] font-bold text-white ${getAvatarColor(assignee)}`}
                 title={assignee}
               >
                 {getInitials(assignee)}
