@@ -98,12 +98,12 @@ export default function Sidebar() {
       {/* Backdrop for mobile drawer */}
       {!isDesktop && mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-30 transition-opacity"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 transition-opacity"
           onClick={closeMobileMenu}
         />
       )}
       <aside
-        className={`fixed top-0 left-0 h-screen bg-[var(--surface-sidebar)] border-r border-[var(--border-default)] flex flex-col transition-all duration-200 z-40 ${
+        className={`fixed top-0 left-0 h-screen bg-[var(--surface-sidebar)] border-r border-0.5 border-[var(--border-default)] flex flex-col transition-all duration-200 z-40 ${
           isDesktop
             ? collapsed
               ? 'w-12'
@@ -152,7 +152,7 @@ export default function Sidebar() {
               className={({ isActive }) =>
                 `flex items-center h-8 rounded-lg text-sm transition-colors duration-75 overflow-hidden ${
                   isActive
-                    ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
+                    ? 'bg-[var(--surface-hover)] text-[var(--text-primary)]'
                     : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)]'
                 } ${showCollapsed ? 'justify-center px-2' : 'gap-3 py-1.5 px-4'}`
               }
@@ -169,7 +169,7 @@ export default function Sidebar() {
                 <>
                   <span className="truncate flex-1">{label}</span>
                   {badge > 0 && (
-                    <span className="text-[10px] font-semibold bg-[var(--accent-lime-wash)] text-[#A8BA32] px-1.5 py-0.5 rounded-full">
+                    <span className="text-[10px] font-semibold bg-[var(--surface-hover)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded-full">
                       {badge}
                     </span>
                   )}
@@ -214,7 +214,7 @@ export default function Sidebar() {
                   onClick={() => handleSelectBoard(board.id)}
                   className={`flex items-center justify-between w-full h-8 py-1.5 px-4 rounded-lg text-sm transition-colors duration-75 group cursor-pointer relative overflow-hidden ${
                     isBoardsActive && activeBoardId === board.id
-                      ? 'text-[var(--text-primary)] bg-[var(--accent-lime-wash)]'
+                      ? 'text-[var(--text-primary)] bg-[var(--surface-hover)]'
                       : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)]'
                   }`}
                 >
@@ -230,9 +230,9 @@ export default function Sidebar() {
                       title="Change icon"
                     >
                       {board.icon ? (
-                        <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                        <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`} />
                       ) : (
-                        <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                        <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`} />
                       )}
                     </button>
                     {renamingBoardId === board.id ? (
@@ -302,7 +302,7 @@ export default function Sidebar() {
                       onClick={() => { setActiveBoard(board.id); navigate('/boards'); closeMobileMenu() }}
                       className={`flex items-center w-full h-8 py-1.5 px-4 rounded-lg text-sm transition-colors duration-75 cursor-pointer overflow-hidden ${
                         isBoardsActive && activeBoardId === board.id
-                          ? 'text-[var(--text-primary)] bg-[var(--accent-lime-wash)]'
+                          ? 'text-[var(--text-primary)] bg-[var(--surface-hover)]'
                           : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)]'
                       }`}
                     >
@@ -332,7 +332,7 @@ export default function Sidebar() {
             className={({ isActive }) =>
               `flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
+                  ? 'bg-[var(--surface-hover)] text-[var(--text-primary)]'
                   : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
               }`
             }
