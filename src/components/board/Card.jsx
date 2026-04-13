@@ -83,31 +83,6 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
             ))}
             {labels?.length > 0 && <span aria-hidden="true">·</span>}
             <span className={`w-2 h-2 rounded-full ${priDot}`} title={priority} />
-            {hasAssignee && (
-              <>
-                <span aria-hidden="true">·</span>
-                {(() => {
-                  const isMe = profile?.display_name && assignee.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
-                  const lightColors = ['bg-[#8E8E89]', 'bg-[#E0DBD5]', 'bg-[#E8E2DB]', 'bg-[#C2D64A]', 'bg-[#A8BA32]', 'bg-[#D4A843]', 'bg-[#C27A4A]']
-                  const iconText = lightColors.includes(profile?.color) ? 'text-[#1B1B18]' : 'text-white'
-                  return isMe && profile.icon ? (
-                    <span
-                      className={`w-4 h-4 rounded-full shrink-0 flex items-center justify-center ${iconText} ${profile.color}`}
-                      title={assignee}
-                    >
-                      <DynamicIcon name={profile.icon} className="w-2.5 h-2.5" />
-                    </span>
-                  ) : (
-                    <span
-                      className={`w-4 h-4 rounded-full shrink-0 flex items-center justify-center text-[10px] font-heading ${getAvatarColor(assignee)} ${getAvatarTextColor(getAvatarColor(assignee))}`}
-                      title={assignee}
-                    >
-                      {getInitials(assignee).toLowerCase()}
-                    </span>
-                  )
-                })()}
-              </>
-            )}
           </div>
         </div>
       </div>
@@ -120,42 +95,65 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
       )}
 
       {/* Bottom metadata row */}
-      {(dueDateObj || hasChecklist) && (
-        <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-          {dueDateObj && (
-            <span
-              className={`font-semibold flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${
-                isYesterday(dueDateObj) || (isPast(dueDateObj) && !isToday(dueDateObj))
-                  ? 'bg-[#F2D9C7] text-[#C27A4A]'
-                  : isToday(dueDateObj)
-                  ? 'bg-[#F5EDCF] text-[#D4A843]'
-                  : isTomorrow(dueDateObj)
-                  ? 'bg-[#EEF2D6] text-[#A8BA32]'
-                  : 'bg-[#EEF2D6] text-[#A8BA32]'
-              }`}
-            >
-              <CalendarDot size={12} weight="bold" />
-              {isToday(dueDateObj) ? 'Today' : isYesterday(dueDateObj) ? 'Yesterday' : isTomorrow(dueDateObj) ? 'Tomorrow' : format(dueDateObj, 'MMM d')}
-            </span>
-          )}
+      {(dueDateObj || hasChecklist || hasAssignee) && (
+        <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-2">
+            {dueDateObj && (
+              <span
+                className={`font-semibold flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${
+                  isYesterday(dueDateObj) || (isPast(dueDateObj) && !isToday(dueDateObj))
+                    ? 'bg-[#F2D9C7] text-[#C27A4A]'
+                    : isToday(dueDateObj)
+                    ? 'bg-[#F5EDCF] text-[#D4A843]'
+                    : isTomorrow(dueDateObj)
+                    ? 'bg-[#EEF2D6] text-[#A8BA32]'
+                    : 'bg-[#EEF2D6] text-[#A8BA32]'
+                }`}
+              >
+                <CalendarDot size={12} weight="bold" />
+                {isToday(dueDateObj) ? 'Today' : isYesterday(dueDateObj) ? 'Yesterday' : isTomorrow(dueDateObj) ? 'Tomorrow' : format(dueDateObj, 'MMM d')}
+              </span>
+            )}
 
-          {hasChecklist && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                setChecklistOpen(!checklistOpen)
-              }}
-              className={`font-semibold flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] transition-colors ${
-                checkedCount === totalCount
-                  ? 'bg-[#EEF2D6] text-[#A8BA32]'
-                  : 'bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[#E0DBD5]'
-              }`}
-            >
-              <CheckSquare size={12} weight="bold" />
-              {checkedCount}/{totalCount}
-            </button>
-          )}
+            {hasChecklist && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setChecklistOpen(!checklistOpen)
+                }}
+                className={`font-semibold flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] transition-colors ${
+                  checkedCount === totalCount
+                    ? 'bg-[#EEF2D6] text-[#A8BA32]'
+                    : 'bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[#E0DBD5]'
+                }`}
+              >
+                <CheckSquare size={12} weight="bold" />
+                {checkedCount}/{totalCount}
+              </button>
+            )}
+          </div>
+
+          {hasAssignee && (() => {
+            const isMe = profile?.display_name && assignee.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
+            const lightColors = ['bg-[#8E8E89]', 'bg-[#E0DBD5]', 'bg-[#E8E2DB]', 'bg-[#C2D64A]', 'bg-[#A8BA32]', 'bg-[#D4A843]', 'bg-[#C27A4A]']
+            const iconText = lightColors.includes(profile?.color) ? 'text-[#1B1B18]' : 'text-white'
+            return isMe && profile.icon ? (
+              <span
+                className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center ${iconText} ${profile.color}`}
+                title={assignee}
+              >
+                <DynamicIcon name={profile.icon} className="w-3 h-3" />
+              </span>
+            ) : (
+              <span
+                className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-heading ${getAvatarColor(assignee)} ${getAvatarTextColor(getAvatarColor(assignee))}`}
+                title={assignee}
+              >
+                {getInitials(assignee).toLowerCase()}
+              </span>
+            )
+          })()}
         </div>
       )}
 
