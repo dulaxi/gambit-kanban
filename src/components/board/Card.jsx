@@ -47,7 +47,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
       }`}
     >
       {/* Top row: icon + title + check */}
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-3">
         {/* Icon container — Claude skill card style */}
         <div className="flex w-10 h-10 shrink-0 items-center justify-center rounded-lg border-0.5 border-[var(--border-default)] bg-[var(--surface-raised)]">
           <div className="w-5 h-5 flex items-center justify-center">
@@ -62,7 +62,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
         {/* Title + meta */}
         <div className="flex min-w-0 grow flex-col gap-0.5">
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className={`truncate text-sm font-medium flex-1 ${completed ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-primary)]'}`}>
+            <span className={`text-sm font-medium flex-1 ${completed ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-primary)]'}`}>
               {title}
             </span>
             <button
@@ -74,15 +74,13 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
               aria-label={completed ? 'Mark as incomplete' : 'Mark as complete'}
               className="shrink-0"
             >
-              <CheckCircle2 className={`w-4 h-4 transition-colors ${completed ? 'text-[#A8BA32]' : 'text-[var(--text-faint)] group-hover:text-[var(--text-muted)] hover:text-[#C2D64A]'}`} />
+              <CheckCircle2 className={`w-4 h-4 transition-colors ${completed ? 'text-[#A8BA32]' : priDot === 'bg-[#C27A4A]' ? 'text-[#C27A4A] hover:text-[#A8BA32]' : priDot === 'bg-[#A8BA32]' ? 'text-[#A8BA32] hover:text-[#8BA32E]' : 'text-[#D4A843] hover:text-[#A8BA32]'}`} />
             </button>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
             {labels?.length > 0 && labels.map((label) => (
               <span key={`${label.text}-${label.color}`} className="font-medium text-[var(--text-secondary)] lowercase">/{label.text}</span>
             ))}
-            {labels?.length > 0 && <span aria-hidden="true">·</span>}
-            <span className={`w-2 h-2 rounded-full ${priDot}`} title={priority} />
           </div>
         </div>
       </div>
