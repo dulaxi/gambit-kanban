@@ -159,7 +159,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               onChange={(e) => setRenameValue(e.target.value)}
               onKeyDown={handleRenameKeyDown}
               onBlur={handleRename}
-              className="text-sm font-semibold rounded px-1.5 py-0.5 flex-1 mr-2 border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none bg-[var(--surface-card)]"
+              className="text-sm font-semibold rounded-lg px-1.5 py-0.5 flex-1 mr-2 border-0.5 border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--border-focus)] focus:outline-none bg-[var(--surface-card)]"
             />
           ) : (
             <h3 className="text-sm font-semibold text-[var(--text-primary)]">
@@ -190,7 +190,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               <MoreHorizontal className="w-4 h-4" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-8 bg-[var(--surface-card)] rounded-xl border border-[var(--border-default)] shadow-lg py-1 z-20 w-40 animate-dropdown">
+              <div className="absolute right-0 top-8 bg-[var(--surface-card)] rounded-xl border-0.5 border-[var(--border-default)] shadow-[0_4px_16px_rgba(0,0,0,0.1)] py-1.5 z-20 w-40 animate-dropdown">
                 <button
                   type="button"
                   onClick={() => {
@@ -290,7 +290,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
           )}
         </div>
         {showTemplates && (
-          <div className="absolute bottom-full mb-1 left-0 right-0 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-xl shadow-lg z-30 overflow-hidden">
+          <div className="absolute bottom-full mb-1 left-0 right-0 bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.1)] z-30 overflow-hidden py-1.5">
             <div className="flex items-center justify-between px-3 py-1.5 border-b border-[var(--border-subtle)]">
               <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Templates</span>
               <button type="button" onClick={() => setShowTemplates(false)} aria-label="Close templates" className="text-[var(--text-faint)] hover:text-[var(--text-secondary)]">
@@ -335,8 +335,8 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
       )}
 
       {editingWip && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={() => setEditingWip(false)}>
-          <div className="bg-[var(--surface-card)] rounded-2xl shadow-xl w-full max-w-xs mx-4 p-5" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setEditingWip(false)}>
+          <div className="bg-[var(--surface-card)] rounded-2xl border-0.5 border-[var(--border-default)] shadow-[0_4px_20px_rgba(0,0,0,0.08)] w-full max-w-xs mx-4 p-5" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">WIP Limit</h3>
             <p className="text-xs text-[var(--text-muted)] mb-3">Maximum number of tasks in "{column.title}". Leave empty for no limit.</p>
             <input
@@ -354,7 +354,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               }}
               autoFocus
               placeholder="No limit"
-              className="w-full text-sm rounded-xl px-3 py-2 border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)] mb-3"
+              className="w-full text-sm rounded-lg px-3 py-2 border-0.5 border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)] mb-3"
             />
             <div className="flex items-center justify-end gap-2">
               <button
@@ -370,7 +370,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
                   updateColumnWipLimit(column.id, parseInt(wipValue) || null)
                   setEditingWip(false)
                 }}
-                className="px-3 py-1.5 text-sm font-medium text-white bg-[#C2D64A] hover:bg-[#A8BA32] rounded-lg transition-colors"
+                className="px-3 py-1.5 text-sm font-medium bg-[var(--btn-primary-bg)] hover:bg-[var(--btn-primary-hover)] text-[var(--btn-primary-text)] rounded-lg transition-colors"
               >
                 Save
               </button>
