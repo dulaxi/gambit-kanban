@@ -83,6 +83,8 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
   useEffect(() => {
     if (!openMenu) return
     const handler = (e) => {
+      // Ignore clicks inside portaled pickers (icon picker, etc)
+      if (e.target.closest('[data-icon-picker]')) return
       if (!e.target.closest('[data-menu-root]')) setOpenMenu(null)
     }
     document.addEventListener('mousedown', handler)
