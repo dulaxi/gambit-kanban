@@ -69,9 +69,7 @@ export default function BoardsPage() {
 
   return (
     <div
-      className={`h-[calc(100vh-7rem)] flex flex-col transition-all duration-200 ${
-        editingCardId ? 'md:mr-[340px] lg:mr-[420px]' : ''
-      }`}
+      className="h-[calc(100vh-7rem)] flex flex-col"
     >
       <div className="mb-4 shrink-0">
         <BoardSelector filters={filters} setFilters={setFilters} sortBy={sortBy} setSortBy={setSortBy} onCreateBoard={() => setShowCreateModal(true)} />
@@ -113,7 +111,7 @@ export default function BoardsPage() {
       </div>
 
       {editingCardId && (
-        <Suspense fallback={<div className="fixed right-0 top-0 h-full w-[340px] lg:w-[420px] bg-[var(--surface-card)] border-l border-gray-200 flex items-center justify-center"><div className="text-sm text-[var(--text-muted)]">Loading...</div></div>}>
+        <Suspense fallback={<div className="fixed inset-0 z-50 grid items-center justify-items-center bg-black/50"><div className="text-sm text-[var(--text-muted)]">Loading...</div></div>}>
           <CardDetailPanel
             key={editingCardId}
             cardId={editingCardId}

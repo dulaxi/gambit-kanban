@@ -1,99 +1,123 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react'
-import {
-  X, Trash2, Check, CheckCircle2, ArrowLeft, Bookmark, Archive, ArchiveRestore, Copy,
-} from 'lucide-react'
-import { showToast } from '../../utils/toast'
+import { X, Plus, Check, User, ArrowLeft, MoreVertical, Trash2, Copy, Bookmark, Calendar, CheckCircle2, Flag, Paperclip, Upload, FileIcon, Image as ImageIcon, Download } from 'lucide-react'
+import { LABEL_COLORS, COLOR_DOT_CLASSES } from '../../constants/colors'
+import { FileText } from '@phosphor-icons/react'
+import DynamicIcon from './DynamicIcon'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
-import { useSettingsStore } from '../../store/settingsStore'
 import { supabase } from '../../lib/supabase'
-import DynamicIcon from './DynamicIcon'
 import { useIsMobile } from '../../hooks/useMediaQuery'
-import { useNotificationStore } from '../../store/notificationStore'
+import { useClickOutside } from '../../hooks/useClickOutside'
+import IconPicker from './IconPicker'
+import { getAvatarColor, getInitials } from '../../utils/formatting'
+import { showToast } from '../../utils/toast'
 import { useTemplateStore } from '../../store/templateStore'
-import { getAvatarColor, getAvatarTextColor, getInitials } from '../../utils/formatting'
-import CardDetailFields from './CardDetailFields'
-import CardDetailChecklist from './CardDetailChecklist'
-import CardDetailComments from './CardDetailComments'
-import CardDetailAttachments from './CardDetailAttachments'
-import CardDetailActivity from './CardDetailActivity'
+
+function ChecklistItem({ item, onToggle, onEdit, onDelete }) {
+  const [editing, setEditing] = useState(false)
+  const [text, setText] = useState(item.text)
+  return (
+    <div className="flex items-center gap-2 py-1 group/check">
+      <button type="button" onClick={onToggle} className="shrink-0">
+        <CheckCircle2 className={`w-4 h-4 transition-colors ${item.done ? 'text-[var(--accent-lime-dark)]' : 'text-[var(--text-faint)] hover:text-[var(--text-muted)]'}`} />
+      </button>
+      {editing ? (
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') { onEdit(text.trim() || item.text); setEditing(false) }
+            else if (e.key === 'Escape') { setText(item.text); setEditing(false) }
+          }}
+          onBlur={() => { onEdit(text.trim() || item.text); setEditing(false) }}
+          autoFocus
+          className="text-sm text-[var(--text-secondary)] bg-transparent focus:outline-none border border-[var(--border-default)] rounded-xl px-1 -mx-1"
+        />
+      ) : (
+        <span
+          className={`text-sm cursor-pointer ${item.done ? 'line-through text-[var(--text-faint)]' : 'text-[var(--text-secondary)]'}`}
+          onClick={() => setEditing(true)}
+        >
+          {item.text}
+        </span>
+      )}
+      <button
+        type="button"
+        onClick={onDelete}
+        className="shrink-0 opacity-0 group-hover/check:opacity-100 text-[var(--text-faint)] hover:text-[#7A5C44] transition-all"
+      >
+        <X className="w-3 h-3" />
+      </button>
+    </div>
+  )
+}
 
 export default memo(function CardDetailPanel({ cardId, onClose }) {
   const card = useBoardStore((s) => s.cards[cardId])
   const updateCard = useBoardStore((s) => s.updateCard)
   const deleteCard = useBoardStore((s) => s.deleteCard)
   const duplicateCard = useBoardStore((s) => s.duplicateCard)
-  const archiveCard = useBoardStore((s) => s.archiveCard)
-  const unarchiveCard = useBoardStore((s) => s.unarchiveCard)
-  const completeCard = useBoardStore((s) => s.completeCard)
+  const addTemplate = useTemplateStore((s) => s.addTemplate)
   const boardName = useBoardStore((s) => s.boards[s.cards[cardId]?.board_id]?.name || '—')
   const statusName = useBoardStore((s) => s.columns[s.cards[cardId]?.column_id]?.title || '—')
-  const profile = useAuthStore((s) => s.profile)
-  const user = useAuthStore((s) => s.user)
-  const font = useSettingsStore((s) => s.font)
-  const isMobile = useIsMobile()
-
-  const [commentText, setCommentText] = useState('')
-  const comments = useBoardStore((s) => s.comments[cardId])
-  const fetchComments = useBoardStore((s) => s.fetchComments)
-  const addComment = useBoardStore((s) => s.addComment)
-  const deleteComment = useBoardStore((s) => s.deleteComment)
-  const activityItems = useBoardStore((s) => s.activity[cardId])
-  const fetchActivity = useBoardStore((s) => s.fetchActivity)
-  const notify = useNotificationStore((s) => s.notify)
-  const addTemplate = useTemplateStore((s) => s.addTemplate)
   const attachmentItems = useBoardStore((s) => s.attachments[cardId])
   const fetchAttachments = useBoardStore((s) => s.fetchAttachments)
   const uploadAttachment = useBoardStore((s) => s.uploadAttachment)
   const deleteAttachment = useBoardStore((s) => s.deleteAttachment)
   const getAttachmentUrl = useBoardStore((s) => s.getAttachmentUrl)
+  const user = useAuthStore((s) => s.user)
+  const profile = useAuthStore((s) => s.profile)
+  const isMobile = useIsMobile()
 
-  // Initialize state directly from card (component remounts via key={cardId} in parent)
   const [title, setTitle] = useState(card?.title || '')
   const [description, setDescription] = useState(card?.description || '')
-  const [assignee, setAssignee] = useState(card?.assignee_name || '')
+  const [editingDescription, setEditingDescription] = useState(false)
+  const [checklist, setChecklist] = useState(card?.checklist ? card.checklist.map((item) => ({ ...item })) : [])
+  const [newCheckItem, setNewCheckItem] = useState('')
   const [priority, setPriority] = useState(card?.priority || 'medium')
   const [dueDate, setDueDate] = useState(card?.due_date || '')
+  // Single openMenu value: 'menu' | 'priority' | 'due' | 'assignee' | 'icon' | null
+  const [openMenu, setOpenMenu] = useState(null)
+  const toggleMenu = (name) => setOpenMenu((cur) => cur === name ? null : name)
+
+  useEffect(() => {
+    if (!openMenu) return
+    const handler = (e) => {
+      if (!e.target.closest('[data-menu-root]')) setOpenMenu(null)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [openMenu])
+  const titleRef = useRef(null)
   const [labels, setLabels] = useState(card?.labels ? [...card.labels] : [])
-  const [checklist, setChecklist] = useState(card?.checklist ? card.checklist.map((item) => ({ ...item })) : [])
-  const [boardMembers, setBoardMembers] = useState([])
+  const [showLabelForm, setShowLabelForm] = useState(false)
+  const [newLabelText, setNewLabelText] = useState('')
+  const [newLabelColor, setNewLabelColor] = useState('blue')
+  const [editingLabelIdx, setEditingLabelIdx] = useState(null)
+  const [editingLabelText, setEditingLabelText] = useState('')
+  const [assignee, setAssignee] = useState(card?.assignee_name || '')
+  const [assigneeSearch, setAssigneeSearch] = useState('')
   const [boardMemberNames, setBoardMemberNames] = useState([])
 
-  // Dirty flag — ONLY set by user interactions, never by effects
   const isDirtyRef = useRef(false)
   const autoSaveTimerRef = useRef(null)
-  const formDataRef = useRef({ title: card?.title || '', description: card?.description || '', assignee: card?.assignee_name || '', priority: card?.priority || 'medium', dueDate: card?.due_date || '', labels: card?.labels ? [...card.labels] : [], checklist: card?.checklist ? card.checklist.map((item) => ({ ...item })) : [] })
+  const formDataRef = useRef({ title: card?.title || '', description: card?.description || '', labels: card?.labels ? [...card.labels] : [], assignee: card?.assignee_name || '', dueDate: card?.due_date || '', checklist: card?.checklist ? card.checklist.map((item) => ({ ...item })) : [], priority: card?.priority || 'medium' })
 
-  // Fetch board members and comments when card changes
   useEffect(() => {
     if (!card) return
     let cancelled = false
-
-    // Single query for board members (used for both assignee picker and @mentions)
     supabase
       .from('board_members')
-      .select('user_id, profiles(id, display_name, icon, color)')
+      .select('user_id, profiles(id, display_name)')
       .eq('board_id', card.board_id)
       .then(({ data, error }) => {
         if (cancelled || error) return
-        const members = (data || [])
-        setBoardMemberNames(members.map((m) => m.profiles?.display_name).filter(Boolean))
-        setBoardMembers(members.map((m) => ({
-          user_id: m.profiles?.id || m.user_id,
-          display_name: m.profiles?.display_name || 'Unknown',
-          color: m.profiles?.color || 'bg-[#E0DBD5]',
-        })))
+        setBoardMemberNames((data || []).map((m) => m.profiles?.display_name).filter(Boolean))
       })
-    fetchComments(cardId)
-    fetchActivity(cardId)
     fetchAttachments(cardId)
-
     return () => { cancelled = true }
   }, [cardId])
 
-  const saveAndCloseRef = useRef(null)
-
-  // Schedule a debounced save — reads latest data from formDataRef
   const scheduleSave = useCallback(() => {
     isDirtyRef.current = true
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
@@ -103,23 +127,21 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
         useBoardStore.getState().updateCard(cardId, {
           title: d.title.trim() || card?.title || 'Untitled task',
           description: d.description,
-          assignee_name: d.assignee.trim(),
-          priority: d.priority,
-          due_date: d.dueDate || null,
           labels: d.labels,
+          assignee_name: d.assignee.trim(),
+          due_date: d.dueDate || null,
           checklist: d.checklist,
+          priority: d.priority,
         })
         isDirtyRef.current = false
       }
     }, 1000)
   }, [cardId, card?.title])
 
-  // Keep formDataRef in sync (passive — does NOT trigger saves)
   useEffect(() => {
-    formDataRef.current = { title, description, assignee, priority, dueDate, labels, checklist }
+    formDataRef.current = { title, description, labels, assignee, dueDate, checklist, priority }
   })
 
-  // Save on unmount (navigation away, component destroyed)
   useEffect(() => {
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
@@ -128,11 +150,11 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
         useBoardStore.getState().updateCard(cardId, {
           title: d.title.trim() || 'Untitled task',
           description: d.description,
-          assignee_name: d.assignee.trim(),
-          priority: d.priority,
-          due_date: d.dueDate || null,
           labels: d.labels,
+          assignee_name: d.assignee.trim(),
+          due_date: d.dueDate || null,
           checklist: d.checklist,
+          priority: d.priority,
         })
       }
     }
@@ -141,9 +163,8 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        // Don't close panel if Escape was for a child modal/overlay
         if (e.target.closest('[data-modal]') || e.target.closest('[data-icon-picker]')) return
-        saveAndCloseRef.current?.()
+        handleSaveAndClose()
       }
     }
     document.addEventListener('keydown', handleKeyDown)
@@ -155,253 +176,411 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
   const handleSave = () => {
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
     isDirtyRef.current = false
-    updateCard(cardId, {
-      title: title.trim() || card.title,
-      description,
-      assignee_name: assignee.trim(),
-      priority,
-      due_date: dueDate || null,
-      labels,
-      checklist,
-    })
+    updateCard(cardId, { title: title.trim() || card.title, description, labels, assignee_name: assignee.trim(), due_date: dueDate || null, checklist, priority })
   }
 
-  const handleSaveAndClose = () => {
-    handleSave()
-    onClose()
-  }
-  saveAndCloseRef.current = handleSaveAndClose
+  const handleSaveAndClose = () => { handleSave(); onClose() }
 
-  const handleDelete = () => {
-    deleteCard(cardId)
-    onClose()
-  }
-
-  const handleArchive = () => {
-    if (card?.archived) {
-      unarchiveCard(cardId)
-    } else {
-      archiveCard(cardId)
-      onClose()
-    }
-  }
-
-  const toggleCheckItem = (index) => {
-    setChecklist(
-      checklist.map((item, i) =>
-        i === index ? { ...item, done: !item.done } : item
-      )
-    )
-    scheduleSave()
-  }
-
-  const removeCheckItem = (index) => {
-    setChecklist(checklist.filter((_, i) => i !== index))
-    scheduleSave()
-  }
-
-  const addCheckItem = (text) => {
-    setChecklist([...checklist, { text, done: false }])
-    scheduleSave()
-  }
-
-  const renderAvatar = (name, size = 'w-6 h-6', iconSize = 'w-3.5 h-3.5') => {
-    const isMe = profile?.display_name && name.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
-    if (isMe && profile.icon) {
-      const iconText = profile.color === 'bg-[#8E8E89]' ? 'text-[var(--text-primary)]' : 'text-white'
-      return (
-        <span className={`${size} rounded-full shrink-0 flex items-center justify-center ${iconText} ${profile.color}`}>
-          <DynamicIcon name={profile.icon} className={iconSize} />
-        </span>
-      )
-    }
-    return (
-      <span className={`${size} rounded-full shrink-0 flex items-center justify-center text-[10px] font-heading ${getAvatarColor(name)} ${getAvatarTextColor(getAvatarColor(name))}`}>
-        {getInitials(name).toLowerCase()}
-      </span>
-    )
-  }
+  const priColor = priority === 'high' ? '#C27A4A' : priority === 'low' ? '#A8BA32' : '#D4A843'
 
   return (
-    <div className={`fixed bg-[var(--surface-card)] border-l-[0.5px] border-[var(--border-default)] flex flex-col z-20 ${
-      isMobile
-        ? 'inset-0'
-        : 'top-16 right-0 bottom-0 w-[340px] lg:w-[420px] animate-slide-in-right'
-    }`}>
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-5 py-2.5 border-b-[0.5px] border-[var(--border-subtle)]">
-        <div className="flex items-center gap-1">
-          {isMobile && (
-            <button
-              type="button"
-              onClick={handleSaveAndClose}
-              aria-label="Back"
-              className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)]"
+    <div
+      className="fixed inset-0 z-50 grid items-center justify-items-center bg-black/50 backdrop-brightness-75 overflow-y-auto overflow-x-hidden md:p-10 p-4"
+      onClick={handleSaveAndClose}
+      style={{ pointerEvents: 'auto' }}
+    >
+      <div
+        role="dialog"
+        onClick={(e) => e.stopPropagation()}
+        className="flex flex-col text-left shadow-xl border-0.5 border-[var(--border-default)] rounded-2xl md:p-6 p-4 bg-[var(--surface-page)] w-full max-w-3xl min-h-[50vh] max-h-[90vh] overflow-hidden"
+      >
+        {/* Top bar — back + actions */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            type="button"
+            onClick={handleSaveAndClose}
+            className="flex items-center gap-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            All cards
+          </button>
+          <div className="flex items-center gap-1 ml-auto">
+            {/* Due date */}
+            <div className="relative" data-menu-root>
+              {(() => {
+                let dateLabel = null
+                let dateColor = 'text-[var(--text-muted)]'
+                if (dueDate) {
+                  const d = new Date(dueDate)
+                  const today = new Date()
+                  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
+                  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1)
+                  const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+                  if (sameDay(d, today)) { dateLabel = 'Today'; dateColor = 'text-[#D4A843]' }
+                  else if (sameDay(d, tomorrow)) { dateLabel = 'Tomorrow'; dateColor = 'text-[#A8BA32]' }
+                  else if (sameDay(d, yesterday)) { dateLabel = 'Yesterday'; dateColor = 'text-[#C27A4A]' }
+                  else if (d < today) { dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); dateColor = 'text-[#C27A4A]' }
+                  else { dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); dateColor = 'text-[var(--text-secondary)]' }
+                }
+                return (
+                  <button
+                    type="button"
+                    onClick={() => toggleMenu('due')}
+                    className={`h-8 rounded-md flex items-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer ${dueDate ? 'px-2' : 'w-8 justify-center'} ${dateColor}`}
+                    title={dueDate ? `Due: ${new Date(dueDate).toLocaleDateString()}` : 'Set due date'}
+                  >
+                    <Calendar className="w-4 h-4" />
+                    {dateLabel && <span className="text-xs font-medium">{dateLabel}</span>}
+                  </button>
+                )
+              })()}
+              {openMenu === 'due' && (
+                <div className="absolute right-0 top-full mt-1 p-2 bg-[var(--surface-card)] border-0.5 border-[var(--color-mist)] backdrop-blur-xl rounded-xl shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)] z-50">
+                  <input
+                    type="date"
+                    value={dueDate ? dueDate.split('T')[0] : ''}
+                    onChange={(e) => {
+                      setDueDate(e.target.value ? `${e.target.value}T23:59:59` : '')
+                      setOpenMenu(null)
+                      scheduleSave()
+                    }}
+                    autoFocus
+                    className="text-sm text-[var(--text-primary)] bg-transparent border border-[var(--border-default)] rounded-lg px-2 py-1.5 focus:border-[var(--border-focus)] focus:outline-none"
+                  />
+                </div>
+              )}
+            </div>
+            {/* Attach file */}
+            <label
+              className="h-8 w-8 rounded-md flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+              title="Attach files"
             >
-              <ArrowLeft className="w-5 h-5 text-[var(--text-secondary)]" />
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={handleSave}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] rounded-lg transition-colors"
-          >
-            <Check className="w-3.5 h-3.5" />
-            Save
-          </button>
+              <Paperclip className="w-4 h-4" />
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                onChange={async (e) => {
+                  const files = Array.from(e.target.files || [])
+                  for (const file of files) {
+                    try {
+                      await uploadAttachment(cardId, file, user?.id)
+                    } catch (err) {
+                      showToast.error(`Failed to upload ${file.name}`)
+                    }
+                  }
+                  e.target.value = ''
+                }}
+              />
+            </label>
+            {/* 3-dot menu */}
+            <div className="relative" data-menu-root>
+              <button
+                type="button"
+                onClick={() => toggleMenu('menu')}
+                aria-label="More options"
+                className="h-8 w-8 rounded-md flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+              >
+                <MoreVertical className="w-5 h-5" />
+              </button>
+              {openMenu === 'menu' && (
+                <div className="absolute right-0 top-full mt-1 p-1.5 bg-[var(--surface-card)] border-0.5 border-[var(--color-mist)] backdrop-blur-xl rounded-xl min-w-[8rem] text-[var(--text-primary)] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)] z-50">
+                  <div role="menuitem" onClick={() => { duplicateCard(cardId); showToast.success('Duplicated'); setOpenMenu(null) }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs">
+                    <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Copy className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Duplicate</span></div>
+                  </div>
+                  <div role="menuitem" onClick={() => { addTemplate({ name: card.title, title: card.title, description: card.description || '', priority: card.priority || 'medium', labels: card.labels || [], checklist: (card.checklist || []).map((item) => ({ text: item.text, done: false })) }); showToast.success('Saved as template'); setOpenMenu(null) }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs">
+                    <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Bookmark className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Template</span></div>
+                  </div>
+                  <div role="separator" className="h-[0.5px] bg-[var(--border-subtle)] my-1.5 mx-2" />
+                  <div role="menuitem" onClick={() => { deleteCard(cardId); onClose(); setOpenMenu(null) }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[#7A5C44]/10 text-[#7A5C44] text-xs">
+                    <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Delete</span></div>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Priority flag */}
+            <div className="relative" data-menu-root>
+              <button
+                type="button"
+                onClick={() => toggleMenu('priority')}
+                className="h-8 w-8 rounded-md flex items-center justify-center hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+              >
+                <Flag className="w-4 h-4" fill={priColor} style={{ color: priColor }} />
+              </button>
+              {openMenu === 'priority' && (
+                <div className="absolute right-0 top-full mt-1 p-1.5 bg-[var(--surface-card)] border-0.5 border-[var(--color-mist)] backdrop-blur-xl rounded-xl min-w-[8rem] text-[var(--text-primary)] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)] z-50">
+                  {[
+                    { value: 'low', label: 'Low', color: '#A8BA32' },
+                    { value: 'medium', label: 'Medium', color: '#D4A843' },
+                    { value: 'high', label: 'High', color: '#C27A4A' },
+                  ].map((opt) => (
+                    <div key={opt.value} role="menuitem" onClick={() => { setPriority(opt.value); setOpenMenu(null); scheduleSave() }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs">
+                      <div className="flex items-center gap-2 w-full"><Flag className="w-3.5 h-3.5 shrink-0" fill={opt.color} style={{ color: opt.color }} /><span className="flex-1 truncate">{opt.label}</span></div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-0.5">
-          <button
-            type="button"
-            onClick={() => {
-              addTemplate({
-                name: card.title,
-                title: card.title,
-                description: card.description || '',
-                priority: card.priority || 'medium',
-                labels: card.labels || [],
-                checklist: (card.checklist || []).map((item) => ({ text: item.text, done: false })),
-              })
-              showToast.success('Saved as template')
-            }}
-            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[#A8BA32] hover:bg-[var(--surface-hover)] transition-colors"
-            title="Save as template"
-          >
-            <Bookmark className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => { duplicateCard(cardId); showToast.success('Card duplicated') }}
-            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
-            title="Duplicate"
-          >
-            <Copy className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={handleArchive}
-            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[#D4A843] hover:bg-[var(--surface-hover)] transition-colors"
-            title={card?.archived ? 'Unarchive' : 'Archive'}
-          >
-            {card?.archived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[#7A5C44] hover:bg-[var(--surface-hover)] transition-colors"
-            title="Delete"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-          {!isMobile && (
-            <button
-              type="button"
-              onClick={handleSaveAndClose}
-              aria-label="Close panel"
-              className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-      </div>
 
-      {/* Scrollable body */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Task number + completion + Title */}
-        <div className="px-5 pt-5 pb-4">
-          <div className="flex items-center gap-2 mb-2">
+        {/* Icon + Title + Labels + Assignee */}
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <div className="relative" data-menu-root>
+              <button
+                type="button"
+                onClick={() => toggleMenu('icon')}
+                className="flex w-10 h-10 shrink-0 items-center justify-center rounded-lg border-0.5 border-[var(--border-default)] bg-[var(--surface-raised)] hover:border-[var(--color-mist)] transition-colors cursor-pointer"
+              >
+                <div className="w-5 h-5 flex items-center justify-center">
+                  {card.icon ? <DynamicIcon name={card.icon} className="w-5 h-5 text-[var(--text-primary)]" /> : <FileText size={20} weight="regular" className="text-[var(--text-muted)]" />}
+                </div>
+              </button>
+              {openMenu === 'icon' && (
+                <IconPicker value={card.icon} onChange={(icon) => { updateCard(cardId, { icon }); setOpenMenu(null) }} onClose={() => setOpenMenu(null)} />
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap min-w-0 flex-1">
+              <span
+                ref={titleRef}
+                contentEditable
+                suppressContentEditableWarning
+                onInput={(e) => setTitle(e.currentTarget.textContent || '')}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur() } }}
+                onBlur={() => scheduleSave()}
+                className="font-heading text-[var(--text-primary)] text-left text-[22px] cursor-text focus:outline-none focus:ring-0 border border-transparent focus:border-[var(--border-default)] rounded-xl px-1 -mx-1"
+              >
+                {card?.title || 'Untitled task'}
+              </span>
+              {/* Labels */}
+              {labels.map((label, idx) => (
+                editingLabelIdx === idx ? (
+                  <span key={`${label.text}-${label.color}-edit`} className="relative inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 rounded-lg text-xs lowercase border border-[var(--border-default)]">
+                    <span className="invisible px-2">/{editingLabelText || label.text}</span>
+                    <input value={editingLabelText} onChange={(e) => setEditingLabelText(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { const t = editingLabelText.trim(); if (t) { setLabels(labels.map((l, i) => i === idx ? { ...l, text: t } : l)); scheduleSave() }; setEditingLabelIdx(null) } else if (e.key === 'Escape') { setEditingLabelIdx(null) } }}
+                      onBlur={() => { const t = editingLabelText.trim(); if (t) { setLabels(labels.map((l, i) => i === idx ? { ...l, text: t } : l)); scheduleSave() }; setEditingLabelIdx(null) }}
+                      autoFocus className="absolute inset-0 h-full bg-transparent text-xs text-[var(--text-secondary)] px-2 rounded-lg focus:outline-none lowercase" style={{ width: '100%' }} />
+                  </span>
+                ) : (
+                  <span key={`${label.text}-${label.color}`} className="relative inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 px-2 rounded-lg text-xs lowercase group/label cursor-pointer" onClick={() => { setEditingLabelIdx(idx); setEditingLabelText(label.text) }}>
+                    /{label.text}
+                    <button type="button" onClick={(e) => { e.stopPropagation(); setLabels(labels.filter((_, i) => i !== idx)); scheduleSave() }} className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] flex items-center justify-center text-[var(--text-faint)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] opacity-0 group-hover/label:opacity-100 transition-all">
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  </span>
+                )
+              ))}
+              {showLabelForm ? (
+                <span className="inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 rounded-lg text-xs lowercase border border-[var(--border-default)]">
+                  <input value={newLabelText} onChange={(e) => setNewLabelText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { const t = newLabelText.trim(); if (t) { setLabels([...labels, { text: t, color: newLabelColor }]); setNewLabelText(''); setShowLabelForm(false); scheduleSave() } } else if (e.key === 'Escape') { setShowLabelForm(false); setNewLabelText('') } }}
+                    onBlur={() => { const t = newLabelText.trim(); if (t) { setLabels([...labels, { text: t, color: newLabelColor }]); setNewLabelText(''); scheduleSave() }; setShowLabelForm(false) }}
+                    autoFocus placeholder="/label" className="h-full bg-transparent text-xs text-[var(--text-secondary)] px-2 rounded-lg focus:outline-none lowercase w-16" />
+                </span>
+              ) : (
+                <button type="button" onClick={() => setShowLabelForm(true)} className="inline-flex items-center justify-center flex-shrink-0 w-6 h-6 rounded-lg text-[var(--text-faint)] hover:text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors">
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+          {/* Assignee — right aligned */}
+          {(() => {
+            const isMe = profile?.display_name && assignee.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
+            const lightColors = ['bg-[#8E8E89]', 'bg-[#E0DBD5]', 'bg-[#E8E2DB]', 'bg-[#C2D64A]', 'bg-[#A8BA32]', 'bg-[#D4A843]', 'bg-[#C27A4A]']
+            const iconText = lightColors.includes(profile?.color) ? 'text-[#1B1B18]' : 'text-white'
+            return (
+          <div className="relative shrink-0" data-menu-root>
             <button
               type="button"
-              onClick={() => completeCard(cardId)}
-              aria-label={card.completed ? 'Mark as incomplete' : 'Mark as complete'}
-              className="shrink-0"
+              onClick={() => { toggleMenu('assignee'); setAssigneeSearch('') }}
+              className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                isMe && profile?.icon
+                  ? `${iconText} ${profile.color}`
+                  : assignee.trim()
+                  ? `${getAvatarColor(assignee)} text-[9px] font-bold text-white`
+                  : 'bg-[var(--surface-hover)] text-[var(--text-faint)] hover:text-[var(--text-muted)]'
+              }`}
+              title={assignee.trim() || 'Assign someone'}
             >
-              <CheckCircle2 className={`w-5 h-5 transition-colors ${card.completed ? 'text-[#A8BA32]' : 'text-[var(--text-muted)] hover:text-[#C2D64A]'}`} />
+              {isMe && profile?.icon
+                ? <DynamicIcon name={profile.icon} className="w-3.5 h-3.5" />
+                : assignee.trim()
+                ? getInitials(assignee)
+                : <User className="w-3.5 h-3.5" />}
             </button>
-            {card.task_number > 0 && (
-              <span className="text-xs font-medium text-[var(--text-secondary)]">Task #{card.task_number}</span>
-            )}
-            {card.global_task_number > 0 && (
-              <span className="text-[10px] text-[var(--text-muted)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-full">G-{card.global_task_number}</span>
-            )}
-            {card.archived && (
-              <span className="text-[10px] font-medium text-[#8B7355] bg-[#F5EDCF] px-1.5 py-0.5 rounded-full">Archived</span>
+            <button
+              type="button"
+              onClick={() => { toggleMenu('assignee'); setAssigneeSearch('') }}
+              className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] flex items-center justify-center text-[var(--text-faint)] hover:text-[var(--text-secondary)] transition-colors"
+            >
+              <Plus className="w-2 h-2" />
+            </button>
+            {openMenu === 'assignee' && (
+              <div className="absolute right-0 top-full mt-2 p-1.5 bg-[var(--surface-card)] border-0.5 border-[var(--color-mist)] backdrop-blur-xl rounded-xl min-w-[12rem] text-[var(--text-primary)] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)] z-50 overflow-hidden">
+                <div className="px-1.5 pb-1.5">
+                  <input
+                    value={assigneeSearch}
+                    onChange={(e) => setAssigneeSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') { const name = assigneeSearch.trim(); if (name) { setAssignee(name); scheduleSave() }; setOpenMenu(null) }
+                      else if (e.key === 'Escape') { setOpenMenu(null) }
+                    }}
+                    autoFocus
+                    placeholder="Search or type name..."
+                    className="w-full text-sm rounded-lg px-2 py-1.5 border border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--border-focus)] focus:outline-none placeholder-[var(--text-faint)]"
+                  />
+                </div>
+                <div className="max-h-48 overflow-y-auto">
+                  {assignee.trim() && (
+                    <div role="menuitem" onClick={() => { setAssignee(''); setOpenMenu(null); scheduleSave() }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs text-[var(--text-muted)]">
+                      <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X className="w-3.5 h-3.5" /></div><span className="flex-1 truncate">Unassign</span></div>
+                    </div>
+                  )}
+                  {assignee.trim() && boardMemberNames.length > 0 && <div role="separator" className="h-[0.5px] bg-[var(--border-subtle)] my-1.5 mx-2" />}
+                  {boardMemberNames
+                    .filter((m) => !assigneeSearch.trim() || m.toLowerCase().includes(assigneeSearch.trim().toLowerCase()))
+                    .map((member) => (
+                      <div key={member} role="menuitem" onClick={() => { setAssignee(member); setOpenMenu(null); scheduleSave() }} className={`min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs ${assignee === member ? 'bg-[var(--surface-hover)] font-medium' : ''}`}>
+                        <div className="flex items-center gap-2 w-full"><span className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white ${getAvatarColor(member)}`}>{getInitials(member)}</span><span className="flex-1 truncate">{member}</span></div>
+                      </div>
+                    ))}
+                  {assigneeSearch.trim() && !boardMemberNames.some((m) => m.toLowerCase() === assigneeSearch.trim().toLowerCase()) && (
+                    <>
+                      <div role="separator" className="h-[0.5px] bg-[var(--border-subtle)] my-1.5 mx-2" />
+                      <div role="menuitem" onClick={() => { setAssignee(assigneeSearch.trim()); setOpenMenu(null); scheduleSave() }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs text-[var(--text-secondary)]">
+                        <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus className="w-3.5 h-3.5" /></div><span className="flex-1 truncate">Add "{assigneeSearch.trim()}"</span></div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
             )}
           </div>
-          <input
-            value={title}
-            onChange={(e) => { setTitle(e.target.value); scheduleSave() }}
-            maxLength={200}
-            aria-label="Task name"
-            className={`text-lg font-semibold bg-transparent border-none focus:outline-none w-full placeholder-[var(--text-faint)] ${card.completed ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-primary)]'}`}
-            placeholder="Task name"
-          />
+          )
+          })()}
         </div>
 
-        {/* Metadata fields */}
-        <CardDetailFields
-          card={card}
-          cardId={cardId}
-          assignee={assignee}
-          setAssignee={setAssignee}
-          priority={priority}
-          setPriority={setPriority}
-          dueDate={dueDate}
-          setDueDate={setDueDate}
-          labels={labels}
-          setLabels={setLabels}
-          scheduleSave={scheduleSave}
-          renderAvatar={renderAvatar}
-          boardMemberNames={boardMemberNames}
-          boardName={boardName}
-          statusName={statusName}
-        />
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+          {/* Description */}
+          {editingDescription ? (
+            <div className="border border-[var(--border-default)] rounded-xl p-6">
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                onBlur={() => { setEditingDescription(false); scheduleSave() }}
+                onKeyDown={(e) => { if (e.key === 'Escape') { setEditingDescription(false); scheduleSave() } }}
+                autoFocus
+                placeholder="Add details about this task..."
+                className="w-full text-sm text-[var(--text-secondary)] bg-transparent focus:outline-none resize-none placeholder-[var(--text-faint)] leading-relaxed min-h-[80px]"
+              />
+            </div>
+          ) : description ? (
+            <div className="text-[var(--text-secondary)] text-sm leading-relaxed cursor-pointer line-clamp-2 hover:text-[var(--text-primary)] transition-colors" onClick={() => setEditingDescription(true)}>
+              {description}
+            </div>
+          ) : (
+            <div className="border border-[var(--border-default)] rounded-xl p-8 text-center cursor-pointer hover:border-[var(--color-mist)] transition-colors" onClick={() => setEditingDescription(true)}>
+              <h3 className="text-[var(--text-faint)] mb-1 text-balance text-sm">Click to add a description for this task.</h3>
+            </div>
+          )}
 
-        {/* Description */}
-        <div className="px-5 pt-5 pb-2 border-t-[0.5px] border-[var(--border-subtle)] mt-1">
-          <label className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2 block">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => { setDescription(e.target.value); scheduleSave() }}
-            rows={4}
-            maxLength={5000}
-            placeholder="Add details about this task..."
-            className="w-full text-sm text-[var(--text-secondary)] rounded-xl px-3 py-2 resize-none border-[0.5px] border-[var(--border-subtle)] hover:border-[var(--border-default)] focus:border-[var(--border-default)] focus:outline-none transition-colors placeholder-[var(--text-faint)]"
-          />
+          {/* Checklist */}
+          <div className="mt-5 max-w-sm">
+            {checklist.map((item, idx) => (
+              <ChecklistItem
+                key={`${item.text}-${idx}`}
+                item={item}
+                onToggle={() => { setChecklist(checklist.map((c, i) => i === idx ? { ...c, done: !c.done } : c)); scheduleSave() }}
+                onEdit={(text) => { setChecklist(checklist.map((c, i) => i === idx ? { ...c, text } : c)); scheduleSave() }}
+                onDelete={() => { setChecklist(checklist.filter((_, i) => i !== idx)); scheduleSave() }}
+              />
+            ))}
+            <div className="flex items-center gap-2 py-1">
+              <Plus className="w-4 h-4 text-[var(--text-faint)] shrink-0" />
+              <input
+                value={newCheckItem}
+                onChange={(e) => setNewCheckItem(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { const t = newCheckItem.trim(); if (t) { setChecklist([...checklist, { text: t, done: false }]); setNewCheckItem(''); scheduleSave() } } }}
+                placeholder="Add an item..."
+                className="text-sm text-[var(--text-secondary)] bg-transparent focus:outline-none placeholder-[var(--text-faint)]"
+              />
+            </div>
+          </div>
+
+          {/* Files — only shown when files exist */}
+          {attachmentItems && attachmentItems.length > 0 && (
+          <div className="w-full py-4 mt-4 border-t-0.5 border-[var(--border-subtle)]">
+            <div className="h-6 w-full flex flex-row items-center justify-between gap-4 mb-1">
+              <h3 className="text-[var(--text-secondary)] text-sm font-semibold">Files</h3>
+            </div>
+            {(
+              <ul className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-3 mt-3">
+                {attachmentItems.map((file) => {
+                  const ext = (file.file_name || '').split('.').pop()?.toLowerCase() || 'file'
+                  const isImage = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)
+                  return (
+                    <li key={file.id} className="relative group/file">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const url = await getAttachmentUrl(file.storage_path)
+                            if (url) window.open(url, '_blank')
+                          } catch (err) {
+                            showToast.error('Failed to open file')
+                          }
+                        }}
+                        className="w-full rounded-lg text-left block cursor-pointer transition-all border border-[var(--color-sand)] flex flex-col justify-between gap-2.5 overflow-hidden px-2.5 py-2 bg-[var(--surface-card)] hover:border-[var(--color-mist)] shadow-[0_0_0_1px_rgba(0,0,0,0.02),0_2px_6px_rgba(0,0,0,0.04)]"
+                        style={{ height: 120, minWidth: '100%' }}
+                        aria-label={`${file.file_name}, ${ext}`}
+                      >
+                        <div className="flex flex-col gap-1 min-h-0">
+                          <h3 className="text-[12px] break-words text-[var(--text-primary)] line-clamp-3">
+                            {file.file_name}
+                          </h3>
+                          {file.file_size > 0 && (
+                            <p className="text-[10px] line-clamp-1 break-words text-[var(--text-faint)]">
+                              {file.file_size < 1024 ? `${file.file_size} B` : file.file_size < 1048576 ? `${(file.file_size / 1024).toFixed(1)} KB` : `${(file.file_size / 1048576).toFixed(1)} MB`}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <div className="relative flex flex-row items-center gap-1 justify-between">
+                            <div className="flex flex-row gap-1 shrink min-w-0">
+                              <div className="min-w-0 h-[18px] flex flex-row items-center justify-center gap-0.5 px-1 border-0.5 border-[var(--border-default)] shadow-sm rounded bg-[var(--surface-card)]/70 backdrop-blur-sm font-medium">
+                                <p className="uppercase truncate text-[var(--text-secondary)] text-[11px] leading-[13px]">{ext}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                      {/* Delete badge on hover */}
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          try {
+                            await deleteAttachment(cardId, file.id, file.storage_path)
+                          } catch (err) {
+                            showToast.error('Failed to delete')
+                          }
+                        }}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] flex items-center justify-center text-[var(--text-faint)] hover:text-[#7A5C44] hover:bg-[var(--surface-hover)] opacity-0 group-hover/file:opacity-100 transition-all"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
+          )}
         </div>
-
-        <CardDetailComments
-          comments={comments}
-          commentText={commentText}
-          setCommentText={setCommentText}
-          addComment={addComment}
-          deleteComment={deleteComment}
-          cardId={cardId}
-          card={card}
-          boardMembers={boardMembers}
-          notify={notify}
-          profile={profile}
-          userId={user?.id}
-        />
-
-        <CardDetailAttachments
-          attachmentItems={attachmentItems}
-          uploadAttachment={uploadAttachment}
-          deleteAttachment={deleteAttachment}
-          getAttachmentUrl={getAttachmentUrl}
-          cardId={cardId}
-          userId={user?.id}
-        />
-
-        <CardDetailChecklist
-          checklist={checklist}
-          onToggle={toggleCheckItem}
-          onRemove={removeCheckItem}
-          onAdd={addCheckItem}
-        />
-
-        <CardDetailActivity activityItems={activityItems} />
       </div>
     </div>
   )
