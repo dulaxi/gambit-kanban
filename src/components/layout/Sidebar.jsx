@@ -23,6 +23,7 @@ import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import { useIsDesktop, useMediaQuery } from '../../hooks/useMediaQuery'
 import { useWorkspaceStore } from '../../store/workspaceStore'
+import { useWorkspacesStore } from '../../store/workspacesStore'
 import { Kanban as PhosphorKanban, SidebarSimple } from '@phosphor-icons/react'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
@@ -51,9 +52,10 @@ export default function Sidebar() {
   const isWide = useMediaQuery('(min-width: 1280px)')
 
   // Auto-collapse on narrow desktop viewports (1024–1280px)
+  // Skip when workspace sub-sidebar is open — it owns the collapsed state in that case.
   useEffect(() => {
-    if (isDesktop) setSidebarCollapsed(!isWide)
-  }, [isDesktop, isWide, setSidebarCollapsed])
+    if (isDesktop && !workspaceSidebarOpen) setSidebarCollapsed(!isWide)
+  }, [isDesktop, isWide, workspaceSidebarOpen, setSidebarCollapsed])
   const user = useAuthStore((s) => s.user)
   const allBoards = useBoardStore((s) => s.boards)
   const activeBoardId = useBoardStore((s) => s.activeBoardId)
@@ -171,7 +173,11 @@ export default function Sidebar() {
               type="button"
               onClick={() => {
                 toggleWorkspaceSidebar()
-                if (!workspaceSidebarOpen) navigate('/workspace')
+                if (!workspaceSidebarOpen) {
+                  // Always land on the workspace index (no workspace selected)
+                  useWorkspacesStore.getState().setActiveWorkspace(null)
+                  navigate('/workspace')
+                }
               }}
               title={showCollapsed ? 'Workspace' : undefined}
               className={`flex items-center h-8 rounded-lg text-sm transition-colors duration-75 overflow-hidden ${
@@ -392,8 +398,10 @@ export default function Sidebar() {
         <div className={`flex items-center ${showCollapsed ? 'justify-center py-3' : 'justify-end px-3 py-3'}`}>
           <button
             onClick={toggle}
+            disabled={workspaceSidebarOpen}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
+            title={workspaceSidebarOpen ? 'Close workspaces to expand' : undefined}
+            className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-[var(--text-muted)]"
           >
             <SidebarSimple size={18} weight="regular" />
           </button>

@@ -11,6 +11,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useBoardStore } from '../../store/boardStore'
 import { useNoteStore } from '../../store/noteStore'
 import { useWorkspaceStore } from '../../store/workspaceStore'
+import { useWorkspacesStore } from '../../store/workspacesStore'
 import { useNotificationStore } from '../../store/notificationStore'
 import { hasLocalData, migrateLocalData } from '../../lib/migrateLocalData'
 import { showToast } from '../../utils/toast'
@@ -56,6 +57,8 @@ export default function AppLayout() {
   const fetchNotes = useNoteStore((s) => s.fetchNotes)
   const fetchInvitations = useWorkspaceStore((s) => s.fetchInvitations)
   const fetchSharedBoards = useWorkspaceStore((s) => s.fetchSharedBoards)
+  const fetchWorkspaces = useWorkspacesStore((s) => s.fetchWorkspaces)
+  const fetchWorkspaceInvitations = useWorkspacesStore((s) => s.fetchInvitations)
   const fetchNotifications = useNotificationStore((s) => s.fetchNotifications)
   const subscribeToNotifications = useNotificationStore((s) => s.subscribeToNotifications)
   const [showMigration, setShowMigration] = useState(false)
@@ -87,6 +90,8 @@ export default function AppLayout() {
       fetchNotes(),
       fetchInvitations(),
       fetchSharedBoards(),
+      fetchWorkspaces(),
+      fetchWorkspaceInvitations(),
       fetchNotifications(),
     ])
 
@@ -210,7 +215,7 @@ export default function AppLayout() {
         className={`flex-1 min-h-0 flex flex-col transition-all duration-200 ${
           isDesktop
             ? workspaceSidebarOpen
-              ? 'ml-[calc(3rem+280px)] xl:ml-[calc(3rem+320px)]'
+              ? 'ml-[calc(3rem+280px)]'
               : collapsed ? 'ml-12' : 'ml-[287px]'
             : 'ml-0'
         }`}
@@ -222,7 +227,7 @@ export default function AppLayout() {
         {isDesktop && (
           <div className={`shrink-0 ${['/boards', '/calendar', '/notes'].includes(basePath) ? 'px-4 sm:px-8' : 'px-4 sm:px-8 max-w-4xl mx-auto w-full'}`}>
             <header className="flex items-end h-8 md:h-8 shrink-0 mb-[26px]">
-              {basePath !== '/dashboard' && (
+              {basePath !== '/dashboard' && basePath !== '/workspace' && (
                 <h1 className="font-heading text-2xl text-[var(--text-primary)] flex items-center gap-2 min-w-0">
                   <span className="truncate">{title}</span>
                 </h1>
