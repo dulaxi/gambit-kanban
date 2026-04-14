@@ -31,9 +31,15 @@ export const useWorkspacesStore = create(
 
         set({ loading: true })
         try {
+          // Inner-join with workspace_members on the current user's id so we ONLY
+          // return workspaces where we're an actual member. Without this filter,
+          // invited-but-unaccepted workspaces leak through (they're readable via
+          // the invitees-can-read-workspaces RLS policy) and render in the
+          // sidebar as if the user had already joined.
           const { data, error } = await supabase
             .from('workspaces')
-            .select('id, name, owner_id, icon, created_at, updated_at')
+            .select('id, name, owner_id, icon, created_at, updated_at, workspace_members!inner(user_id)')
+            .eq('workspace_members.user_id', user.id)
             .order('created_at', { ascending: true })
 
           if (error) {
@@ -43,7 +49,11 @@ export const useWorkspacesStore = create(
           }
 
           const workspaces = {}
-          ;(data || []).forEach((w) => { workspaces[w.id] = w })
+          ;(data || []).forEach((w) => {
+            // Strip the inner-join side-effect field so it doesn't leak into state
+            const { workspace_members: _wm, ...clean } = w
+            workspaces[w.id] = clean
+          })
 
           // Validate activeWorkspaceId — if the stored one no longer exists,
           // drop back to Personal (null)
@@ -112,14 +122,19 @@ export const useWorkspacesStore = create(
       },
 
       fetchInvitations: async () => {
-        const profile = useAuthStore.getState().profile
-        if (!profile?.email) return
+        // Use the auth user's email (set synchronously during initialize),
+        // NOT profile.email — profile is fetched in a second round-trip, so
+        // when AppLayout's [user]-scoped effect calls this, profile can still
+        // be null. Using user.email closes that race.
+        const user = useAuthStore.getState().user
+        const email = user?.email?.toLowerCase()
+        if (!email) return
 
         try {
           const { data, error } = await supabase
             .from('workspace_invitations')
             .select('id, workspace_id, invited_email, invited_by, status, created_at, workspaces(id, name, icon), inviter:profiles!workspace_invitations_invited_by_fkey(id, display_name, email)')
-            .eq('invited_email', profile.email)
+            .eq('invited_email', email)
             .eq('status', 'pending')
             .order('created_at', { ascending: false })
 
@@ -257,6 +272,12 @@ export const useWorkspacesStore = create(
           }
           await get().fetchWorkspaces()
           await get().fetchInvitations()
+          // Joining a workspace grants read access to its boards. Pull the
+          // boardStore back into sync so those boards appear in the sidebar
+          // (otherwise the workspace shows up empty until the next full reload).
+          // Lazy import avoids circular dep with boardStore.
+          const { useBoardStore } = await import('./boardStore')
+          await useBoardStore.getState().fetchBoards()
         } catch (err) {
           logError('acceptInvitation failed:', err)
         }

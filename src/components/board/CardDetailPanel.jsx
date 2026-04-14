@@ -5,6 +5,7 @@ import { FileText } from '@phosphor-icons/react'
 import DynamicIcon from './DynamicIcon'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
+import { useWorkspacesStore } from '../../store/workspacesStore'
 import { supabase } from '../../lib/supabase'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import { useClickOutside } from '../../hooks/useClickOutside'
@@ -105,20 +106,39 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
   const autoSaveTimerRef = useRef(null)
   const formDataRef = useRef({ title: card?.title || '', description: card?.description || '', labels: card?.labels ? [...card.labels] : [], assignee: card?.assignee_name || '', dueDate: card?.due_date || '', checklist: card?.checklist ? card.checklist.map((item) => ({ ...item })) : [], priority: card?.priority || 'medium' })
 
+  // Resolve which board this card belongs to, and whether it's scoped to a workspace
+  const board = useBoardStore((s) => (card ? s.boards[card.board_id] : null))
+  const workspaceId = board?.workspace_id || null
+  const workspaceMembers = useWorkspacesStore((s) => (workspaceId ? s.members[workspaceId] : null))
+
   useEffect(() => {
     if (!card) return
     let cancelled = false
-    supabase
-      .from('board_members')
-      .select('user_id, profiles(id, display_name)')
-      .eq('board_id', card.board_id)
-      .then(({ data, error }) => {
-        if (cancelled || error) return
-        setBoardMemberNames((data || []).map((m) => m.profiles?.display_name).filter(Boolean))
-      })
+
+    if (workspaceId) {
+      // Workspace board → source assignee list from workspace_members (whole team)
+      useWorkspacesStore.getState().fetchMembers(workspaceId)
+    } else {
+      // Personal board → original board_members fetch
+      supabase
+        .from('board_members')
+        .select('user_id, profiles(id, display_name)')
+        .eq('board_id', card.board_id)
+        .then(({ data, error }) => {
+          if (cancelled || error) return
+          setBoardMemberNames((data || []).map((m) => m.profiles?.display_name).filter(Boolean))
+        })
+    }
     fetchAttachments(cardId)
     return () => { cancelled = true }
-  }, [cardId])
+  }, [cardId, workspaceId])
+
+  // When on a workspace board, keep the picker list mirrored from workspacesStore.members
+  useEffect(() => {
+    if (!workspaceId) return
+    const names = (workspaceMembers || []).map((m) => m.display_name).filter(Boolean)
+    setBoardMemberNames(names)
+  }, [workspaceId, workspaceMembers])
 
   const scheduleSave = useCallback(() => {
     isDirtyRef.current = true

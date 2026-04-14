@@ -40,7 +40,9 @@ const navItems = [
 ]
 
 export default function Sidebar() {
-  const invitationCount = useWorkspaceStore((s) => s.invitations.length)
+  const boardInvitationCount = useWorkspaceStore((s) => s.invitations.length)
+  const workspaceInvitationCount = useWorkspacesStore((s) => s.invitations.length)
+  const invitationCount = boardInvitationCount + workspaceInvitationCount
   const collapsed = useSettingsStore((s) => s.sidebarCollapsed)
   const toggle = useSettingsStore((s) => s.toggleSidebar)
   const setSidebarCollapsed = useSettingsStore((s) => s.setSidebarCollapsed)

@@ -3,6 +3,7 @@ import { CheckCircle2, Plus, X, Calendar, User, Flag } from 'lucide-react'
 import { FileText, CalendarDot, CheckSquare } from '@phosphor-icons/react'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
+import { useWorkspacesStore } from '../../store/workspacesStore'
 import { supabase } from '../../lib/supabase'
 import DynamicIcon from './DynamicIcon'
 import IconPicker from './IconPicker'
@@ -41,10 +42,22 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
   const [boardMemberNames, setBoardMemberNames] = useState([])
   const [assigneeSearch, setAssigneeSearch] = useState('')
 
-  // Fetch board members for assignee picker
+  // Resolve whether this card's board is scoped to a workspace
+  const board = useBoardStore((s) => (card ? s.boards[card.board_id] : null))
+  const workspaceId = board?.workspace_id || null
+  const workspaceMembers = useWorkspacesStore((s) => (workspaceId ? s.members[workspaceId] : null))
+
+  // Fetch assignee list — workspace members when board belongs to a workspace,
+  // otherwise fall back to board_members.
   useEffect(() => {
     if (!card) return
     let cancelled = false
+
+    if (workspaceId) {
+      useWorkspacesStore.getState().fetchMembers(workspaceId)
+      return () => { cancelled = true }
+    }
+
     supabase
       .from('board_members')
       .select('user_id, profiles(id, display_name)')
@@ -54,7 +67,14 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
         setBoardMemberNames((data || []).map((m) => m.profiles?.display_name).filter(Boolean))
       })
     return () => { cancelled = true }
-  }, [card?.board_id])
+  }, [card?.board_id, workspaceId])
+
+  // Mirror workspacesStore.members into boardMemberNames for workspace boards
+  useEffect(() => {
+    if (!workspaceId) return
+    const names = (workspaceMembers || []).map((m) => m.display_name).filter(Boolean)
+    setBoardMemberNames(names)
+  }, [workspaceId, workspaceMembers])
 
   const titleRef = useRef(null)
   const rootRef = useRef(null)
