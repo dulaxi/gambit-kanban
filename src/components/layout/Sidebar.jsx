@@ -166,7 +166,7 @@ export default function Sidebar() {
               className={({ isActive }) =>
                 `flex items-center h-8 rounded-lg text-sm transition-colors duration-75 overflow-hidden ${
                   isActive
-                    ? 'bg-[var(--surface-hover)] text-[var(--text-primary)]'
+                    ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
                     : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)]'
                 } ${showCollapsed ? 'justify-center px-2' : 'gap-3 py-1.5 px-4'}`
               }
@@ -193,7 +193,7 @@ export default function Sidebar() {
               title={showCollapsed ? 'Workspace' : undefined}
               className={`flex items-center h-8 rounded-lg text-sm transition-colors duration-75 overflow-hidden ${
                 workspaceSidebarOpen || location.pathname === '/workspace'
-                  ? 'bg-[var(--surface-hover)] text-[var(--text-primary)]'
+                  ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
                   : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)]'
               } ${showCollapsed ? 'justify-center px-2 w-full' : 'gap-3 py-1.5 px-4 w-full'}`}
             >
@@ -223,7 +223,7 @@ export default function Sidebar() {
               className={({ isActive }) =>
                 `flex items-center h-8 rounded-lg text-sm transition-colors duration-75 overflow-hidden ${
                   isActive
-                    ? 'bg-[var(--surface-hover)] text-[var(--text-primary)]'
+                    ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
                     : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)]'
                 } gap-3 py-1.5 px-4`
               }
