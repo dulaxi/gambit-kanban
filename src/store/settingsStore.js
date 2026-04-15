@@ -9,9 +9,31 @@ export const useSettingsStore = create(
       font: 'mona-sans',
       mobileMenuOpen: false,
       favoriteBoards: [],
+      collapsedSpaces: {}, // { [workspaceId]: true } — persists workspace collapse state
+      boardsCollapsed: false,
+      sharedBoardsCollapsed: false,
+      workspaceSidebarOpen: false,
+      _sidebarBeforeWorkspace: false,
       toggleSidebar: () =>
         set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
       setSidebarCollapsed: (val) => set({ sidebarCollapsed: val }),
+      openWorkspaceSidebar: () => set((s) => ({
+        workspaceSidebarOpen: true,
+        _sidebarBeforeWorkspace: s.sidebarCollapsed,
+        sidebarCollapsed: true,
+      })),
+      closeWorkspaceSidebar: () => set((s) => ({
+        workspaceSidebarOpen: false,
+        sidebarCollapsed: s._sidebarBeforeWorkspace,
+      })),
+      toggleWorkspaceSidebar: () => {
+        const s = get()
+        if (s.workspaceSidebarOpen) {
+          set({ workspaceSidebarOpen: false, sidebarCollapsed: s._sidebarBeforeWorkspace })
+        } else {
+          set({ workspaceSidebarOpen: true, _sidebarBeforeWorkspace: s.sidebarCollapsed, sidebarCollapsed: true })
+        }
+      },
       toggleMobileMenu: () => set((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
       closeMobileMenu: () => set({ mobileMenuOpen: false }),
       setTheme: (theme) => {
@@ -27,6 +49,14 @@ export const useSettingsStore = create(
         set({ favoriteBoards: next })
       },
       isFavorite: (boardId) => get().favoriteBoards.includes(boardId),
+      toggleSpaceCollapsed: (workspaceId) => set((s) => {
+        const next = { ...s.collapsedSpaces }
+        if (next[workspaceId]) delete next[workspaceId]
+        else next[workspaceId] = true
+        return { collapsedSpaces: next }
+      }),
+      toggleBoardsCollapsed: () => set((s) => ({ boardsCollapsed: !s.boardsCollapsed })),
+      toggleSharedBoardsCollapsed: () => set((s) => ({ sharedBoardsCollapsed: !s.sharedBoardsCollapsed })),
     }),
     {
       name: 'kolumn-settings',

@@ -182,7 +182,7 @@ export const useBoardStore = create((set, get) => ({
     }
   },
 
-  addBoard: async (name, icon, customColumns) => {
+  addBoard: async (name, icon, customColumns, workspaceId = null) => {
     if (!boardCreateLimiter()) { showToast.warn('Too many boards created — slow down'); return null }
     const sanitizedName = sanitizeTitle(name) || 'Untitled Board'
 
@@ -192,7 +192,7 @@ export const useBoardStore = create((set, get) => ({
 
     const boardId = crypto.randomUUID()
 
-    const validated = boardInsertSchema.safeParse({ id: boardId, name: sanitizedName, icon: icon || null, owner_id: user.id })
+    const validated = boardInsertSchema.safeParse({ id: boardId, name: sanitizedName, icon: icon || null, owner_id: user.id, workspace_id: workspaceId || null })
     if (!validated.success) {
       logError('Board validation failed:', validated.error.flatten())
       showToast.error('Invalid board data')
@@ -460,7 +460,10 @@ export const useBoardStore = create((set, get) => ({
       global_task_number: localGlobalNumber,
       title: sanitizeTitle(cardData.title) || 'Untitled task',
       description: sanitizeDescription(cardData.description) || '',
-      assignee_name: sanitizeTitle(cardData.assignee) || '',
+      assignees: (cardData.assignees || (cardData.assignee ? [cardData.assignee] : []))
+        .map((n) => sanitizeTitle(n))
+        .filter(Boolean),
+      assignee_name: sanitizeTitle((cardData.assignees && cardData.assignees[0]) || cardData.assignee) || '',
       labels: cardData.labels || [],
       due_date: cardData.dueDate || null,
       priority: cardData.priority || 'medium',
@@ -504,6 +507,7 @@ export const useBoardStore = create((set, get) => ({
           title: optimisticCard.title,
           description: optimisticCard.description,
           assignee_name: optimisticCard.assignee_name,
+          assignees: optimisticCard.assignees,
           labels: optimisticCard.labels,
           due_date: optimisticCard.due_date,
           priority: optimisticCard.priority,
@@ -587,6 +591,14 @@ export const useBoardStore = create((set, get) => ({
     if ('description' in updates) dbUpdates.description = sanitizeDescription(updates.description)
     if ('assignee' in updates) dbUpdates.assignee_name = sanitizeTitle(updates.assignee)
     if ('assignee_name' in updates) dbUpdates.assignee_name = sanitizeTitle(updates.assignee_name)
+    if ('assignees' in updates) {
+      const cleaned = (updates.assignees || [])
+        .map((n) => sanitizeTitle(n))
+        .filter(Boolean)
+      dbUpdates.assignees = cleaned
+      // Mirror first entry into assignee_name so legacy consumers keep working
+      dbUpdates.assignee_name = cleaned[0] || ''
+    }
     if ('priority' in updates) dbUpdates.priority = updates.priority
     if ('dueDate' in updates) dbUpdates.due_date = updates.dueDate
     if ('due_date' in updates) dbUpdates.due_date = updates.due_date

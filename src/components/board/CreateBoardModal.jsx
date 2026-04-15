@@ -88,12 +88,16 @@ function SkeletonPreview({ columns }) {
   )
 }
 
-export default function CreateBoardModal({ onClose }) {
+export default function CreateBoardModal({ onClose, workspaceId = null }) {
   const isMobile = useIsMobile()
   const addBoard = useBoardStore((s) => s.addBoard)
 
   const [name, setName] = useState('')
   const [icon, setIcon] = useState(null)
+  // Once the user explicitly picks an icon, don't let a later template
+  // selection silently overwrite it. Fixes a bug where choosing an icon
+  // before a non-Blank template would be clobbered on Create.
+  const [iconManuallySet, setIconManuallySet] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState('blank')
   const [creating, setCreating] = useState(false)
   const [showIconPicker, setShowIconPicker] = useState(false)
@@ -116,13 +120,14 @@ export default function CreateBoardModal({ onClose }) {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
-  // When selecting a template with a preset icon, apply it
+  // When selecting a template with a preset icon, apply it — but only if
+  // the user hasn't already chosen an icon themselves.
   const handleTemplateSelect = useCallback((tpl) => {
     setSelectedTemplate(tpl.key)
-    if (tpl.icon) {
+    if (tpl.icon && !iconManuallySet) {
       setIcon(tpl.icon)
     }
-  }, [])
+  }, [iconManuallySet])
 
   const handleCreate = useCallback(async () => {
     const trimmed = name.trim()
@@ -130,12 +135,12 @@ export default function CreateBoardModal({ onClose }) {
 
     setCreating(true)
     try {
-      const id = await addBoard(trimmed, icon, template.columns)
+      const id = await addBoard(trimmed, icon, template.columns, workspaceId)
       if (id) onClose()
     } finally {
       setCreating(false)
     }
-  }, [name, icon, template, creating, addBoard, onClose])
+  }, [name, icon, template, creating, addBoard, onClose, workspaceId])
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -319,7 +324,7 @@ export default function CreateBoardModal({ onClose }) {
       {showIconPicker && (
         <IconPicker
           value={icon}
-          onChange={setIcon}
+          onChange={(newIcon) => { setIcon(newIcon); setIconManuallySet(true) }}
           onClose={() => setShowIconPicker(false)}
         />
       )}

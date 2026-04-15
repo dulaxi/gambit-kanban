@@ -62,6 +62,20 @@ export const useAuthStore = create((set, get) => ({
         return
       }
 
+      // User id actually changed (different account on same tab, or first
+      // sign-in after anon). Purge tenant-scoped stores so the fresh user
+      // doesn't briefly see the previous user's workspaces / boards.
+      const prevUserId = currentUser?.id
+      const nextUserId = session?.user?.id
+      if (prevUserId && prevUserId !== nextUserId) {
+        setTimeout(() => {
+          import('./boardStore').then(({ useBoardStore }) => useBoardStore.getState().resetStore())
+          import('./noteStore').then(({ useNoteStore }) => useNoteStore.getState().resetStore())
+          import('./workspacesStore').then(({ useWorkspacesStore }) => useWorkspacesStore.getState().resetStore())
+          import('./boardSharingStore').then(({ useBoardSharingStore }) => useBoardSharingStore.getState().resetStore())
+        }, 0)
+      }
+
       set({ user: session?.user || null, session })
       if (session?.user) {
         // Defer fetchProfile to escape the auth lock — see comment above
@@ -131,9 +145,11 @@ export const useAuthStore = create((set, get) => ({
     set({ user: null, session: null, profile: null })
     Sentry.setUser(null)
     resetUser()
-    // Lazy import to avoid circular dependency (boardStore imports authStore)
+    // Lazy imports to avoid circular dependency (these stores import authStore)
     import('./boardStore').then(({ useBoardStore }) => useBoardStore.getState().resetStore())
     import('./noteStore').then(({ useNoteStore }) => useNoteStore.getState().resetStore())
+    import('./workspacesStore').then(({ useWorkspacesStore }) => useWorkspacesStore.getState().resetStore())
+    import('./boardSharingStore').then(({ useBoardSharingStore }) => useBoardSharingStore.getState().resetStore())
     localStorage.removeItem('kolumn_active_board')
     supabase.auth.signOut({ scope: 'global' }).catch((err) => {
       logError('Sign out error:', err)

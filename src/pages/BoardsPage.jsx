@@ -13,8 +13,10 @@ export default function BoardsPage() {
   const [filters, setFilters] = useState({ priority: [], assignee: null, label: [], due: null })
   const [sortBy, setSortBy] = useState('manual')
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createInWorkspaceId, setCreateInWorkspaceId] = useState(null)
   const activeBoardId = useBoardStore((s) => s.activeBoardId)
   const boards = useBoardStore((s) => s.boards)
+  const activeBoardName = useBoardStore((s) => s.boards[s.activeBoardId]?.name)
 
   const addCard = useBoardStore((s) => s.addCard)
   const columns = useBoardStore((s) => s.columns)
@@ -40,7 +42,11 @@ export default function BoardsPage() {
       const cardId = await addCard(activeBoardId, firstCol.id, { title: '' })
       if (cardId) setInlineCardId(cardId)
     }
-    const openCreate = () => { setShowCreateModal(true); window.dispatchEvent(new CustomEvent('kolumn:create-board-ack')) }
+    const openCreate = (e) => {
+      setCreateInWorkspaceId(e?.detail?.workspaceId || null)
+      setShowCreateModal(true)
+      window.dispatchEvent(new CustomEvent('kolumn:create-board-ack'))
+    }
     window.addEventListener('kolumn:open-card', openCard)
     window.addEventListener('kolumn:close-panel', closePanel)
     window.addEventListener('kolumn:new-card', newCard)
@@ -71,8 +77,13 @@ export default function BoardsPage() {
     <div
       className="h-[calc(100vh-7rem)] flex flex-col"
     >
-      <div className="mb-4 shrink-0">
-        <BoardSelector filters={filters} setFilters={setFilters} sortBy={sortBy} setSortBy={setSortBy} onCreateBoard={() => setShowCreateModal(true)} />
+      <div className="mb-4 shrink-0 flex items-start justify-between gap-4">
+        <h1 className="font-heading text-2xl text-[var(--text-primary)] truncate min-w-0 flex-1 self-end">
+          {activeBoardId === '__all__' ? 'All tasks' : (activeBoardName || 'Boards')}
+        </h1>
+        <div className="shrink-0">
+          <BoardSelector filters={filters} setFilters={setFilters} sortBy={sortBy} setSortBy={setSortBy} onCreateBoard={() => setShowCreateModal(true)} />
+        </div>
       </div>
 
       <div className="flex-1 min-h-0">
@@ -121,7 +132,10 @@ export default function BoardsPage() {
       )}
 
       {showCreateModal && (
-        <CreateBoardModal onClose={() => setShowCreateModal(false)} />
+        <CreateBoardModal
+          onClose={() => { setShowCreateModal(false); setCreateInWorkspaceId(null) }}
+          workspaceId={createInWorkspaceId}
+        />
       )}
     </div>
   )

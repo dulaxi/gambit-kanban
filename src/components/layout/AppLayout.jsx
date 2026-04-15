@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
+import WorkspaceSidebar from './WorkspaceSidebar'
 import Header from './Header'
 import SearchDialog from '../SearchDialog'
 import BottomTabBar from './BottomTabBar'
@@ -9,7 +10,8 @@ import { useIsDesktop } from '../../hooks/useMediaQuery'
 import { useAuthStore } from '../../store/authStore'
 import { useBoardStore } from '../../store/boardStore'
 import { useNoteStore } from '../../store/noteStore'
-import { useWorkspaceStore } from '../../store/workspaceStore'
+import { useBoardSharingStore } from '../../store/boardSharingStore'
+import { useWorkspacesStore } from '../../store/workspacesStore'
 import { useNotificationStore } from '../../store/notificationStore'
 import { hasLocalData, migrateLocalData } from '../../lib/migrateLocalData'
 import { showToast } from '../../utils/toast'
@@ -27,6 +29,7 @@ const pageTitles = {
 
 export default function AppLayout() {
   const collapsed = useSettingsStore((s) => s.sidebarCollapsed)
+  const workspaceSidebarOpen = useSettingsStore((s) => s.workspaceSidebarOpen)
   const theme = useSettingsStore((s) => s.theme)
   const font = useSettingsStore((s) => s.font)
   const isDesktop = useIsDesktop()
@@ -52,8 +55,10 @@ export default function AppLayout() {
   const subscribeToBoards = useBoardStore((s) => s.subscribeToBoards)
   const unsubscribeAll = useBoardStore((s) => s.unsubscribeAll)
   const fetchNotes = useNoteStore((s) => s.fetchNotes)
-  const fetchInvitations = useWorkspaceStore((s) => s.fetchInvitations)
-  const fetchSharedBoards = useWorkspaceStore((s) => s.fetchSharedBoards)
+  const fetchInvitations = useBoardSharingStore((s) => s.fetchInvitations)
+  const fetchSharedBoards = useBoardSharingStore((s) => s.fetchSharedBoards)
+  const fetchWorkspaces = useWorkspacesStore((s) => s.fetchWorkspaces)
+  const fetchWorkspaceInvitations = useWorkspacesStore((s) => s.fetchInvitations)
   const fetchNotifications = useNotificationStore((s) => s.fetchNotifications)
   const subscribeToNotifications = useNotificationStore((s) => s.subscribeToNotifications)
   const [showMigration, setShowMigration] = useState(false)
@@ -85,6 +90,8 @@ export default function AppLayout() {
       fetchNotes(),
       fetchInvitations(),
       fetchSharedBoards(),
+      fetchWorkspaces(),
+      fetchWorkspaceInvitations(),
       fetchNotifications(),
     ])
 
@@ -111,7 +118,12 @@ export default function AppLayout() {
       let dueToday = 0
       Object.values(cards).forEach((card) => {
         if (card.completed || card.archived || !card.due_date) return
-        if (displayName && card.assignee_name !== displayName) return
+        if (displayName) {
+          const names = (card.assignees && card.assignees.length)
+            ? card.assignees
+            : (card.assignee_name ? [card.assignee_name] : [])
+          if (!names.includes(displayName)) return
+        }
         const dueDateStr = card.due_date.split('T')[0]
         if (dueDateStr < todayStr) overdue++
         else if (dueDateStr === todayStr) dueToday++
@@ -203,23 +215,27 @@ export default function AppLayout() {
       <InlineErrorBoundary name="sidebar">
         <Sidebar />
       </InlineErrorBoundary>
+      <WorkspaceSidebar />
       <div
         className={`flex-1 min-h-0 flex flex-col transition-all duration-200 ${
-          isDesktop ? (collapsed ? 'ml-12' : 'ml-[287px]') : 'ml-0'
+          isDesktop
+            ? workspaceSidebarOpen
+              ? 'ml-[calc(3rem+280px)]'
+              : collapsed ? 'ml-12' : 'ml-[287px]'
+            : 'ml-0'
         }`}
       >
         <InlineErrorBoundary name="header">
           <Header title={title} />
         </InlineErrorBoundary>
-        {/* Page heading — OUTSIDE the scroll container so it stays pinned */}
-        {isDesktop && (
-          <div className={`shrink-0 ${['/boards', '/calendar', '/notes'].includes(basePath) ? 'px-4 sm:px-8' : 'px-4 sm:px-8 max-w-4xl mx-auto w-full'}`}>
+        {/* Page heading — OUTSIDE the scroll container so it stays pinned.
+            /boards owns its own heading row (inline with Share/Sort/Filter). */}
+        {isDesktop && !['/dashboard', '/workspace', '/boards'].includes(basePath) && (
+          <div className="shrink-0 px-4 sm:px-8 max-w-4xl mx-auto w-full">
             <header className="flex items-end h-8 md:h-8 shrink-0 mb-[26px]">
-              {basePath !== '/dashboard' && (
-                <h1 className="font-heading text-2xl text-[var(--text-primary)] flex items-center gap-2 min-w-0">
-                  <span className="truncate">{title}</span>
-                </h1>
-              )}
+              <h1 className="font-heading text-2xl text-[var(--text-primary)] flex items-center gap-2 min-w-0">
+                <span className="truncate">{title}</span>
+              </h1>
             </header>
           </div>
         )}
