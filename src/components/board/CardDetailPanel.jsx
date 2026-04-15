@@ -10,6 +10,7 @@ import { supabase } from '../../lib/supabase'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import { useClickOutside } from '../../hooks/useClickOutside'
 import { useMenuState } from '../../hooks/useMenuState'
+import { useCardEditState } from '../../hooks/useCardEditState'
 import IconPicker from './IconPicker'
 import { formatDueDateLabel } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
@@ -72,28 +73,29 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
   const profile = useAuthStore((s) => s.profile)
   const isMobile = useIsMobile()
 
-  const [title, setTitle] = useState(card?.title || '')
-  const [description, setDescription] = useState(card?.description || '')
+  const {
+    title, setTitle,
+    description, setDescription,
+    checklist, setChecklist,
+    priority, setPriority,
+    dueDate, setDueDate,
+    labels, setLabels,
+    assignees, setAssignees,
+  } = useCardEditState(card)
   const [editingDescription, setEditingDescription] = useState(false)
-  const [checklist, setChecklist] = useState(card?.checklist ? card.checklist.map((item) => ({ ...item })) : [])
   const [newCheckItem, setNewCheckItem] = useState('')
-  const [priority, setPriority] = useState(card?.priority || 'medium')
-  const [dueDate, setDueDate] = useState(card?.due_date || '')
   // Single openMenu value: 'menu' | 'priority' | 'due' | 'assignee' | 'icon' | null
   const [openMenu, setOpenMenu, toggleMenu] = useMenuState()
   const titleRef = useRef(null)
-  const [labels, setLabels] = useState(card?.labels ? [...card.labels] : [])
   const [showLabelForm, setShowLabelForm] = useState(false)
   const [newLabelText, setNewLabelText] = useState('')
   const [newLabelColor, setNewLabelColor] = useState('blue')
   const [editingLabelIdx, setEditingLabelIdx] = useState(null)
   const [editingLabelText, setEditingLabelText] = useState('')
-  // Multi-assignee: array of display names. Falls back to legacy single
-  // assignee_name for cards not yet migrated / re-saved.
+  // Legacy assignee fallback preserved — formDataRef initialization below still needs this local
   const initialAssignees = card?.assignees?.length
     ? card.assignees
     : (card?.assignee_name ? [card.assignee_name] : [])
-  const [assignees, setAssignees] = useState(initialAssignees)
   const [assigneeSearch, setAssigneeSearch] = useState('')
   const [boardMemberNames, setBoardMemberNames] = useState([])
 
