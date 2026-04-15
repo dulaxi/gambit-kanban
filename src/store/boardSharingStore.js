@@ -25,6 +25,10 @@ export const useBoardSharingStore = create((set, get) => ({
 
   clearError: () => set({ error: null }),
 
+  // Clear all state on sign-out / user-switch so the next user doesn't see the
+  // previous user's shared boards or pending invitations during the fetch gap.
+  resetStore: () => set({ invitations: [], sharedBoards: [], loading: false, error: null }),
+
   // ============================================================
   // FETCH INVITATIONS
   // ============================================================

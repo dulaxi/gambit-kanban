@@ -424,24 +424,45 @@ export default function Sidebar() {
               <div className={`flex flex-col gap-px ${isCollapsed ? 'hidden' : ''}`}>
                 {wsBoards.map((board) => {
                   const canDelete = board.owner_id === user?.id
+                  // Workspace-board owner can change the icon, same as for personal boards.
+                  // Non-owners see a static icon glyph (no click affordance).
                   return (
                     <div
                       key={board.id}
                       onClick={() => handleSelectBoard(board.id)}
-                      className={`flex items-center justify-between w-full h-8 py-1.5 px-4 rounded-lg text-sm transition-colors duration-75 group cursor-pointer overflow-hidden ${
+                      className={`flex items-center justify-between w-full h-8 py-1.5 px-4 rounded-lg text-sm transition-colors duration-75 group cursor-pointer overflow-hidden relative ${
                         isBoardsActive && activeBoardId === board.id
                           ? 'text-[var(--text-primary)] bg-[var(--accent-lime-wash)]'
                           : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
                       }`}
                     >
                       <span className="flex items-center gap-3 truncate">
-                        <span className="flex items-center justify-center shrink-0" style={{ width: 16, height: 16 }}>
-                          {board.icon ? (
-                            <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
-                          ) : (
-                            <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
-                          )}
-                        </span>
+                        {canDelete ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setIconPickerBoardId(iconPickerBoardId === board.id ? null : board.id)
+                            }}
+                            className="shrink-0 hover:bg-[var(--border-default)] rounded p-0.5 transition-colors flex items-center justify-center"
+                            style={{ width: 16, height: 16 }}
+                            title="Change icon"
+                          >
+                            {board.icon ? (
+                              <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                            ) : (
+                              <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                            )}
+                          </button>
+                        ) : (
+                          <span className="flex items-center justify-center shrink-0" style={{ width: 16, height: 16 }}>
+                            {board.icon ? (
+                              <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                            ) : (
+                              <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                            )}
+                          </span>
+                        )}
                         <span className="truncate">{board.name}</span>
                       </span>
                       {canDelete && (
@@ -453,6 +474,15 @@ export default function Sidebar() {
                             onClick={(e) => handleDeleteBoard(e, board.id)}
                           />
                         </span>
+                      )}
+                      {iconPickerBoardId === board.id && (
+                        <div className="absolute left-0 top-full z-40" onClick={(e) => e.stopPropagation()}>
+                          <IconPicker
+                            value={board.icon}
+                            onChange={(icon) => updateBoardIcon(board.id, icon)}
+                            onClose={() => setIconPickerBoardId(null)}
+                          />
+                        </div>
                       )}
                     </div>
                   )

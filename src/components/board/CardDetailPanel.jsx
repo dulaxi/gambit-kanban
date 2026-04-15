@@ -10,7 +10,7 @@ import { supabase } from '../../lib/supabase'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import { useClickOutside } from '../../hooks/useClickOutside'
 import IconPicker from './IconPicker'
-import { getAvatarColor, getInitials } from '../../utils/formatting'
+import { getAvatarColor, getAvatarTextColor, getInitials } from '../../utils/formatting'
 import { showToast } from '../../utils/toast'
 import { useTemplateStore } from '../../store/templateStore'
 
@@ -464,12 +464,12 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                         className={`w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-[var(--surface-page)] ${
                           isMe && profile?.icon
                             ? `${iconText} ${profile.color}`
-                            : `${getAvatarColor(name)} text-[9px] font-bold text-white`
+                            : `${getAvatarColor(name)} ${getAvatarTextColor(getAvatarColor(name))} text-[11px] font-heading`
                         }`}
                       >
                         {isMe && profile?.icon
                           ? <DynamicIcon name={profile.icon} className="w-3.5 h-3.5" />
-                          : getInitials(name)}
+                          : getInitials(name).toLowerCase()}
                       </span>
                     )
                   })}
@@ -518,7 +518,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                         className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs bg-[var(--surface-hover)] font-medium"
                       >
                         <div className="flex items-center gap-2 w-full">
-                          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white ${getAvatarColor(name)}`}>{getInitials(name)}</span>
+                          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-heading ${getAvatarColor(name)} ${getAvatarTextColor(getAvatarColor(name))}`}>{getInitials(name).toLowerCase()}</span>
                           <span className="flex-1 truncate">{name}</span>
                         </div>
                         <Check className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
@@ -537,7 +537,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                           className={`min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs ${checked ? 'bg-[var(--surface-hover)] font-medium' : ''}`}
                         >
                           <div className="flex items-center gap-2 w-full">
-                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white ${getAvatarColor(member)}`}>{getInitials(member)}</span>
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-heading ${getAvatarColor(member)} ${getAvatarTextColor(getAvatarColor(member))}`}>{getInitials(member).toLowerCase()}</span>
                             <span className="flex-1 truncate">{member}</span>
                           </div>
                           {checked && <Check className="w-3.5 h-3.5 text-[var(--text-secondary)]" />}

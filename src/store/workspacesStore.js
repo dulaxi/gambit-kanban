@@ -29,6 +29,18 @@ export const useWorkspacesStore = create(
       // ====== Setters ======
       setActiveWorkspace: (workspaceId) => set({ activeWorkspaceId: workspaceId }),
 
+      // Reset all tenant-scoped state on sign-out / user-switch. Without this,
+      // switching users in the same tab leaves the previous user's workspaces
+      // briefly rendered in the sidebar before fresh fetches overwrite.
+      resetStore: () => set({
+        workspaces: {},
+        members: {},
+        invitations: [],
+        sentInvitations: {},
+        activeWorkspaceId: null,
+        loading: false,
+      }),
+
       // ====== Fetch ======
       fetchWorkspaces: async () => {
         const user = useAuthStore.getState().user
