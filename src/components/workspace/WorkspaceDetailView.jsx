@@ -5,6 +5,7 @@ import { useAuthStore } from '../../store/authStore'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
 import { getAvatarColor, getAvatarTextColor, getInitials } from '../../utils/formatting'
+import { supabase } from '../../lib/supabase'
 
 // Stable empty-array reference — if put inline as `|| []` inside a Zustand selector,
 // useSyncExternalStore sees a new reference every render and re-renders infinitely.
@@ -54,6 +55,27 @@ export default function WorkspaceDetailView({ workspaceId }) {
     if (!workspaceId) return
     fetchMembers(workspaceId)
     fetchSentInvitations(workspaceId)
+
+    // Live-refresh when membership or invitations change from other clients.
+    // Without this, a member leaving / being removed / accepting an invite
+    // would stay stale in the viewer's panel until the page remounted.
+    const membersChannel = supabase
+      .channel(`ws-members-${workspaceId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'workspace_members',
+        filter: `workspace_id=eq.${workspaceId}`,
+      }, () => { fetchMembers(workspaceId) })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'workspace_invitations',
+        filter: `workspace_id=eq.${workspaceId}`,
+      }, () => { fetchSentInvitations(workspaceId) })
+      .subscribe()
+
+    return () => { supabase.removeChannel(membersChannel) }
   }, [workspaceId, fetchMembers, fetchSentInvitations])
 
   useEffect(() => {
