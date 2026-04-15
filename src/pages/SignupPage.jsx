@@ -83,7 +83,7 @@ export default function SignupPage() {
               onChange={(e) => setDisplayName(e.target.value)}
               autoFocus
               placeholder="Your name"
-              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-[var(--surface-card)] border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)] transition-colors placeholder:text-[var(--text-faint)]"
+              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-[var(--surface-card)] border border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)] transition-colors placeholder:text-[var(--text-faint)]"
             />
           </div>
 
@@ -97,7 +97,7 @@ export default function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="you@example.com"
-              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-[var(--surface-card)] border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)] transition-colors placeholder:text-[var(--text-faint)]"
+              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-[var(--surface-card)] border border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)] transition-colors placeholder:text-[var(--text-faint)]"
             />
           </div>
 
@@ -111,7 +111,7 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="At least 6 characters"
-              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-[var(--surface-card)] border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)] transition-colors placeholder:text-[var(--text-faint)]"
+              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-[var(--surface-card)] border border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)] transition-colors placeholder:text-[var(--text-faint)]"
             />
           </div>
 

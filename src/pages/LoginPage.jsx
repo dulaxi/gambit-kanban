@@ -69,7 +69,7 @@ export default function LoginPage() {
               required
               autoFocus
               placeholder="you@example.com"
-              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-[var(--surface-card)] border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)] transition-colors placeholder:text-[var(--text-faint)]"
+              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-[var(--surface-card)] border border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)] transition-colors placeholder:text-[var(--text-faint)]"
             />
           </div>
 
@@ -89,7 +89,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-[var(--surface-card)] border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)] transition-colors placeholder:text-[var(--text-faint)]"
+              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-[var(--surface-card)] border border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)] transition-colors placeholder:text-[var(--text-faint)]"
             />
           </div>
 

@@ -157,7 +157,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               onChange={(e) => setRenameValue(e.target.value)}
               onKeyDown={handleRenameKeyDown}
               onBlur={handleRename}
-              className="text-sm font-semibold rounded-lg px-1.5 py-0.5 flex-1 mr-2 border-0.5 border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--border-focus)] focus:outline-none bg-[var(--surface-card)]"
+              className="text-sm font-semibold rounded-lg px-1.5 py-0.5 flex-1 mr-2 border-0.5 border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--border-focus)] focus:outline-none focus:border-[var(--text-primary)] bg-[var(--surface-card)]"
             />
           ) : (
             <h3 className="text-sm font-semibold text-[var(--text-primary)]">
@@ -352,7 +352,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               }}
               autoFocus
               placeholder="No limit"
-              className="w-full text-sm rounded-lg px-3 py-2 border-0.5 border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)] mb-3"
+              className="w-full text-sm rounded-lg px-3 py-2 border-0.5 border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)] mb-3"
             />
             <div className="flex items-center justify-end gap-2">
               <button

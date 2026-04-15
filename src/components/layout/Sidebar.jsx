@@ -334,7 +334,7 @@ export default function Sidebar() {
                           setRenamingBoardId(null)
                         }}
                         onClick={(e) => e.stopPropagation()}
-                        className="flex-1 text-sm bg-[var(--surface-card)] border border-[var(--border-focus)] rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)] min-w-0"
+                        className="flex-1 text-sm bg-[var(--surface-card)] border border-[var(--border-default)] rounded px-1.5 py-0.5 focus:outline-none focus:border-[var(--text-primary)] min-w-0"
                       />
                     ) : (
                       <span

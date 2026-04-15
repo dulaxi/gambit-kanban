@@ -151,7 +151,7 @@ export default function BoardShareModal({ board, onClose }) {
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); setError('') }}
                   placeholder="Invite by email..."
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)]"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)]"
                 />
               </div>
               <button

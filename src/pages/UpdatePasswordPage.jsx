@@ -59,7 +59,7 @@ export default function UpdatePasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoFocus
-              className="w-full text-sm rounded-xl px-3 py-2.5 border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)]"
+              className="w-full text-sm rounded-xl px-3 py-2.5 border border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)]"
               placeholder="At least 6 characters"
             />
           </div>
@@ -71,7 +71,7 @@ export default function UpdatePasswordPage() {
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               required
-              className="w-full text-sm rounded-xl px-3 py-2.5 border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime-wash)]"
+              className="w-full text-sm rounded-xl px-3 py-2.5 border border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)]"
               placeholder="Repeat your password"
             />
           </div>
