@@ -5,12 +5,11 @@ import { FileText } from '@phosphor-icons/react'
 import DynamicIcon from './DynamicIcon'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
-import { useWorkspacesStore } from '../../store/workspacesStore'
-import { supabase } from '../../lib/supabase'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import { useClickOutside } from '../../hooks/useClickOutside'
 import { useMenuState } from '../../hooks/useMenuState'
 import { useCardEditState } from '../../hooks/useCardEditState'
+import { useBoardMemberNames } from '../../hooks/useBoardMemberNames'
 import IconPicker from './IconPicker'
 import { formatDueDateLabel } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
@@ -97,57 +96,15 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
     ? card.assignees
     : (card?.assignee_name ? [card.assignee_name] : [])
   const [assigneeSearch, setAssigneeSearch] = useState('')
-  const [boardMemberNames, setBoardMemberNames] = useState([])
+  const boardMemberNames = useBoardMemberNames(card)
 
   const isDirtyRef = useRef(false)
   const autoSaveTimerRef = useRef(null)
   const formDataRef = useRef({ title: card?.title || '', description: card?.description || '', labels: card?.labels ? [...card.labels] : [], assignees: [...initialAssignees], dueDate: card?.due_date || '', checklist: card?.checklist ? card.checklist.map((item) => ({ ...item })) : [], priority: card?.priority || 'medium' })
 
-  // Resolve which board this card belongs to, and whether it's scoped to a workspace
-  const board = useBoardStore((s) => (card && s.boards ? s.boards[card.board_id] : null))
-  const workspaceId = board?.workspace_id || null
-  const workspaceMembers = useWorkspacesStore((s) => (workspaceId ? s.members[workspaceId] : null))
-
   useEffect(() => {
-    if (!card) return
-    let cancelled = false
-
-    if (workspaceId) {
-      // Workspace board → source assignee list from workspace_members (whole team)
-      useWorkspacesStore.getState().fetchMembers(workspaceId)
-    } else {
-      // Personal board → fetch board_members then profiles in two steps.
-      // The old single-query `profiles(...)` embed returned null because
-      // board_members.user_id FKs to auth.users (not profiles), so PostgREST
-      // can't auto-resolve the join — same problem the workspace fetch had.
-      ;(async () => {
-        const { data: rows, error } = await supabase
-          .from('board_members')
-          .select('user_id')
-          .eq('board_id', card.board_id)
-        if (cancelled || error || !rows?.length) {
-          if (!cancelled && !error) setBoardMemberNames([])
-          return
-        }
-        const userIds = rows.map((r) => r.user_id)
-        const { data: profiles, error: pErr } = await supabase
-          .from('profiles')
-          .select('id, display_name')
-          .in('id', userIds)
-        if (cancelled || pErr) return
-        setBoardMemberNames((profiles || []).map((p) => p.display_name).filter(Boolean))
-      })()
-    }
-    fetchAttachments(cardId)
-    return () => { cancelled = true }
-  }, [cardId, workspaceId])
-
-  // When on a workspace board, keep the picker list mirrored from workspacesStore.members
-  useEffect(() => {
-    if (!workspaceId) return
-    const names = (workspaceMembers || []).map((m) => m.display_name).filter(Boolean)
-    setBoardMemberNames(names)
-  }, [workspaceId, workspaceMembers])
+    if (card) fetchAttachments(cardId)
+  }, [cardId])
 
   const scheduleSave = useCallback(() => {
     isDirtyRef.current = true
