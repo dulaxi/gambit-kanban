@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabase'
 import DynamicIcon from './DynamicIcon'
 import IconPicker from './IconPicker'
 import { useMenuState } from '../../hooks/useMenuState'
+import { useCardEditState } from '../../hooks/useCardEditState'
 import { PRIORITY_OPTIONS } from '../../constants/colors'
 import { parseISO } from 'date-fns'
 import { formatDueDateLabel, dueDateBadgeClass } from '../../utils/dateUtils'
@@ -30,16 +31,15 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
   const deleteCard = useBoardStore((s) => s.deleteCard)
   const profile = useAuthStore((s) => s.profile)
 
-  const [title, setTitle] = useState(() => card?.title === 'Untitled task' ? '' : (card?.title || ''))
-  const [assignees, setAssignees] = useState(() => {
-    if (card?.assignees?.length) return card.assignees
-    return card?.assignee_name ? [card.assignee_name] : []
-  })
-  const [priority, setPriority] = useState(() => card?.priority || 'medium')
-  const [dueDate, setDueDate] = useState(() => card?.due_date || '')
-  const [labels, setLabels] = useState(() => card?.labels ? [...card.labels] : [])
-  const [description, setDescription] = useState(() => card?.description || '')
-  const [checklist, setChecklist] = useState(() => card?.checklist ? [...card.checklist] : [])
+  const {
+    title, setTitle,
+    assignees, setAssignees,
+    priority, setPriority,
+    dueDate, setDueDate,
+    labels, setLabels,
+    description, setDescription,
+    checklist, setChecklist,
+  } = useCardEditState(card, { treatUntitledAsEmpty: true })
 
   const [showDescription, setShowDescription] = useState(() => !!card?.description)
   const [newLabelText, setNewLabelText] = useState('')
