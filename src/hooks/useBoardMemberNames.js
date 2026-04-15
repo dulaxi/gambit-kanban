@@ -11,23 +11,23 @@ export function useBoardMemberNames(card) {
 
   useEffect(() => {
     if (!card) return
-    let cancelled = false
+
+    // Clear prior names when switching boards so the picker never flashes
+    // stale members from the previously-open card.
+    setNames([])
 
     if (workspaceId) {
       useWorkspacesStore.getState().fetchMembers(workspaceId)
-      return () => { cancelled = true }
+      return
     }
 
-    // Personal board: two-step fetch (board_members → profiles)
+    let cancelled = false
     ;(async () => {
       const { data: rows, error } = await supabase
         .from('board_members')
         .select('user_id')
         .eq('board_id', card.board_id)
-      if (cancelled || error || !rows?.length) {
-        if (!cancelled && !error) setNames([])
-        return
-      }
+      if (cancelled || error || !rows?.length) return
       const userIds = rows.map((r) => r.user_id)
       const { data: profiles, error: pErr } = await supabase
         .from('profiles')
@@ -40,7 +40,6 @@ export function useBoardMemberNames(card) {
     return () => { cancelled = true }
   }, [card?.board_id, workspaceId])
 
-  // Mirror workspacesStore.members into local names array
   useEffect(() => {
     if (!workspaceId) return
     setNames((workspaceMembers || []).map((m) => m.display_name).filter(Boolean))
