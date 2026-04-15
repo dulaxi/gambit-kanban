@@ -7,8 +7,8 @@ import { parseISO, format } from 'date-fns'
 import { useBoardStore } from '../../store/boardStore'
 import DynamicIcon from './DynamicIcon'
 import IconPicker from './IconPicker'
-import { LABEL_BG, getAvatarColor, getInitials } from '../../utils/formatting'
-import { addRecurrenceInterval } from '../../utils/dateUtils'
+import { LABEL_BG } from '../../utils/formatting'
+import { addRecurrenceInterval, formatDueDateLabel } from '../../utils/dateUtils'
 import { LABEL_COLORS, COLOR_DOT_CLASSES, PRIORITY_OPTIONS } from '../../constants/colors'
 
 export default function CardDetailFields({
@@ -32,19 +32,7 @@ export default function CardDetailFields({
 
   const currentPriority = PRIORITY_OPTIONS.find((p) => p.value === priority) || PRIORITY_OPTIONS[1]
 
-  const dueDateDisplay = dueDate ? (() => {
-    const d = new Date(dueDate)
-    const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(today.getDate() - 1)
-    const tomorrow = new Date(today)
-    tomorrow.setDate(today.getDate() + 1)
-    const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
-    if (sameDay(d, today)) return 'Today'
-    if (sameDay(d, yesterday)) return 'Yesterday'
-    if (sameDay(d, tomorrow)) return 'Tomorrow'
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  })() : null
+  const dueDateDisplay = dueDate ? formatDueDateLabel(dueDate, { long: true }) : null
 
   const recurrenceLabel = card?.recurrence_interval
     ? card.recurrence_unit === 'months'

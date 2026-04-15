@@ -9,8 +9,10 @@ import { useWorkspacesStore } from '../../store/workspacesStore'
 import { supabase } from '../../lib/supabase'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import { useClickOutside } from '../../hooks/useClickOutside'
+import { useMenuState } from '../../hooks/useMenuState'
 import IconPicker from './IconPicker'
-import { getAvatarColor, getAvatarTextColor, getInitials } from '../../utils/formatting'
+import { formatDueDateLabel } from '../../utils/dateUtils'
+import Avatar from '../ui/Avatar'
 import { showToast } from '../../utils/toast'
 import { useTemplateStore } from '../../store/templateStore'
 
@@ -78,19 +80,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
   const [priority, setPriority] = useState(card?.priority || 'medium')
   const [dueDate, setDueDate] = useState(card?.due_date || '')
   // Single openMenu value: 'menu' | 'priority' | 'due' | 'assignee' | 'icon' | null
-  const [openMenu, setOpenMenu] = useState(null)
-  const toggleMenu = (name) => setOpenMenu((cur) => cur === name ? null : name)
-
-  useEffect(() => {
-    if (!openMenu) return
-    const handler = (e) => {
-      // Ignore clicks inside portaled pickers (icon picker, etc)
-      if (e.target.closest('[data-icon-picker]')) return
-      if (!e.target.closest('[data-menu-root]')) setOpenMenu(null)
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [openMenu])
+  const [openMenu, setOpenMenu, toggleMenu] = useMenuState()
   const titleRef = useRef(null)
   const [labels, setLabels] = useState(card?.labels ? [...card.labels] : [])
   const [showLabelForm, setShowLabelForm] = useState(false)
@@ -252,14 +242,12 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                 if (dueDate) {
                   const d = new Date(dueDate)
                   const today = new Date()
-                  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
-                  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1)
-                  const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
-                  if (sameDay(d, today)) { dateLabel = 'Today'; dateColor = 'text-[#D4A843]' }
-                  else if (sameDay(d, tomorrow)) { dateLabel = 'Tomorrow'; dateColor = 'text-[#A8BA32]' }
-                  else if (sameDay(d, yesterday)) { dateLabel = 'Yesterday'; dateColor = 'text-[#C27A4A]' }
-                  else if (d < today) { dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); dateColor = 'text-[#C27A4A]' }
-                  else { dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); dateColor = 'text-[var(--text-secondary)]' }
+                  dateLabel = formatDueDateLabel(d)
+                  if (dateLabel === 'Today') dateColor = 'text-[#D4A843]'
+                  else if (dateLabel === 'Tomorrow') dateColor = 'text-[#A8BA32]'
+                  else if (dateLabel === 'Yesterday') dateColor = 'text-[#C27A4A]'
+                  else if (d < today) dateColor = 'text-[#C27A4A]'
+                  else dateColor = 'text-[var(--text-secondary)]'
                 }
                 return (
                   <button
@@ -458,20 +446,17 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                 <span className="flex -space-x-2">
                   {visible.map((name) => {
                     const isMe = isMeName(name)
-                    return (
-                      <span
-                        key={name}
-                        className={`w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-[var(--surface-page)] ${
-                          isMe && profile?.icon
-                            ? `${iconText} ${profile.color}`
-                            : `${getAvatarColor(name)} ${getAvatarTextColor(getAvatarColor(name))} text-[11px] font-heading`
-                        }`}
-                      >
-                        {isMe && profile?.icon
-                          ? <DynamicIcon name={profile.icon} className="w-3.5 h-3.5" />
-                          : getInitials(name).toLowerCase()}
-                      </span>
-                    )
+                    if (isMe && profile?.icon) {
+                      return (
+                        <span
+                          key={name}
+                          className={`w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-[var(--surface-page)] ${iconText} ${profile.color}`}
+                        >
+                          <DynamicIcon name={profile.icon} className="w-3.5 h-3.5" />
+                        </span>
+                      )
+                    }
+                    return <Avatar key={name} name={name} size="lg" ringed className="ring-[var(--surface-page)] w-7 h-7 text-[11px]" />
                   })}
                   {overflow > 0 && (
                     <span className="w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-[var(--surface-page)] bg-[var(--surface-hover)] text-[10px] font-medium text-[var(--text-secondary)]">
@@ -518,7 +503,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                         className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs bg-[var(--surface-hover)] font-medium"
                       >
                         <div className="flex items-center gap-2 w-full">
-                          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-heading ${getAvatarColor(name)} ${getAvatarTextColor(getAvatarColor(name))}`}>{getInitials(name).toLowerCase()}</span>
+                          <Avatar name={name} />
                           <span className="flex-1 truncate">{name}</span>
                         </div>
                         <Check className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
@@ -537,7 +522,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                           className={`min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs ${checked ? 'bg-[var(--surface-hover)] font-medium' : ''}`}
                         >
                           <div className="flex items-center gap-2 w-full">
-                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-heading ${getAvatarColor(member)} ${getAvatarTextColor(getAvatarColor(member))}`}>{getInitials(member).toLowerCase()}</span>
+                            <Avatar name={member} />
                             <span className="flex-1 truncate">{member}</span>
                           </div>
                           {checked && <Check className="w-3.5 h-3.5 text-[var(--text-secondary)]" />}

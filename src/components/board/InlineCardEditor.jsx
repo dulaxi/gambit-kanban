@@ -7,9 +7,11 @@ import { useWorkspacesStore } from '../../store/workspacesStore'
 import { supabase } from '../../lib/supabase'
 import DynamicIcon from './DynamicIcon'
 import IconPicker from './IconPicker'
+import { useMenuState } from '../../hooks/useMenuState'
 import { PRIORITY_OPTIONS } from '../../constants/colors'
-import { getAvatarColor, getAvatarTextColor, getInitials } from '../../utils/formatting'
-import { format, isPast, isToday, isTomorrow, isYesterday, parseISO } from 'date-fns'
+import { parseISO } from 'date-fns'
+import { formatDueDateLabel, dueDateBadgeClass } from '../../utils/dateUtils'
+import Avatar from '../ui/Avatar'
 
 /**
  * InlineCardEditor — matches the new Card.jsx layout 1:1.
@@ -39,11 +41,21 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
   const [description, setDescription] = useState(() => card?.description || '')
   const [checklist, setChecklist] = useState(() => card?.checklist ? [...card.checklist] : [])
 
-  const [openMenu, setOpenMenu] = useState(null) // 'icon' | 'priority' | 'date' | 'label' | 'assignee' | null
   const [showDescription, setShowDescription] = useState(() => !!card?.description)
   const [newLabelText, setNewLabelText] = useState('')
   const [boardMemberNames, setBoardMemberNames] = useState([])
   const [assigneeSearch, setAssigneeSearch] = useState('')
+  const newLabelTextRef = useRef('')
+  newLabelTextRef.current = newLabelText
+  const [openMenu, setOpenMenu] = useMenuState((closing) => {
+    if (closing === 'label') {
+      const trimmed = newLabelTextRef.current.trim()
+      if (trimmed) {
+        setLabels((prev) => [...prev, { text: trimmed, color: 'gray' }])
+        setNewLabelText('')
+      }
+    }
+  })
 
   // Resolve whether this card's board is scoped to a workspace
   const board = useBoardStore((s) => (card && s.boards ? s.boards[card.board_id] : null))
@@ -98,27 +110,6 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
   useEffect(() => {
     if (titleRef.current) titleRef.current.focus()
   }, [])
-
-  // Close menus on outside click — save pending label if any
-  useEffect(() => {
-    if (!openMenu) return
-    const handler = (e) => {
-      // Ignore clicks inside portaled pickers (icon picker, etc)
-      if (e.target.closest('[data-icon-picker]')) return
-      if (!e.target.closest('[data-menu-root]')) {
-        if (openMenu === 'label') {
-          const trimmed = newLabelText.trim()
-          if (trimmed) {
-            setLabels((prev) => [...prev, { text: trimmed, color: 'gray' }])
-            setNewLabelText('')
-          }
-        }
-        setOpenMenu(null)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [openMenu, newLabelText])
 
   if (!card) return null
 
@@ -324,18 +315,10 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
               <button
                 type="button"
                 onClick={() => setOpenMenu(openMenu === 'date' ? null : 'date')}
-                className={`font-semibold flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${
-                  isYesterday(dueDateObj) || (isPast(dueDateObj) && !isToday(dueDateObj))
-                    ? 'bg-[#F2D9C7] text-[#C27A4A]'
-                    : isToday(dueDateObj)
-                    ? 'bg-[#F5EDCF] text-[#D4A843]'
-                    : isTomorrow(dueDateObj)
-                    ? 'bg-[#EEF2D6] text-[#A8BA32]'
-                    : 'bg-[#EEF2D6] text-[#A8BA32]'
-                }`}
+                className={`font-semibold flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${dueDateBadgeClass(dueDateObj)}`}
               >
                 <CalendarDot size={12} weight="bold" />
-                {isToday(dueDateObj) ? 'Today' : isYesterday(dueDateObj) ? 'Yesterday' : isTomorrow(dueDateObj) ? 'Tomorrow' : format(dueDateObj, 'MMM d')}
+                {formatDueDateLabel(dueDateObj)}
               </button>
             ) : (
               <button
@@ -421,16 +404,16 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
                       {visible.map((name) => {
                         const isMe = isMeName(name)
                         return (
-                          <span
-                            key={name}
-                            className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center ring-2 ring-[var(--surface-page)] ${
-                              isMe && profile?.icon
-                                ? `${iconText} ${profile.color}`
-                                : `${getAvatarColor(name)} ${getAvatarTextColor(getAvatarColor(name))} text-[9px] font-heading`
-                            }`}
-                          >
-                            {isMe && profile?.icon ? <DynamicIcon name={profile.icon} className="w-3 h-3" /> : getInitials(name).toLowerCase()}
-                          </span>
+                          isMe && profile?.icon ? (
+                            <span
+                              key={name}
+                              className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center ring-2 ring-[var(--surface-page)] ${iconText} ${profile.color}`}
+                            >
+                              <DynamicIcon name={profile.icon} className="w-3 h-3" />
+                            </span>
+                          ) : (
+                            <Avatar key={name} name={name} size="sm" ringed className="ring-[var(--surface-page)]" />
+                          )
                         )
                       })}
                       {overflow > 0 && (
@@ -481,9 +464,7 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
                             className="min-h-7 px-2 py-1 rounded-lg cursor-pointer grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs bg-[var(--surface-hover)] font-medium"
                           >
                             <div className="flex items-center gap-2 w-full">
-                              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-heading ${getAvatarColor(name)} ${getAvatarTextColor(getAvatarColor(name))}`}>
-                                {getInitials(name).toLowerCase()}
-                              </span>
+                              <Avatar name={name} className="text-[8px]" />
                               <span className="flex-1 truncate">{name}</span>
                             </div>
                             <Check className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
@@ -502,9 +483,7 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
                               className={`min-h-7 px-2 py-1 rounded-lg cursor-pointer grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs ${checked ? 'bg-[var(--surface-hover)] font-medium' : ''}`}
                             >
                               <div className="flex items-center gap-2 w-full">
-                                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-heading ${getAvatarColor(member)} ${getAvatarTextColor(getAvatarColor(member))}`}>
-                                  {getInitials(member).toLowerCase()}
-                                </span>
+                                <Avatar name={member} className="text-[8px]" />
                                 <span className="flex-1 truncate">{member}</span>
                               </div>
                               {checked && <Check className="w-3.5 h-3.5 text-[var(--text-secondary)]" />}
