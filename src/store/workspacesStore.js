@@ -331,6 +331,16 @@ export const useWorkspacesStore = create(
               activeWorkspaceId: s.activeWorkspaceId === workspaceId ? null : s.activeWorkspaceId,
             }
           })
+          // Leaving revokes read access to that workspace's boards. Resync
+          // boardStore + sharedBoards so the now-inaccessible boards drop out
+          // of the sidebar, Home grid, AllBoards view, etc. Lazy import avoids
+          // circular dep.
+          const { useBoardStore } = await import('./boardStore')
+          const { useBoardSharingStore } = await import('./boardSharingStore')
+          await Promise.all([
+            useBoardStore.getState().fetchBoards(),
+            useBoardSharingStore.getState().fetchSharedBoards(),
+          ])
         } catch (err) {
           logError('leaveWorkspace failed:', err)
         }
