@@ -3,12 +3,12 @@ import remarkGfm from 'remark-gfm'
 
 const components = {
   h3: ({ children }) => (
-    <h3 className="text-[16px] font-semibold text-[var(--text-primary)] mt-4 mb-1.5" style={{ fontFamily: "'Clash Grotesk', sans-serif" }}>
+    <h3 className="text-[16px] text-[var(--text-primary)] mt-4 mb-1.5" style={{ fontFamily: "'Clash Grotesk', sans-serif", fontWeight: 550 }}>
       {children}
     </h3>
   ),
   strong: ({ children }) => (
-    <strong className="text-[var(--text-primary)]" style={{ fontFamily: "'Clash Grotesk', sans-serif", fontWeight: 600 }}>
+    <strong className="text-[var(--text-primary)]" style={{ fontFamily: "'Clash Grotesk', sans-serif", fontWeight: 550 }}>
       {children}
     </strong>
   ),

@@ -153,11 +153,12 @@ export default function Sidebar() {
           {/* Chat */}
           <NavLink
             to="/chat"
+            end
             onClick={closeMobileMenu}
-            title={showCollapsed ? 'Chat' : undefined}
+            title={showCollapsed ? 'Chats' : undefined}
             className={({ isActive }) =>
               `flex items-center h-8 rounded-lg text-sm transition-colors duration-75 overflow-hidden ${
-                isActive || location.pathname.startsWith('/chat')
+                isActive
                   ? 'bg-[var(--accent-lime-wash)] text-[var(--text-primary)]'
                   : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)]'
               } ${showCollapsed ? 'justify-center px-2' : 'gap-3 py-1.5 px-4'}`
