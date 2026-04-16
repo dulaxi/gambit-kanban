@@ -5,6 +5,7 @@ import { Plus, Search, Calendar, ClipboardList, ArrowUp, Columns3, Bug, Zap } fr
 import { capture } from '../lib/analytics'
 import { useAuthStore } from '../store/authStore'
 import { useBoardStore } from '../store/boardStore'
+import { useChatStore } from '../store/chatStore'
 
 const ACTIONS = [
   { label: 'Create a card', icon: Plus, prompt: 'Create a card: ' },
@@ -77,11 +78,20 @@ export default function DashboardPage() {
 
   const setActiveBoard = useBoardStore((s) => s.setActiveBoard)
   const addBoard = useBoardStore((s) => s.addBoard)
+  const createConversation = useChatStore((s) => s.createConversation)
+  const addMessage = useChatStore((s) => s.addMessage)
+  const mockRespond = useChatStore((s) => s.mockRespond)
 
   useEffect(() => { capture('feature_used', { feature: 'home' }) }, [])
 
   const handleSubmit = () => {
-    // AI hook-up point — noop for now
+    const text = input.trim()
+    if (!text) return
+    const convId = createConversation('New chat')
+    addMessage(convId, { role: 'user', text })
+    setInput('')
+    navigate(`/chat/${convId}`)
+    mockRespond(convId, text)
   }
 
   const handleKeyDown = (e) => {
