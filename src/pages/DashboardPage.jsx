@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sparkle } from '@phosphor-icons/react'
-import { Plus, Search, Calendar, ClipboardList, ArrowUp, Columns3, Bug, Zap } from 'lucide-react'
+import { Plus, Search, Calendar, ClipboardList, Columns3, Bug, Zap } from 'lucide-react'
 import { capture } from '../lib/analytics'
 import { useAuthStore } from '../store/authStore'
 import { useBoardStore } from '../store/boardStore'
 import { useChatStore } from '../store/chatStore'
+import ChatInput from '../components/chat/ChatInput'
 
 const ACTIONS = [
   { label: 'Create a card', icon: Plus, prompt: 'Create a card: ' },
@@ -74,7 +75,6 @@ export default function DashboardPage() {
   const profile = useAuthStore((s) => s.profile)
   const fullName = profile?.display_name || ''
   const firstName = fullName.split(' ')[0] || 'there'
-  const [input, setInput] = useState('')
 
   const setActiveBoard = useBoardStore((s) => s.setActiveBoard)
   const addBoard = useBoardStore((s) => s.addBoard)
@@ -84,30 +84,12 @@ export default function DashboardPage() {
 
   useEffect(() => { capture('feature_used', { feature: 'home' }) }, [])
 
-  const handleSubmit = () => {
-    const text = input.trim()
+  const handleSubmit = (text) => {
     if (!text) return
     const convId = createConversation('New chat')
     addMessage(convId, { role: 'user', text })
-    setInput('')
     navigate(`/chat/${convId}`)
     mockRespond(convId, text)
-  }
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSubmit()
-    }
-  }
-
-  const handleActionClick = (prompt) => {
-    setInput(prompt)
-    const el = document.querySelector('textarea[placeholder="How can I help you today?"]')
-    if (el) {
-      el.focus()
-      el.setSelectionRange(prompt.length, prompt.length)
-    }
   }
 
   const handleNewBoard = () => {
@@ -137,45 +119,7 @@ export default function DashboardPage() {
 
         {/* Chat input */}
         <div className="w-full">
-          <div className="flex flex-col bg-[var(--surface-card)] rounded-[20px] border border-transparent shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035),0_0_0_0.5px_rgba(224,219,213,0.6)] hover:shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035),0_0_0_0.5px_rgba(174,170,164,0.6)] focus-within:shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.075),0_0_0_0.5px_rgba(174,170,164,0.6)] transition-all duration-200">
-            <div className="flex flex-col m-3.5 gap-3">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="How can I help you today?"
-                rows={1}
-                className="w-full resize-none bg-transparent text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none min-h-[1.5rem] max-h-96 pl-1.5 pt-1"
-                onInput={(e) => {
-                  e.target.style.height = 'auto'
-                  e.target.style.height = e.target.scrollHeight + 'px'
-                }}
-              />
-
-              <div className="flex items-center gap-2">
-                <button type="button" aria-label="Add files, connectors, and more" className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-[var(--surface-hover)] text-[var(--text-secondary)] transition-colors cursor-pointer">
-                  <Plus className="w-5 h-5" />
-                </button>
-                <div className="flex-1" />
-                {input.trim() ? (
-                  <button type="button" onClick={handleSubmit} aria-label="Send message" className="h-8 w-8 rounded-lg flex items-center justify-center bg-[var(--text-primary)] text-[var(--surface-card)] hover:opacity-90 transition-opacity cursor-pointer">
-                    <ArrowUp className="w-4 h-4" strokeWidth={2.5} />
-                  </button>
-                ) : (
-                  <button type="button" aria-label="Use voice mode" className="h-8 px-1.5 rounded-lg flex items-center justify-center hover:bg-[var(--surface-hover)] text-[var(--text-secondary)] transition-colors cursor-pointer">
-                    <svg width="20" height="20" viewBox="0 0 21 21" fill="none" className="block">
-                      <rect x="0" y="7.5" height="6" fill="currentColor" width="1" rx="0.5" />
-                      <rect x="4" y="5.5" height="10" fill="currentColor" width="1" rx="0.5" />
-                      <rect x="8" y="2.5" height="16" fill="currentColor" width="1" rx="0.5" />
-                      <rect x="12" y="5.5" height="10" fill="currentColor" width="1" rx="0.5" />
-                      <rect x="16" y="2.5" height="16" fill="currentColor" width="1" rx="0.5" />
-                      <rect x="20" y="7.5" height="6" fill="currentColor" width="1" rx="0.5" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
+          <ChatInput onSend={handleSubmit} />
         </div>
 
         {/* Kanban-action pills */}
@@ -185,7 +129,7 @@ export default function DashboardPage() {
               <li key={label}>
                 <button
                   type="button"
-                  onClick={() => handleActionClick(prompt)}
+                  onClick={() => handleSubmit(prompt)}
                   className="inline-flex items-center gap-1.5 h-8 px-2.5 text-sm text-[var(--text-secondary)] bg-[var(--surface-page)] border-[0.5px] border-[var(--border-default)] rounded-lg hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-all duration-75 cursor-pointer"
                 >
                   <Icon className="w-4 h-4 text-[var(--text-muted)] -ml-0.5" />
