@@ -16,6 +16,7 @@ const CalendarPage = lazy(() => import('./pages/CalendarPage'))
 const NotesPage = lazy(() => import('./pages/NotesPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const WorkspacePage = lazy(() => import('./pages/WorkspacePage'))
+const ChatPage = lazy(() => import('./pages/ChatPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 function UndoListener() {
@@ -63,6 +64,7 @@ export default function App() {
             }
           >
             <Route path="dashboard" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
+            <Route path="chat/:id" element={<ErrorBoundary><ChatPage /></ErrorBoundary>} />
             <Route path="boards/*" element={<ErrorBoundary><BoardsPage /></ErrorBoundary>} />
             <Route path="workspace" element={<ErrorBoundary><WorkspacePage /></ErrorBoundary>} />
             <Route path="calendar" element={<ErrorBoundary><CalendarPage /></ErrorBoundary>} />
