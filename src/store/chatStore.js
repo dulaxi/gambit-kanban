@@ -67,4 +67,43 @@ export const useChatStore = create((set, get) => ({
   setActiveConversation: (id) => set({ activeConversationId: id }),
   setStreaming: (conversationId) => set({ streamingConversationId: conversationId }),
   clearStreaming: () => set({ streamingConversationId: null }),
+
+  mockRespond: async (conversationId, userText) => {
+    set({ streamingConversationId: conversationId })
+
+    const lower = userText.toLowerCase()
+    let response
+    if (lower.startsWith('create a card') || lower.startsWith('create card')) {
+      const title = userText.replace(/^create a card[:\s]*/i, '').trim() || 'New task'
+      response = `Done — created **${title}** in your board.\n\nAssigned to you, priority medium. Want me to set a due date?`
+    } else if (lower.includes('find task') || lower.includes('search')) {
+      response = `Here are the matching cards:\n\n1. **Hero section** — In Progress, due Friday\n2. **Pricing table** — To Do, no due date\n3. **Stripe integration** — Review, due today\n\nWant me to open any of these?`
+    } else if (lower.includes('plan my week') || lower.includes('stand-up')) {
+      response = `### This week's focus\n\n- **3 cards** due this week across 2 boards\n- **Stripe integration** is the most urgent (due today)\n- **Hero section** due Friday — currently in progress\n\n### Suggested priorities\n\n1. Fix the Stripe webhook (blocked)\n2. Finish hero section (in progress)\n3. Start pricing table (not started)\n\nWant me to create a stand-up summary from this?`
+    } else {
+      response = "I'll be able to help with that once my AI is connected. For now, try creating cards or boards from the templates on the Home page!"
+    }
+
+    await new Promise((r) => setTimeout(r, 1500))
+
+    const words = response.split(' ')
+    let streamed = ''
+    const msgId = get().addMessage(conversationId, { role: 'assistant', text: '' })
+
+    for (let i = 0; i < words.length; i++) {
+      streamed += (i === 0 ? '' : ' ') + words[i]
+      set((s) => ({
+        messages: {
+          ...s.messages,
+          [conversationId]: s.messages[conversationId].map((m) =>
+            m.id === msgId ? { ...m, text: streamed } : m
+          ),
+        },
+      }))
+      await new Promise((r) => setTimeout(r, 30))
+    }
+
+    set({ streamingConversationId: null })
+    get().generateTitle(conversationId)
+  },
 }))
