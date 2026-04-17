@@ -30,9 +30,9 @@ export default function ChatMessage({ message }) {
     )
   }
 
-  const embeddedCards = (message.cardIds || [])
-    .map((id) => cards[id])
-    .filter(Boolean)
+  const tempIdMap = useBoardStore((s) => s._tempIdMap)
+  const resolvedIds = (message.cardIds || []).map((id) => tempIdMap[id] || id)
+  const embeddedCards = resolvedIds.map((id) => cards[id]).filter(Boolean)
 
   return (
     <div className="mb-5 pl-1">
@@ -58,7 +58,7 @@ export default function ChatMessage({ message }) {
         </div>
       )}
 
-      {(message.cardIds || []).filter((id) => !cards[id]).map((id) => (
+      {resolvedIds.filter((id) => !cards[id]).map((id) => (
         <div key={id} className="mt-2 px-3 py-2 rounded-xl bg-[var(--surface-raised)] text-[13px] text-[var(--text-faint)]">
           Card not found
         </div>
