@@ -101,37 +101,4 @@ export const TOOLS = [
       required: ["name"],
     },
   },
-  {
-    name: "search_cards",
-    description: "Search cards across all accessible boards. Use this for finding cards, listing due/overdue items, or answering questions about what exists.",
-    input_schema: {
-      type: "object",
-      properties: {
-        query: { type: "string", description: "Search query — matched against card titles, descriptions, labels" },
-        filters: {
-          type: "object",
-          properties: {
-            priority: { type: "string", enum: ["low", "medium", "high"] },
-            assignee: { type: "string" },
-            due: { type: "string", enum: ["today", "overdue", "this_week"] },
-            board: { type: "string" },
-            completed: { type: "boolean" },
-          },
-          description: "Optional filters to narrow results",
-        },
-      },
-      required: ["query"],
-    },
-  },
-  {
-    name: "summarize_board",
-    description: "Get a summary of a board's current state — columns, card counts, who's working on what, blockers.",
-    input_schema: {
-      type: "object",
-      properties: {
-        board: { type: "string", description: "Board name to summarize" },
-      },
-      required: ["board"],
-    },
-  },
 ] as const

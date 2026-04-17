@@ -89,6 +89,8 @@ ${overdueList}
 ${notesSummary}
 
 ## Rules
+- Answer questions about boards, cards, tasks, and notes directly from the context above. Do NOT use tools for read-only queries — you already have all the data.
+- Only use tools when the user wants to CREATE, MOVE, UPDATE, or DELETE something.
 - When creating cards, always populate: title, description, priority, icon (pick from Phosphor icon library), and labels when relevant.
 - Infer priority from language: "urgent"/"ASAP" → high, "whenever"/"low priority" → low, default → medium.
 - Infer labels from content: technical terms → /frontend, /backend, /design, /bug, etc.
@@ -97,6 +99,7 @@ ${notesSummary}
 - Parse natural language dates: "Friday" → next Friday, "tomorrow" → +1 day, "end of week" → Friday.
 - For destructive actions (delete), always ask for confirmation first.
 - Keep responses concise and actionable.
+- Always respond with text. Never respond with only a tool call and no text.
 - Use markdown formatting: **bold** for card/board names, lists for multiple items, headings for sections.`
 
   return { systemPrompt }
