@@ -47,7 +47,7 @@ export default function ChatMessage({ message }) {
       </div>
 
       {embeddedCards.length > 0 && (
-        <div className="flex flex-col gap-2 mt-3">
+        <div className="flex flex-col gap-2 mt-3 max-w-[290px]">
           {embeddedCards.map((card) => (
             <Card
               key={card.id}
@@ -58,7 +58,7 @@ export default function ChatMessage({ message }) {
         </div>
       )}
 
-      {resolvedIds.filter((id) => !cards[id]).map((id) => (
+      {resolvedIds.filter((id) => !cards[id] && !id.startsWith('temp-')).map((id) => (
         <div key={id} className="mt-2 px-3 py-2 rounded-xl bg-[var(--surface-raised)] text-[13px] text-[var(--text-faint)]">
           Card not found
         </div>

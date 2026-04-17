@@ -41,7 +41,7 @@ export async function executeTool(action, params) {
 
     const checklist = (params.checklist || []).map((text) => ({ text, done: false }))
 
-    const cardId = await store.addCard(board.id, column.id, {
+    const tempId = await store.addCard(board.id, column.id, {
       title: params.title,
       description: params.description || '',
       priority: params.priority || 'medium',
@@ -51,7 +51,14 @@ export async function executeTool(action, params) {
       assignee_name: params.assignee || null,
       due_date: params.due_date || null,
     })
+    if (!tempId) return { ok: false, error: 'Failed to create card' }
 
+    let cardId = tempId
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 200))
+      const realId = useBoardStore.getState()._tempIdMap[tempId]
+      if (realId) { cardId = realId; break }
+    }
     return { ok: true, cardId }
   }
 
