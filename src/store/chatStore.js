@@ -84,8 +84,9 @@ export const useChatStore = create(persist((set, get) => ({
   sendMessage: async (conversationId, userText) => {
     set({ streamingConversationId: conversationId })
 
-    const history = (get().messages[conversationId] || [])
-      .filter((m) => m.id)
+    const allMsgs = (get().messages[conversationId] || []).filter((m) => m.id && m.text)
+    const history = allMsgs
+      .slice(0, -1)
       .slice(-20)
       .map((m) => ({ role: m.role, content: m.text }))
 
