@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { MagnifyingGlass, ChatsCircle } from '@phosphor-icons/react'
 import { useChatStore } from '../store/chatStore'
 import { formatDistanceToNow } from 'date-fns'
@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns'
 export default function ChatListPage() {
   const navigate = useNavigate()
   const conversations = useChatStore((s) => s.conversations)
+  const clearAll = useChatStore((s) => s.clearAll)
   const [search, setSearch] = useState('')
 
   const sorted = useMemo(() => {
@@ -22,14 +23,26 @@ export default function ChatListPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-heading text-2xl text-[var(--text-primary)]">Chat</h1>
-        <button
-          type="button"
-          onClick={() => navigate('/dashboard')}
-          className="inline-flex items-center gap-1.5 h-8 px-3 text-sm text-[var(--text-secondary)] border-[0.5px] border-[var(--border-default)] rounded-lg hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-all cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          New chat
-        </button>
+        <div className="flex items-center gap-2">
+          {Object.keys(conversations).length > 0 && (
+            <button
+              type="button"
+              onClick={() => { if (window.confirm('Delete all conversations?')) clearAll() }}
+              className="inline-flex items-center gap-1.5 h-8 px-3 text-sm text-[var(--text-muted)] border-[0.5px] border-[var(--border-default)] rounded-lg hover:bg-[var(--surface-hover)] hover:text-[#C27A4A] transition-all cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Clear all
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard')}
+            className="inline-flex items-center gap-1.5 h-8 px-3 text-sm text-[var(--text-secondary)] border-[0.5px] border-[var(--border-default)] rounded-lg hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            New chat
+          </button>
+        </div>
       </div>
 
       {/* Search */}

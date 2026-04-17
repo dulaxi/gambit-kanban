@@ -67,6 +67,8 @@ export const useChatStore = create(persist((set, get) => ({
       .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
   },
 
+  clearAll: () => set({ conversations: {}, messages: {}, activeConversationId: null, streamingConversationId: null }),
+
   setActiveConversation: (id) => set({ activeConversationId: id }),
   setStreaming: (conversationId) => set({ streamingConversationId: conversationId }),
   clearStreaming: () => set({ streamingConversationId: null }),
