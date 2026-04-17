@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { buildContext } from "./context.ts"
 import { TOOLS } from "./tools.ts"
 import { SSEWriter, sseHeaders } from "./stream.ts"
+import { checkTier, filterToolsForTier } from "./tier.ts"
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 
@@ -52,6 +53,23 @@ Deno.serve(async (req) => {
     return new Response("Message is required", { status: 400 })
   }
 
+  // Tier check + rate limit
+  const tierInfo = await checkTier(supabase, user.id, body.message)
+
+  if (!tierInfo.allowed) {
+    return new Response(
+      JSON.stringify({
+        error: "rate_limit",
+        message: "You've reached your daily limit of 20 messages. Upgrade to Pro for unlimited access.",
+        remaining: 0,
+      }),
+      {
+        status: 429,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      },
+    )
+  }
+
   const { systemPrompt } = await buildContext(supabase, user.id)
 
   const messages: Array<{ role: string; content: string }> = [
@@ -60,6 +78,9 @@ Deno.serve(async (req) => {
   ]
 
   const sse = new SSEWriter()
+
+  // Send tier info as first SSE event
+  sse.write({ type: "tier", tier: tierInfo.tier, remaining: tierInfo.remaining })
 
   const streamToClient = async () => {
     try {
@@ -71,10 +92,10 @@ Deno.serve(async (req) => {
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
+          model: tierInfo.model,
           max_tokens: 4096,
           system: systemPrompt,
-          tools: TOOLS,
+          tools: filterToolsForTier(TOOLS, tierInfo.tier),
           messages,
           stream: true,
         }),
