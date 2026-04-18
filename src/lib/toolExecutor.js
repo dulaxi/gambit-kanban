@@ -63,14 +63,18 @@ export async function executeTool(action, params) {
     })
     if (!tempId) return { ok: false, error: 'Failed to create card' }
     aiBuildingCards.add(tempId)
-    setTimeout(() => aiBuildingCards.delete(tempId), 2000)
 
     let cardId = tempId
     for (let i = 0; i < 20; i++) {
       await new Promise((r) => setTimeout(r, 200))
       const realId = useBoardStore.getState()._tempIdMap[tempId]
-      if (realId) { cardId = realId; break }
+      if (realId) {
+        aiBuildingCards.add(realId)
+        cardId = realId
+        break
+      }
     }
+    setTimeout(() => { aiBuildingCards.delete(tempId); aiBuildingCards.delete(cardId) }, 3000)
     return { ok: true, cardId }
   }
 
