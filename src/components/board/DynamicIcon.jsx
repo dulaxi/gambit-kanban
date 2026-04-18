@@ -63,9 +63,11 @@ function renderMaterial(materialName, sizePx, props) {
 }
 
 function renderPhosphor(iconName, sizePx, props) {
+  const prefix = props.weight === 'fill' ? 'ph-fill' : 'ph'
+  const { weight: _, ...restProps } = props
   return (
     <i
-      className={`ph ph-${iconName}`}
+      className={`${prefix} ph-${iconName}`}
       style={{
         fontSize: `${sizePx}px`,
         lineHeight: `${sizePx}px`,
@@ -76,7 +78,7 @@ function renderPhosphor(iconName, sizePx, props) {
         height: `${sizePx}px`,
         flexShrink: 0,
       }}
-      {...props}
+      {...restProps}
     />
   )
 }
