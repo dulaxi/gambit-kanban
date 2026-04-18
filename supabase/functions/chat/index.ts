@@ -94,7 +94,13 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           model: tierInfo.model,
           max_tokens: 4096,
-          system: systemPrompt,
+          system: [
+            {
+              type: "text",
+              text: systemPrompt,
+              cache_control: { type: "ephemeral" },
+            },
+          ],
           tools: filterToolsForTier(TOOLS, tierInfo.tier),
           messages,
           stream: true,
