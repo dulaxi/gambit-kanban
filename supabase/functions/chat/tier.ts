@@ -62,7 +62,7 @@ function classifyModel(message: string): string {
 
   const isWrite = writePatterns.some((p) => lower.includes(p))
 
-  if (isWrite) return "claude-3-5-sonnet-20241022"
+  if (isWrite) return "claude-haiku-4-5-20251001"
   return "claude-haiku-4-5-20251001"
 }
 
