@@ -29,6 +29,9 @@ function firstColumnOf(boardId) {
 
 const DESTRUCTIVE_ACTIONS = ['delete_card']
 
+const aiBuildingCards = new Set()
+export function isAIBuilding(cardId) { return aiBuildingCards.has(cardId) }
+
 export function isDestructive(action) {
   return DESTRUCTIVE_ACTIONS.includes(action)
 }
@@ -57,9 +60,10 @@ export async function executeTool(action, params) {
       checklist,
       assignee_name: params.assignee || null,
       dueDate: params.due_date || null,
-      _aiBuilding: true,
     })
     if (!tempId) return { ok: false, error: 'Failed to create card' }
+    aiBuildingCards.add(tempId)
+    setTimeout(() => aiBuildingCards.delete(tempId), 2000)
 
     let cardId = tempId
     for (let i = 0; i < 20; i++) {

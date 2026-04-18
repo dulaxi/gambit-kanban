@@ -5,13 +5,14 @@ import { GripVertical } from 'lucide-react'
 import Card from './Card'
 import AICardSkeleton from './AICardSkeleton'
 import { useIsMobile } from '../../hooks/useMediaQuery'
+import { isAIBuilding } from '../../lib/toolExecutor'
 
 export default memo(function SortableCard({ card, onClick, onComplete, isSelected }) {
-  const [showSkeleton, setShowSkeleton] = useState(!!card._aiBuilding)
+  const [showSkeleton, setShowSkeleton] = useState(() => isAIBuilding(card.id))
 
   useEffect(() => {
     if (showSkeleton) {
-      const timer = setTimeout(() => setShowSkeleton(false), 1200)
+      const timer = setTimeout(() => setShowSkeleton(false), 1500)
       return () => clearTimeout(timer)
     }
   }, [showSkeleton])
