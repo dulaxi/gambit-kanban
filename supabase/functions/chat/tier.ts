@@ -2,7 +2,7 @@ import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const FREE_DAILY_LIMIT = 20
 
-const PRO_ONLY_TOOLS = ["move_card", "update_card", "delete_card", "create_board"]
+const PRO_ONLY_TOOLS = ["move_card", "update_card", "delete_card"]
 
 export interface TierInfo {
   tier: "free" | "pro"
