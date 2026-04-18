@@ -27,6 +27,12 @@ function firstColumnOf(boardId) {
     .sort((a, b) => a.position - b.position)[0]
 }
 
+const DESTRUCTIVE_ACTIONS = ['delete_card']
+
+export function isDestructive(action) {
+  return DESTRUCTIVE_ACTIONS.includes(action)
+}
+
 export async function executeTool(action, params) {
   console.log('[toolExecutor]', action, params)
   const store = useBoardStore.getState()
