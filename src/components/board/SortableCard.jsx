@@ -1,11 +1,20 @@
-import { memo } from 'react'
+import { memo, useState, useEffect } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 import Card from './Card'
+import AICardSkeleton from './AICardSkeleton'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 
 export default memo(function SortableCard({ card, onClick, onComplete, isSelected }) {
+  const [showSkeleton, setShowSkeleton] = useState(card._optimistic && card.title === 'Untitled task')
+
+  useEffect(() => {
+    if (showSkeleton && card.title !== 'Untitled task') {
+      const timer = setTimeout(() => setShowSkeleton(false), 600)
+      return () => clearTimeout(timer)
+    }
+  }, [showSkeleton, card.title])
   const isMobile = useIsMobile()
   const {
     attributes,
@@ -23,8 +32,15 @@ export default memo(function SortableCard({ card, onClick, onComplete, isSelecte
     opacity: isDragging ? 0.4 : 1,
   }
 
+  if (showSkeleton) {
+    return (
+      <div ref={setNodeRef} style={style}>
+        <AICardSkeleton />
+      </div>
+    )
+  }
+
   if (isMobile) {
-    // On mobile, use a drag handle so touch scrolling works normally
     return (
       <div ref={setNodeRef} style={style} className="flex items-stretch">
         <div

@@ -114,6 +114,10 @@ export async function executeTool(action, params) {
   if (action === 'create_board') {
     const columns = params.columns || ['To Do', 'In Progress', 'Done']
     const boardId = await store.addBoard(params.name, params.icon || null, columns)
+    if (boardId) {
+      store.setActiveBoard(boardId)
+      window.dispatchEvent(new CustomEvent('kolumn:ai-navigate-board'))
+    }
     return { ok: true, boardId }
   }
 

@@ -20,6 +20,12 @@ export default function ChatPage() {
   }, [id])
 
   useEffect(() => {
+    const handler = () => navigate('/boards')
+    window.addEventListener('kolumn:ai-navigate-board', handler)
+    return () => window.removeEventListener('kolumn:ai-navigate-board', handler)
+  }, [navigate])
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages.length, streamingId])
 

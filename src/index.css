@@ -222,6 +222,39 @@
   color: transparent;
 }
 
+/* AI card building shimmer */
+@keyframes ai-card-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.ai-card-building {
+  background: linear-gradient(
+    90deg,
+    var(--surface-card) 0%,
+    #E8DDE2 20%,
+    #EEF2D6 40%,
+    #DAE0F0 60%,
+    var(--surface-card) 80%
+  );
+  background-size: 200% 100%;
+  animation: ai-card-shimmer 2s ease-in-out infinite;
+}
+
+.ai-skeleton-block {
+  background: var(--surface-raised);
+  border-radius: 6px;
+  animation: ai-card-shimmer 2s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    var(--surface-raised) 0%,
+    #E8DDE2 25%,
+    #EEF2D6 50%,
+    var(--surface-raised) 75%
+  );
+  background-size: 200% 100%;
+}
+
 /* Text selection */
 ::selection {
   background: #EEF2D6;
