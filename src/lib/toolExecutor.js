@@ -32,6 +32,11 @@ const DESTRUCTIVE_ACTIONS = ['delete_card']
 const aiBuildingCards = new Set()
 export function isAIBuilding(cardId) { return aiBuildingCards.has(cardId) }
 
+const AI_CARDS_KEY = 'kolumn-ai-cards'
+function getAICards() { try { return new Set(JSON.parse(localStorage.getItem(AI_CARDS_KEY) || '[]')) } catch { return new Set() } }
+function saveAICard(id) { const s = getAICards(); s.add(id); localStorage.setItem(AI_CARDS_KEY, JSON.stringify([...s].slice(-200))) }
+export function isAICreated(cardId) { return getAICards().has(cardId) }
+
 export function isDestructive(action) {
   return DESTRUCTIVE_ACTIONS.includes(action)
 }
@@ -70,6 +75,7 @@ export async function executeTool(action, params) {
       const realId = useBoardStore.getState()._tempIdMap[tempId]
       if (realId) {
         aiBuildingCards.add(realId)
+        saveAICard(realId)
         cardId = realId
         break
       }

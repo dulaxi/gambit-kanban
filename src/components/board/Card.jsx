@@ -9,6 +9,7 @@ import DynamicIcon from './DynamicIcon'
 import { LABEL_BG, PRIORITY_DOT } from '../../utils/formatting'
 import { formatDueDateLabel, dueDateBadgeClass } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
+import { isAICreated } from '../../lib/toolExecutor'
 
 export default memo(function Card({ card, onClick, onComplete, isSelected, iconOverride }) {
   const { title, description, labels, priority, due_date: dueDate, checklist, task_number: taskNumber, completed, icon } = card
@@ -39,6 +40,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
   const overdue = dueDateObj ? isPast(dueDateObj) : false
 
   const priDot = PRIORITY_DOT[priority] || PRIORITY_DOT.medium
+  const aiCard = isAICreated(card.id)
 
   return (
     <button
@@ -55,7 +57,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
       {/* Top row: icon + title + check */}
       <div className="flex items-center gap-3">
         {/* Icon container — Claude skill card style */}
-        <div className="flex w-10 h-10 shrink-0 items-center justify-center rounded-lg border-0.5 border-[var(--border-default)] bg-[var(--surface-raised)]">
+        <div className={`flex w-10 h-10 shrink-0 items-center justify-center rounded-lg border-0.5 ${aiCard ? 'border-[#E8DDE2] bg-[#E8DDE2]' : 'border-[var(--border-default)] bg-[var(--surface-raised)]'}`}>
           <div className="w-5 h-5 flex items-center justify-center">
             {displayIcon ? (
               <DynamicIcon name={displayIcon} className="w-5 h-5 text-[var(--text-primary)]" />
