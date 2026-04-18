@@ -60,9 +60,9 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
         <div className={`flex w-10 h-10 shrink-0 items-center justify-center rounded-lg border-0.5 ${aiCard ? 'border-[#E8DDE2] bg-[#E8DDE2]' : 'border-[var(--border-default)] bg-[var(--surface-raised)]'}`}>
           <div className="w-5 h-5 flex items-center justify-center">
             {displayIcon ? (
-              <DynamicIcon name={displayIcon} className="w-5 h-5 text-[var(--text-primary)]" />
+              <DynamicIcon name={displayIcon} className={`w-5 h-5 ${aiCard ? 'text-[#8BA32E]' : 'text-[var(--text-primary)]'}`} />
             ) : (
-              <FileText size={20} weight="regular" className="text-[var(--text-muted)]" />
+              <FileText size={20} weight="regular" className={aiCard ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'} />
             )}
           </div>
         </div>
