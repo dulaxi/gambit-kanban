@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Sparkle, Microphone } from '@phosphor-icons/react'
+import { Sparkle, Waveform } from '@phosphor-icons/react'
 import { ArrowUp } from 'lucide-react'
 import { useClickOutside } from '../../hooks/useClickOutside'
 import { useBoardStore } from '../../store/boardStore'
@@ -87,7 +87,7 @@ export default function QuickAddBar({ boardId }) {
             aria-label="Voice input"
             className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
           >
-            <Microphone size={20} weight="regular" className="text-[var(--text-secondary)]" />
+            <Waveform size={20} weight="regular" className="text-[var(--text-secondary)]" />
           </button>
         </div>
       </div>
