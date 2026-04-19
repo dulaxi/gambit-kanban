@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Sparkle } from '@phosphor-icons/react'
+import { Sparkle, Microphone } from '@phosphor-icons/react'
 import { ArrowUp, X } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
 import { executeTool } from '../../lib/toolExecutor'
@@ -70,13 +70,20 @@ export default function QuickAddBar({ boardId }) {
 
   if (!expanded) {
     return (
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3">
         <button
           type="button"
           onClick={() => setExpanded(true)}
           className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--surface-card)] border-[0.5px] border-[var(--border-default)] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.14)] hover:border-[var(--text-muted)] hover:scale-105 transition-all cursor-pointer"
         >
           <Sparkle size={22} weight="fill" className="text-[#D4B8C8]" />
+        </button>
+        <button
+          type="button"
+          aria-label="Voice input"
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--surface-card)] border-[0.5px] border-[var(--border-default)] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.14)] hover:border-[var(--text-muted)] hover:scale-105 transition-all cursor-pointer"
+        >
+          <Microphone size={22} weight="regular" className="text-[var(--text-secondary)]" />
         </button>
       </div>
     )
