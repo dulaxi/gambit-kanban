@@ -24,8 +24,8 @@ export default function QuickAddBar({ boardId }) {
       clearTimeout(scrollTimer.current)
       scrollTimer.current = setTimeout(() => setVisible(true), 800)
     }
-    container.addEventListener('scroll', onScroll, { passive: true })
-    return () => { container.removeEventListener('scroll', onScroll); clearTimeout(scrollTimer.current) }
+    container.addEventListener('scroll', onScroll, { capture: true, passive: true })
+    return () => { container.removeEventListener('scroll', onScroll, { capture: true }); clearTimeout(scrollTimer.current) }
   }, [expanded])
 
   useEffect(() => {
