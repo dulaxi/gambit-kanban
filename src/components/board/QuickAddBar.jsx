@@ -74,10 +74,9 @@ export default function QuickAddBar({ boardId }) {
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="flex items-center gap-2 h-9 px-4 rounded-full bg-[var(--surface-card)] border-[0.5px] border-[var(--border-default)] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.12)] hover:border-[var(--text-muted)] transition-all cursor-pointer"
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--surface-card)] border-[0.5px] border-[var(--border-default)] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.14)] hover:border-[var(--text-muted)] hover:scale-105 transition-all cursor-pointer"
         >
-          <Sparkle size={14} weight="fill" className="text-[#D4B8C8]" />
-          <span className="text-[13px] text-[var(--text-secondary)]">AI Quick Add</span>
+          <Sparkle size={22} weight="fill" className="text-[#D4B8C8]" />
         </button>
       </div>
     )
