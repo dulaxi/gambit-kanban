@@ -17,6 +17,7 @@ import { useIsMobile } from '../../hooks/useMediaQuery'
 import SortableColumn from './SortableColumn'
 import Column from './Column'
 import Card from './Card'
+import QuickAddBar from './QuickAddBar'
 
 export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCardId, onInlineDone, selectedCardId, filters, sortBy }) {
   const [isAddingColumn, setIsAddingColumn] = useState(false)
@@ -281,6 +282,7 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
+      <QuickAddBar boardId={boardId} />
       <div className="flex gap-3 sm:gap-5 overflow-x-auto h-full pb-4 snap-x snap-mandatory sm:snap-none scroll-pl-0 overscroll-x-contain">
         {/* Column drag reorder disabled for now — SortableColumn + reorderColumns ready when needed */}
         {boardColumns.map((column) => (
