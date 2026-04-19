@@ -264,61 +264,6 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
         )}
       </div>
 
-      {/* Add card */}
-      <div className="pt-1 relative">
-        <div className="flex items-center">
-          <button
-            type="button"
-            onClick={() => handleCreateCard()}
-            disabled={creating}
-            className="flex items-center gap-1.5 text-[13px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] px-0.5 py-1.5 flex-1 transition-colors disabled:opacity-50"
-          >
-            <Plus className="w-4 h-4" />
-            {creating ? 'Adding...' : 'Add task'}
-          </button>
-          {templates.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowTemplates(!showTemplates)}
-              className="p-1 rounded text-[var(--text-faint)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
-              title="From template"
-            >
-              <Bookmark className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-        {showTemplates && (
-          <div className="absolute bottom-full mb-1 left-0 right-0 bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.1)] z-30 overflow-hidden py-1.5">
-            <div className="flex items-center justify-between px-3 py-1.5 border-b border-[var(--border-subtle)]">
-              <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Templates</span>
-              <button type="button" onClick={() => setShowTemplates(false)} aria-label="Close templates" className="text-[var(--text-faint)] hover:text-[var(--text-secondary)]">
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-            <div className="max-h-40 overflow-y-auto py-1">
-              {templates.map((t) => (
-                <div key={t.id} className="flex items-center group">
-                  <button
-                    type="button"
-                    onClick={() => handleCreateCard(t)}
-                    className="flex-1 text-left px-3 py-1.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] truncate transition-colors"
-                  >
-                    {t.name}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => deleteTemplate(t.id)}
-                    aria-label={`Delete template ${t.name}`}
-                    className="p-1 mr-1 text-[var(--text-faint)] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 transition-all"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
 
       {confirmDelete && (
         <ConfirmModal

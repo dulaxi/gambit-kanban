@@ -239,7 +239,7 @@ export default function AppLayout() {
             </header>
           </div>
         )}
-        <main className={`flex-1 min-h-0 flex flex-col ${['/boards', '/calendar', '/notes'].includes(basePath) ? 'px-4 sm:px-8 pb-12' : 'px-4 sm:px-8 pb-12 max-w-4xl mx-auto overflow-y-auto w-full subtle-scrollbar'} ${!isDesktop ? 'pb-20' : ''}`}>
+        <main className={`flex-1 min-h-0 flex flex-col ${basePath === '/boards' ? 'px-4 sm:px-8' : ['/calendar', '/notes'].includes(basePath) ? 'px-4 sm:px-8 pb-12' : 'px-4 sm:px-8 pb-12 max-w-4xl mx-auto overflow-y-auto w-full subtle-scrollbar'} ${!isDesktop ? 'pb-20' : ''}`}>
           {/* Migration banner */}
           {showMigration && (
             <div className="mb-4 bg-[var(--accent-lime-wash)] border border-[#C2D64A] rounded-xl p-4 flex items-center justify-between">

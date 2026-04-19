@@ -53,14 +53,4 @@ describe('Column', () => {
     expect(screen.getByText('2')).toBeInTheDocument()
   })
 
-  test('renders Add task button', () => {
-    render(<Column column={column} boardId="b1" onCardClick={vi.fn()} />)
-    expect(screen.getByText('Add task')).toBeInTheDocument()
-  })
-
-  test('clicking Add task calls addCard', async () => {
-    render(<Column column={column} boardId="b1" onCardClick={vi.fn()} />)
-    screen.getByText('Add task').click()
-    expect(mockAddCard).toHaveBeenCalled()
-  })
 })
