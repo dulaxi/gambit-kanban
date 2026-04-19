@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Sparkle, Microphone } from '@phosphor-icons/react'
-import { ArrowUp, X } from 'lucide-react'
+import { ArrowUp } from 'lucide-react'
+import { useClickOutside } from '../../hooks/useClickOutside'
 import { useBoardStore } from '../../store/boardStore'
 import { executeTool } from '../../lib/toolExecutor'
 import { streamChat } from '../../lib/aiClient'
@@ -10,6 +11,7 @@ export default function QuickAddBar({ boardId }) {
   const [input, setInput] = useState('')
   const [processing, setProcessing] = useState(false)
   const inputRef = useRef(null)
+  const expandedRef = useClickOutside(() => { if (!processing) { setExpanded(false); setInput('') } })
   const boardName = useBoardStore((s) => s.boards[boardId]?.name)
 
   useEffect(() => {
@@ -93,7 +95,7 @@ export default function QuickAddBar({ boardId }) {
   }
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-md">
+    <div ref={expandedRef} className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-md">
       <div className="flex items-center gap-2 h-11 px-4 rounded-2xl bg-[var(--surface-card)] border-[0.5px] border-[var(--border-default)] shadow-[0_4px_24px_rgba(0,0,0,0.1)] transition-all">
         <Sparkle size={14} weight="fill" className="shrink-0 text-[#D4B8C8]" />
         <input
@@ -105,7 +107,7 @@ export default function QuickAddBar({ boardId }) {
           disabled={processing}
           className="flex-1 bg-transparent text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-faint)] focus:outline-none disabled:opacity-50"
         />
-        {input.trim() ? (
+        {input.trim() && (
           <button
             type="button"
             onClick={handleSubmit}
@@ -113,14 +115,6 @@ export default function QuickAddBar({ boardId }) {
             className="h-7 w-7 rounded-lg flex items-center justify-center bg-[var(--text-primary)] text-[var(--surface-card)] hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
           >
             <ArrowUp className="w-3.5 h-3.5" strokeWidth={2.5} />
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => { setExpanded(false); setInput('') }}
-            className="h-7 w-7 rounded-lg flex items-center justify-center text-[var(--text-faint)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-          >
-            <X className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
