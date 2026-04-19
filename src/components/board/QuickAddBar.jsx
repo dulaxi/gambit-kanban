@@ -8,11 +8,17 @@ import { streamChat } from '../../lib/aiClient'
 
 export default function QuickAddBar({ boardId }) {
   const [expanded, setExpanded] = useState(false)
+  const [collapsing, setCollapsing] = useState(false)
   const [input, setInput] = useState('')
   const [processing, setProcessing] = useState(false)
   const [visible, setVisible] = useState(true)
   const inputRef = useRef(null)
-  const expandedRef = useClickOutside(() => { if (!processing) { setExpanded(false); setInput('') } })
+  const collapseWithAnim = () => {
+    if (processing) return
+    setCollapsing(true)
+    setTimeout(() => { setExpanded(false); setCollapsing(false); setInput('') }, 350)
+  }
+  const expandedRef = useClickOutside(collapseWithAnim)
   const scrollTimer = useRef(null)
   const boardName = useBoardStore((s) => s.boards[boardId]?.name)
 
@@ -79,8 +85,7 @@ export default function QuickAddBar({ boardId }) {
       handleSubmit()
     }
     if (e.key === 'Escape') {
-      setExpanded(false)
-      setInput('')
+      collapseWithAnim()
     }
   }
 
@@ -109,28 +114,36 @@ export default function QuickAddBar({ boardId }) {
   }
 
   return (
-    <div ref={expandedRef} className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-md">
-      <div className="flex items-center gap-2 h-11 px-4 rounded-2xl bg-[var(--surface-card)] border-[0.5px] border-[var(--border-default)] shadow-[0_4px_24px_rgba(0,0,0,0.1)] transition-all">
-        <Sparkle size={14} weight="fill" className="shrink-0 text-[#D4B8C8]" />
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={processing ? 'Creating...' : 'Type a task or paste notes...'}
-          disabled={processing}
-          className="flex-1 bg-transparent text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-faint)] focus:outline-none disabled:opacity-50"
-        />
-        {input.trim() && (
-          <button
-            type="button"
-            onClick={handleSubmit}
+    <div ref={expandedRef} className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-30 w-full max-w-2xl px-4 origin-bottom ${collapsing ? 'animate-[pill-bounce-out_350ms_ease-in_forwards]' : 'animate-[pill-bounce-in_450ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]'}`}>
+      <div className="flex flex-col bg-[var(--surface-card)] rounded-[20px] border border-transparent shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035),0_0_0_0.5px_rgba(224,219,213,0.6)] focus-within:shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.075),0_0_0_0.5px_rgba(174,170,164,0.6)] transition-shadow duration-200">
+        <div className="flex flex-col m-3.5 gap-3">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={processing ? 'Creating...' : 'Type a task or paste notes...'}
             disabled={processing}
-            className="h-7 w-7 rounded-lg flex items-center justify-center bg-[var(--text-primary)] text-[var(--surface-card)] hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
-          >
-            <ArrowUp className="w-3.5 h-3.5" strokeWidth={2.5} />
-          </button>
-        )}
+            rows={1}
+            className="w-full resize-none bg-transparent text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none min-h-[1.5rem] max-h-96 pl-1.5 pt-1 disabled:opacity-50"
+            onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
+          />
+          <div className="flex items-center gap-2">
+            <button type="button" aria-label="Add files" className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-[var(--surface-hover)] text-[var(--text-secondary)] transition-colors cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+            </button>
+            <div className="flex-1" />
+            {input.trim() ? (
+              <button type="button" onClick={handleSubmit} disabled={processing} aria-label="Send" className="h-8 w-8 rounded-lg flex items-center justify-center bg-[var(--text-primary)] text-[var(--surface-card)] hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50">
+                <ArrowUp className="w-4 h-4" strokeWidth={2.5} />
+              </button>
+            ) : (
+              <button type="button" aria-label="Voice mode" className="h-8 px-1.5 rounded-lg flex items-center justify-center hover:bg-[var(--surface-hover)] text-[var(--text-secondary)] transition-colors cursor-pointer">
+                <Waveform size={20} weight="regular" />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )

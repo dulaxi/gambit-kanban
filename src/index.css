@@ -222,6 +222,18 @@
   color: transparent;
 }
 
+/* AI Quick Add pill bounce animations */
+@keyframes pill-bounce-in {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes pill-bounce-out {
+  0% { transform: scale(1); opacity: 1; }
+  40% { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(0.3); opacity: 0; }
+}
+
 /* AI card building shimmer */
 @keyframes ai-card-shimmer {
   0% { background-position: -200% 0; }
