@@ -73,7 +73,7 @@ export default function QuickAddBar({ boardId }) {
   if (!expanded) {
     return (
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
-        <div className="flex items-center gap-1 h-12 px-2 rounded-[20px] bg-[var(--surface-card)] border-[1.5px] border-[#D4B8C8] shadow-[0_4px_16px_rgba(212,184,200,0.2)] hover:shadow-[0_4px_20px_rgba(212,184,200,0.3)] transition-all">
+        <div className="flex items-center gap-1 h-12 px-2 rounded-[14px] bg-[var(--surface-card)] border border-[var(--color-mist)] transition-all hover:border-[var(--text-muted)]">
           <button
             type="button"
             onClick={() => setExpanded(true)}
