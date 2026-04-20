@@ -34,6 +34,7 @@ export default memo(function SortableCard({ card, onClick, onComplete, isSelecte
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.4 : 1,
+    ...(aiShimmer ? { outline: '2px solid #C2A0B2', outlineOffset: '-1px', borderRadius: '16px' } : {}),
   }
 
   if (isMobile) {
