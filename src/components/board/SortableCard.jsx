@@ -9,10 +9,14 @@ export default memo(function SortableCard({ card, onClick, onComplete, isSelecte
   const [aiShimmer, setAiShimmer] = useState(false)
 
   useEffect(() => {
-    if (card._aiCreatedAt && Date.now() - card._aiCreatedAt < 3000 && !aiShimmer) {
-      setAiShimmer(true)
-      const timer = setTimeout(() => setAiShimmer(false), 2000)
-      return () => clearTimeout(timer)
+    if (card._aiCreatedAt) {
+      const age = Date.now() - card._aiCreatedAt
+      console.log('[SortableCard] _aiCreatedAt detected, age:', age, 'aiShimmer:', aiShimmer, 'cardId:', card.id.slice(0,8))
+      if (age < 3000 && !aiShimmer) {
+        setAiShimmer(true)
+        const timer = setTimeout(() => setAiShimmer(false), 2000)
+        return () => clearTimeout(timer)
+      }
     }
   }, [card._aiCreatedAt])
   const isMobile = useIsMobile()
