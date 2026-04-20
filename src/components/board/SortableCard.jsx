@@ -12,7 +12,7 @@ export default memo(function SortableCard({ card, onClick, onComplete, isSelecte
 
   useEffect(() => {
     if (showSkeleton) {
-      const timer = setTimeout(() => setShowSkeleton(false), 1500)
+      const timer = setTimeout(() => setShowSkeleton(false), 2000)
       return () => clearTimeout(timer)
     }
   }, [showSkeleton])
