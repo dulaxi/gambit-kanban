@@ -118,20 +118,26 @@ export async function executeTool(action, params) {
       dueDate: params.due_date || null,
     })
     if (!tempId) return { ok: false, error: 'Failed to create card' }
-    aiBuildingCards.add(tempId)
+
+    // Stamp the card in the store so SortableCard can detect it reactively
+    useBoardStore.setState((s) => ({
+      cards: { ...s.cards, [tempId]: { ...s.cards[tempId], _aiCreatedAt: Date.now() } }
+    }))
 
     let cardId = tempId
     for (let i = 0; i < 20; i++) {
       await new Promise((r) => setTimeout(r, 200))
       const realId = useBoardStore.getState()._tempIdMap[tempId]
       if (realId) {
-        aiBuildingCards.add(realId)
         saveAICard(realId)
+        // Stamp the real card too
+        useBoardStore.setState((s) => ({
+          cards: { ...s.cards, [realId]: { ...s.cards[realId], _aiCreatedAt: Date.now() } }
+        }))
         cardId = realId
         break
       }
     }
-    setTimeout(() => { aiBuildingCards.delete(tempId); aiBuildingCards.delete(cardId) }, 3000)
     return { ok: true, cardId }
   }
 

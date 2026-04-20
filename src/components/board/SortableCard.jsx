@@ -3,25 +3,18 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 import Card from './Card'
-import AICardSkeleton from './AICardSkeleton'
 import { useIsMobile } from '../../hooks/useMediaQuery'
-import { isAIBuilding } from '../../lib/toolExecutor'
 
 export default memo(function SortableCard({ card, onClick, onComplete, isSelected }) {
-  const [showSkeleton, setShowSkeleton] = useState(() => isAIBuilding(card.id))
+  const [aiShimmer, setAiShimmer] = useState(false)
 
   useEffect(() => {
-    if (!showSkeleton && isAIBuilding(card.id)) {
-      setShowSkeleton(true)
-    }
-  })
-
-  useEffect(() => {
-    if (showSkeleton) {
-      const timer = setTimeout(() => setShowSkeleton(false), 2000)
+    if (card._aiCreatedAt && Date.now() - card._aiCreatedAt < 3000 && !aiShimmer) {
+      setAiShimmer(true)
+      const timer = setTimeout(() => setAiShimmer(false), 2000)
       return () => clearTimeout(timer)
     }
-  }, [showSkeleton])
+  }, [card._aiCreatedAt])
   const isMobile = useIsMobile()
   const {
     attributes,
@@ -51,7 +44,7 @@ export default memo(function SortableCard({ card, onClick, onComplete, isSelecte
           <GripVertical className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">
-          <Card card={card} onClick={onClick} onComplete={onComplete} isSelected={isSelected} aiShimmer={showSkeleton} />
+          <Card card={card} onClick={onClick} onComplete={onComplete} isSelected={isSelected} aiShimmer={aiShimmer} />
         </div>
       </div>
     )
