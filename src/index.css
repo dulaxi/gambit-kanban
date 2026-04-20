@@ -234,6 +234,17 @@
   100% { transform: scale(0.15) translateY(10px); opacity: 0; }
 }
 
+/* AI card border shimmer */
+@keyframes ai-border-shimmer {
+  0% { border-color: #E8DDE2; box-shadow: 0 0 8px rgba(212,184,200,0.2); }
+  50% { border-color: #D4B8C8; box-shadow: 0 0 16px rgba(212,184,200,0.35); }
+  100% { border-color: #E8DDE2; box-shadow: 0 0 8px rgba(212,184,200,0.2); }
+}
+.ai-border-shimmer {
+  animation: ai-border-shimmer 1.2s ease-in-out infinite;
+  border-color: #E8DDE2 !important;
+}
+
 /* AI card building shimmer */
 @keyframes ai-card-shimmer {
   0% { background-position: -200% 0; }

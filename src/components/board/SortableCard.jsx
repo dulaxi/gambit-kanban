@@ -39,14 +39,6 @@ export default memo(function SortableCard({ card, onClick, onComplete, isSelecte
     opacity: isDragging ? 0.4 : 1,
   }
 
-  if (showSkeleton) {
-    return (
-      <div ref={setNodeRef} style={style}>
-        <AICardSkeleton />
-      </div>
-    )
-  }
-
   if (isMobile) {
     return (
       <div ref={setNodeRef} style={style} className="flex items-stretch">
@@ -59,7 +51,7 @@ export default memo(function SortableCard({ card, onClick, onComplete, isSelecte
           <GripVertical className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">
-          <Card card={card} onClick={onClick} onComplete={onComplete} isSelected={isSelected} />
+          <Card card={card} onClick={onClick} onComplete={onComplete} isSelected={isSelected} aiShimmer={showSkeleton} />
         </div>
       </div>
     )
