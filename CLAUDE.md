@@ -1,162 +1,294 @@
 # Kolumn — Project Context
 
-## Overview
+## What this is
 
-Kolumn is a multi-user Kanban project management dashboard inspired by Asana's UI patterns. Built with React 19 + Vite + Tailwind CSS v4 + Supabase (Postgres + Auth).
+Kolumn is a Kanban-first project management app with an AI agent layered on top.
+Users manage cards/boards via classic drag-and-drop, OR via a chat sidebar where
+Claude operates the same data model through tools.
 
-## Tech Stack
+Stack: **React 19 + Vite 7 + Tailwind v4 + Supabase (Postgres, Auth, Realtime,
+Edge Functions) + Anthropic Claude API**.
 
-- **Framework**: React 19 with Vite 7
-- **Styling**: Tailwind CSS v4 (uses `@theme` and `@utility` blocks in `src/index.css`)
-- **State**: Zustand (no persist — data lives in Supabase)
-- **Backend**: Supabase (Postgres, Auth, Realtime)
-- **Drag & Drop**: @dnd-kit/core + @dnd-kit/sortable
-- **Icons**: lucide-react (1688 icons, rendered dynamically by name via `DynamicIcon` component)
-- **Font**: Mona Sans Variable (GitHub's font, via @fontsource-variable/mona-sans)
-- **Router**: react-router-dom v7
-- **Charts**: Recharts
+## Active focus (April 2026)
+
+**Polish, test, debug, coherency — not features.**
+
+"Coherency" means CSS / interaction consistency across the whole app: every
+button looks like every other button, every modal animates the same way, every
+focus state behaves the same. Design north star is **claude.ai-style**:
+restrained, generous whitespace, single accent (lime), Mona Sans + serif accents,
+soft 1px borders, 8-12px radius.
+
+Bias: prefer extending an existing pattern over inventing a new one. Refactor
+inconsistencies you encounter, but don't go on unrelated cleanup tangents.
 
 ## Commands
 
 ```bash
-npm run dev      # Dev server (Vite)
-npm run build    # Production build
-npm run preview  # Preview production build
+npm run dev          # Vite dev server (port 5173)
+npm run build        # Production build
+npm run preview      # Preview production build (port 4173)
+npm run lint         # ESLint
+npm run test         # Vitest, single run
+npm run test:watch   # Vitest, watch mode
 ```
 
-## Environment Setup
+## Tech stack
 
-1. Create a Supabase project at supabase.com
-2. Disable email confirmation (Auth > Settings)
-3. Run `supabase/schema.sql` in the SQL Editor
-4. Copy `.env.example` to `.env.local` and fill in credentials:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
+- **React 19** + react-router-dom v7
+- **Vite 7** + `@tailwindcss/vite` (Tailwind v4)
+- **Zustand** for state — most stores hit Supabase, only `settingsStore` persists locally
+- **Supabase** — Postgres + Auth + Realtime + Edge Functions
+- **@dnd-kit/core + @dnd-kit/sortable** — drag-and-drop
+- **react-hot-toast** — toast system (see Design System → Toasts)
+- **@phosphor-icons/react** — primary icon library (see Coherency Rules)
+- **react-markdown + remark-gfm** — chat message rendering
+- **zod** — runtime validation
+- **motion** — selective animation
+- **date-fns**, **nanoid**
+- **@sentry/react** — error tracking
+- **posthog-js** — product analytics
+- **Vitest + @testing-library/react + jsdom** — test infrastructure (~25 test files in `src/__tests__/`)
 
 ## Architecture
 
 ```
 src/
-├── main.jsx                    # Entry point, imports Mona Sans font, initializes auth
-├── App.jsx                     # Router setup (auth routes + protected routes)
-├── index.css                   # Tailwind theme tokens, scrollbar styles
+├── main.jsx                        # Entry, font imports, auth init
+├── App.jsx                         # Router + global Toaster (top-center) + UndoListener
+├── index.css                       # @theme tokens, light/dark CSS vars, scrollbar, animations
 ├── lib/
-│   ├── supabase.js             # Supabase client singleton
-│   └── migrateLocalData.js     # One-time localStorage → Supabase migration
-├── store/
-│   ├── authStore.js            # Auth state: user, session, profile, signUp/signIn/signOut
-│   ├── boardStore.js           # Boards, columns, cards (Supabase CRUD + realtime)
-│   ├── noteStore.js            # Notes (Supabase CRUD, private per user)
-│   └── settingsStore.js        # Local settings: sidebarCollapsed, theme, font
+│   ├── supabase.js                 # Supabase client singleton
+│   └── migrateLocalData.js         # Legacy localStorage → Supabase migration
+├── store/                          # Zustand stores
+│   ├── authStore.js                # User, session, profile
+│   ├── boardStore.js               # Boards, columns, cards + realtime subscriptions
+│   ├── boardSharingStore.js        # Per-board members + invitations
+│   ├── workspacesStore.js          # Multi-tenant workspaces + members + invitations
+│   ├── chatStore.js                # AI chat threads + messages + tool calls
+│   ├── noteStore.js                # Private notes
+│   ├── notificationStore.js        # In-app notifications
+│   ├── templateStore.js            # Board/card templates
+│   ├── settingsStore.js            # Local-only: sidebar, theme, font
+│   └── selectors.js                # Cross-store derived selectors
 ├── components/
-│   ├── auth/
-│   │   └── ProtectedRoute.jsx  # Redirects to /login if no session
-│   ├── layout/
-│   │   ├── AppLayout.jsx       # Main layout shell, data fetch, subscriptions, migration
-│   │   ├── Sidebar.jsx         # Left nav with board list, icons, board icon picker
-│   │   └── Header.jsx          # Top bar with search, user menu, sign out
-│   └── board/
-│       ├── BoardView.jsx       # DndContext, columns, drag handlers, add-column
-│       ├── BoardSelector.jsx   # Board switcher + Share button
-│       ├── BoardShareModal.jsx # Invite users by email, manage members
-│       ├── Column.jsx          # Droppable column with card list, rename, delete
-│       ├── Card.jsx            # Card display (icon, title, checkmark, priority dot, labels, assignee)
-│       ├── SortableCard.jsx    # Wraps Card with useSortable
-│       ├── CardDetailPanel.jsx # Right-side detail panel (420px fixed)
-│       ├── InlineCardEditor.jsx# Inline expanded card editor for NEW tasks
-│       ├── AllBoardsView.jsx   # "All Tasks" view across all boards
-│       ├── DynamicIcon.jsx     # Renders any lucide-react icon by string name
-│       └── IconPicker.jsx      # Full-screen categorized icon picker modal
-└── pages/
-    ├── LoginPage.jsx           # Email/password login
-    ├── SignupPage.jsx          # Email/password/display name signup
-    ├── BoardsPage.jsx          # Main board page
-    ├── DashboardPage.jsx       # Stats overview
-    ├── CalendarPage.jsx        # Calendar view
-    ├── NotesPage.jsx           # Notes editor
-    └── SettingsPage.jsx        # Profile, theme, font, export/import
+│   ├── ui/                         # Design-system primitives (TODO: mostly empty — see Coherency Rules)
+│   │   └── Avatar.jsx
+│   ├── auth/ProtectedRoute.jsx
+│   ├── chat/                       # Chat UI (message list, composer, tool-call cards)
+│   ├── workspace/                  # Workspace switcher, settings, member list
+│   ├── layout/                     # AppLayout, Sidebar, Header, OfflineBanner
+│   ├── board/                      # Board, columns, cards, detail panel, modals
+│   ├── ActionCard.jsx              # AI-suggested action card
+│   ├── SearchDialog.jsx            # ⌘K search
+│   ├── ErrorBoundary.jsx + InlineErrorBoundary.jsx
+│   └── ...
+├── pages/
+│   ├── LandingPage.jsx             # Marketing / public landing
+│   ├── LoginPage / SignupPage / ForgotPasswordPage / UpdatePasswordPage
+│   ├── DashboardPage.jsx
+│   ├── BoardsPage.jsx              # Primary kanban view
+│   ├── ChatPage.jsx + ChatListPage.jsx
+│   ├── WorkspacePage.jsx
+│   ├── CalendarPage.jsx
+│   ├── NotesPage.jsx
+│   ├── SettingsPage.jsx
+│   └── NotFoundPage.jsx
+├── utils/
+│   ├── formatting.js               # LABEL_BG, PRIORITY_DOT, AVATAR_COLORS class strings
+│   ├── toast.js                    # showToast.{success|error|delete|...} helpers
+│   ├── logger.js                   # Sentry wrapper
+│   └── ...
+└── __tests__/                      # Vitest specs
+
+supabase/
+├── config.toml                     # Local Supabase CLI config
+├── schema.sql                      # Tables, triggers, RLS
+├── migrations/                     # Versioned SQL migrations
+└── functions/
+    └── chat/                       # AI agent edge function
+        ├── index.ts                # Entry — auth, tier check, Claude API stream
+        ├── context.ts              # Builds system prompt from user's boards/cards
+        ├── tools.ts                # 18 tool definitions (create_card, move_card, …)
+        ├── tier.ts                 # Free/Pro gating + per-tool access list + daily limit
+        └── stream.ts               # SSE writer
 ```
 
-## Key Patterns
+## Subsystems
 
-### Authentication
-- Email/password auth via Supabase (no email confirmation)
-- `authStore.initialize()` called before render in main.jsx
-- `ProtectedRoute` wraps all app routes, redirects to /login
-- Profile stored in Supabase `profiles` table, read via `authStore.profile`
+### AI agent (`supabase/functions/chat/`)
 
-### Board Store Shape (Supabase-backed)
-```js
-{
-  boards: { [id]: { id, name, icon, owner_id, next_task_number } },
-  columns: { [id]: { id, board_id, title, position } },
-  cards: { [id]: { id, board_id, column_id, position, task_number, global_task_number, title, description, assignee_name, priority, due_date, icon, completed, labels, checklist } },
-  activeBoardId, loading
-}
-```
+Edge Function that streams Claude responses via SSE. Loads the user's boards/cards
+into a system prompt (`context.ts`), exposes 18 tools (`tools.ts`), gates by tier
+(`tier.ts`), and writes results back to Supabase via the same RLS-protected APIs
+the frontend uses.
 
-### Card Field Names (DB columns use snake_case)
-- `assignee_name` (not `assignee`)
-- `due_date` (not `dueDate`)
-- `task_number` (not `taskNumber`)
-- `global_task_number` (not `globalTaskNumber`)
-- `board_id`, `column_id`, `updated_at`, `created_at`
+Tools: `create_card`, `move_card`, `update_card`, `delete_card`, `create_board`,
+`move_cards`, `update_cards`, `complete_cards`, `duplicate_card`, `toggle_checklist`,
+`update_board`, `delete_board`, `add_column`, `delete_column`, `invite_member`,
+`remove_member`, `create_note`, `update_note`.
 
-### Card Creation vs Editing
-- **New task**: Creates card in Supabase, shows `InlineCardEditor` inline
-- **Existing task**: Click opens `CardDetailPanel` (420px fixed right panel)
+### Tier system (`supabase/functions/chat/tier.ts`)
 
-### Drag and Drop
-- Custom collision detection: `pointerWithin` + `rectIntersection` fallback
-- Position-based ordering (integer `position` field on cards/columns)
-- Optimistic updates + async Supabase persistence
+- **Free**: 20 messages/day, Haiku model only, write tools blocked. Read-only-ish.
+- **Pro**: unlimited, all tools enabled.
+- `PRO_ONLY_TOOLS` array is the source of truth for which tools require Pro.
+- `profiles.tier` column drives the gate; daily counter via `increment_chat_usage` RPC.
+- Currently Pro and Free both run Haiku — `classifyModel` is wired but routes both paths to Haiku.
 
-### Real-Time Subscriptions
-- `subscribeToBoards()` in boardStore subscribes to postgres_changes on boards, columns, cards tables
-- Set up in AppLayout after auth, torn down on unmount
-- Last-write-wins merge strategy
+### Workspaces (`workspacesStore.js`)
 
-### Board Sharing
-- Board owners can invite by email via `BoardShareModal`
-- Existing users added directly to `board_members`
-- Non-existing users get `board_invitations` (auto-accepted on signup)
-- RLS ensures users only see boards they're members of
+Multi-tenant containers. Tables: `workspaces`, `workspace_members`,
+`workspace_invitations`. Boards can be **workspace-scoped** (`workspace_id` set) or
+**personal** (`workspace_id` null, optionally shared via `board_members`). The
+two sharing systems coexist — `boardSharingStore` handles the lightweight per-board
+flow, `workspacesStore` handles tenant-scoped membership.
 
-### localStorage Migration
-- `migrateLocalData.js` detects old localStorage data after first login
-- Banner in AppLayout offers to import boards/cards/notes into Supabase
-- Clears localStorage after successful migration
+### Realtime sync
 
-## Database Schema
+`boardStore` subscribes to `postgres_changes` on `boards`, `columns`, `cards`
+after auth, tears down on unmount. Last-write-wins merge.
 
-Tables: `profiles`, `boards`, `board_members`, `columns`, `cards`, `notes`, `board_invitations`
+### localStorage migration
 
-Triggers:
-- Auto-create profile on signup
-- Auto-add owner to board_members on board creation
-- Auto-accept pending invitations on new user signup
-- Auto-update `updated_at` on cards and notes
-
-RLS: Users can only access boards they're members of. Notes are private per user.
+`migrateLocalData.js` is wired into `AppLayout` and offers a banner to import
+legacy localStorage data into Supabase on first sign-in. Likely vestigial — verify
+before removing.
 
 ## Design System
 
-### Colors
-- **Background**: `bg-[#FEFDFD]` (between sidebar cream and white)
-- **Cards**: `bg-white` with `border-[#E0DBD5]`, `shadow-sm`, `rounded-xl`
-- **Label palette** (Phosphor warm/desaturated — see `src/utils/formatting.js` for source of truth):
-  - Red: `bg-[#F2D9C7] text-[#8B5A33]`
-  - Blue: `bg-[#DAE0F0] text-[#4A5578]`
-  - Green: `bg-[#EEF2D6] text-[#6B7A12]`
-  - Yellow: `bg-[#F5EDCF] text-[#8B7322]`
-  - Purple: `bg-[#E8DDE2] text-[#6E5A65]`
-  - Pink: `bg-[#F0E0D2] text-[#7A5C44]`
-  - Gray: `bg-[#E8E2DB] text-[#5C5C57]`
-- **Priority dots**: `bg-emerald-400` (low), `bg-amber-400` (medium), `bg-rose-400` (high)
+### Tokens (source of truth: `src/index.css`)
 
-## Important Notes
+All design tokens are CSS variables defined in `@theme {}` and `:root /
+[data-theme="light"|"dark"]` blocks. **Never hardcode hex codes — always reference
+the token.**
 
-- Tailwind v4 uses `@theme {}` blocks (not `tailwind.config.js`) for theme tokens
-- No test suite — verify changes with `npm run build`
-- `settingsStore` still uses localStorage persist (sidebar, theme, font only)
-- All other state lives in Supabase (boards, columns, cards, notes, profiles)
+- Surfaces: `--surface-page`, `--surface-card`, `--surface-raised`, `--surface-hover`, `--surface-input`, `--surface-sidebar`
+- Borders: `--border-default`, `--border-subtle`, `--border-focus`
+- Text: `--text-primary`, `--text-secondary`, `--text-muted`, `--text-faint`
+- Accents: `--accent-lime`, `--accent-lime-dark`, `--accent-lime-wash`
+- Buttons: `--btn-primary-bg`, `--btn-primary-text`, `--btn-primary-hover`
+- Labels: `--label-{red|blue|green|yellow|purple|pink|gray}-{bg|text}`
+- Phosphor palette (raw): `--color-{cream|sand|ink|charcoal|stone|mist|lime|copper|honey|mauve|...}`
+
+Both light and dark variants are defined. Components use `var(--token)` via
+Tailwind arbitrary values: `bg-[var(--surface-card)]`.
+
+### Typography stack
+
+| Token            | Font                  | Use                                |
+|------------------|-----------------------|------------------------------------|
+| `--font-sans`    | Mona Sans Variable    | Main app text                      |
+| `--font-logo`    | Clash Grotesk         | "Kolumn" wordmark only             |
+| `--font-heading` | Sentient (serif)      | Display headings, avatar initials  |
+| `--font-mono`    | IBM Plex Mono         | Code, IDs, paths                   |
+| `--font-pill`    | Google Sans Text      | Pill labels (PRO, BETA, NEW)       |
+| `.landing-font`  | Plus Jakarta Sans     | Landing page only (scoped class)   |
+
+### Existing primitives
+
+- `src/components/ui/Avatar.jsx` — initials avatar, hash-derived color, 4 sizes, optional ring for stacking.
+- `src/utils/formatting.js` — `LABEL_BG`, `LABEL_BG_QUIET`, `PRIORITY_DOT`, `AVATAR_COLORS` exported as Tailwind class strings (not components).
+- `src/utils/toast.js` — `showToast.{success|error|delete|archive|restore|info|warn|overdue}`. Powered by `react-hot-toast`. Configured globally as `<Toaster position="top-center">` in `App.jsx`. Style: 420px fixed width, 1px solid `#1B1B18` border, 10px radius, IBM Plex Mono / SF Mono 12px, Phosphor icon + message + dismiss button. Eight intents each with their own background color and duration (3-5s). **Never roll your own toast — always import this helper.**
+
+### Missing primitives (coherency-phase TODO)
+
+`src/components/ui/` is the design-system layer but currently only contains `Avatar`.
+Extract these from existing inline usages, in roughly this priority order based
+on usage frequency:
+
+1. **Button** — 5 variants (primary/accent/secondary/ghost/destructive), 3 sizes, loading + disabled states.
+2. **Input / Textarea** — with label, helper, error states. Search variant with leading icon.
+3. **Modal / Dialog** — backdrop (no blur), scale-in, header/body/footer, escape + outside-click close.
+4. **Menu / Dropdown** — anchored popover with items, dividers, shortcut hints, destructive variant.
+5. **Tooltip** — replace scattered `title` attributes.
+6. **Skeleton** — generalize the AI-card shimmer pattern in `index.css`.
+
+Reference: `public/ui-inventory.html` has live mockups of all of these in the
+target style. Open via `npm run dev` then `/ui-inventory.html`.
+
+## Coherency Rules
+
+These are the rules that make the app feel like one app. Don't violate them
+without a deliberate reason discussed with the user.
+
+- **Icons: Phosphor only.** `@phosphor-icons/react` is canonical. `lucide-react` is in `package.json` for legacy reasons but is **deprecated** — do not extend, migrate when touching.
+- **Colors: tokens only.** Reference `var(--token)` from `src/index.css`. No new hex codes anywhere.
+- **Inputs: 1px ink (`#1B1B18`) border on focus.** No lime focus ring, no glow. Hover bumps border from sand to mist.
+- **Modals: no backdrop blur.** Just dimmed ink overlay (`rgba(27,27,24,0.45)`). Perf + visual win.
+- **Toasts: always `showToast.*` from `src/utils/toast.js`.** Never roll inline. Pick the most specific intent (`delete` not `error`, `restore` not `success`).
+- **Buttons: ink primary, lime accent for create/save/positive, copper for destructive.**
+- **Border radius: 8px small (buttons, inputs), 10-12px raised (cards, modals, panels).**
+- **Shadows: minimal.** Default raised shadow is `0 4px 24px rgba(27,27,24,0.10)` (matches toasts).
+- **Card field names are snake_case** (DB columns). See Key Data Shapes.
+
+## Key data shapes
+
+### Card (`cards` table — DB uses snake_case)
+```
+id, board_id, column_id, position,
+task_number, global_task_number,
+title, description, icon, completed,
+assignee_name, priority, due_date,
+labels, checklist,
+created_at, updated_at
+```
+
+Common pitfall: it's `assignee_name`, NOT `assignee`. It's `due_date`, NOT `dueDate`.
+
+### Board store shape (Zustand)
+```js
+{
+  boards:        { [id]: { id, name, icon, owner_id, workspace_id, next_task_number } },
+  columns:       { [id]: { id, board_id, title, position } },
+  cards:         { [id]: <Card> },
+  activeBoardId,
+  loading,
+}
+```
+
+### Card creation vs editing
+- **New task** → creates card in Supabase, shows `InlineCardEditor` inline.
+- **Existing task** → click opens `CardDetailPanel` (right-side fixed 420px panel).
+
+## Database
+
+Tables: `profiles`, `workspaces`, `workspace_members`, `workspace_invitations`,
+`boards`, `board_members`, `board_invitations`, `columns`, `cards`, `notes`,
+plus chat tables (`chat_threads`, `chat_messages`, etc.).
+
+Triggers:
+- Auto-create profile on signup
+- Auto-add owner to `board_members` on board creation
+- Auto-accept pending invitations on new user signup
+- Auto-update `updated_at` on cards / notes
+
+RLS: users see boards they're members of. Notes are private per user. Workspaces
+have member-based RLS.
+
+Migrations live in `supabase/migrations/`; the canonical full schema is
+`supabase/schema.sql`.
+
+## Conventions
+
+- **Commits**: conventional with scope — `feat(ai):`, `fix(chat):`, `style(ai):`, `refactor(board):`, `docs:`.
+- **Plans / specs**: `docs/superpowers/{plans,specs}/YYYY-MM-DD-<topic>.md`. Use the superpowers skills (`brainstorming` → `writing-plans` → `executing-plans`) for non-trivial work.
+- **Verifying changes**: `npm run build` for type/syntax sanity, `npm run test` for behavior, `npm run lint` for style.
+- **UI changes**: open the dev server in a browser and exercise the feature, including edge cases. Don't claim "done" without seeing it run.
+
+## Environment setup
+
+1. Create a Supabase project at supabase.com, disable email confirmation in Auth settings.
+2. Run `supabase/schema.sql` in the SQL Editor (or use `supabase db push` with the CLI).
+3. Copy `.env.example` to `.env.local` and fill in:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+4. Edge Functions need `ANTHROPIC_API_KEY` set in Supabase → Edge Functions → Secrets.
+
+## Important notes
+
+- Tailwind v4 uses `@theme {}` blocks in CSS — there is no `tailwind.config.js`.
+- Both `lucide-react` and `@phosphor-icons/react` are installed; only Phosphor is canonical.
+- `settingsStore` is the only store that persists locally (sidebar, theme, font). All other state lives in Supabase.
+- Realtime is wired but uses last-write-wins; expect transient flicker on simultaneous edits.
+- Sentry + PostHog are wired in production; check `src/utils/logger.js` before adding ad-hoc `console.error`.
