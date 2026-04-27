@@ -77,6 +77,10 @@ export default function Modal({
 }) {
   const contentRef = useRef(null)
   const previouslyFocusedRef = useRef(null)
+  // Tracks how the modal was dismissed so we can skip focus restoration
+  // for mouse-driven closes (which would surface a stale :focus-visible
+  // ring on the trigger). Keyboard-driven closes (Escape) still restore.
+  const closeSourceRef = useRef(null)
 
   const handleClose = useCallback(() => {
     if (typeof onClose === 'function') onClose()
@@ -93,6 +97,7 @@ export default function Modal({
   useEffect(() => {
     if (!open) return
     previouslyFocusedRef.current = document.activeElement
+    closeSourceRef.current = null
     const target =
       initialFocusRef?.current ||
       getFocusables(contentRef.current)[0] ||
@@ -100,6 +105,7 @@ export default function Modal({
     target?.focus?.()
     return () => {
       const prev = previouslyFocusedRef.current
+      if (closeSourceRef.current === 'mouse') return
       if (prev && typeof prev.focus === 'function') {
         prev.focus()
       }
@@ -119,6 +125,7 @@ export default function Modal({
       if (!isTopmost()) return
       if (e.key === 'Escape' && dismissOnEscape) {
         e.stopPropagation()
+        closeSourceRef.current = 'keyboard'
         handleClose()
         return
       }
@@ -153,7 +160,10 @@ export default function Modal({
 
   const onBackdropClick = (e) => {
     if (!dismissOnOutside) return
-    if (e.target === e.currentTarget) handleClose()
+    if (e.target === e.currentTarget) {
+      closeSourceRef.current = 'mouse'
+      handleClose()
+    }
   }
 
   return createPortal(

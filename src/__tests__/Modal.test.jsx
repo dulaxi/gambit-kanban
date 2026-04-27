@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'
+import { useState } from 'react'
 import { render, screen, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Modal from '../components/ui/Modal'
@@ -137,17 +138,41 @@ describe('Modal primitive', () => {
     expect(document.activeElement).toBe(buttons[0])
   })
 
-  test('restores focus to previously-focused element on close', () => {
+  test('restores focus to previously-focused element when closed by Escape', async () => {
     const trigger = document.createElement('button')
     trigger.textContent = 'Trigger'
     document.body.appendChild(trigger)
     trigger.focus()
     expect(document.activeElement).toBe(trigger)
 
-    const { rerender } = render(<Harness />)
+    function Wrapper() {
+      const [open, setOpen] = useState(true)
+      return <Harness open={open} onClose={() => setOpen(false)} />
+    }
+    render(<Wrapper />)
     expect(document.activeElement).not.toBe(trigger)
-    rerender(<Harness open={false} />)
+    await userEvent.keyboard('{Escape}')
     expect(document.activeElement).toBe(trigger)
+
+    document.body.removeChild(trigger)
+  })
+
+  test('does NOT restore focus when closed by backdrop click (avoids stale focus ring)', async () => {
+    const trigger = document.createElement('button')
+    trigger.textContent = 'Trigger'
+    document.body.appendChild(trigger)
+    trigger.focus()
+
+    function Wrapper() {
+      const [open, setOpen] = useState(true)
+      return <Harness open={open} onClose={() => setOpen(false)} />
+    }
+    render(<Wrapper />)
+    expect(document.activeElement).not.toBe(trigger)
+
+    const backdrop = document.querySelector('[data-modal-backdrop]')
+    await userEvent.click(backdrop)
+    expect(document.activeElement).not.toBe(trigger)
 
     document.body.removeChild(trigger)
   })
