@@ -48,6 +48,19 @@ export default function Sidebar() {
   useEffect(() => {
     if (isDesktop && !workspaceSidebarOpen) setSidebarCollapsed(!isWide)
   }, [isDesktop, isWide, workspaceSidebarOpen, setSidebarCollapsed])
+
+  // While mobile drawer is open: lock body scroll + Escape closes
+  useEffect(() => {
+    if (isDesktop || !mobileMenuOpen) return
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKeyDown = (e) => { if (e.key === 'Escape') closeMobileMenu() }
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = originalOverflow
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [isDesktop, mobileMenuOpen, closeMobileMenu])
   const user = useAuthStore((s) => s.user)
   const allBoards = useBoardStore((s) => s.boards)
   const activeBoardId = useBoardStore((s) => s.activeBoardId)

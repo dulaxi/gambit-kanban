@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { createPortal } from 'react-dom'
 import { X, SquareKanban } from 'lucide-react'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import { useBoardStore } from '../../store/boardStore'
 import DynamicIcon from './DynamicIcon'
 import IconPicker from './IconPicker'
+import Modal from '../ui/Modal'
 
 const TEMPLATES = [
   {
@@ -106,20 +106,6 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
 
   const template = TEMPLATES.find((t) => t.key === selectedTemplate) || TEMPLATES[0]
 
-  // Autofocus name input on mount
-  useEffect(() => {
-    if (nameRef.current) nameRef.current.focus()
-  }, [])
-
-  // Keyboard handlers
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
-
   // When selecting a template with a preset icon, apply it — but only if
   // the user hasn't already chosen an icon themselves.
   const handleTemplateSelect = useCallback((tpl) => {
@@ -154,21 +140,20 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
 
   const canCreate = name.trim().length > 0 && !creating
 
-  return createPortal(
+  return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
-        onClick={onClose}
+      <Modal
+        open
+        onClose={onClose}
+        contentClassName="flex items-center justify-center"
+        initialFocusRef={nameRef}
       >
-        {/* Modal */}
         <div
           className={`bg-[var(--surface-page)] shadow-2xl flex flex-col overflow-hidden ${
             isMobile
               ? 'fixed inset-0 rounded-none'
               : 'rounded-2xl w-[900px] max-h-[85vh]'
           }`}
-          onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)]">
@@ -318,9 +303,9 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
             </button>
           </div>
         </div>
-      </div>
+      </Modal>
 
-      {/* Icon picker overlay */}
+      {/* Icon picker overlay (separate Modal — stacks above) */}
       {showIconPicker && (
         <IconPicker
           value={icon}
@@ -328,7 +313,6 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
           onClose={() => setShowIconPicker(false)}
         />
       )}
-    </>,
-    document.body,
+    </>
   )
 }

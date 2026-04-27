@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Search, X, Kanban, StickyNote } from 'lucide-react'
 import { useBoardStore } from '../store/boardStore'
 import { useNavigate } from 'react-router-dom'
+import Modal from './ui/Modal'
 
 export default function SearchDialog({ open, onClose }) {
   const [query, setQuery] = useState('')
@@ -58,22 +59,18 @@ export default function SearchDialog({ open, onClose }) {
     } else if (e.key === 'Enter' && results[selectedIdx]) {
       e.preventDefault()
       handleSelect(results[selectedIdx])
-    } else if (e.key === 'Escape') {
-      onClose()
     }
   }
 
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-
-      {/* Dialog */}
+    <Modal
+      open={open}
+      onClose={onClose}
+      contentClassName="flex items-start justify-center pt-[15vh]"
+      initialFocusRef={inputRef}
+    >
       <div
-        role="dialog"
-        className="relative w-full max-w-2xl bg-[var(--surface-card)] rounded-xl border-[0.5px] border-[var(--border-default)] shadow-2xl overflow-hidden animate-dropdown"
+        className="relative w-full max-w-2xl mx-4 bg-[var(--surface-card)] rounded-xl border-[0.5px] border-[var(--border-default)] shadow-2xl overflow-hidden animate-dropdown"
       >
         {/* Search input */}
         <div className="flex items-center gap-2 pl-6 pt-[1.1rem] pb-[0.9rem] pr-2.5">
@@ -137,6 +134,6 @@ export default function SearchDialog({ open, onClose }) {
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

@@ -5,6 +5,7 @@ import { showToast } from '../../utils/toast'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { useIsMobile } from '../../hooks/useMediaQuery'
+import Modal from '../ui/Modal'
 
 export default function BoardShareModal({ board, onClose }) {
   const isMobile = useIsMobile()
@@ -107,19 +108,8 @@ export default function BoardShareModal({ board, onClose }) {
 
   const isOwner = user?.id === board.owner_id
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
-
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
-      data-modal
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
-    >
+    <Modal open onClose={onClose} contentClassName="flex items-center justify-center">
       <div className={`bg-[var(--surface-card)] shadow-xl ${
         isMobile
           ? 'fixed inset-0'
@@ -247,6 +237,6 @@ export default function BoardShareModal({ board, onClose }) {
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

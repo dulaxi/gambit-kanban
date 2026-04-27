@@ -13,6 +13,7 @@ import { useBoardMemberNames } from '../../hooks/useBoardMemberNames'
 import IconPicker from './IconPicker'
 import { formatDueDateLabel } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
+import Modal from '../ui/Modal'
 import { showToast } from '../../utils/toast'
 import { useTemplateStore } from '../../store/templateStore'
 
@@ -148,17 +149,6 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
     }
   }, [cardId])
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        if (e.target.closest('[data-modal]') || e.target.closest('[data-icon-picker]')) return
-        handleSaveAndClose()
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [])
-
   if (!card) return null
 
   const handleSave = () => {
@@ -172,14 +162,12 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
   const priColor = priority === 'high' ? '#C27A4A' : priority === 'low' ? '#A8BA32' : '#D4A843'
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid items-center justify-items-center bg-black/50 backdrop-brightness-75 overflow-y-auto overflow-x-hidden md:p-10 p-4"
-      onClick={handleSaveAndClose}
-      style={{ pointerEvents: 'auto' }}
+    <Modal
+      open
+      onClose={handleSaveAndClose}
+      contentClassName="grid items-center justify-items-center overflow-y-auto overflow-x-hidden md:p-10 p-4"
     >
       <div
-        role="dialog"
-        onClick={(e) => e.stopPropagation()}
         className="flex flex-col text-left shadow-xl border-0.5 border-[var(--border-default)] rounded-2xl md:p-6 p-4 bg-[var(--surface-page)] w-full max-w-3xl min-h-[50vh] max-h-[90vh] overflow-hidden"
       >
         {/* Top bar — back + actions */}
@@ -649,6 +637,6 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   )
 })

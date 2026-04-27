@@ -1,26 +1,21 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { AlertTriangle } from 'lucide-react'
+import Modal from '../ui/Modal'
 
 export default function ConfirmModal({ title, message, confirmLabel = 'Delete', onConfirm, onCancel }) {
   const confirmRef = useRef(null)
 
-  useEffect(() => {
-    confirmRef.current?.focus()
-    const handler = (e) => {
-      if (e.key === 'Escape') onCancel()
-    }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [onCancel])
-
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" data-modal onClick={onCancel} role="presentation">
+    <Modal
+      open
+      onClose={onCancel}
+      role="alertdialog"
+      ariaLabelledBy="confirm-title"
+      ariaDescribedBy="confirm-message"
+      initialFocusRef={confirmRef}
+    >
       <div
-        role="alertdialog"
-        aria-labelledby="confirm-title"
-        aria-describedby="confirm-message"
         className="bg-[var(--surface-card)] rounded-2xl shadow-xl w-full max-w-sm mx-4 p-5"
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 mb-3">
           <div className="w-9 h-9 rounded-full bg-[#F0E0D2] flex items-center justify-center shrink-0">
@@ -47,6 +42,6 @@ export default function ConfirmModal({ title, message, confirmLabel = 'Delete', 
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

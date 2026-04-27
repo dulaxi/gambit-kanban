@@ -3,6 +3,7 @@ import { X, Users } from 'lucide-react'
 import { useWorkspacesStore } from '../../store/workspacesStore'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
+import Modal from '../ui/Modal'
 
 /**
  * WorkspaceCreateModal — Claude-style centered dialog.
@@ -28,18 +29,8 @@ export default function WorkspaceCreateModal({ open, onClose, onCreated }) {
       setIcon(null)
       setShowIconPicker(false)
       setSubmitting(false)
-      setTimeout(() => nameRef.current?.focus(), 50)
     }
   }, [open])
-
-  useEffect(() => {
-    if (!open) return
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [open, onClose])
-
-  if (!open) return null
 
   const canSubmit = name.trim().length > 0 && !submitting
 
@@ -54,14 +45,13 @@ export default function WorkspaceCreateModal({ open, onClose, onCreated }) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid items-center justify-items-center bg-black/50 backdrop-brightness-75 overflow-y-auto md:p-10 p-4"
-      onClick={onClose}
-      style={{ pointerEvents: 'auto' }}
+    <Modal
+      open={open}
+      onClose={onClose}
+      contentClassName="grid items-center justify-items-center overflow-y-auto md:p-10 p-4"
+      initialFocusRef={nameRef}
     >
       <form
-        role="dialog"
-        onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
         className="flex flex-col text-left shadow-xl border-0.5 border-[var(--border-default)] rounded-2xl md:p-6 p-4 bg-[var(--surface-page)] w-full max-w-xl"
       >
@@ -158,6 +148,6 @@ export default function WorkspaceCreateModal({ open, onClose, onCreated }) {
           </button>
         </div>
       </form>
-    </div>
+    </Modal>
   )
 }

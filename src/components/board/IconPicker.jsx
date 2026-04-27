@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
 import { useIsMobile } from '../../hooks/useMediaQuery'
-import { createPortal } from 'react-dom'
 import DynamicIcon from './DynamicIcon'
 import { PHOSPHOR_CATEGORIES, ALL_PHOSPHOR_ICONS } from '../../data/phosphorIcons'
+import Modal from '../ui/Modal'
 
 // Lazy-load Material data only when the user switches to the Material tab.
 // This keeps the 139KB file out of the main JS chunk.
@@ -67,18 +67,6 @@ export default function IconPicker({ value, onChange, onClose }) {
     }
   }, [activeTab, materialData])
 
-  useEffect(() => {
-    if (inputRef.current) inputRef.current.focus()
-  }, [])
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
-
   const searchResults = useMemo(() => {
     if (!search.trim()) return null
     const q = search.toLowerCase().replace(/\s+/g, activeTab === 'material' ? '_' : '-')
@@ -88,15 +76,20 @@ export default function IconPicker({ value, onChange, onClose }) {
   const currentCategory = categories.find((c) => c.key === activeCategory)
   const displayIcons = !searchResults ? (currentCategory ? currentCategory.icons : []) : null
 
-  return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" data-icon-picker onClick={onClose}>
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      contentClassName="flex items-center justify-center"
+      initialFocusRef={inputRef}
+    >
       <div
+        data-icon-picker
         className={`bg-[var(--surface-card)] shadow-2xl flex flex-col overflow-hidden ${
           isMobile
             ? 'fixed inset-0 rounded-none'
             : 'rounded-2xl w-[640px] max-h-[80vh]'
         }`}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header with tabs */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border-subtle)]">
@@ -203,7 +196,6 @@ export default function IconPicker({ value, onChange, onClose }) {
           </button>
         </div>
       </div>
-    </div>,
-    document.body
+    </Modal>
   )
 }

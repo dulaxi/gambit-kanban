@@ -11,6 +11,7 @@ import { filterCards } from '../../utils/cardFilters'
 import { showToast } from '../../utils/toast'
 import ConfirmModal from './ConfirmModal'
 import { useTemplateStore } from '../../store/templateStore'
+import Modal from '../ui/Modal'
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 }
 
@@ -277,9 +278,12 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
         />
       )}
 
-      {editingWip && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setEditingWip(false)}>
-          <div className="bg-[var(--surface-card)] rounded-2xl border-0.5 border-[var(--border-default)] shadow-[0_4px_20px_rgba(0,0,0,0.08)] w-full max-w-xs mx-4 p-5" onClick={(e) => e.stopPropagation()}>
+      <Modal
+        open={editingWip}
+        onClose={() => setEditingWip(false)}
+        contentClassName="flex items-center justify-center"
+      >
+        <div className="bg-[var(--surface-card)] rounded-2xl border-0.5 border-[var(--border-default)] shadow-[0_4px_20px_rgba(0,0,0,0.08)] w-full max-w-xs mx-4 p-5">
             <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">WIP Limit</h3>
             <p className="text-xs text-[var(--text-muted)] mb-3">Maximum number of tasks in "{column.title}". Leave empty for no limit.</p>
             <input
@@ -290,8 +294,6 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   updateColumnWipLimit(column.id, parseInt(wipValue) || null)
-                  setEditingWip(false)
-                } else if (e.key === 'Escape') {
                   setEditingWip(false)
                 }
               }}
@@ -319,8 +321,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
     </div>
   )
 }
