@@ -281,7 +281,7 @@ export default function SettingsPage() {
           onClick={() => fileInputRef.current?.click()}
         />
         <ActionCard
-          icon={Trash2}
+          icon={Trash}
           title="Clear all data"
           description="Permanently delete all boards, notes, and settings. Cannot be undone."
           variant="danger"

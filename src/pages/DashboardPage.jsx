@@ -10,7 +10,7 @@ import ChatInput from '../components/chat/ChatInput'
 
 const ACTIONS = [
   { label: 'Create a card', icon: Plus, prompt: 'Create a card: ' },
-  { label: 'Find a task', icon: Search, prompt: 'Find tasks where ' },
+  { label: 'Find a task', icon: MagnifyingGlass, prompt: 'Find tasks where ' },
   { label: 'Plan my week', icon: Calendar, prompt: 'Plan my week.' },
   { label: 'Stand-up notes', icon: ClipboardText, prompt: 'Draft stand-up notes from my recent activity.' },
 ]
@@ -19,7 +19,7 @@ const TEMPLATES = [
   {
     id: 'simple',
     name: 'Simple',
-    icon: Columns3,
+    icon: Columns,
     columns: ['To Do', 'In Progress', 'Done'],
   },
   {

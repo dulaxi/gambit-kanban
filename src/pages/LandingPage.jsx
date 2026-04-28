@@ -141,7 +141,7 @@ const stats = [
 
 const features = [
   {
-    icon: Columns3,
+    icon: Columns,
     title: 'Kanban Boards',
     desc: 'Organize work into columns that match your workflow. Drag cards between stages with buttery-smooth interactions.',
   },

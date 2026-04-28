@@ -3,7 +3,7 @@
  * Usage:
  *   <ActionCard icon={Plus} title="Create a board" description="Start organizing tasks" onClick={...} />
  *   <ActionCard icon={Upload} title="Import" description="..." to="/settings" />
- *   <ActionCard variant="danger" icon={Trash2} title="Clear data" description="..." onClick={...} />
+ *   <ActionCard variant="danger" icon={Trash} title="Clear data" description="..." onClick={...} />
  */
 export default function ActionCard({ icon: Icon, title, description, onClick, to, disabled = false, variant = 'default' }) {
   const isDanger = variant === 'danger'

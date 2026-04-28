@@ -2,11 +2,11 @@ import { NavLink } from 'react-router-dom'
 import { Calendar, Columns, Gear, SquaresFour, Notepad, Users } from '@phosphor-icons/react'
 
 const tabs = [
-  { to: '/boards', icon: Columns3, label: 'Board' },
+  { to: '/boards', icon: Columns, label: 'Board' },
   { to: '/dashboard', icon: SquaresFour, label: 'Home' },
   { to: '/workspace', icon: Users, label: 'Workspace' },
   { to: '/calendar', icon: Calendar, label: 'Calendar' },
-  { to: '/notes', icon: StickyNote, label: 'Notes' },
+  { to: '/notes', icon: Notepad, label: 'Notes' },
 ]
 
 export default function BottomTabBar() {
