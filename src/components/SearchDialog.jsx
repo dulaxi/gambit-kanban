@@ -28,6 +28,36 @@ export default function SearchDialog({ open, onClose }) {
       .slice(0, 12)
   }, [query, cards])
 
+  // Splits a string into segments around case-insensitive matches of `q`,
+  // wrapping each match in a lime-wash highlight span. Mirrors the @mention
+  // text-emphasis vocabulary so the visual rule stays consistent.
+  const renderHighlighted = (text, q) => {
+    const trimmed = (q || '').trim()
+    if (!trimmed || trimmed.length < 2 || !text) return text
+    const lower = text.toLowerCase()
+    const needle = trimmed.toLowerCase()
+    const parts = []
+    let i = 0
+    while (i < text.length) {
+      const found = lower.indexOf(needle, i)
+      if (found === -1) {
+        parts.push(text.slice(i))
+        break
+      }
+      if (found > i) parts.push(text.slice(i, found))
+      parts.push(
+        <span
+          key={found}
+          className="bg-[var(--accent-lime-wash)] text-[var(--accent-lime-dark)] rounded-[2px] px-[1px]"
+        >
+          {text.slice(found, found + needle.length)}
+        </span>,
+      )
+      i = found + needle.length
+    }
+    return parts
+  }
+
   useEffect(() => {
     if (open) {
       setQuery('')
@@ -114,7 +144,7 @@ export default function SearchDialog({ open, onClose }) {
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <Kanban className="w-4 h-4 shrink-0 text-[var(--text-muted)]" />
-                      <span className="truncate">{card.title}</span>
+                      <span className="truncate">{renderHighlighted(card.title, query)}</span>
                     </div>
                     <span className="text-xs text-[var(--text-muted)] shrink-0">
                       {board?.name || ''}

@@ -243,23 +243,10 @@
   100% { transform: scale(0.3); opacity: 0; }
 }
 
-/* AI card building shimmer */
+/* AI skeleton block shimmer (used by AICardSkeleton during AI tool execution) */
 @keyframes ai-card-shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
-}
-
-.ai-card-building {
-  background: linear-gradient(
-    90deg,
-    var(--surface-card) 0%,
-    #E8DDE2 20%,
-    #EEF2D6 40%,
-    #DAE0F0 60%,
-    var(--surface-card) 80%
-  );
-  background-size: 200% 100%;
-  animation: ai-card-shimmer 2s ease-in-out infinite;
 }
 
 .ai-skeleton-block {

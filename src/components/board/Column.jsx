@@ -138,7 +138,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
   }
 
   return (
-    <div className={`flex flex-col w-[calc(100vw-3.5rem)] sm:w-[260px] lg:w-[290px] shrink-0 snap-start ${overWip ? 'bg-[var(--surface-hover)] rounded-xl px-2.5 py-2' : ''}`}>
+    <div className={`flex flex-col w-[calc(100vw-3.5rem)] sm:w-[260px] lg:w-[290px] shrink-0 snap-start ${overWip ? 'bg-[var(--color-copper-wash)] rounded-xl px-2.5 py-2' : ''}`}>
       {/* Header */}
       <div className="flex items-center justify-between px-0.5 pb-3">
         <div className="flex items-baseline gap-2">
@@ -165,7 +165,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               {column.title}
             </h3>
           )}
-          <span className={`text-xs ${overWip ? 'text-[#8B7355] font-medium' : 'text-[var(--text-muted)]'}`}>
+          <span className={`text-xs ${overWip ? 'text-[var(--color-copper)] font-medium' : 'text-[var(--text-muted)]'}`}>
             {columnCards.length}{wipLimit ? `/${wipLimit}` : ''}
           </span>
         </div>
