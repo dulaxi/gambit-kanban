@@ -31,7 +31,7 @@ const TEMPLATES = [
   {
     id: 'sprint',
     name: 'Sprint',
-    icon: Zap,
+    icon: Lightning,
     columns: ['Backlog', 'To Do', 'In Progress', 'Review', 'Done'],
   },
 ]

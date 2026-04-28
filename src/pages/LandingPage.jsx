@@ -151,7 +151,7 @@ const features = [
     desc: 'Share boards with your team. Every change syncs instantly across all connected users — no refresh needed.',
   },
   {
-    icon: Zap,
+    icon: Lightning,
     title: 'Smart Organization',
     desc: 'Priorities, color-coded labels, checklists, and due dates. Everything you need to stay on top of your work.',
   },
@@ -166,7 +166,7 @@ const features = [
     desc: 'Reorder cards, move between columns, rearrange your entire board — all with natural drag interactions.',
   },
   {
-    icon: Sparkles,
+    icon: Sparkle,
     title: 'Clean Interface',
     desc: 'No bloat, no clutter. A focused workspace that gets out of your way so you can focus on shipping.',
   },
