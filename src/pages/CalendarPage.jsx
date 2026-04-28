@@ -107,7 +107,7 @@ export default function CalendarPage() {
                   type="button"
                   onClick={() => setSelectedDay(day)}
                   className={`relative border-b border-r border-[var(--border-subtle)] text-left cursor-pointer transition-colors flex flex-col ${
-                    selected ? 'bg-[var(--accent-lime-wash)]/30' : 'hover:bg-[var(--surface-raised)]/60'
+                    selected ? 'bg-[var(--soft-lime)]' : 'hover:bg-[var(--surface-raised)]/60'
                   }`}
                 >
                   {/* Date number */}

@@ -183,7 +183,7 @@ export default function SettingsPage() {
                   onClick={() => handleProfileUpdate({ color: c.value })}
                   className={`w-7 h-7 rounded-full transition-all ${
                     profile?.color === c.value
-                      ? 'ring-2 ring-offset-2 ring-[#C4BFB8] scale-110'
+                      ? 'ring-2 ring-offset-2 ring-[var(--soft-lime)]'
                       : 'hover:scale-110'
                   }`}
                   style={{ backgroundColor: c.hex }}
@@ -210,7 +210,7 @@ export default function SettingsPage() {
               onClick={() => setTheme(t.id)}
               className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border-2 cursor-pointer transition-colors ${
                 theme === t.id
-                  ? 'border-[var(--border-focus)] bg-[var(--accent-lime-wash)]/60'
+                  ? 'border-[var(--soft-lime)] bg-[var(--soft-lime)]'
                   : 'border-[var(--border-default)] hover:border-[var(--border-default)]'
               }`}
             >
@@ -245,7 +245,7 @@ export default function SettingsPage() {
             onClick={() => setFont('mona-sans')}
             className={`flex flex-col items-center gap-2 px-5 py-3 rounded-xl border-2 cursor-pointer transition-colors ${
               font === 'mona-sans'
-                ? 'border-[var(--border-focus)] bg-[var(--accent-lime-wash)]/60'
+                ? 'border-[var(--soft-lime)] bg-[var(--soft-lime)]'
                 : 'border-[var(--border-default)] hover:border-[var(--border-default)]'
             }`}
           >
@@ -256,7 +256,7 @@ export default function SettingsPage() {
             onClick={() => setFont('sf-mono')}
             className={`flex flex-col items-center gap-2 px-5 py-3 rounded-xl border-2 cursor-pointer transition-colors ${
               font === 'sf-mono'
-                ? 'border-[var(--border-focus)] bg-[var(--accent-lime-wash)]/60'
+                ? 'border-[var(--soft-lime)] bg-[var(--soft-lime)]'
                 : 'border-[var(--border-default)] hover:border-[var(--border-default)]'
             }`}
           >

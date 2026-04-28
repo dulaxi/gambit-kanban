@@ -19,7 +19,7 @@ function FilterPill({ label, active, children }) {
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center gap-1.5 h-8 px-2.5 text-sm rounded-lg border-[0.5px] transition-all duration-75 cursor-pointer active:scale-[0.995] ${
           active
-            ? 'bg-[var(--accent-lime-wash)] text-[#A8BA32] border-[var(--border-focus)]'
+            ? 'bg-[var(--soft-lime)] text-[var(--text-primary)] border-[var(--soft-lime)]'
             : 'bg-[var(--surface-card)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
         }`}
       >
@@ -56,7 +56,7 @@ function PriorityFilter({ filters, setFilters }) {
           className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] transition-colors"
         >
           <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
-            selected.includes(p.value) ? 'bg-[#C2D64A] border-[var(--border-focus)]' : 'border-[var(--border-default)]'
+            selected.includes(p.value) ? 'bg-[var(--soft-lime)] border-[var(--soft-lime)]' : 'border-[var(--border-default)]'
           }`}>
             {selected.includes(p.value) && <Check className="w-2.5 h-2.5 text-white" />}
           </span>
@@ -86,7 +86,7 @@ function AssigneeFilter({ filters, setFilters, assignees }) {
             type="button"
             onClick={() => select(name)}
             className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
-              selected === name ? 'bg-[var(--accent-lime-wash)] text-[#A8BA32]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
+              selected === name ? 'bg-[var(--soft-lime)] text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
             }`}
           >
             <span className="w-5 h-5 rounded-full bg-[#E0DBD5] flex items-center justify-center text-[10px] font-medium text-[var(--text-secondary)] shrink-0">
@@ -133,7 +133,7 @@ function LabelFilter({ filters, setFilters, labels }) {
             className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] transition-colors"
           >
             <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
-              selected.includes(lbl.text) ? 'bg-[#C2D64A] border-[var(--border-focus)]' : 'border-[var(--border-default)]'
+              selected.includes(lbl.text) ? 'bg-[var(--soft-lime)] border-[var(--soft-lime)]' : 'border-[var(--border-default)]'
             }`}>
               {selected.includes(lbl.text) && <Check className="w-2.5 h-2.5 text-white" />}
             </span>
@@ -168,7 +168,7 @@ function DueFilter({ filters, setFilters }) {
           type="button"
           onClick={() => select(opt.value)}
           className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
-            selected === opt.value ? 'bg-[var(--accent-lime-wash)] text-[#A8BA32]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
+            selected === opt.value ? 'bg-[var(--soft-lime)] text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
           }`}
         >
           {opt.label}
@@ -276,7 +276,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
                   type="button"
                   onClick={() => setSortBy(opt.value)}
                   className={`flex items-center justify-between gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
-                    sortBy === opt.value ? 'bg-[var(--accent-lime-wash)] text-[#A8BA32] font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
+                    sortBy === opt.value ? 'bg-[var(--soft-lime)] text-[var(--text-primary)] font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
                   }`}
                 >
                   {opt.label}
@@ -293,7 +293,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
               onClick={() => setShowFilters(!showFilters)}
               className={`relative flex items-center gap-1.5 h-8 px-2.5 text-sm rounded-lg border-[0.5px] transition-all duration-75 cursor-pointer active:scale-[0.995] ${
                 showFilters || activeFilterCount > 0
-                  ? 'bg-[var(--accent-lime-wash)] text-[#A8BA32] border-[var(--border-focus)]'
+                  ? 'bg-[var(--soft-lime)] text-[var(--text-primary)] border-[var(--soft-lime)]'
                   : 'text-[var(--text-secondary)] bg-[var(--surface-card)] border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
               }`}
             >

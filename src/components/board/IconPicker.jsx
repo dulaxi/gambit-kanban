@@ -34,7 +34,7 @@ function IconGrid({ icons: iconList, value, onChange, onClose, namePrefix = '' }
             title={name}
             className={`w-10 h-10 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
               value === storedName
-                ? 'bg-[var(--accent-lime-wash)] text-[#A8BA32] ring-1 ring-[#C2D64A]'
+                ? 'bg-[var(--soft-lime)] text-[var(--text-primary)]'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-secondary)]'
             }`}
           >

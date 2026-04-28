@@ -234,14 +234,14 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
                       onClick={() => handleTemplateSelect(tpl)}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
                         selectedTemplate === tpl.key
-                          ? 'bg-[var(--accent-lime-wash)] ring-1 ring-[#C2D64A]'
+                          ? 'bg-[var(--soft-lime)]'
                           : 'hover:bg-[var(--surface-raised)]'
                       }`}
                     >
                       <div
                         className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                           selectedTemplate === tpl.key
-                            ? 'bg-[#C2D64A]/20 text-[#7A8A1E]'
+                            ? 'bg-black/8 text-[var(--text-primary)]'
                             : 'bg-[var(--surface-hover)] text-[var(--text-muted)]'
                         }`}
                       >

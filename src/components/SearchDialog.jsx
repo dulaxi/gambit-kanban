@@ -108,7 +108,7 @@ export default function SearchDialog({ open, onClose }) {
                     onClick={() => handleSelect(card)}
                     className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between gap-3 cursor-pointer truncate text-sm ${
                       idx === selectedIdx
-                        ? 'bg-[var(--surface-hover)] text-[var(--text-primary)]'
+                        ? 'bg-[var(--soft-lime)] text-[var(--text-primary)]'
                         : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
                     }`}
                   >
