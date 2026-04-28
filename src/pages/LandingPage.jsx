@@ -1945,7 +1945,7 @@ export default function LandingPage() {
                         <SquaresFour className="w-5 h-5 shrink-0" />
                       </div>
                       <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium bg-[#EEF2D6] text-[#1B1B18]">
-                        <LucideKanban className="w-5 h-5 shrink-0" />
+                        <Kanban className="w-5 h-5 shrink-0" />
                       </div>
                       <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#5C5C57]">
                         <Calendar className="w-5 h-5 shrink-0" />
