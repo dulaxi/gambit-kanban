@@ -18,8 +18,8 @@ export default function ConfirmModal({ title, message, confirmLabel = 'Delete', 
         className="bg-[var(--surface-card)] rounded-2xl shadow-xl w-full max-w-sm mx-4 p-5"
       >
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-9 h-9 rounded-full bg-[#F0E0D2] flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-5 h-5 text-[#7A5C44]" />
+          <div className="w-9 h-9 rounded-full bg-[var(--color-bark-wash)] flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-5 h-5 text-[var(--color-bark)]" />
           </div>
           <h3 id="confirm-title" className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
         </div>
@@ -36,7 +36,7 @@ export default function ConfirmModal({ title, message, confirmLabel = 'Delete', 
             ref={confirmRef}
             type="button"
             onClick={onConfirm}
-            className="px-4 py-2 text-sm font-medium text-white bg-[#7A5C44] hover:bg-[#6B4D38] rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-white bg-[var(--color-bark)] hover:bg-[var(--color-bark-dark)] rounded-lg transition-colors"
           >
             {confirmLabel}
           </button>

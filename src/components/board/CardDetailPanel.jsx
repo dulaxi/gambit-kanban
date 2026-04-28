@@ -48,7 +48,7 @@ function ChecklistItem({ item, onToggle, onEdit, onDelete }) {
       <button
         type="button"
         onClick={onDelete}
-        className="shrink-0 opacity-0 group-hover/check:opacity-100 text-[var(--text-faint)] hover:text-[#7A5C44] transition-all"
+        className="shrink-0 opacity-0 group-hover/check:opacity-100 text-[var(--text-faint)] hover:text-[var(--color-bark)] transition-all"
       >
         <X className="w-3 h-3" />
       </button>
@@ -190,10 +190,10 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                   const d = new Date(dueDate)
                   const today = new Date()
                   dateLabel = formatDueDateLabel(d)
-                  if (dateLabel === 'Today') dateColor = 'text-[#D4A843]'
-                  else if (dateLabel === 'Tomorrow') dateColor = 'text-[#A8BA32]'
-                  else if (dateLabel === 'Yesterday') dateColor = 'text-[#C27A4A]'
-                  else if (d < today) dateColor = 'text-[#C27A4A]'
+                  if (dateLabel === 'Today') dateColor = 'text-[var(--color-honey)]'
+                  else if (dateLabel === 'Tomorrow') dateColor = 'text-[var(--color-lime-dark)]'
+                  else if (dateLabel === 'Yesterday') dateColor = 'text-[var(--color-copper)]'
+                  else if (d < today) dateColor = 'text-[var(--color-copper)]'
                   else dateColor = 'text-[var(--text-secondary)]'
                 }
                 return (
@@ -266,7 +266,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                     <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Bookmark className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Template</span></div>
                   </div>
                   <div role="separator" className="h-[0.5px] bg-[var(--border-subtle)] my-1.5 mx-2" />
-                  <div role="menuitem" onClick={() => { deleteCard(cardId); onClose(); setOpenMenu(null) }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[#7A5C44]/10 text-[#7A5C44] text-xs">
+                  <div role="menuitem" onClick={() => { deleteCard(cardId); onClose(); setOpenMenu(null) }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--color-bark)]/10 text-[var(--color-bark)] text-xs">
                     <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Delete</span></div>
                   </div>
                 </div>
@@ -364,7 +364,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
           {(() => {
             const lightColors = ['bg-[#8E8E89]', 'bg-[#E0DBD5]', 'bg-[#E8E2DB]', 'bg-[#C2D64A]', 'bg-[#A8BA32]', 'bg-[#D4A843]', 'bg-[#C27A4A]']
             const isMeName = (n) => profile?.display_name && n.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
-            const iconText = lightColors.includes(profile?.color) ? 'text-[#1B1B18]' : 'text-white'
+            const iconText = lightColors.includes(profile?.color) ? 'text-[var(--text-primary)]' : 'text-white'
             const maxVisible = 3
             const visible = assignees.slice(0, maxVisible)
             const overflow = Math.max(0, assignees.length - maxVisible)
@@ -624,7 +624,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                             showToast.error('Failed to delete')
                           }
                         }}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] flex items-center justify-center text-[var(--text-faint)] hover:text-[#7A5C44] hover:bg-[var(--surface-hover)] opacity-0 group-hover/file:opacity-100 transition-all"
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] flex items-center justify-center text-[var(--text-faint)] hover:text-[var(--color-bark)] hover:bg-[var(--surface-hover)] opacity-0 group-hover/file:opacity-100 transition-all"
                       >
                         <X className="w-3 h-3" />
                       </button>

@@ -6,20 +6,20 @@ export const LABEL_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'pink',
 
 // Tailwind background classes for each label color (used in pickers/dots)
 export const COLOR_DOT_CLASSES = {
-  red: 'bg-[#F2D9C7]',
-  blue: 'bg-[#DAE0F0]',
-  green: 'bg-[#EEF2D6]',
-  yellow: 'bg-[#F5EDCF]',
-  purple: 'bg-[#E8DDE2]',
-  pink: 'bg-[#F0E0D2]',
-  gray: 'bg-[#E8E2DB]',
+  red: 'bg-[var(--label-red-bg)]',
+  blue: 'bg-[var(--label-blue-bg)]',
+  green: 'bg-[var(--label-green-bg)]',
+  yellow: 'bg-[var(--label-yellow-bg)]',
+  purple: 'bg-[var(--label-purple-bg)]',
+  pink: 'bg-[var(--color-bark-wash)]',
+  gray: 'bg-[var(--label-gray-bg)]',
 }
 
 // Priority options for card detail fields and inline editor
 export const PRIORITY_OPTIONS = [
-  { value: 'low', label: 'Low', dot: 'bg-[#A8BA32]' },
-  { value: 'medium', label: 'Medium', dot: 'bg-[#D4A843]' },
-  { value: 'high', label: 'High', dot: 'bg-[#C27A4A]' },
+  { value: 'low', label: 'Low', dot: 'bg-[var(--color-lime-dark)]' },
+  { value: 'medium', label: 'Medium', dot: 'bg-[var(--color-honey)]' },
+  { value: 'high', label: 'High', dot: 'bg-[var(--color-copper)]' },
 ]
 
 // Profile avatar color choices (settings page)
@@ -43,14 +43,14 @@ export const SEGMENT_COLORS = ['#d2d6c5', '#a4b55b', '#8BA32E', '#7A5C44', '#5C5
 
 // Calendar priority dot colors
 export const DOT_COLORS = {
-  high: 'bg-[#7A5C44]',
-  medium: 'bg-[#C2D64A]',
-  low: 'bg-[#A8BA32]',
+  high: 'bg-[var(--color-bark)]',
+  medium: 'bg-[var(--color-lime)]',
+  low: 'bg-[var(--color-lime-dark)]',
 }
 
 // Calendar event left-border accent by priority
 export const EVENT_ACCENT = {
-  high: 'border-l-[#7A5C44]',
-  medium: 'border-l-[#C2D64A]',
-  low: 'border-l-[#A8BA32]',
+  high: 'border-l-[var(--color-bark)]',
+  medium: 'border-l-[var(--color-lime)]',
+  low: 'border-l-[var(--color-lime-dark)]',
 }

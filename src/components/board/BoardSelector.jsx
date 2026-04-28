@@ -111,13 +111,13 @@ function LabelFilter({ filters, setFilters, labels }) {
   }
 
   const labelColors = {
-    red: 'bg-[#F2D9C7] text-[#8B5A33]',
-    blue: 'bg-[#DAE0F0] text-[#4A5578]',
-    green: 'bg-[#EEF2D6] text-[#6B7A12]',
-    yellow: 'bg-[#F5EDCF] text-[#8B7322]',
-    purple: 'bg-[#E8DDE2] text-[#6E5A65]',
-    pink: 'bg-[#F0E0D2] text-[#7A5C44]',
-    gray: 'bg-[#E8E2DB] text-[#5C5C57]',
+    red: 'bg-[var(--color-copper-wash)] text-[var(--label-red-text)]',
+    blue: 'bg-[var(--label-blue-bg)] text-[var(--label-blue-text)]',
+    green: 'bg-[var(--color-lime-wash)] text-[var(--label-green-text)]',
+    yellow: 'bg-[var(--color-honey-wash)] text-[var(--label-yellow-text)]',
+    purple: 'bg-[var(--color-mauve-wash)] text-[var(--label-purple-text)]',
+    pink: 'bg-[var(--color-bark-wash)] text-[var(--color-bark)]',
+    gray: 'bg-[var(--surface-hover)] text-[var(--text-secondary)]',
   }
 
   return (
@@ -300,7 +300,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
               <Filter className="w-4 h-4 -ml-0.5" />
               Filter
               {activeFilterCount > 0 && (
-                <span className="flex items-center justify-center w-4 h-4 text-[10px] font-semibold text-white bg-[#C2D64A] rounded-full">
+                <span className="flex items-center justify-center w-4 h-4 text-[10px] font-semibold text-white bg-[var(--color-lime)] rounded-full">
                   {activeFilterCount}
                 </span>
               )}
@@ -314,7 +314,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
               onClick={() => setShowArchived(!showArchived)}
               className={`flex items-center gap-1.5 h-8 px-2.5 text-sm rounded-lg border-[0.5px] transition-all duration-75 cursor-pointer active:scale-[0.995] ${
                 showArchived
-                  ? 'bg-[#F5EDCF] text-[#D4A843] border-[#D4A843]'
+                  ? 'bg-[var(--color-honey-wash)] text-[var(--color-honey)] border-[var(--color-honey)]'
                   : 'text-[var(--text-secondary)] bg-[var(--surface-card)] border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -345,10 +345,10 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
         )}
         {/* Archived cards panel */}
         {showArchived && archivedCards.length > 0 && (
-          <div className="bg-[#F5EDCF]/50 border border-[#D4A843] rounded-xl p-3">
+          <div className="bg-[var(--color-honey-wash)]/50 border border-[var(--color-honey)] rounded-xl p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-[#8B7355] uppercase tracking-wider">Archived Tasks</span>
-              <button type="button" onClick={() => setShowArchived(false)} className="text-[#D4A843] hover:text-[#8B7355]">
+              <span className="text-xs font-medium text-[var(--color-walnut)] uppercase tracking-wider">Archived Tasks</span>
+              <button type="button" onClick={() => setShowArchived(false)} className="text-[var(--color-honey)] hover:text-[var(--color-walnut)]">
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -363,7 +363,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
                     <button
                       type="button"
                       onClick={() => unarchiveCard(card.id)}
-                      className="p-1 text-[var(--text-faint)] hover:text-[#A8BA32] transition-colors"
+                      className="p-1 text-[var(--text-faint)] hover:text-[var(--color-lime-dark)] transition-colors"
                       title="Restore"
                     >
                       <ArchiveRestore className="w-3.5 h-3.5" />
@@ -371,7 +371,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
                     <button
                       type="button"
                       onClick={() => deleteCard(card.id)}
-                      className="p-1 text-[var(--text-faint)] hover:text-[#7A5C44] transition-colors"
+                      className="p-1 text-[var(--text-faint)] hover:text-[var(--color-bark)] transition-colors"
                       title="Delete permanently"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

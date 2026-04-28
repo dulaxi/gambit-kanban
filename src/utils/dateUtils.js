@@ -34,16 +34,16 @@ export function formatDueDateLabel(date, { long = false } = {}) {
 export function dueDateColorClass(date) {
   if (!date) return 'text-[#57534e]'
   const d = typeof date === 'string' ? parseISO(date) : date
-  if (isYesterday(d) || (isPast(d) && !isToday(d))) return 'text-[#C27A4A] font-medium'
-  if (isToday(d)) return 'text-[#D4A843] font-medium'
-  if (isTomorrow(d)) return 'text-[#A8BA32] font-medium'
+  if (isYesterday(d) || (isPast(d) && !isToday(d))) return 'text-[var(--color-copper)] font-medium'
+  if (isToday(d)) return 'text-[var(--color-honey)] font-medium'
+  if (isTomorrow(d)) return 'text-[var(--color-lime-dark)] font-medium'
   return 'text-[#57534e]'
 }
 
 export function dueDateBadgeClass(date) {
   if (!date) return 'bg-[var(--surface-hover)] text-[var(--text-muted)]'
   const d = typeof date === 'string' ? parseISO(date) : date
-  if (isYesterday(d) || (isPast(d) && !isToday(d))) return 'bg-[#F2D9C7] text-[#C27A4A]'
-  if (isToday(d)) return 'bg-[#F5EDCF] text-[#D4A843]'
-  return 'bg-[#EEF2D6] text-[#A8BA32]'
+  if (isYesterday(d) || (isPast(d) && !isToday(d))) return 'bg-[var(--color-copper-wash)] text-[var(--color-copper)]'
+  if (isToday(d)) return 'bg-[var(--color-honey-wash)] text-[var(--color-honey)]'
+  return 'bg-[var(--color-lime-wash)] text-[var(--color-lime-dark)]'
 }

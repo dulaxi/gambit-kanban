@@ -70,7 +70,7 @@ export default function CalendarPage() {
               setCurrentMonth(new Date())
               setSelectedDay(new Date())
             }}
-            className="px-3 py-1 text-sm font-medium text-[#7A5C44] border border-[var(--border-default)] rounded-full hover:bg-[var(--surface-raised)] transition-colors"
+            className="px-3 py-1 text-sm font-medium text-[var(--color-bark)] border border-[var(--border-default)] rounded-full hover:bg-[var(--surface-raised)] transition-colors"
           >
             Today
           </button>
@@ -115,7 +115,7 @@ export default function CalendarPage() {
                     <span
                       className={`text-[13px] w-7 h-7 flex items-center justify-center rounded-full leading-none ${
                         today
-                          ? 'bg-[#7A5C44] text-white font-semibold'
+                          ? 'bg-[var(--color-bark)] text-white font-semibold'
                           : inMonth
                             ? 'text-[var(--text-primary)] font-medium'
                             : 'text-[var(--text-muted)]'
@@ -164,7 +164,7 @@ export default function CalendarPage() {
                 No tasks scheduled
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto divide-y divide-[#F2EDE8]">
+              <div className="flex-1 overflow-y-auto divide-y divide-[var(--surface-raised)]">
                 {selectedDayCards.map((card) => (
                   <div key={card.id} className={`flex flex-col gap-1 px-4 py-3 border-l-[3px] ${EVENT_ACCENT[card.priority] || EVENT_ACCENT.medium}`}>
                     <p className="text-sm font-medium text-[var(--text-primary)]">{card.title}</p>

@@ -30,7 +30,7 @@ export default function CardDetailChecklist({ checklist, onToggle, onRemove, onA
       {checklist.length > 0 && (
         <div className="w-full bg-[var(--surface-hover)] rounded-full h-1 mb-3">
           <div
-            className="bg-[#C2D64A] h-1 rounded-full transition-all"
+            className="bg-[var(--color-lime)] h-1 rounded-full transition-all"
             style={{
               width: `${(checkedCount / checklist.length) * 100}%`,
             }}
@@ -45,7 +45,7 @@ export default function CardDetailChecklist({ checklist, onToggle, onRemove, onA
               type="checkbox"
               checked={item.done}
               onChange={() => onToggle(idx)}
-              className="w-4 h-4 rounded border-[var(--border-default)] text-[#C2D64A] focus:ring-1 focus:ring-[var(--color-ink)]"
+              className="w-4 h-4 rounded border-[var(--border-default)] text-[var(--color-lime)] focus:ring-1 focus:ring-[var(--color-ink)]"
             />
             <span
               className={`flex-1 text-sm ${
@@ -57,7 +57,7 @@ export default function CardDetailChecklist({ checklist, onToggle, onRemove, onA
             <button
               type="button"
               onClick={() => onRemove(idx)}
-              className="opacity-0 group-hover:opacity-100 p-0.5 text-[var(--text-muted)] hover:text-[#7A5C44] transition-opacity"
+              className="opacity-0 group-hover:opacity-100 p-0.5 text-[var(--text-muted)] hover:text-[var(--color-bark)] transition-opacity"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -71,7 +71,7 @@ export default function CardDetailChecklist({ checklist, onToggle, onRemove, onA
           onChange={(e) => setNewCheckItem(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
           placeholder="Add an item..."
-          className="flex-1 text-sm rounded-lg px-2.5 py-1.5 border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none placeholder-[#8E8E89]"
+          className="flex-1 text-sm rounded-lg px-2.5 py-1.5 border border-[var(--border-default)] focus:border-[var(--border-focus)] focus:outline-none placeholder-[var(--text-muted)]"
         />
         <button
           type="button"

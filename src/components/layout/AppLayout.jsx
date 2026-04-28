@@ -242,7 +242,7 @@ export default function AppLayout() {
         <main className={`flex-1 min-h-0 flex flex-col ${basePath === '/boards' ? 'px-4 sm:px-8' : ['/calendar', '/notes'].includes(basePath) ? 'px-4 sm:px-8 pb-12' : 'px-4 sm:px-8 pb-12 max-w-4xl mx-auto overflow-y-auto w-full subtle-scrollbar'} ${!isDesktop ? 'pb-20' : ''}`}>
           {/* Migration banner */}
           {showMigration && (
-            <div className="mb-4 bg-[var(--accent-lime-wash)] border border-[#C2D64A] rounded-xl p-4 flex items-center justify-between">
+            <div className="mb-4 bg-[var(--accent-lime-wash)] border border-[var(--color-lime)] rounded-xl p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[var(--text-primary)]">Local data detected</p>
                 <p className="text-xs text-[var(--text-secondary)] mt-0.5">
@@ -259,7 +259,7 @@ export default function AppLayout() {
                 <button
                   onClick={handleMigrate}
                   disabled={migrating}
-                  className="px-3 py-1.5 text-xs font-medium bg-[var(--text-primary)] text-white rounded-lg hover:bg-[#333] disabled:opacity-50 transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium bg-[var(--text-primary)] text-white rounded-lg hover:bg-[var(--btn-primary-hover)] disabled:opacity-50 transition-colors"
                 >
                   {migrating ? 'Importing...' : 'Import data'}
                 </button>

@@ -125,7 +125,7 @@ export default function IconPicker({ value, onChange, onClose }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search icons..."
-            className="flex-1 text-sm bg-transparent border-none focus:outline-none placeholder-[#8E8E89]"
+            className="flex-1 text-sm bg-transparent border-none focus:outline-none placeholder-[var(--text-muted)]"
           />
           {search && (
             <button type="button" onClick={() => setSearch('')} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
@@ -163,7 +163,7 @@ export default function IconPicker({ value, onChange, onClose }) {
               <button
                 type="button"
                 onClick={() => { onChange(null); onClose() }}
-                className="mb-3 text-xs text-[var(--text-muted)] hover:text-[#7A5C44] transition-colors cursor-pointer"
+                className="mb-3 text-xs text-[var(--text-muted)] hover:text-[var(--color-bark)] transition-colors cursor-pointer"
               >
                 Remove icon
               </button>

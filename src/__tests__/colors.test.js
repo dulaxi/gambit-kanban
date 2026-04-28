@@ -30,7 +30,8 @@ describe('COLOR_DOT_CLASSES', () => {
   test('has a Tailwind class for every label color', () => {
     for (const color of LABEL_COLORS) {
       expect(COLOR_DOT_CLASSES).toHaveProperty(color)
-      expect(COLOR_DOT_CLASSES[color]).toMatch(/^bg-\[#[A-Fa-f0-9]{6}\]$/)
+      // Accept either raw hex or var(--token) syntax
+      expect(COLOR_DOT_CLASSES[color]).toMatch(/^bg-\[(#[A-Fa-f0-9]{6}|var\(--[a-z-]+\))\]$/)
     }
   })
 
@@ -104,7 +105,7 @@ describe('DOT_COLORS', () => {
 describe('EVENT_ACCENT', () => {
   test('has border-l classes for low, medium, high', () => {
     for (const key of ['low', 'medium', 'high']) {
-      expect(EVENT_ACCENT[key]).toMatch(/^border-l-\[#[A-Fa-f0-9]{6}\]$/)
+      expect(EVENT_ACCENT[key]).toMatch(/^border-l-\[(#[A-Fa-f0-9]{6}|var\(--[a-z-]+\))\]$/)
     }
   })
 })

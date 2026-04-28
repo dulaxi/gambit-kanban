@@ -46,7 +46,7 @@ export default function UpdatePasswordPage() {
 
         <form onSubmit={handleSubmit} className="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-2xl p-6 shadow-sm space-y-4">
           {error && (
-            <div className="text-sm text-[#7A5C44] bg-[#F0E0D2] rounded-xl px-3 py-2">
+            <div className="text-sm text-[var(--color-bark)] bg-[var(--color-bark-wash)] rounded-xl px-3 py-2">
               {error}
             </div>
           )}

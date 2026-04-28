@@ -82,7 +82,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
               aria-label={completed ? 'Mark as incomplete' : 'Mark as complete'}
               className="shrink-0"
             >
-              <CheckCircle2 className={`w-4 h-4 transition-colors ${completed ? 'text-[#A8BA32]' : priDot === 'bg-[#C27A4A]' ? 'text-[#C27A4A] hover:text-[#A8BA32]' : priDot === 'bg-[#A8BA32]' ? 'text-[#A8BA32] hover:text-[#8BA32E]' : 'text-[#D4A843] hover:text-[#A8BA32]'}`} />
+              <CheckCircle2 className={`w-4 h-4 transition-colors ${completed ? 'text-[var(--color-lime-dark)]' : priority === 'high' ? 'text-[var(--color-copper)] hover:text-[var(--color-lime-dark)]' : priority === 'low' ? 'text-[var(--color-lime-dark)] hover:text-[var(--color-logo)]' : 'text-[var(--color-honey)] hover:text-[var(--color-lime-dark)]'}`} />
             </button>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
@@ -120,8 +120,8 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
                 }}
                 className={`font-semibold flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] transition-colors ${
                   checkedCount === totalCount
-                    ? 'bg-[#EEF2D6] text-[#A8BA32]'
-                    : 'bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[#E0DBD5]'
+                    ? 'bg-[var(--color-lime-wash)] text-[var(--color-lime-dark)]'
+                    : 'bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[var(--border-default)]'
                 }`}
               >
                 <CheckSquare size={12} weight="bold" />
@@ -133,7 +133,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
           {hasAssignee && (() => {
             const lightColors = ['bg-[#8E8E89]', 'bg-[#E0DBD5]', 'bg-[#E8E2DB]', 'bg-[#C2D64A]', 'bg-[#A8BA32]', 'bg-[#D4A843]', 'bg-[#C27A4A]']
             const isMeName = (n) => profile?.display_name && n.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
-            const iconText = lightColors.includes(profile?.color) ? 'text-[#1B1B18]' : 'text-white'
+            const iconText = lightColors.includes(profile?.color) ? 'text-[var(--text-primary)]' : 'text-white'
             const maxVisible = 3
             const visible = assignees.slice(0, maxVisible)
             const overflow = Math.max(0, assignees.length - maxVisible)
@@ -169,7 +169,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
           {/* Progress bar */}
           <div className="w-full bg-[var(--surface-hover)] rounded-full h-1 mb-2">
             <div
-              className={`h-1 rounded-full transition-all ${checkedCount === totalCount ? 'bg-[#A8BA32]' : 'bg-[#C2D64A]'}`}
+              className={`h-1 rounded-full transition-all ${checkedCount === totalCount ? 'bg-[var(--color-lime-dark)]' : 'bg-[var(--color-lime)]'}`}
               style={{ width: `${(checkedCount / totalCount) * 100}%` }}
             />
           </div>
@@ -180,7 +180,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
                   type="checkbox"
                   checked={item.done}
                   onChange={() => toggleCheckItem(idx)}
-                  className="w-3.5 h-3.5 rounded border-[var(--border-default)] text-[#C2D64A] focus:ring-1 focus:ring-[var(--color-ink)]"
+                  className="w-3.5 h-3.5 rounded border-[var(--border-default)] text-[var(--color-lime)] focus:ring-1 focus:ring-[var(--color-ink)]"
                 />
                 <span className={`text-[12px] leading-snug ${item.done ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-secondary)]'}`}>
                   {item.text}

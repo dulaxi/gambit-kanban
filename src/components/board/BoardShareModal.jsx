@@ -147,14 +147,14 @@ export default function BoardShareModal({ board, onClose }) {
               <button
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="flex items-center gap-1.5 px-3 py-2 bg-[#1B1B18] text-white text-sm font-medium rounded-xl hover:bg-[#1B1B18] disabled:opacity-50 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 bg-[var(--text-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--text-primary)] disabled:opacity-50 transition-colors"
               >
                 <UserPlus className="w-4 h-4" />
                 Invite
               </button>
             </div>
             {error && (
-              <p className="text-xs text-[#7A5C44] mt-1.5">{error}</p>
+              <p className="text-xs text-[var(--color-bark)] mt-1.5">{error}</p>
             )}
           </form>
         )}
@@ -183,7 +183,7 @@ export default function BoardShareModal({ board, onClose }) {
                 </div>
                 <div className="flex items-center gap-1.5">
                   {m.role === 'owner' ? (
-                    <span className="flex items-center gap-1 text-xs text-[#D4A843] bg-[#F5EDCF] px-2 py-0.5 rounded-full">
+                    <span className="flex items-center gap-1 text-xs text-[var(--color-honey)] bg-[var(--color-honey-wash)] px-2 py-0.5 rounded-full">
                       <Crown className="w-3 h-3" />
                       Owner
                     </span>
@@ -191,7 +191,7 @@ export default function BoardShareModal({ board, onClose }) {
                     <button
                       type="button"
                       onClick={() => handleRemoveMember(m.user_id)}
-                      className="p-1 text-[var(--text-muted)] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="p-1 text-[var(--text-muted)] hover:text-[var(--color-bark)] opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -225,7 +225,7 @@ export default function BoardShareModal({ board, onClose }) {
                       <button
                         type="button"
                         onClick={() => handleCancelInvitation(inv.id)}
-                        className="p-1 text-[var(--text-muted)] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="p-1 text-[var(--text-muted)] hover:text-[var(--color-bark)] opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>

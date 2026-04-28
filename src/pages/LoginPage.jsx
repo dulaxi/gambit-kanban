@@ -31,7 +31,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Brand */}
         <div className="flex items-center justify-center gap-2 mb-10">
-          <PhosphorKanban size={30} weight="fill" className="text-[#8BA32E]" />
+          <PhosphorKanban size={30} weight="fill" className="text-[var(--color-logo)]" />
           <span className="text-[23px] font-[450] text-[var(--text-primary)] tracking-tight leading-none font-logo">
             Kolumn
           </span>
@@ -53,7 +53,7 @@ export default function LoginPage() {
           className="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-3xl p-6 shadow-sm space-y-4"
         >
           {error && (
-            <div className="text-sm text-[#7A5C44] bg-[#F0E0D2]/60 border border-[#D4A07A]/40 rounded-xl px-3 py-2.5">
+            <div className="text-sm text-[var(--color-bark)] bg-[var(--color-bark-wash)]/60 border border-[#D4A07A]/40 rounded-xl px-3 py-2.5">
               {error}
             </div>
           )}
@@ -78,7 +78,7 @@ export default function LoginPage() {
               <label className="text-xs font-medium text-[var(--text-secondary)]">Password</label>
               <Link
                 to="/forgot-password"
-                className="text-xs text-[var(--text-muted)] hover:text-[#8BA32E] transition-colors"
+                className="text-xs text-[var(--text-muted)] hover:text-[var(--color-logo)] transition-colors"
               >
                 Forgot?
               </Link>
@@ -110,7 +110,7 @@ export default function LoginPage() {
           Don't have an account?{' '}
           <Link
             to="/signup"
-            className="text-[#8BA32E] font-medium hover:underline underline-offset-4"
+            className="text-[var(--color-logo)] font-medium hover:underline underline-offset-4"
           >
             Sign up
           </Link>

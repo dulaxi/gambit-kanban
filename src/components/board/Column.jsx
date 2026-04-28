@@ -224,7 +224,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
                       deleteColumn(boardId, column.id)
                     }
                   }}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[#7A5C44] hover:bg-[var(--surface-raised)]"
+                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[var(--color-bark)] hover:bg-[var(--surface-raised)]"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete
@@ -258,7 +258,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
           <button
             type="button"
             onClick={() => setVisibleCount((c) => c + 20)}
-            className="w-full py-1.5 text-[12px] font-medium text-[#A8BA32] hover:text-[#A8BA32] hover:bg-[var(--accent-lime-wash)] rounded-lg transition-colors"
+            className="w-full py-1.5 text-[12px] font-medium text-[var(--color-lime-dark)] hover:text-[var(--color-lime-dark)] hover:bg-[var(--accent-lime-wash)] rounded-lg transition-colors"
           >
             Show {Math.min(filteredCards.length - visibleCount, 20)} more ({filteredCards.length - visibleCount} remaining)
           </button>

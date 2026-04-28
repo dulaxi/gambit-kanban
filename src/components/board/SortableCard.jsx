@@ -48,7 +48,7 @@ export default memo(function SortableCard({ card, onClick, onComplete, isSelecte
           ref={setActivatorNodeRef}
           {...attributes}
           {...listeners}
-          className="flex items-center px-1 text-[#E0DBD5] active:text-[#8E8E89] touch-none"
+          className="flex items-center px-1 text-[var(--border-default)] active:text-[var(--text-muted)] touch-none"
         >
           <GripVertical className="w-4 h-4" />
         </div>

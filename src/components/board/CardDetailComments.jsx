@@ -58,7 +58,7 @@ export default function CardDetailComments({
                     type="button"
                     onClick={() => deleteComment(comment.id, cardId)}
                     aria-label="Delete comment"
-                    className="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[#7A5C44] transition-all"
+                    className="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--color-bark)] transition-all"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -68,7 +68,7 @@ export default function CardDetailComments({
             <p className="text-sm text-[var(--text-secondary)] mt-0.5">
               {comment.text.split(/(@\w[\w ]*)/g).map((part, i) =>
                 part.startsWith('@') ? (
-                  <span key={i} className="font-medium text-[#A8BA32]">{part}</span>
+                  <span key={i} className="font-medium text-[var(--color-lime-dark)]">{part}</span>
                 ) : (
                   <span key={i}>{part}</span>
                 )
@@ -88,7 +88,7 @@ export default function CardDetailComments({
         <button
           type="button"
           onClick={handleSubmit}
-          className="px-3 py-1.5 text-xs font-medium bg-[#1B1B18] text-white rounded-lg hover:bg-[#333] transition-colors"
+          className="px-3 py-1.5 text-xs font-medium bg-[var(--text-primary)] text-white rounded-lg hover:bg-[var(--btn-primary-hover)] transition-colors"
         >
           Send
         </button>

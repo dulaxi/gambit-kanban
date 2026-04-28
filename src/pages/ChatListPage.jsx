@@ -64,7 +64,7 @@ export default function ChatListPage() {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id) }}
-                className="shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 text-[var(--text-faint)] hover:text-[#C27A4A] hover:bg-[var(--surface-raised)] transition-all"
+                className="shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 text-[var(--text-faint)] hover:text-[var(--color-copper)] hover:bg-[var(--surface-raised)] transition-all"
                 aria-label="Delete conversation"
               >
                 <X className="w-3.5 h-3.5" />

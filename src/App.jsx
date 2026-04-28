@@ -50,7 +50,7 @@ export default function App() {
         containerProps={{ role: 'status', 'aria-live': 'polite' }}
       />
       <UndoListener />
-      <Suspense fallback={<div className="min-h-screen bg-[#F2EDE8] flex items-center justify-center"><div className="text-sm text-[#8E8E89]">Loading...</div></div>}>
+      <Suspense fallback={<div className="min-h-screen bg-[var(--surface-raised)] flex items-center justify-center"><div className="text-sm text-[var(--text-muted)]">Loading...</div></div>}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />

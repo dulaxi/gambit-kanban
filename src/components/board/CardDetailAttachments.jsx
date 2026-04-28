@@ -20,7 +20,7 @@ export default function CardDetailAttachments({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="flex items-center gap-1 text-[11px] font-medium text-[#A8BA32] hover:text-[#A8BA32] disabled:opacity-50"
+          className="flex items-center gap-1 text-[11px] font-medium text-[var(--color-lime-dark)] hover:text-[var(--color-lime-dark)] disabled:opacity-50"
         >
           <Upload className="w-3 h-3" />
           {uploading ? 'Uploading...' : 'Add file'}
@@ -56,7 +56,7 @@ export default function CardDetailAttachments({
             return (
               <div key={att.id} className="group flex items-center gap-2 py-1.5 px-2 -mx-2 rounded-lg hover:bg-[var(--surface-raised)] transition-colors">
                 <div className="w-7 h-7 rounded-lg bg-[var(--surface-hover)] flex items-center justify-center shrink-0">
-                  {isImage ? <Image className="w-3.5 h-3.5 text-[#C2D64A]" /> : <File className="w-3.5 h-3.5 text-[var(--text-faint)]" />}
+                  {isImage ? <Image className="w-3.5 h-3.5 text-[var(--color-lime)]" /> : <File className="w-3.5 h-3.5 text-[var(--text-faint)]" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-medium text-[var(--text-secondary)] truncate">{att.file_name}</p>
@@ -69,7 +69,7 @@ export default function CardDetailAttachments({
                       const url = await getAttachmentUrl(att.storage_path)
                       if (url) window.open(url, '_blank')
                     }}
-                    className="p-1 text-[var(--text-faint)] hover:text-[#A8BA32] transition-colors"
+                    className="p-1 text-[var(--text-faint)] hover:text-[var(--color-lime-dark)] transition-colors"
                     title="Download"
                   >
                     <Download className="w-3.5 h-3.5" />
@@ -78,7 +78,7 @@ export default function CardDetailAttachments({
                     <button
                       type="button"
                       onClick={() => deleteAttachment(att.id, cardId, att.storage_path)}
-                      className="p-1 text-[var(--text-faint)] hover:text-[#7A5C44] transition-colors"
+                      className="p-1 text-[var(--text-faint)] hover:text-[var(--color-bark)] transition-colors"
                       title="Delete"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

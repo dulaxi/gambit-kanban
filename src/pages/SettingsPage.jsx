@@ -300,10 +300,10 @@ export default function SettingsPage() {
 
       {/* Inline clear-data confirmation */}
       {confirmingClear && (
-        <div className="bg-[#F0E0D2]/40 border border-[#D4A07A] rounded-2xl p-5 mb-4">
+        <div className="bg-[var(--color-bark-wash)]/40 border border-[#D4A07A] rounded-2xl p-5 mb-4">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-4 h-4 text-[#C27A4A]" />
-            <h2 className="text-sm font-semibold text-[#7A5C44]">Confirm — this cannot be undone</h2>
+            <AlertTriangle className="w-4 h-4 text-[var(--color-copper)]" />
+            <h2 className="text-sm font-semibold text-[var(--color-bark)]">Confirm — this cannot be undone</h2>
           </div>
           <p className="text-sm text-[var(--text-secondary)] mb-4">
             Permanently delete all your boards, notes, and settings.
@@ -311,7 +311,7 @@ export default function SettingsPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleClearData}
-              className="px-4 py-2 bg-[#7A5C44] text-white text-sm font-medium rounded-xl hover:bg-[#6B4D38] cursor-pointer transition-colors"
+              className="px-4 py-2 bg-[var(--color-bark)] text-white text-sm font-medium rounded-xl hover:bg-[#6B4D38] cursor-pointer transition-colors"
             >
               Yes, delete everything
             </button>

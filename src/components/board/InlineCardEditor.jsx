@@ -191,7 +191,7 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
                 <button
                   type="button"
                   onClick={() => setLabels(labels.filter((_, i) => i !== idx))}
-                  className="ml-0.5 opacity-0 group-hover/label:opacity-100 text-[var(--text-faint)] hover:text-[#7A5C44] transition-opacity"
+                  className="ml-0.5 opacity-0 group-hover/label:opacity-100 text-[var(--text-faint)] hover:text-[var(--color-bark)] transition-opacity"
                 >
                   <X className="w-2.5 h-2.5" />
                 </button>
@@ -298,7 +298,7 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
                   <button
                     type="button"
                     onClick={() => { setDueDate(''); setOpenMenu(null) }}
-                    className="text-[10px] text-[var(--text-muted)] hover:text-[#7A5C44] transition-colors self-start"
+                    className="text-[10px] text-[var(--text-muted)] hover:text-[var(--color-bark)] transition-colors self-start"
                   >
                     Clear
                   </button>
@@ -321,7 +321,7 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
           {(() => {
             const lightColors = ['bg-[#8E8E89]', 'bg-[#E0DBD5]', 'bg-[#E8E2DB]', 'bg-[#C2D64A]', 'bg-[#A8BA32]', 'bg-[#D4A843]', 'bg-[#C27A4A]']
             const isMeName = (n) => profile?.display_name && n.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
-            const iconText = lightColors.includes(profile?.color) ? 'text-[#1B1B18]' : 'text-white'
+            const iconText = lightColors.includes(profile?.color) ? 'text-[var(--text-primary)]' : 'text-white'
             const maxVisible = 3
             const visible = assignees.slice(0, maxVisible)
             const overflow = Math.max(0, assignees.length - maxVisible)
@@ -494,7 +494,7 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
         <button
           type="button"
           onClick={() => { deleteCard(resolvedId); onDone() }}
-          className="text-[11px] text-[var(--text-muted)] hover:text-[#7A5C44] px-2 py-1 rounded-lg transition-colors"
+          className="text-[11px] text-[var(--text-muted)] hover:text-[var(--color-bark)] px-2 py-1 rounded-lg transition-colors"
         >
           Discard
         </button>

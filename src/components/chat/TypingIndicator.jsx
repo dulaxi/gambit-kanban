@@ -6,7 +6,7 @@ export default function TypingIndicator() {
       <Kanban
         size={16}
         weight="fill"
-        className="text-[#8BA32E] animate-[glitch-pulse_1.2s_steps(5,end)_infinite]"
+        className="text-[var(--color-logo)] animate-[glitch-pulse_1.2s_steps(5,end)_infinite]"
       />
       <style>{`
         @keyframes glitch-pulse {

@@ -19,18 +19,18 @@ export const LABEL_BG_QUIET = {
 }
 
 export const PRIORITY_DOT = {
-  low: 'bg-[#A8BA32]',
-  medium: 'bg-[#D4A843]',
-  high: 'bg-[#C27A4A]',
+  low: 'bg-[var(--color-lime-dark)]',
+  medium: 'bg-[var(--color-honey)]',
+  high: 'bg-[var(--color-copper)]',
 }
 
 export const AVATAR_COLORS = [
-  'bg-[#E8E2DB]',
-  'bg-[#EEF2D6]',
-  'bg-[#E8DDE2]',
-  'bg-[#F2D9C7]',
-  'bg-[#F5EDCF]',
-  'bg-[#DAE0F0]',
+  'bg-[var(--surface-hover)]',
+  'bg-[var(--color-lime-wash)]',
+  'bg-[var(--color-mauve-wash)]',
+  'bg-[var(--color-copper-wash)]',
+  'bg-[var(--color-honey-wash)]',
+  'bg-[var(--label-blue-bg)]',
   'bg-[#D6E8E0]',
 ]
 
@@ -43,8 +43,8 @@ export function getAvatarColor(name) {
 }
 
 export function getAvatarTextColor(bgClass) {
-  const darkBgs = ['bg-[#1B1B18]', 'bg-[#5C5C57]', 'bg-[#7A5C44]', 'bg-[#8B7355]']
-  return darkBgs.includes(bgClass) ? 'text-white' : 'text-[#1B1B18]'
+  const darkBgs = ['bg-[var(--text-primary)]', 'bg-[#5C5C57]', 'bg-[var(--color-bark)]', 'bg-[#8B7355]']
+  return darkBgs.includes(bgClass) ? 'text-white' : 'text-[var(--text-primary)]'
 }
 
 export function getInitials(name) {

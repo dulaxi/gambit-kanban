@@ -24,7 +24,7 @@ const components = {
       )
     }
     return (
-      <pre className="bg-[var(--text-primary)] text-[#E8E2DB] px-4 py-3.5 rounded-[10px] text-[13px] font-mono leading-relaxed overflow-x-auto my-3">
+      <pre className="bg-[var(--text-primary)] text-[var(--surface-hover)] px-4 py-3.5 rounded-[10px] text-[13px] font-mono leading-relaxed overflow-x-auto my-3">
         <code className={className}>{children}</code>
       </pre>
     )
@@ -41,7 +41,7 @@ const components = {
     <td className="text-left px-2.5 py-1.5 border-b border-[var(--border-default)]">{children}</td>
   ),
   a: ({ children, href }) => (
-    <a href={href} className="text-[#8BA32E] underline" target="_blank" rel="noopener noreferrer">
+    <a href={href} className="text-[var(--color-logo)] underline" target="_blank" rel="noopener noreferrer">
       {children}
     </a>
   ),

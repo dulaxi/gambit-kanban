@@ -152,7 +152,7 @@ export default function Header({ title }) {
                       </div>
                       {card.priority && (
                         <span className={`w-2 h-2 rounded-full shrink-0 ${
-                          card.priority === 'high' ? 'bg-[#C27A4A]' : card.priority === 'medium' ? 'bg-[#D4A843]' : 'bg-[#A8BA32]'
+                          card.priority === 'high' ? 'bg-[var(--color-copper)]' : card.priority === 'medium' ? 'bg-[var(--color-honey)]' : 'bg-[var(--color-lime-dark)]'
                         }`} />
                       )}
                     </button>
@@ -225,7 +225,7 @@ export default function Header({ title }) {
           >
             <Bell className="w-[18px] h-[18px]" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-[#C27A4A] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute top-1 right-1 w-4 h-4 bg-[var(--color-copper)] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -250,9 +250,9 @@ export default function Header({ title }) {
                   <p className="px-4 py-6 text-sm text-[var(--text-muted)] text-center">No notifications yet</p>
                 )}
                 {notifications.map((n) => {
-                  const icon = n.type === 'mention' ? <AtSign className="w-3.5 h-3.5 text-[#A8BA32]" />
-                    : n.type === 'assigned' ? <UserPlus className="w-3.5 h-3.5 text-[#A8BA32]" />
-                    : n.type === 'moved' ? <ArrowRight className="w-3.5 h-3.5 text-[#A8969E]" />
+                  const icon = n.type === 'mention' ? <AtSign className="w-3.5 h-3.5 text-[var(--color-lime-dark)]" />
+                    : n.type === 'assigned' ? <UserPlus className="w-3.5 h-3.5 text-[var(--color-lime-dark)]" />
+                    : n.type === 'moved' ? <ArrowRight className="w-3.5 h-3.5 text-[var(--color-mauve)]" />
                     : <MessageSquare className="w-3.5 h-3.5 text-[var(--text-faint)]" />
 
                   return (
@@ -283,7 +283,7 @@ export default function Header({ title }) {
                           {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                         </p>
                       </div>
-                      {!n.read && <span className="mt-1.5 w-2 h-2 rounded-full bg-[#C2D64A] shrink-0" />}
+                      {!n.read && <span className="mt-1.5 w-2 h-2 rounded-full bg-[var(--color-lime)] shrink-0" />}
                     </button>
                   )
                 })}
@@ -332,7 +332,7 @@ export default function Header({ title }) {
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[#7A5C44] hover:bg-[var(--surface-raised)] cursor-pointer"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--color-bark)] hover:bg-[var(--surface-raised)] cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               Sign out

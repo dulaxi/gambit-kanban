@@ -337,7 +337,7 @@ export default function WorkspaceDetailView({ workspaceId }) {
                     <button
                       type="button"
                       onClick={() => deleteWorkspace(workspaceId)}
-                      className="h-9 px-4 rounded-lg whitespace-nowrap bg-[#C27A4A] hover:bg-[#A86338] text-white transition-colors text-sm font-medium inline-flex items-center gap-2"
+                      className="h-9 px-4 rounded-lg whitespace-nowrap bg-[var(--color-copper)] hover:bg-[var(--color-bark)] text-white transition-colors text-sm font-medium inline-flex items-center gap-2"
                     >
                       <Check className="w-4 h-4" /> Confirm delete
                     </button>
@@ -346,7 +346,7 @@ export default function WorkspaceDetailView({ workspaceId }) {
                   <button
                     type="button"
                     onClick={() => setConfirmDelete(true)}
-                    className="h-9 px-4 rounded-lg whitespace-nowrap border-0.5 border-[var(--border-default)] bg-[var(--surface-card)] text-[#C27A4A] hover:bg-[var(--surface-hover)] transition-colors text-sm font-medium inline-flex items-center gap-2"
+                    className="h-9 px-4 rounded-lg whitespace-nowrap border-0.5 border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--color-copper)] hover:bg-[var(--surface-hover)] transition-colors text-sm font-medium inline-flex items-center gap-2"
                   >
                     <Trash2 className="w-4 h-4" /> Delete workspace
                   </button>
@@ -370,7 +370,7 @@ export default function WorkspaceDetailView({ workspaceId }) {
                     <button
                       type="button"
                       onClick={() => leaveWorkspace(workspaceId)}
-                      className="h-9 px-4 rounded-lg whitespace-nowrap bg-[#C27A4A] hover:bg-[#A86338] text-white transition-colors text-sm font-medium inline-flex items-center gap-2"
+                      className="h-9 px-4 rounded-lg whitespace-nowrap bg-[var(--color-copper)] hover:bg-[var(--color-bark)] text-white transition-colors text-sm font-medium inline-flex items-center gap-2"
                     >
                       <Check className="w-4 h-4" /> Confirm leave
                     </button>

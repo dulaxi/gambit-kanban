@@ -38,14 +38,14 @@ export default function ForgotPasswordPage() {
         {sent ? (
           <div className="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-2xl p-6 shadow-sm text-center">
             <div className="w-12 h-12 rounded-full bg-[var(--accent-lime-wash)] flex items-center justify-center mx-auto mb-3">
-              <Mail className="w-6 h-6 text-[#A8BA32]" />
+              <Mail className="w-6 h-6 text-[var(--color-lime-dark)]" />
             </div>
             <p className="text-sm text-[var(--text-secondary)] mb-4">
               We sent a password reset link to <span className="font-medium text-[var(--text-primary)]">{email}</span>. Click the link in the email to set a new password.
             </p>
             <Link
               to="/login"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#A8BA32] hover:text-[#A8BA32]"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-lime-dark)] hover:text-[var(--color-lime-dark)]"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Back to sign in
@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
         ) : (
           <form onSubmit={handleSubmit} className="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-2xl p-6 shadow-sm space-y-4">
             {error && (
-              <div className="text-sm text-[#7A5C44] bg-[#F0E0D2] rounded-xl px-3 py-2">
+              <div className="text-sm text-[var(--color-bark)] bg-[var(--color-bark-wash)] rounded-xl px-3 py-2">
                 {error}
               </div>
             )}
@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
         )}
 
         <p className="text-center text-sm text-[var(--text-secondary)] mt-4">
-          <Link to="/login" className="text-[#A8BA32] hover:text-[#A8BA32] font-medium">
+          <Link to="/login" className="text-[var(--color-lime-dark)] hover:text-[var(--color-lime-dark)] font-medium">
             Back to sign in
           </Link>
         </p>

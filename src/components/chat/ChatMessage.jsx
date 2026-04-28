@@ -79,7 +79,7 @@ export default function ChatMessage({ message }) {
       )}
 
       {pending && pending.status === 'approved' && (
-        <div className="mt-2 text-[12px] text-[#8BA32E] font-medium">Action executed</div>
+        <div className="mt-2 text-[12px] text-[var(--color-logo)] font-medium">Action executed</div>
       )}
 
       {pending && pending.status === 'rejected' && (

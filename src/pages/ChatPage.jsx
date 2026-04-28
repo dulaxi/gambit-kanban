@@ -36,7 +36,7 @@ export default function ChatPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 text-[var(--text-muted)]">
         <p className="text-sm">Conversation not found</p>
-        <Link to="/dashboard" className="text-sm text-[#8BA32E] hover:underline">Back to Home</Link>
+        <Link to="/dashboard" className="text-sm text-[var(--color-logo)] hover:underline">Back to Home</Link>
       </div>
     )
   }

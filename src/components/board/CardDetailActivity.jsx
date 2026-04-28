@@ -4,10 +4,10 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 
 const ACTION_ICONS = {
-  created: <Plus className="w-3 h-3 text-[#A8BA32]" />,
-  moved: <ArrowRight className="w-3 h-3 text-[#A8BA32]" />,
-  completed: <CircleCheck className="w-3 h-3 text-[#A8BA32]" />,
-  reopened: <CircleDot className="w-3 h-3 text-[#D4A843]" />,
+  created: <Plus className="w-3 h-3 text-[var(--color-lime-dark)]" />,
+  moved: <ArrowRight className="w-3 h-3 text-[var(--color-lime-dark)]" />,
+  completed: <CircleCheck className="w-3 h-3 text-[var(--color-lime-dark)]" />,
+  reopened: <CircleDot className="w-3 h-3 text-[var(--color-honey)]" />,
 }
 
 const ACTION_TEXT = {

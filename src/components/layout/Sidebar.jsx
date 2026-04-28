@@ -25,7 +25,7 @@ import IconPicker from '../board/IconPicker'
 import ConfirmModal from '../board/ConfirmModal'
 
 function KolumnLogo({ size = 30 }) {
-  return <PhosphorKanban size={size} weight="fill" className="shrink-0 text-[#8BA32E]" />
+  return <PhosphorKanban size={size} weight="fill" className="shrink-0 text-[var(--color-logo)]" />
 }
 
 
@@ -229,7 +229,7 @@ export default function Sidebar() {
               <span className="relative flex items-center justify-center" style={{ width: 16, height: 16 }}>
                 <UsersThree className="w-4 h-4 shrink-0" />
                 {showCollapsed && invitationCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-[#C2D64A] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-1.5 bg-[var(--color-lime)] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {invitationCount > 9 ? '9+' : invitationCount}
                   </span>
                 )}
@@ -338,9 +338,9 @@ export default function Sidebar() {
                       title="Change icon"
                     >
                       {board.icon ? (
-                        <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                        <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[var(--color-logo)]' : 'text-[var(--text-muted)]'}`} />
                       ) : (
-                        <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                        <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[var(--color-logo)]' : 'text-[var(--text-muted)]'}`} />
                       )}
                     </button>
                     {renamingBoardId === board.id ? (
@@ -382,7 +382,7 @@ export default function Sidebar() {
                     <Trash2
                       role="button"
                       aria-label={`Delete board ${board.name}`}
-                      className="w-3.5 h-3.5 text-[var(--text-muted)] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 shrink-0"
+                      className="w-3.5 h-3.5 text-[var(--text-muted)] hover:text-[var(--color-bark)] opacity-0 group-hover:opacity-100 shrink-0"
                       onClick={(e) => handleDeleteBoard(e, board.id)}
                     />
                   </span>
@@ -478,17 +478,17 @@ export default function Sidebar() {
                             title="Change icon"
                           >
                             {board.icon ? (
-                              <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                              <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[var(--color-logo)]' : 'text-[var(--text-muted)]'}`} />
                             ) : (
-                              <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                              <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[var(--color-logo)]' : 'text-[var(--text-muted)]'}`} />
                             )}
                           </button>
                         ) : (
                           <span className="flex items-center justify-center shrink-0" style={{ width: 16, height: 16 }}>
                             {board.icon ? (
-                              <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                              <DynamicIcon name={board.icon} className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[var(--color-logo)]' : 'text-[var(--text-muted)]'}`} />
                             ) : (
-                              <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[#8BA32E]' : 'text-[var(--text-muted)]'}`} />
+                              <Kanban className={`w-4 h-4 ${isBoardsActive && activeBoardId === board.id ? 'text-[var(--color-logo)]' : 'text-[var(--text-muted)]'}`} />
                             )}
                           </span>
                         )}
@@ -499,7 +499,7 @@ export default function Sidebar() {
                           <Trash2
                             role="button"
                             aria-label={`Delete board ${board.name}`}
-                            className="w-3.5 h-3.5 text-[var(--text-muted)] hover:text-[#7A5C44] opacity-0 group-hover:opacity-100 shrink-0"
+                            className="w-3.5 h-3.5 text-[var(--text-muted)] hover:text-[var(--color-bark)] opacity-0 group-hover:opacity-100 shrink-0"
                             onClick={(e) => handleDeleteBoard(e, board.id)}
                           />
                         </span>
