@@ -45,7 +45,7 @@ export default function CardDetailChecklist({ checklist, onToggle, onRemove, onA
               type="checkbox"
               checked={item.done}
               onChange={() => onToggle(idx)}
-              className="w-4 h-4 rounded border-[var(--border-default)] text-[#C2D64A] focus:ring-[var(--accent-lime-wash)]"
+              className="w-4 h-4 rounded border-[var(--border-default)] text-[#C2D64A] focus:ring-1 focus:ring-[var(--color-ink)]"
             />
             <span
               className={`flex-1 text-sm ${

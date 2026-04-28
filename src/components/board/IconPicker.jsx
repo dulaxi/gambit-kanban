@@ -101,7 +101,7 @@ export default function IconPicker({ value, onChange, onClose }) {
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors cursor-pointer ${
+                  className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors cursor-pointer focus:outline-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-[var(--color-ink)] focus-visible:outline-offset-1 ${
                     activeTab === tab.key
                       ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-secondary)]'

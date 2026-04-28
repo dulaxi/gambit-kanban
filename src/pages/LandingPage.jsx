@@ -1744,7 +1744,7 @@ function HeroAuthCard() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
-              className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[#E0DBD5] hover:border-[#C2D64A]/50 focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6] transition-colors"
+              className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--color-ink)] focus:outline-none transition-colors"
             />
             <button
               type="submit"
@@ -1775,7 +1775,7 @@ function HeroAuthCard() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
                 autoFocus
-                className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[#E0DBD5] hover:border-[#C2D64A]/50 focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6] transition-colors"
+                className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--color-ink)] focus:outline-none transition-colors"
               />
             )}
             <input
@@ -1785,7 +1785,7 @@ function HeroAuthCard() {
               placeholder={mode === 'signup' ? 'Create a password' : 'Enter your password'}
               required
               autoFocus={mode === 'signin'}
-              className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[#E0DBD5] hover:border-[#C2D64A]/50 focus:border-[#C2D64A] focus:outline-none focus:ring-1 focus:ring-[#EEF2D6] transition-colors"
+              className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--color-ink)] focus:outline-none transition-colors"
             />
             <button
               type="submit"

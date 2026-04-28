@@ -216,7 +216,7 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
                     autoFocus
                     maxLength={200}
                     placeholder="e.g. Product Roadmap"
-                    className="flex-1 h-10 px-3 text-sm rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#C2D64A] focus:border-transparent transition-shadow"
+                    className="flex-1 h-10 px-3 text-sm rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
                   />
                 </div>
               </div>

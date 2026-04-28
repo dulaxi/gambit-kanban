@@ -48,7 +48,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
       aria-label={`Task: ${title}`}
       onClick={() => onClick(card.id)}
       style={font === 'sf-mono' ? { fontFamily: "'SF Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace" } : undefined}
-      className={`w-full flex flex-col gap-3 rounded-2xl border p-4 text-left shadow-sm transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-1 group ${
+      className={`w-full flex flex-col gap-3 rounded-2xl border p-4 text-left shadow-sm transition-all cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-1 group ${
         isSelected
           ? 'bg-[var(--color-mauve-cream)] border-[var(--color-ink)]'
           : 'bg-[var(--surface-card)] border-[var(--color-mist)] hover:bg-[var(--surface-page)] hover:shadow-none hover:border-[var(--text-muted)]'
@@ -180,7 +180,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
                   type="checkbox"
                   checked={item.done}
                   onChange={() => toggleCheckItem(idx)}
-                  className="w-3.5 h-3.5 rounded border-[var(--border-default)] text-[#C2D64A] focus:ring-[var(--accent-lime-wash)]"
+                  className="w-3.5 h-3.5 rounded border-[var(--border-default)] text-[#C2D64A] focus:ring-1 focus:ring-[var(--color-ink)]"
                 />
                 <span className={`text-[12px] leading-snug ${item.done ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-secondary)]'}`}>
                   {item.text}
