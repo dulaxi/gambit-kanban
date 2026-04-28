@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { Trash } from '@phosphor-icons/react'
 import { formatDistanceToNow } from 'date-fns'
 import MentionInput from './MentionInput'
 
@@ -60,7 +60,7 @@ export default function CardDetailComments({
                     aria-label="Delete comment"
                     className="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--color-bark)] transition-all"
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <Trash className="w-3 h-3" />
                   </button>
                 )}
               </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react'
-import { Users, Mail, X, Trash2, LogOut, Pencil, Check } from 'lucide-react'
+import { Check, Envelope, Pencil, SignOut, Trash, Users, X } from '@phosphor-icons/react'
 import { useWorkspacesStore } from '../../store/workspacesStore'
 import { useAuthStore } from '../../store/authStore'
 import DynamicIcon from '../board/DynamicIcon'
@@ -266,7 +266,7 @@ export default function WorkspaceDetailView({ workspaceId }) {
 
             <form onSubmit={handleInvite} className="mt-4 flex items-stretch gap-2">
               <div className="relative flex-1">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+                <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
                 <input
                   type="email"
                   value={inviteEmail}
@@ -293,7 +293,7 @@ export default function WorkspaceDetailView({ workspaceId }) {
                   {sentInvitations.map((inv) => (
                     <li key={inv.id} className="flex items-center gap-3 px-4 py-3">
                       <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 bg-[var(--surface-hover)] text-[var(--text-muted)]">
-                        <Mail className="w-4 h-4" />
+                        <Envelope className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm text-[var(--text-primary)] truncate">{inv.invited_email}</div>
@@ -348,7 +348,7 @@ export default function WorkspaceDetailView({ workspaceId }) {
                     onClick={() => setConfirmDelete(true)}
                     className="h-9 px-4 rounded-lg whitespace-nowrap border-0.5 border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--color-copper)] hover:bg-[var(--surface-hover)] transition-colors text-sm font-medium inline-flex items-center gap-2"
                   >
-                    <Trash2 className="w-4 h-4" /> Delete workspace
+                    <Trash className="w-4 h-4" /> Delete workspace
                   </button>
                 )}
               </>
@@ -381,7 +381,7 @@ export default function WorkspaceDetailView({ workspaceId }) {
                     onClick={() => setConfirmLeave(true)}
                     className="h-9 px-4 rounded-lg whitespace-nowrap border-0.5 border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors text-sm font-medium inline-flex items-center gap-2"
                   >
-                    <LogOut className="w-4 h-4" /> Leave workspace
+                    <SignOut className="w-4 h-4" /> Leave workspace
                   </button>
                 )}
               </>

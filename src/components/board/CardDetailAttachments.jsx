@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Trash2, Paperclip, Download, Upload, File, Image } from 'lucide-react'
+import { Download, File, Image, Paperclip, Trash, Upload } from '@phosphor-icons/react'
 import { showToast } from '../../utils/toast'
 
 export default function CardDetailAttachments({
@@ -81,7 +81,7 @@ export default function CardDetailAttachments({
                       className="p-1 text-[var(--text-faint)] hover:text-[var(--color-bark)] transition-colors"
                       title="Delete"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>

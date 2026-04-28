@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Users, Plus } from 'lucide-react'
+import { ArrowLeft, Plus, Users } from '@phosphor-icons/react'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useWorkspacesStore } from '../../store/workspacesStore'
 import { useIsDesktop } from '../../hooks/useMediaQuery'

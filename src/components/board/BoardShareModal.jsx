@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { capture } from '../../lib/analytics'
-import { X, UserPlus, Trash2, Mail, Crown, Users } from 'lucide-react'
+import { Crown, Envelope, Trash, UserPlus, Users, X } from '@phosphor-icons/react'
 import { showToast } from '../../utils/toast'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
@@ -135,7 +135,7 @@ export default function BoardShareModal({ board, onClose }) {
           <form onSubmit={handleInvite} className="px-5 py-3 border-b border-[var(--border-subtle)]">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <input
                   type="email"
                   value={email}
@@ -193,7 +193,7 @@ export default function BoardShareModal({ board, onClose }) {
                       onClick={() => handleRemoveMember(m.user_id)}
                       className="p-1 text-[var(--text-muted)] hover:text-[var(--color-bark)] opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash className="w-3.5 h-3.5" />
                     </button>
                   ) : (
                     <span className="text-xs text-[var(--text-muted)]">Member</span>
@@ -217,7 +217,7 @@ export default function BoardShareModal({ board, onClose }) {
                   >
                     <div className="flex items-center gap-2.5">
                       <div className="w-7 h-7 rounded-full bg-[var(--surface-hover)] flex items-center justify-center">
-                        <Mail className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                        <Envelope className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                       </div>
                       <p className="text-sm text-[var(--text-secondary)]">{inv.invited_email}</p>
                     </div>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { Search, X } from 'lucide-react'
+import { MagnifyingGlass, X } from '@phosphor-icons/react'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import DynamicIcon from './DynamicIcon'
 import { PHOSPHOR_CATEGORIES, ALL_PHOSPHOR_ICONS } from '../../data/phosphorIcons'
@@ -119,7 +119,7 @@ export default function IconPicker({ value, onChange, onClose }) {
 
         {/* Search */}
         <div className="flex items-center gap-2 px-5 py-3 border-b border-[var(--border-subtle)]">
-          <Search className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+          <MagnifyingGlass className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
           <input
             ref={inputRef}
             value={search}

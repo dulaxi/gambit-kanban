@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { Search, X, Kanban, StickyNote } from 'lucide-react'
+import { Kanban, MagnifyingGlass, Notepad, X } from '@phosphor-icons/react'
 import { useBoardStore } from '../store/boardStore'
 import { useNavigate } from 'react-router-dom'
 import Modal from './ui/Modal'
@@ -104,7 +104,7 @@ export default function SearchDialog({ open, onClose }) {
       >
         {/* Search input */}
         <div className="flex items-center gap-2 pl-6 pt-[1.1rem] pb-[0.9rem] pr-2.5">
-          <Search className="w-4 h-4 text-[var(--text-muted)] shrink-0 -ml-1 mr-1" />
+          <MagnifyingGlass className="w-4 h-4 text-[var(--text-muted)] shrink-0 -ml-1 mr-1" />
           <input
             ref={inputRef}
             type="text"

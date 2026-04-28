@@ -1,21 +1,10 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import '@fontsource-variable/plus-jakarta-sans'
-import {
-  ArrowRight, Columns3, Users, Zap, Calendar, StickyNote,
-  Share2, BarChart3, GripVertical, Tag, CheckSquare, Clock,
-  Shield, Sparkles, MousePointerClick, ArrowUpRight,
-  Check, Square, AlignLeft, User, Plus, FileText, CheckCircle2,
-  LayoutDashboard, Settings, ChevronsRight, SquareKanban, Kanban as LucideKanban,
-  ChevronLeft, ChevronRight, Hash, Menu, X,
-} from 'lucide-react'
+
 import { SiGmail } from 'react-icons/si'
 import { BsSlack, BsMicrosoftTeams } from 'react-icons/bs'
-import {
-  Kanban, Browser, Tag as PhosphorTag, CreditCard,
-  ShoppingCart, ShieldCheck, Gauge,
-  TrendUp, ChartPie, Target,
-} from '@phosphor-icons/react'
+import { TextAlignLeft, ArrowRight, ArrowUpRight, Browser, Calendar, CaretDoubleRight, CaretLeft, CaretRight, ChartBar, ChartPie, Check, CheckCircle, CheckSquare, Clock, Columns, CreditCard, DotsSixVertical, FileText, Gauge, Gear, Hash, Kanban, SquaresFour, Lightning, List, CursorClick, Notepad, Tag, Plus, ShareNetwork, Shield, ShieldCheck, ShoppingCart, Sparkle, Square, Target, TrendUp, User, Users, X } from '@phosphor-icons/react'
 import {
   DndContext, DragOverlay, pointerWithin, rectIntersection,
   PointerSensor, useSensor, useSensors, useDroppable,
@@ -172,7 +161,7 @@ const features = [
     desc: 'Row-level security on every table. Your data is private to your team with zero configuration.',
   },
   {
-    icon: MousePointerClick,
+    icon: CursorClick,
     title: 'Drag & Drop Everything',
     desc: 'Reorder cards, move between columns, rearrange your entire board — all with natural drag interactions.',
   },
@@ -312,7 +301,7 @@ function MockDetailPanel() {
         {/* Description */}
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
-            <AlignLeft className="w-3 h-3 text-[#8E8E89]" />
+            <TextAlignLeft className="w-3 h-3 text-[#8E8E89]" />
             <span className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider">Description</span>
           </div>
           <p className="text-[11px] text-[#5C5C57] leading-relaxed">{card.desc}</p>
@@ -567,7 +556,7 @@ function computeSlackCardState(elapsed, cardIdx) {
   return { opacity: 1, sweepProgress: Math.min(1, cardElapsed / SLACK_CARD_SWEEP) }
 }
 
-const PHOSPHOR_ICON_MAP = { 'browser': Browser, 'tag': PhosphorTag, 'credit-card': CreditCard }
+const PHOSPHOR_ICON_MAP = { 'browser': Browser, 'tag': Tag, 'credit-card': CreditCard }
 const TEAMS_PHOSPHOR_ICON_MAP = { 'shopping-cart': ShoppingCart, 'shield-check': ShieldCheck, 'gauge': Gauge }
 const GMAIL_PHOSPHOR_ICON_MAP = { 'trend-up': TrendUp, 'chart-pie': ChartPie, 'target': Target }
 
@@ -856,7 +845,7 @@ function AICard({ card, opacity, sweepProgress, iconMap }) {
           </div>
         )}
         <div className="flex items-center gap-1.5 mb-0.5">
-          <CheckCircle2 className="w-4 h-4 shrink-0 text-[#8E8E89]" />
+          <CheckCircle className="w-4 h-4 shrink-0 text-[#8E8E89]" />
           <span className="text-[11px] font-medium text-[#5C5C57]">Task #{card.taskNumber}</span>
           <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dotColor }} />
         </div>
@@ -890,7 +879,7 @@ function AICard({ card, opacity, sweepProgress, iconMap }) {
             )}
             {card.description && (
               <span className="text-[10px] flex items-center text-[#8E8E89]">
-                <AlignLeft className="w-3 h-3" />
+                <TextAlignLeft className="w-3 h-3" />
               </span>
             )}
           </div>
@@ -1514,14 +1503,14 @@ function DemoSlider() {
           className="w-8 h-8 rounded-full border border-[#E0DBD5] flex items-center justify-center text-[#8E8E89] hover:text-[#1B1B18] hover:border-[#1B1B18] transition-colors"
           aria-label="Previous demo"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <CaretLeft className="w-4 h-4" />
         </button>
         <button
           onClick={next}
           className="w-8 h-8 rounded-full border border-[#E0DBD5] flex items-center justify-center text-[#8E8E89] hover:text-[#1B1B18] hover:border-[#1B1B18] transition-colors"
           aria-label="Next demo"
         >
-          <ChevronRight className="w-4 h-4" />
+          <CaretRight className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -1844,7 +1833,7 @@ function MobileNav() {
           className="w-9 h-9 flex items-center justify-center rounded-lg text-[#5C5C57] hover:bg-[#E8E2DB] transition-colors"
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
         >
-          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          {menuOpen ? <X className="w-5 h-5" /> : <List className="w-5 h-5" />}
         </button>
       </div>
 
@@ -1905,7 +1894,7 @@ export default function LandingPage() {
             <div className="flex w-full min-h-[85vh] items-center">
             <div className="text-center flex flex-col items-center w-full">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EEF2D6] text-[#6B7A12] text-xs font-normal mb-6">
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkle className="w-3.5 h-3.5" />
                 100% free — no credit card required
               </span>
               <h1 className="text-5xl sm:text-6xl lg:text-[3.5rem] xl:text-6xl font-light text-[#1B1B18] tracking-tight leading-[1.08] mb-5">
@@ -1953,7 +1942,7 @@ export default function LandingPage() {
                     </div>
                     <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
                       <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#5C5C57]">
-                        <LayoutDashboard className="w-5 h-5 shrink-0" />
+                        <SquaresFour className="w-5 h-5 shrink-0" />
                       </div>
                       <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium bg-[#EEF2D6] text-[#1B1B18]">
                         <LucideKanban className="w-5 h-5 shrink-0" />
@@ -1962,15 +1951,15 @@ export default function LandingPage() {
                         <Calendar className="w-5 h-5 shrink-0" />
                       </div>
                       <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#5C5C57]">
-                        <StickyNote className="w-5 h-5 shrink-0" />
+                        <Notepad className="w-5 h-5 shrink-0" />
                       </div>
                     </nav>
                     <div className="border-t border-[#E0DBD5] py-4 px-2 space-y-1">
                       <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#5C5C57]">
-                        <Settings className="w-5 h-5 shrink-0" />
+                        <Gear className="w-5 h-5 shrink-0" />
                       </div>
                       <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#5C5C57]">
-                        <ChevronsRight className="w-5 h-5" />
+                        <CaretDoubleRight className="w-5 h-5" />
                       </div>
                     </div>
                   </div>

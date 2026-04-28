@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
-import { LayoutGrid } from 'lucide-react'
+import { SquaresFour } from '@phosphor-icons/react'
 import { useBoardStore } from '../store/boardStore'
 import BoardSelector from '../components/board/BoardSelector'
 import BoardView from '../components/board/BoardView'
@@ -101,7 +101,7 @@ export default function BoardsPage() {
         ) : Object.keys(boards).length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
             <div className="w-14 h-14 rounded-2xl bg-[var(--surface-hover)] flex items-center justify-center mb-4">
-              <LayoutGrid className="w-7 h-7 text-[var(--text-muted)]" />
+              <SquaresFour className="w-7 h-7 text-[var(--text-muted)]" />
             </div>
             <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-1">Create your first board</h2>
             <p className="text-sm text-[var(--text-muted)] mb-5 max-w-xs">Organize tasks into columns that match your workflow.</p>
@@ -110,7 +110,7 @@ export default function BoardsPage() {
               onClick={() => setShowCreateModal(true)}
               className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[var(--btn-primary-bg)] hover:bg-[var(--btn-primary-hover)] rounded-xl transition-colors"
             >
-              <LayoutGrid className="w-4 h-4" />
+              <SquaresFour className="w-4 h-4" />
               New Board
             </button>
           </div>

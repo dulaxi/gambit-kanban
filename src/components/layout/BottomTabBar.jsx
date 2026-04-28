@@ -1,9 +1,9 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Columns3, Calendar, StickyNote, Settings, Users } from 'lucide-react'
+import { Calendar, Columns, Gear, SquaresFour, Notepad, Users } from '@phosphor-icons/react'
 
 const tabs = [
   { to: '/boards', icon: Columns3, label: 'Board' },
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
+  { to: '/dashboard', icon: SquaresFour, label: 'Home' },
   { to: '/workspace', icon: Users, label: 'Workspace' },
   { to: '/calendar', icon: Calendar, label: 'Calendar' },
   { to: '/notes', icon: StickyNote, label: 'Notes' },

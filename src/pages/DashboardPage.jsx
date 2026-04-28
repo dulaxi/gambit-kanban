@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkle } from '@phosphor-icons/react'
-import { Plus, Search, Calendar, ClipboardList, Columns3, Bug, Zap } from 'lucide-react'
+import { Bug, Calendar, ClipboardText, Columns, Lightning, MagnifyingGlass, Plus, Sparkle } from '@phosphor-icons/react'
+
 import { capture } from '../lib/analytics'
 import { useAuthStore } from '../store/authStore'
 import { useBoardStore } from '../store/boardStore'
@@ -12,7 +12,7 @@ const ACTIONS = [
   { label: 'Create a card', icon: Plus, prompt: 'Create a card: ' },
   { label: 'Find a task', icon: Search, prompt: 'Find tasks where ' },
   { label: 'Plan my week', icon: Calendar, prompt: 'Plan my week.' },
-  { label: 'Stand-up notes', icon: ClipboardList, prompt: 'Draft stand-up notes from my recent activity.' },
+  { label: 'Stand-up notes', icon: ClipboardText, prompt: 'Draft stand-up notes from my recent activity.' },
 ]
 
 const TEMPLATES = [

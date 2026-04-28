@@ -1,7 +1,7 @@
 import { memo, useState, useEffect } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical } from 'lucide-react'
+import { DotsSixVertical } from '@phosphor-icons/react'
 import Card from './Card'
 import AICardSkeleton from './AICardSkeleton'
 import { useIsMobile } from '../../hooks/useMediaQuery'
@@ -50,7 +50,7 @@ export default memo(function SortableCard({ card, onClick, onComplete, isSelecte
           {...listeners}
           className="flex items-center px-1 text-[var(--border-default)] active:text-[var(--text-muted)] touch-none"
         >
-          <GripVertical className="w-4 h-4" />
+          <DotsSixVertical className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">
           <Card card={card} onClick={onClick} onComplete={onComplete} isSelected={isSelected} />

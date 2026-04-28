@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { CheckCircle2, Check, Plus, X, Calendar, User, Flag } from 'lucide-react'
-import { FileText, CalendarDot, CheckSquare } from '@phosphor-icons/react'
+
+import { Calendar, CalendarDot, Check, CheckCircle, CheckSquare, FileText, Flag, Plus, User, X } from '@phosphor-icons/react'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import DynamicIcon from './DynamicIcon'
@@ -156,7 +156,7 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
                 aria-label="Set priority"
                 title={`Priority: ${priOption.label}`}
               >
-                <CheckCircle2 className="w-4 h-4 transition-colors" style={{ color: priColor }} />
+                <CheckCircle className="w-4 h-4 transition-colors" style={{ color: priColor }} />
               </button>
               {openMenu === 'priority' && (
                 <div className="absolute right-0 top-full mt-1 p-1.5 bg-[var(--surface-card)] border-0.5 border-[var(--color-mist)] backdrop-blur-xl rounded-xl min-w-[8rem] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)] z-50">

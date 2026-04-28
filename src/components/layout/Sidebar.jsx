@@ -1,33 +1,20 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import {
-  Kanban,
-  Settings,
-  ChevronsLeft,
-  ChevronsRight,
-  ChevronDown,
-  ChevronRight,
-  Plus,
-  Trash2,
-  Layers,
-  Briefcase,
-  GripVertical,
-} from 'lucide-react'
+
 import { useSettingsStore } from '../../store/settingsStore'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import { useIsDesktop, useMediaQuery } from '../../hooks/useMediaQuery'
 import { useBoardSharingStore } from '../../store/boardSharingStore'
 import { useWorkspacesStore } from '../../store/workspacesStore'
-import { Kanban as PhosphorKanban, SidebarSimple, ChatsCircle, MagnifyingGlass, CalendarDots, Notepad, UsersThree } from '@phosphor-icons/react'
+import { Briefcase, CalendarDots, CaretDoubleLeft, CaretDoubleRight, CaretDown, CaretRight, ChatsCircle, DotsSixVertical, Gear, Kanban, MagnifyingGlass, Notepad, Plus, SidebarSimple, Stack, Trash, UsersThree } from '@phosphor-icons/react'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
 import ConfirmModal from '../board/ConfirmModal'
 
 function KolumnLogo({ size = 30 }) {
-  return <PhosphorKanban size={size} weight="fill" className="shrink-0 text-[var(--color-logo)]" />
+  return <Kanban size={size} weight="fill" className="shrink-0 text-[var(--color-logo)]" />
 }
-
 
 export default function Sidebar() {
   const boardInvitationCount = useBoardSharingStore((s) => s.invitations.length)
@@ -379,7 +366,7 @@ export default function Sidebar() {
                     )}
                   </span>
                   <span className="flex items-center gap-0.5 shrink-0">
-                    <Trash2
+                    <Trash
                       role="button"
                       aria-label={`Delete board ${board.name}`}
                       className="w-3.5 h-3.5 text-[var(--text-muted)] hover:text-[var(--color-bark)] opacity-0 group-hover:opacity-100 shrink-0"
@@ -496,7 +483,7 @@ export default function Sidebar() {
                       </span>
                       {canDelete && (
                         <span className="flex items-center gap-0.5 shrink-0">
-                          <Trash2
+                          <Trash
                             role="button"
                             aria-label={`Delete board ${board.name}`}
                             className="w-3.5 h-3.5 text-[var(--text-muted)] hover:text-[var(--color-bark)] opacity-0 group-hover:opacity-100 shrink-0"

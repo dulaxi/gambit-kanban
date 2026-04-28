@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { ArrowRight } from 'lucide-react'
-import { Kanban as PhosphorKanban } from '@phosphor-icons/react'
+
+import { ArrowRight, Kanban } from '@phosphor-icons/react'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -46,7 +46,7 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         {/* Brand */}
         <div className="flex items-center justify-center gap-2 mb-10">
-          <PhosphorKanban size={30} weight="fill" className="text-[var(--color-logo)]" />
+          <Kanban size={30} weight="fill" className="text-[var(--color-logo)]" />
           <span className="text-[23px] font-[450] text-[var(--text-primary)] tracking-tight leading-none font-logo">
             Kolumn
           </span>

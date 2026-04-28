@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { Lock, SquareKanban } from 'lucide-react'
+import { Kanban, Lock } from '@phosphor-icons/react'
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState('')
@@ -39,7 +39,7 @@ export default function UpdatePasswordPage() {
     <div className="min-h-screen bg-[var(--surface-raised)] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <SquareKanban className="w-10 h-10 text-black mx-auto mb-3" strokeWidth={1.75} />
+          <Kanban className="w-10 h-10 text-black mx-auto mb-3" strokeWidth={1.75} />
           <h1 className="text-2xl font-bold text-[var(--text-primary)] font-heading">Set new password</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">Enter your new password below</p>
         </div>

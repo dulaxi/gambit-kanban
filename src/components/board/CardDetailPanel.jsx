@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react'
-import { X, Plus, Check, User, ArrowLeft, MoreVertical, Trash2, Copy, Bookmark, Calendar, CheckCircle2, Flag, Paperclip, Upload, FileIcon, Image as ImageIcon, Download } from 'lucide-react'
+
 import { LABEL_COLORS, COLOR_DOT_CLASSES } from '../../constants/colors'
-import { FileText } from '@phosphor-icons/react'
+import { ArrowLeft, Bookmark, Calendar, Check, CheckCircle, Copy, DotsThreeVertical, Download, File, FileText, Flag, Image, Paperclip, Plus, Trash, Upload, User, X } from '@phosphor-icons/react'
 import DynamicIcon from './DynamicIcon'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
@@ -23,7 +23,7 @@ function ChecklistItem({ item, onToggle, onEdit, onDelete }) {
   return (
     <div className="flex items-center gap-2 py-1 group/check">
       <button type="button" onClick={onToggle} className="shrink-0">
-        <CheckCircle2 className={`w-4 h-4 transition-colors ${item.done ? 'text-[var(--accent-lime-dark)]' : 'text-[var(--text-faint)] hover:text-[var(--text-muted)]'}`} />
+        <CheckCircle className={`w-4 h-4 transition-colors ${item.done ? 'text-[var(--accent-lime-dark)]' : 'text-[var(--text-faint)] hover:text-[var(--text-muted)]'}`} />
       </button>
       {editing ? (
         <input
@@ -255,7 +255,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                 aria-label="More options"
                 className="h-8 w-8 rounded-md flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
               >
-                <MoreVertical className="w-5 h-5" />
+                <DotsThreeVertical className="w-5 h-5" />
               </button>
               {openMenu === 'menu' && (
                 <div className="absolute right-0 top-full mt-1 p-1.5 bg-[var(--surface-card)] border-0.5 border-[var(--color-mist)] backdrop-blur-xl rounded-xl min-w-[8rem] text-[var(--text-primary)] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)] z-50">
@@ -267,7 +267,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                   </div>
                   <div role="separator" className="h-[0.5px] bg-[var(--border-subtle)] my-1.5 mx-2" />
                   <div role="menuitem" onClick={() => { deleteCard(cardId); onClose(); setOpenMenu(null) }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--color-bark)]/10 text-[var(--color-bark)] text-xs">
-                    <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Delete</span></div>
+                    <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Delete</span></div>
                   </div>
                 </div>
               )}

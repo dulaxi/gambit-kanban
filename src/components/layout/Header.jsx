@@ -1,4 +1,4 @@
-import { Search, User, LogOut, Settings, LayoutGrid, Bell, AtSign, UserPlus, MessageSquare, ArrowRight, X, SquareKanban } from 'lucide-react'
+import { ArrowRight, At, Bell, Gear, Kanban, MagnifyingGlass, ChatCircle, SignOut, SquaresFour, User, UserPlus, X } from '@phosphor-icons/react'
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
@@ -107,7 +107,7 @@ export default function Header({ title }) {
       {/* Mobile search overlay */}
       {!isDesktop && mobileSearchOpen ? (
         <div className="absolute inset-0 bg-[var(--surface-card)] flex items-center gap-2 px-4 z-40">
-          <Search className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+          <MagnifyingGlass className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
           <input
             ref={mobileSearchRef}
             type="text"
@@ -190,7 +190,7 @@ export default function Header({ title }) {
             aria-label="Toggle menu"
             className="p-1.5 -ml-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
           >
-            <LayoutGrid className="w-[18px] h-[18px]" />
+            <SquaresFour className="w-[18px] h-[18px]" />
           </button>
         )}
         {!isDesktop && (
@@ -199,7 +199,6 @@ export default function Header({ title }) {
       </div>
       </>
       )}
-
 
       {/* Right: search (mobile) + notifications + avatar */}
       <div className="flex items-center gap-1">
@@ -211,7 +210,7 @@ export default function Header({ title }) {
             aria-label="Search"
             className="p-2 rounded-lg text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors"
           >
-            <Search className="w-[18px] h-[18px]" />
+            <MagnifyingGlass className="w-[18px] h-[18px]" />
           </button>
         )}
 
@@ -250,10 +249,10 @@ export default function Header({ title }) {
                   <p className="px-4 py-6 text-sm text-[var(--text-muted)] text-center">No notifications yet</p>
                 )}
                 {notifications.map((n) => {
-                  const icon = n.type === 'mention' ? <AtSign className="w-3.5 h-3.5 text-[var(--color-lime-dark)]" />
+                  const icon = n.type === 'mention' ? <At className="w-3.5 h-3.5 text-[var(--color-lime-dark)]" />
                     : n.type === 'assigned' ? <UserPlus className="w-3.5 h-3.5 text-[var(--color-lime-dark)]" />
                     : n.type === 'moved' ? <ArrowRight className="w-3.5 h-3.5 text-[var(--color-mauve)]" />
-                    : <MessageSquare className="w-3.5 h-3.5 text-[var(--text-faint)]" />
+                    : <ChatCircle className="w-3.5 h-3.5 text-[var(--text-faint)]" />
 
                   return (
                     <button
@@ -304,7 +303,7 @@ export default function Header({ title }) {
           }`}
         >
           {!isDesktop ? (
-            <SquareKanban className="w-[22px] h-[22px] text-[var(--text-primary)]" strokeWidth={1.75} />
+            <Kanban className="w-[22px] h-[22px] text-[var(--text-primary)]" strokeWidth={1.75} />
           ) : profile?.icon ? (
             <DynamicIcon name={profile.icon} className="w-5 h-5" />
           ) : (
@@ -326,7 +325,7 @@ export default function Header({ title }) {
               }}
               className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] cursor-pointer"
             >
-              <Settings className="w-4 h-4" />
+              <Gear className="w-4 h-4" />
               Settings
             </button>
             <button
@@ -334,7 +333,7 @@ export default function Header({ title }) {
               onClick={handleSignOut}
               className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--color-bark)] hover:bg-[var(--surface-raised)] cursor-pointer"
             >
-              <LogOut className="w-4 h-4" />
+              <SignOut className="w-4 h-4" />
               Sign out
             </button>
           </div>

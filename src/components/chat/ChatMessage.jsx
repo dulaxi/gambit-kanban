@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, X } from 'lucide-react'
+import { Check, X } from '@phosphor-icons/react'
 import { useBoardStore } from '../../store/boardStore'
 import { useChatStore } from '../../store/chatStore'
 import Card from '../board/Card'

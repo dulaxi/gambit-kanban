@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, X } from 'lucide-react'
-import { MagnifyingGlass, ChatsCircle } from '@phosphor-icons/react'
+
+import { ChatsCircle, MagnifyingGlass, Plus, X } from '@phosphor-icons/react'
 import { useChatStore } from '../store/chatStore'
 import { formatDistanceToNow } from 'date-fns'
 

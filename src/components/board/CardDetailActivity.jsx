@@ -1,13 +1,11 @@
-import {
-  Plus, ArrowRight, PencilLine, CircleCheck, CircleDot, History,
-} from 'lucide-react'
+import { ArrowRight, CheckCircle, Circle, ClockCounterClockwise, PencilLine, Plus } from '@phosphor-icons/react'
 import { formatDistanceToNow } from 'date-fns'
 
 const ACTION_ICONS = {
   created: <Plus className="w-3 h-3 text-[var(--color-lime-dark)]" />,
   moved: <ArrowRight className="w-3 h-3 text-[var(--color-lime-dark)]" />,
-  completed: <CircleCheck className="w-3 h-3 text-[var(--color-lime-dark)]" />,
-  reopened: <CircleDot className="w-3 h-3 text-[var(--color-honey)]" />,
+  completed: <CheckCircle className="w-3 h-3 text-[var(--color-lime-dark)]" />,
+  reopened: <Circle className="w-3 h-3 text-[var(--color-honey)]" />,
 }
 
 const ACTION_TEXT = {
@@ -25,7 +23,7 @@ export default function CardDetailActivity({ activityItems }) {
   return (
     <div className="px-5 pt-3 pb-5 border-t border-[var(--border-subtle)]">
       <label className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3 flex items-center gap-2">
-        <History className="w-3.5 h-3.5" />
+        <ClockCounterClockwise className="w-3.5 h-3.5" />
         Activity
       </label>
       {!activityItems || activityItems.length === 0 ? (

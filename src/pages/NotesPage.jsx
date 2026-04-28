@@ -3,7 +3,7 @@ import { capture } from '../lib/analytics'
 import { useNoteStore } from '../store/noteStore'
 import { useAutoSave } from '../hooks/useAutoSave'
 import { format, parseISO } from 'date-fns'
-import { Plus, Trash2, FileText, ArrowLeft } from 'lucide-react'
+import { ArrowLeft, FileText, Plus, Trash } from '@phosphor-icons/react'
 import { useIsMobile } from '../hooks/useMediaQuery'
 
 export default function NotesPage() {
@@ -89,7 +89,6 @@ export default function NotesPage() {
     scheduleSave()
   }
 
-
   return (
     <div className="flex gap-0 flex-1 min-h-0">
       {/* Notes List */}
@@ -132,7 +131,7 @@ export default function NotesPage() {
                     onClick={(e) => handleDeleteNote(e, note.id)}
                     className="p-1 opacity-0 group-hover:opacity-100 hover:bg-[var(--surface-hover)] hover:text-[var(--color-bark)] rounded text-[var(--text-muted)] cursor-pointer transition-opacity"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </button>

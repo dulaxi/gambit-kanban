@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { Mail, ArrowLeft, SquareKanban } from 'lucide-react'
+import { ArrowLeft, Envelope, Kanban } from '@phosphor-icons/react'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-[var(--surface-raised)] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <SquareKanban className="w-10 h-10 text-black mx-auto mb-3" strokeWidth={1.75} />
+          <Kanban className="w-10 h-10 text-black mx-auto mb-3" strokeWidth={1.75} />
           <h1 className="text-2xl font-bold text-[var(--text-primary)] font-heading">Reset password</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
             {sent ? 'Check your email for a reset link' : 'Enter your email to receive a reset link'}
@@ -38,7 +38,7 @@ export default function ForgotPasswordPage() {
         {sent ? (
           <div className="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-2xl p-6 shadow-sm text-center">
             <div className="w-12 h-12 rounded-full bg-[var(--accent-lime-wash)] flex items-center justify-center mx-auto mb-3">
-              <Mail className="w-6 h-6 text-[var(--color-lime-dark)]" />
+              <Envelope className="w-6 h-6 text-[var(--color-lime-dark)]" />
             </div>
             <p className="text-sm text-[var(--text-secondary)] mb-4">
               We sent a password reset link to <span className="font-medium text-[var(--text-primary)]">{email}</span>. Click the link in the email to set a new password.
@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--btn-primary-bg)] text-white text-sm font-medium rounded-xl hover:bg-[var(--btn-primary-hover)] transition-colors disabled:opacity-50"
             >
-              <Mail className="w-4 h-4" />
+              <Envelope className="w-4 h-4" />
               {loading ? 'Sending...' : 'Send reset link'}
             </button>
           </form>

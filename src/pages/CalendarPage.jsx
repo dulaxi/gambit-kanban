@@ -14,7 +14,7 @@ import {
   addMonths,
   subMonths,
 } from 'date-fns'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { groupCardsByDate, getCardsForDate } from '../utils/dateUtils'
 import { DOT_COLORS, EVENT_ACCENT } from '../constants/colors'
 
@@ -53,13 +53,13 @@ export default function CalendarPage() {
               onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
               className="p-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <CaretLeft className="w-5 h-5" />
             </button>
             <button
               onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
               className="p-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
             >
-              <ChevronRight className="w-5 h-5" />
+              <CaretRight className="w-5 h-5" />
             </button>
             <h1 className="text-xl font-semibold text-[var(--text-primary)] font-heading ml-2">
               {format(currentMonth, 'MMMM yyyy')}

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { selectBoardColumns } from '../../store/selectors'
-import { Plus, X } from 'lucide-react'
+import { Plus, X } from '@phosphor-icons/react'
 import {
   DndContext,
   DragOverlay,

@@ -1,7 +1,7 @@
 import { useState, memo } from 'react'
 import { isPast, parseISO } from 'date-fns'
-import { CheckCircle2 } from 'lucide-react'
-import { CalendarDot, CheckSquare, FileText } from '@phosphor-icons/react'
+
+import { CalendarDot, CheckCircle, CheckSquare, FileText } from '@phosphor-icons/react'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -82,7 +82,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
               aria-label={completed ? 'Mark as incomplete' : 'Mark as complete'}
               className="shrink-0"
             >
-              <CheckCircle2 className={`w-4 h-4 transition-colors ${completed ? 'text-[var(--color-lime-dark)]' : priority === 'high' ? 'text-[var(--color-copper)] hover:text-[var(--color-lime-dark)]' : priority === 'low' ? 'text-[var(--color-lime-dark)] hover:text-[var(--color-logo)]' : 'text-[var(--color-honey)] hover:text-[var(--color-lime-dark)]'}`} />
+              <CheckCircle className={`w-4 h-4 transition-colors ${completed ? 'text-[var(--color-lime-dark)]' : priority === 'high' ? 'text-[var(--color-copper)] hover:text-[var(--color-lime-dark)]' : priority === 'low' ? 'text-[var(--color-lime-dark)] hover:text-[var(--color-logo)]' : 'text-[var(--color-honey)] hover:text-[var(--color-lime-dark)]'}`} />
             </button>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">

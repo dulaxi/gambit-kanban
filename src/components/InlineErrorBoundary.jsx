@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import { logError } from '../utils/logger'
-import { RefreshCw } from 'lucide-react'
+import { ArrowsClockwise } from '@phosphor-icons/react'
 import * as Sentry from '@sentry/react'
 
 /**
@@ -40,7 +40,7 @@ export default class InlineErrorBoundary extends Component {
             aria-label="Retry"
             className="flex items-center gap-1 px-2 py-0.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-card)] rounded border border-[var(--border-default)] transition-colors"
           >
-            <RefreshCw className="w-3 h-3" />
+            <ArrowsClockwise className="w-3 h-3" />
             Retry
           </button>
         </div>

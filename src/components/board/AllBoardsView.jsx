@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Layers } from 'lucide-react'
+import { Stack } from '@phosphor-icons/react'
 import { useBoardStore } from '../../store/boardStore'
 import Card from './Card'
 import { buildColumnMap } from '../../utils/columnGrouping'
@@ -55,7 +55,7 @@ export default function AllBoardsView({ onCardClick, selectedCardId }) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center px-6">
         <div className="w-12 h-12 rounded-full bg-[var(--surface-hover)] flex items-center justify-center mb-3">
-          <Layers className="w-6 h-6 text-[var(--text-faint)]" />
+          <Stack className="w-6 h-6 text-[var(--text-faint)]" />
         </div>
         <p className="text-sm font-medium text-[var(--text-secondary)]">No tasks across boards</p>
         <p className="text-xs text-[var(--text-muted)] mt-1">Create a board and add tasks to see them here</p>

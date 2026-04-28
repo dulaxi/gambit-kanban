@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { Sparkle, Waveform } from '@phosphor-icons/react'
-import { ArrowUp } from 'lucide-react'
+import { ArrowUp, Sparkle, Waveform } from '@phosphor-icons/react'
+
 import { useBoardStore } from '../../store/boardStore'
 import { executeTool } from '../../lib/toolExecutor'
 import { streamChat } from '../../lib/aiClient'

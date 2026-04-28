@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, Users } from 'lucide-react'
+import { Users, X } from '@phosphor-icons/react'
 import { useWorkspacesStore } from '../../store/workspacesStore'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'

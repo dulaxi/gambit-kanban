@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback, lazy, Suspense } from 'react'
 import { useClickOutside } from '../../hooks/useClickOutside'
-import { ChevronDown, Plus, LayoutGrid, Layers, Users, Filter, X, Check, ArrowUpDown, Archive, ArchiveRestore, Trash2, Copy } from 'lucide-react'
+import { Archive, ArrowCounterClockwise, ArrowsDownUp, CaretDown, Check, Copy, Funnel, Plus, SquaresFour, Stack, Trash, Users, X } from '@phosphor-icons/react'
 
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
@@ -24,7 +24,7 @@ function FilterPill({ label, active, children }) {
         }`}
       >
         {label}
-        <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <CaretDown className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && (
         <div className="absolute left-0 top-full mt-1 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-xl shadow-lg py-1 z-40 min-w-[160px]">
@@ -297,7 +297,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
                   : 'text-[var(--text-secondary)] bg-[var(--surface-card)] border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
               }`}
             >
-              <Filter className="w-4 h-4 -ml-0.5" />
+              <Funnel className="w-4 h-4 -ml-0.5" />
               Filter
               {activeFilterCount > 0 && (
                 <span className="flex items-center justify-center w-4 h-4 text-[10px] font-semibold text-white bg-[var(--color-lime)] rounded-full">
@@ -366,7 +366,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
                       className="p-1 text-[var(--text-faint)] hover:text-[var(--color-lime-dark)] transition-colors"
                       title="Restore"
                     >
-                      <ArchiveRestore className="w-3.5 h-3.5" />
+                      <ArrowCounterClockwise className="w-3.5 h-3.5" />
                     </button>
                     <button
                       type="button"
@@ -374,7 +374,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
                       className="p-1 text-[var(--text-faint)] hover:text-[var(--color-bark)] transition-colors"
                       title="Delete permanently"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>

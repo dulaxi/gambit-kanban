@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useClickOutside } from '../../hooks/useClickOutside'
-import { Plus, MoreHorizontal, Pencil, Trash2, Gauge, ChevronDown, Bookmark, X, GripVertical } from 'lucide-react'
+import { Bookmark, CaretDown, DotsSixVertical, DotsThree, Gauge, Pencil, Plus, Trash, X } from '@phosphor-icons/react'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useBoardStore } from '../../store/boardStore'
@@ -148,7 +148,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               className="cursor-grab active:cursor-grabbing text-[var(--text-faint)] hover:text-[var(--text-muted)] -ml-1 touch-none"
               aria-label="Drag to reorder column"
             >
-              <GripVertical className="w-3.5 h-3.5" />
+              <DotsSixVertical className="w-3.5 h-3.5" />
             </button>
           )}
           {isRenaming ? (
@@ -186,7 +186,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               aria-label="Column options"
               className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
             >
-              <MoreHorizontal className="w-4 h-4" />
+              <DotsThree className="w-4 h-4" />
             </button>
             {menuOpen && (
               <div className="absolute right-0 top-8 bg-[var(--surface-card)] rounded-xl border-0.5 border-[var(--border-default)] shadow-[0_4px_16px_rgba(0,0,0,0.1)] py-1.5 z-20 w-40 animate-dropdown">
@@ -226,7 +226,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
                   }}
                   className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[var(--color-bark)] hover:bg-[var(--surface-raised)]"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash className="w-3.5 h-3.5" />
                   Delete
                 </button>
               </div>
@@ -264,7 +264,6 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
           </button>
         )}
       </div>
-
 
       {confirmDelete && (
         <ConfirmModal

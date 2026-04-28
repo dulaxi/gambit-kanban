@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Users, LayoutGrid, Plus, Check, X, Mail } from 'lucide-react'
+import { Check, Envelope, Plus, SquaresFour, Users, X } from '@phosphor-icons/react'
 import { useSettingsStore } from '../store/settingsStore'
 import { useWorkspacesStore } from '../store/workspacesStore'
 import WorkspaceCreateModal from '../components/workspace/WorkspaceCreateModal'
@@ -103,7 +103,7 @@ export default function WorkspacePage() {
             >
               <div className="flex shrink-0 items-center rounded-full bg-[var(--surface-hover)] p-1.5">
                 <div style={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <LayoutGrid className="w-5 h-5" />
+                  <SquaresFour className="w-5 h-5" />
                 </div>
               </div>
               <div className="flex flex-1 flex-col gap-0.5">

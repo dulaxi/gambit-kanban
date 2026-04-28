@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { AlertTriangle } from 'lucide-react'
+import { Warning } from '@phosphor-icons/react'
 import Modal from '../ui/Modal'
 
 export default function ConfirmModal({ title, message, confirmLabel = 'Delete', onConfirm, onCancel }) {
@@ -19,7 +19,7 @@ export default function ConfirmModal({ title, message, confirmLabel = 'Delete', 
       >
         <div className="flex items-center gap-3 mb-3">
           <div className="w-9 h-9 rounded-full bg-[var(--color-bark-wash)] flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-5 h-5 text-[var(--color-bark)]" />
+            <Warning className="w-5 h-5 text-[var(--color-bark)]" />
           </div>
           <h3 id="confirm-title" className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
         </div>

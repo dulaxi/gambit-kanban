@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Download, Upload, Trash2, AlertTriangle, Palette, User, Type } from 'lucide-react'
+import { Download, Palette, TextT, Trash, Upload, User, Warning } from '@phosphor-icons/react'
 import { showToast } from '../utils/toast'
 import { useSettingsStore } from '../store/settingsStore'
 import { useAuthStore } from '../store/authStore'
@@ -234,7 +234,7 @@ export default function SettingsPage() {
       {/* Font */}
       <div className="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-2xl p-5 shadow-sm mb-4">
         <div className="flex items-center gap-2 mb-1">
-          <Type className="w-4 h-4 text-[var(--text-secondary)]" />
+          <TextT className="w-4 h-4 text-[var(--text-secondary)]" />
           <h2 className="text-sm font-semibold text-[var(--text-primary)]">Font</h2>
         </div>
         <p className="text-sm text-[var(--text-secondary)] mb-4">
@@ -302,7 +302,7 @@ export default function SettingsPage() {
       {confirmingClear && (
         <div className="bg-[var(--color-bark-wash)]/40 border border-[#D4A07A] rounded-2xl p-5 mb-4">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-4 h-4 text-[var(--color-copper)]" />
+            <Warning className="w-4 h-4 text-[var(--color-copper)]" />
             <h2 className="text-sm font-semibold text-[var(--color-bark)]">Confirm — this cannot be undone</h2>
           </div>
           <p className="text-sm text-[var(--text-secondary)] mb-4">

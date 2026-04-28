@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plus, ArrowUp } from 'lucide-react'
+import { ArrowUp, Plus } from '@phosphor-icons/react'
 
 export default function ChatInput({ onSend, autoFocus = false }) {
   const [input, setInput] = useState('')

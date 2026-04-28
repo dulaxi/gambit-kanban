@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { WifiOff } from 'lucide-react'
+import { WifiSlash } from '@phosphor-icons/react'
 import { showToast } from '../../utils/toast'
 import { useOnlineStatus } from '../../hooks/useOnlineStatus'
 import { useBoardStore } from '../../store/boardStore'
@@ -26,7 +26,7 @@ export default function OfflineBanner() {
 
   return (
     <div className="bg-[var(--color-honey)] text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium">
-      <WifiOff className="w-4 h-4 shrink-0" />
+      <WifiSlash className="w-4 h-4 shrink-0" />
       You're offline — changes may not be saved
     </div>
   )

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { X, SquareKanban } from 'lucide-react'
+import { Kanban, X } from '@phosphor-icons/react'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import { useBoardStore } from '../../store/boardStore'
 import DynamicIcon from './DynamicIcon'
@@ -158,7 +158,7 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)]">
             <div className="flex items-center gap-2">
-              <SquareKanban className="w-4 h-4 text-[var(--text-muted)]" />
+              <Kanban className="w-4 h-4 text-[var(--text-muted)]" />
               <h2 className="text-sm font-semibold text-[var(--text-primary)]">
                 New Board
               </h2>
@@ -204,7 +204,7 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
                         className="w-4 h-4 text-[var(--text-secondary)]"
                       />
                     ) : (
-                      <SquareKanban className="w-4 h-4 text-[var(--text-muted)]" />
+                      <Kanban className="w-4 h-4 text-[var(--text-muted)]" />
                     )}
                   </button>
                   <input
@@ -248,7 +248,7 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
                         {tpl.icon ? (
                           <DynamicIcon name={tpl.icon} className="w-4 h-4" />
                         ) : (
-                          <SquareKanban className="w-4 h-4" />
+                          <Kanban className="w-4 h-4" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">

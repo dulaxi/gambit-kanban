@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, CheckSquare } from 'lucide-react'
+import { CheckSquare, X } from '@phosphor-icons/react'
 
 export default function CardDetailChecklist({ checklist, onToggle, onRemove, onAdd }) {
   const [newCheckItem, setNewCheckItem] = useState('')
