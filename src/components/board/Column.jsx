@@ -6,7 +6,7 @@ import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import SortableCard from './SortableCard'
 import InlineCardEditor from './InlineCardEditor'
-import { filterCards, sortCards } from '../../utils/cardFilters'
+import { filterCards } from '../../utils/cardFilters'
 import { showToast } from '../../utils/toast'
 import ConfirmModal from './ConfirmModal'
 import { useTemplateStore } from '../../store/templateStore'
@@ -15,7 +15,31 @@ import Button from '../ui/Button'
 import Input from '../ui/Input'
 import Menu from '../ui/Menu'
 
-export default function Column({ column, boardId, onCardClick, onCreateCard, onCompleteCard, inlineCardId, onInlineDone, selectedCardId, focusedCardId, filters, sortBy, dragHandleProps }) {
+const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 }
+
+function sortCards(cards, sortBy) {
+  if (!sortBy || sortBy === 'manual') return cards
+  return [...cards].sort((a, b) => {
+    if (sortBy === 'due_date') {
+      if (!a.due_date && !b.due_date) return 0
+      if (!a.due_date) return 1
+      if (!b.due_date) return -1
+      return a.due_date.localeCompare(b.due_date)
+    }
+    if (sortBy === 'priority') {
+      return (PRIORITY_ORDER[a.priority] ?? 3) - (PRIORITY_ORDER[b.priority] ?? 3)
+    }
+    if (sortBy === 'created') {
+      return (b.created_at || '').localeCompare(a.created_at || '')
+    }
+    if (sortBy === 'alpha') {
+      return (a.title || '').localeCompare(b.title || '')
+    }
+    return 0
+  })
+}
+
+export default function Column({ column, boardId, onCardClick, onCreateCard, onCompleteCard, inlineCardId, onInlineDone, selectedCardId, filters, sortBy, dragHandleProps }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [isRenaming, setIsRenaming] = useState(false)
@@ -228,7 +252,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
             return isInline ? (
               <InlineCardEditor key={card.id} cardId={card.id} onDone={onInlineDone} />
             ) : (
-              <SortableCard key={card.id} card={card} onClick={onCardClick} onComplete={onCompleteCard} isSelected={card.id === selectedCardId} isFocused={card.id === focusedCardId} />
+              <SortableCard key={card.id} card={card} onClick={onCardClick} onComplete={onCompleteCard} isSelected={card.id === selectedCardId} />
             )
           })}
         </SortableContext>

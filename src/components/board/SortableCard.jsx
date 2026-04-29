@@ -7,7 +7,7 @@ import AICardSkeleton from './AICardSkeleton'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import { isAIBuilding } from '../../lib/toolExecutor'
 
-export default memo(function SortableCard({ card, onClick, onComplete, isSelected, isFocused }) {
+export default memo(function SortableCard({ card, onClick, onComplete, isSelected }) {
   const [showSkeleton, setShowSkeleton] = useState(() => isAIBuilding(card.id))
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default memo(function SortableCard({ card, onClick, onComplete, isSelecte
           <DotsSixVertical className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">
-          <Card card={card} onClick={onClick} onComplete={onComplete} isSelected={isSelected} isFocused={isFocused} />
+          <Card card={card} onClick={onClick} onComplete={onComplete} isSelected={isSelected} />
         </div>
       </div>
     )

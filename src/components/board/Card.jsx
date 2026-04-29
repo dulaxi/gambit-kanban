@@ -11,7 +11,7 @@ import { formatDueDateLabel, dueDateBadgeClass } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
 import { isAICreated } from '../../lib/toolExecutor'
 
-export default memo(function Card({ card, onClick, onComplete, isSelected, isFocused, iconOverride }) {
+export default memo(function Card({ card, onClick, onComplete, isSelected, iconOverride }) {
   const { title, description, labels, priority, due_date: dueDate, checklist, task_number: taskNumber, completed, icon } = card
   // Multi-assignee: prefer new `assignees` array; fall back to legacy single name
   const assignees = (card.assignees && card.assignees.length)
@@ -51,8 +51,6 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, isFoc
       className={`w-full flex flex-col gap-3 rounded-2xl border p-4 text-left shadow-sm transition-all cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-1 group ${
         isSelected
           ? 'bg-[var(--color-mauve-cream)] border-[var(--color-ink)]'
-          : isFocused
-          ? 'bg-[var(--surface-card)] border-[var(--color-ink)] ring-2 ring-[var(--color-lime-dark)] ring-offset-1 ring-offset-[var(--surface-page)]'
           : 'bg-[var(--surface-card)] border-[var(--color-mist)] hover:bg-[var(--surface-page)] hover:shadow-none hover:border-[var(--text-muted)]'
       }`}
     >
