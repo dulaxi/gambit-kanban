@@ -1736,7 +1736,7 @@ function HeroAuthCard() {
               placeholder="Enter your email"
               required
             />
-            <Button type="submit" size="lg" className="w-full">
+            <Button type="submit" className="w-full">
               Continue with email
               <ArrowRight className="w-4 h-4" />
             </Button>
@@ -1774,7 +1774,6 @@ function HeroAuthCard() {
             />
             <Button
               type="submit"
-              size="lg"
               loading={submitting}
               loadingText="Please wait…"
               className="w-full"
