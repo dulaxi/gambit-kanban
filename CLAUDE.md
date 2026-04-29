@@ -249,7 +249,7 @@ Common pitfall: it's `assignee_name`, NOT `assignee`. It's `due_date`, NOT `dueD
 
 ### Card creation vs editing
 - **New task** → creates card in Supabase, shows `InlineCardEditor` inline.
-- **Existing task** → click opens `CardDetailPanel` (right-side fixed 420px panel).
+- **Existing task** → click opens `CardDetailPanel` (centered modal, max-w-3xl, 50–90vh). The "Panel" name is historical — it used to be a right-side panel and was migrated to a modal; the filename was kept to avoid churn.
 
 ## Database
 
