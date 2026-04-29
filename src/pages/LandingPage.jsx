@@ -1691,7 +1691,7 @@ function DemoBoard({ variant = 'density' }) {
     const isInProgress = col.id === 'demo-col-2'
 
     return (
-      <div ref={setNodeRef} className="w-[260px] shrink-0 flex flex-col h-full">
+      <div ref={setNodeRef} className="w-[260px] @[612px]:w-[290px] shrink-0 flex flex-col h-full">
         {/* Header */}
         {variant === 'density' ? (
           <div className="flex items-center justify-between px-0.5 pb-3">
@@ -1749,7 +1749,7 @@ function DemoBoard({ variant = 'density' }) {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={`flex ${colGap} h-full`}>
+      <div className={`@container flex ${colGap} h-full`}>
         {DEMO_COLUMNS.map((col) => (
           <DroppableColumn key={col.id} col={col} colCards={getColumnCards(col.id)} />
         ))}
@@ -2003,7 +2003,7 @@ export default function LandingPage() {
       {/* ─── Hero ─── */}
       <section className="relative overflow-hidden">
         <div className="px-6 sm:px-10 pb-8 max-w-[90rem] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,_420px)_1fr] gap-4">
             {/* Left — Copy (center-aligned) */}
             <div className="flex w-full min-h-[85vh] items-center">
             <div className="text-center flex flex-col items-center w-full">
