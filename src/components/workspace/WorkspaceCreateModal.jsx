@@ -4,6 +4,8 @@ import { useWorkspacesStore } from '../../store/workspacesStore'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
 import Modal from '../ui/Modal'
+import Button from '../ui/Button'
+import Input from '../ui/Input'
 
 /**
  * WorkspaceCreateModal — Claude-style centered dialog.
@@ -97,14 +99,14 @@ export default function WorkspaceCreateModal({ open, onClose, onCreated }) {
                   />
                 )}
               </div>
-              <input
+              <Input
                 id="ws-name"
                 ref={nameRef}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Design team"
                 maxLength={64}
-                className="flex-1 bg-[var(--surface-card)] border border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--text-muted)] transition-colors placeholder:text-[var(--text-faint)] h-9 px-3 py-2 rounded-lg text-sm focus:outline-none"
+                className="flex-1"
               />
             </div>
           </div>
@@ -132,20 +134,8 @@ export default function WorkspaceCreateModal({ open, onClose, onCreated }) {
 
         {/* Footer */}
         <div className="mt-4 flex flex-col gap-2 sm:flex-row justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="h-9 px-4 py-2 rounded-lg min-w-[5rem] whitespace-nowrap border-0.5 border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors text-sm font-medium"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className="h-9 px-4 py-2 rounded-lg min-w-[5rem] whitespace-nowrap bg-[var(--btn-primary-bg)] hover:bg-[var(--btn-primary-hover)] text-[var(--btn-primary-text)] transition-colors text-sm font-medium disabled:opacity-50"
-          >
-            Create
-          </button>
+          <Button variant="secondary" onClick={onClose} className="min-w-[5rem]">Cancel</Button>
+          <Button type="submit" disabled={!canSubmit} className="min-w-[5rem]">Create</Button>
         </div>
       </form>
     </Modal>

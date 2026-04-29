@@ -191,7 +191,7 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
                 <button
                   type="button"
                   onClick={() => setLabels(labels.filter((_, i) => i !== idx))}
-                  className="ml-0.5 opacity-0 group-hover/label:opacity-100 text-[var(--text-faint)] hover:text-[var(--color-bark)] transition-opacity"
+                  className="ml-0.5 opacity-0 group-hover/label:opacity-100 text-[var(--text-faint)] hover:text-[var(--color-copper)] transition-opacity"
                 >
                   <X className="w-2.5 h-2.5" />
                 </button>
@@ -298,7 +298,7 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
                   <button
                     type="button"
                     onClick={() => { setDueDate(''); setOpenMenu(null) }}
-                    className="text-[10px] text-[var(--text-muted)] hover:text-[var(--color-bark)] transition-colors self-start"
+                    className="text-[10px] text-[var(--text-muted)] hover:text-[var(--color-copper)] transition-colors self-start"
                   >
                     Clear
                   </button>
@@ -494,14 +494,14 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
         <button
           type="button"
           onClick={() => { deleteCard(resolvedId); onDone() }}
-          className="text-[11px] text-[var(--text-muted)] hover:text-[var(--color-bark)] px-2 py-1 rounded-lg transition-colors"
+          className="text-[11px] text-[var(--text-muted)] hover:text-[var(--color-copper)] px-2 py-1 rounded-lg transition-colors"
         >
           Discard
         </button>
         <button
           type="button"
           onClick={handleSave}
-          className="text-[11px] font-medium text-white bg-[var(--text-primary)] hover:opacity-90 px-3 py-1 rounded-lg transition-opacity"
+          className="text-[11px] font-medium text-[var(--btn-primary-text)] bg-[var(--btn-primary-bg)] hover:bg-[var(--btn-primary-hover)] px-3 py-1 rounded-lg transition-colors"
         >
           Save
         </button>

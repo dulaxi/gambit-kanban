@@ -1,8 +1,9 @@
 import { memo } from 'react'
 
-// Map lucide PascalCase names that DON'T have direct Phosphor equivalents.
-// Only names where toKebab() produces a non-existent Phosphor icon need mapping.
-const LUCIDE_TO_PHOSPHOR = {
+// Forward-compat shim: legacy icon names persisted in DB (board.icon, card.icon)
+// from the old lucide era are remapped to their current Phosphor equivalents.
+// Lucide-react itself has been removed. Do not delete — would break old boards.
+const LEGACY_ICON_REMAP = {
   'grip-vertical': 'dots-six-vertical',
   'panel-right': 'sidebar-simple',
   'calendar-days': 'calendar-blank',
@@ -102,8 +103,8 @@ export default memo(function DynamicIcon({ name, className = 'w-4 h-4', ...props
   // Phosphor: kebab-case or single lowercase word; PascalCase → convert to kebab
   const kebab = name.includes('-') || name === name.toLowerCase() ? name : toKebab(name)
 
-  // Apply lucide→phosphor fallback for names that don't exist in Phosphor
-  const iconName = LUCIDE_TO_PHOSPHOR[kebab] || kebab
+  // Remap legacy icon names persisted from the old lucide era
+  const iconName = LEGACY_ICON_REMAP[kebab] || kebab
 
   return renderPhosphor(iconName, sizePx, props)
 })

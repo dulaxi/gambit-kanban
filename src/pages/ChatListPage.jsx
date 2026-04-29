@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChatsCircle, MagnifyingGlass, Plus, X } from '@phosphor-icons/react'
 import { useChatStore } from '../store/chatStore'
 import { formatDistanceToNow } from 'date-fns'
+import Button from '../components/ui/Button'
 
 export default function ChatListPage() {
   const navigate = useNavigate()
@@ -80,14 +81,10 @@ export default function ChatListPage() {
         <div className="text-center py-12">
           <ChatsCircle size={32} weight="regular" className="mx-auto mb-3 text-[var(--text-faint)]" />
           <p className="text-sm text-[var(--text-muted)] mb-4">No conversations yet</p>
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center gap-1.5 h-8 px-3 text-sm font-medium text-white bg-[var(--text-primary)] rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
-          >
+          <Button size="sm" onClick={() => navigate('/dashboard')}>
             <Plus className="w-4 h-4" />
             Start a conversation
-          </button>
+          </Button>
         </div>
       )}
     </div>

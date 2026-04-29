@@ -48,7 +48,7 @@ function ChecklistItem({ item, onToggle, onEdit, onDelete }) {
       <button
         type="button"
         onClick={onDelete}
-        className="shrink-0 opacity-0 group-hover/check:opacity-100 text-[var(--text-faint)] hover:text-[var(--color-bark)] transition-all"
+        className="shrink-0 opacity-0 group-hover/check:opacity-100 text-[var(--text-faint)] hover:text-[var(--color-copper)] transition-all"
       >
         <X className="w-3 h-3" />
       </button>
@@ -266,7 +266,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                     <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Bookmark className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Template</span></div>
                   </div>
                   <div role="separator" className="h-[0.5px] bg-[var(--border-subtle)] my-1.5 mx-2" />
-                  <div role="menuitem" onClick={() => { deleteCard(cardId); onClose(); setOpenMenu(null) }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--color-bark)]/10 text-[var(--color-bark)] text-xs">
+                  <div role="menuitem" onClick={() => { deleteCard(cardId); onClose(); setOpenMenu(null) }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--color-copper)]/10 text-[var(--color-copper)] text-xs">
                     <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Delete</span></div>
                   </div>
                 </div>
@@ -624,7 +624,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                             showToast.error('Failed to delete')
                           }
                         }}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] flex items-center justify-center text-[var(--text-faint)] hover:text-[var(--color-bark)] hover:bg-[var(--surface-hover)] opacity-0 group-hover/file:opacity-100 transition-all"
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] flex items-center justify-center text-[var(--text-faint)] hover:text-[var(--color-copper)] hover:bg-[var(--surface-hover)] opacity-0 group-hover/file:opacity-100 transition-all"
                       >
                         <X className="w-3 h-3" />
                       </button>

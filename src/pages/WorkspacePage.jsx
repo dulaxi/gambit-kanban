@@ -5,6 +5,7 @@ import { useWorkspacesStore } from '../store/workspacesStore'
 import WorkspaceCreateModal from '../components/workspace/WorkspaceCreateModal'
 import WorkspaceDetailView from '../components/workspace/WorkspaceDetailView'
 import DynamicIcon from '../components/board/DynamicIcon'
+import Button from '../components/ui/Button'
 
 /**
  * WorkspacePage — routes between two views:
@@ -79,14 +80,10 @@ export default function WorkspacePage() {
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => acceptInvitation(inv.id)}
-                        className="h-8 px-3 rounded-lg inline-flex items-center gap-1.5 text-sm font-medium bg-[var(--btn-primary-bg)] hover:bg-[var(--btn-primary-hover)] text-[var(--btn-primary-text)] transition-colors"
-                      >
+                      <Button size="sm" onClick={() => acceptInvitation(inv.id)}>
                         <Check className="w-4 h-4" />
                         Accept
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )

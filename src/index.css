@@ -22,6 +22,7 @@
   --color-lime-wash: #EEF2D6;
   --color-logo: #8BA32E;
   --color-copper: #C27A4A;
+  --color-copper-dark: #A86434;
   --color-copper-wash: #F2D9C7;
   --color-honey: #D4A843;
   --color-honey-wash: #F5EDCF;
@@ -249,6 +250,23 @@
 @keyframes ai-card-shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+/* Button loading dots — cycles ., .., ... after the verb (e.g. "Saving...") */
+@keyframes button-dots-cycle {
+  0%, 100% { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+}
+.btn-dots {
+  display: inline-block;
+  min-width: 1ch;
+  text-align: left;
+}
+.btn-dots::after {
+  content: '';
+  animation: button-dots-cycle 1.4s steps(4, end) infinite;
 }
 
 .ai-skeleton-block {

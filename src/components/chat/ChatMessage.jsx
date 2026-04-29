@@ -4,6 +4,7 @@ import { useBoardStore } from '../../store/boardStore'
 import { useChatStore } from '../../store/chatStore'
 import Card from '../board/Card'
 import MarkdownRenderer from './MarkdownRenderer'
+import Button from '../ui/Button'
 
 const ACTION_LABELS = {
   delete_card: 'Delete card',
@@ -58,22 +59,14 @@ export default function ChatMessage({ message }) {
             {ACTION_LABELS[pending.action] || pending.action}: <span className="text-[var(--text-secondary)]">{pending.params.card_title || pending.params.title}</span>
           </div>
           <div className="flex items-center gap-2 mt-2">
-            <button
-              type="button"
-              onClick={() => approveToolCall(conversationId, message.id)}
-              className="inline-flex items-center gap-1.5 h-7 px-3 text-[13px] font-medium text-white bg-[var(--text-primary)] rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
-            >
+            <Button size="sm" onClick={() => approveToolCall(conversationId, message.id)}>
               <Check className="w-3.5 h-3.5" />
               Approve
-            </button>
-            <button
-              type="button"
-              onClick={() => rejectToolCall(conversationId, message.id)}
-              className="inline-flex items-center gap-1.5 h-7 px-3 text-[13px] font-medium text-[var(--text-secondary)] border-[0.5px] border-[var(--border-default)] rounded-lg hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-            >
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => rejectToolCall(conversationId, message.id)}>
               <X className="w-3.5 h-3.5" />
               Reject
-            </button>
+            </Button>
           </div>
         </div>
       )}

@@ -5,6 +5,7 @@ import { useBoardStore } from '../../store/boardStore'
 import { executeTool } from '../../lib/toolExecutor'
 import { streamChat } from '../../lib/aiClient'
 import Modal from '../ui/Modal'
+import Button from '../ui/Button'
 
 export default function QuickAddBar({ boardId }) {
   const [expanded, setExpanded] = useState(false)
@@ -132,18 +133,18 @@ export default function QuickAddBar({ boardId }) {
             onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
           />
           <div className="flex items-center gap-2">
-            <button type="button" aria-label="Add files" className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-[var(--surface-hover)] text-[var(--text-secondary)] transition-colors cursor-pointer">
+            <Button variant="ghost" size="icon-sm" aria-label="Add files">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-            </button>
+            </Button>
             <div className="flex-1" />
             {input.trim() ? (
-              <button type="button" onClick={handleSubmit} disabled={processing} aria-label="Send" className="h-8 w-8 rounded-lg flex items-center justify-center bg-[var(--text-primary)] text-[var(--surface-card)] hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50">
+              <Button size="icon-sm" onClick={handleSubmit} disabled={processing} aria-label="Send">
                 <ArrowUp className="w-4 h-4" strokeWidth={2.5} />
-              </button>
+              </Button>
             ) : (
-              <button type="button" aria-label="Voice mode" className="h-8 px-1.5 rounded-lg flex items-center justify-center hover:bg-[var(--surface-hover)] text-[var(--text-secondary)] transition-colors cursor-pointer">
+              <Button variant="ghost" size="icon-sm" aria-label="Voice mode">
                 <Waveform size={20} weight="regular" />
-              </button>
+              </Button>
             )}
           </div>
         </div>

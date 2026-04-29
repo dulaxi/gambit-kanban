@@ -78,7 +78,7 @@ export default function CardDetailAttachments({
                     <button
                       type="button"
                       onClick={() => deleteAttachment(att.id, cardId, att.storage_path)}
-                      className="p-1 text-[var(--text-faint)] hover:text-[var(--color-bark)] transition-colors"
+                      className="p-1 text-[var(--text-faint)] hover:text-[var(--color-copper)] transition-colors"
                       title="Delete"
                     >
                       <Trash className="w-3.5 h-3.5" />

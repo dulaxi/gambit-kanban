@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { useClickOutside } from '../../hooks/useClickOutside'
 import { Bookmark, CaretDown, DotsSixVertical, DotsThree, Gauge, Pencil, Plus, Trash, X } from '@phosphor-icons/react'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
@@ -12,6 +11,9 @@ import { showToast } from '../../utils/toast'
 import ConfirmModal from './ConfirmModal'
 import { useTemplateStore } from '../../store/templateStore'
 import Modal from '../ui/Modal'
+import Button from '../ui/Button'
+import Input from '../ui/Input'
+import Menu from '../ui/Menu'
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 }
 
@@ -55,7 +57,6 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
   const templates = useTemplateStore((s) => s.templates)
   const deleteTemplate = useTemplateStore((s) => s.deleteTemplate)
   const renameRef = useRef(null)
-  const menuRef = useClickOutside(() => setMenuOpen(false))
 
   const allCards = useBoardStore((s) => s.cards)
   const tempIdMap = useBoardStore((s) => s._tempIdMap)
@@ -179,7 +180,51 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
           >
             <Plus className="w-4 h-4" />
           </button>
-          <div className="relative" ref={menuRef}>
+          <Menu
+            open={menuOpen}
+            onOpenChange={setMenuOpen}
+            placement="bottom-end"
+            panelClassName="w-44"
+            panel={
+              <>
+                <Menu.Item
+                  icon={<Pencil size={14} />}
+                  onSelect={() => {
+                    setMenuOpen(false)
+                    setIsRenaming(true)
+                    setRenameValue(column.title)
+                  }}
+                >
+                  Rename
+                </Menu.Item>
+                <Menu.Item
+                  icon={<Gauge size={14} />}
+                  onSelect={() => {
+                    setMenuOpen(false)
+                    setEditingWip(true)
+                    setWipValue(column.wip_limit || '')
+                  }}
+                >
+                  WIP limit{wipLimit ? ` (${wipLimit})` : ''}
+                </Menu.Item>
+                <Menu.Divider />
+                <Menu.Item
+                  icon={<Trash size={14} />}
+                  destructive
+                  onSelect={() => {
+                    setMenuOpen(false)
+                    if (columnCards.length > 0) {
+                      setConfirmDelete(true)
+                    } else {
+                      deleteColumn(boardId, column.id)
+                    }
+                  }}
+                >
+                  Delete
+                </Menu.Item>
+              </>
+            }
+          >
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
@@ -188,50 +233,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
             >
               <DotsThree className="w-4 h-4" />
             </button>
-            {menuOpen && (
-              <div className="absolute right-0 top-8 bg-[var(--surface-card)] rounded-xl border-0.5 border-[var(--border-default)] shadow-[0_4px_16px_rgba(0,0,0,0.1)] py-1.5 z-20 w-40 animate-dropdown">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    setIsRenaming(true)
-                    setRenameValue(column.title)
-                  }}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]"
-                >
-                  <Pencil className="w-3.5 h-3.5" />
-                  Rename
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    setEditingWip(true)
-                    setWipValue(column.wip_limit || '')
-                  }}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]"
-                >
-                  <Gauge className="w-3.5 h-3.5" />
-                  WIP limit{wipLimit ? ` (${wipLimit})` : ''}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    if (columnCards.length > 0) {
-                      setConfirmDelete(true)
-                    } else {
-                      deleteColumn(boardId, column.id)
-                    }
-                  }}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[var(--color-bark)] hover:bg-[var(--surface-raised)]"
-                >
-                  <Trash className="w-3.5 h-3.5" />
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
+          </Menu>
         </div>
       </div>
 
@@ -285,7 +287,7 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
         <div className="bg-[var(--surface-card)] rounded-2xl border-0.5 border-[var(--border-default)] shadow-[0_4px_20px_rgba(0,0,0,0.08)] w-full max-w-xs mx-4 p-5">
             <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">WIP Limit</h3>
             <p className="text-xs text-[var(--text-muted)] mb-3">Maximum number of tasks in "{column.title}". Leave empty for no limit.</p>
-            <input
+            <Input
               type="number"
               min="0"
               value={wipValue}
@@ -298,26 +300,21 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
               }}
               autoFocus
               placeholder="No limit"
-              className="w-full text-sm rounded-lg px-3 py-2 border-0.5 border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)] mb-3"
+              className="mb-3"
             />
             <div className="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setEditingWip(false)}
-                className="px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] rounded-lg transition-colors"
-              >
+              <Button variant="ghost" size="sm" onClick={() => setEditingWip(false)}>
                 Cancel
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                size="sm"
                 onClick={() => {
                   updateColumnWipLimit(column.id, parseInt(wipValue) || null)
                   setEditingWip(false)
                 }}
-                className="px-3 py-1.5 text-sm font-medium bg-[var(--btn-primary-bg)] hover:bg-[var(--btn-primary-hover)] text-[var(--btn-primary-text)] rounded-lg transition-colors"
               >
                 Save
-              </button>
+              </Button>
             </div>
           </div>
       </Modal>

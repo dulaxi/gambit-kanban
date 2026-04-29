@@ -5,6 +5,7 @@ import WorkspaceSidebar from './WorkspaceSidebar'
 import Header from './Header'
 import SearchDialog from '../SearchDialog'
 import BottomTabBar from './BottomTabBar'
+import Button from '../ui/Button'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useIsDesktop } from '../../hooks/useMediaQuery'
 import { useAuthStore } from '../../store/authStore'
@@ -250,19 +251,10 @@ export default function AppLayout() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={handleSkipMigration}
-                  className="px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] rounded-lg transition-colors"
-                >
-                  Skip
-                </button>
-                <button
-                  onClick={handleMigrate}
-                  disabled={migrating}
-                  className="px-3 py-1.5 text-xs font-medium bg-[var(--text-primary)] text-white rounded-lg hover:bg-[var(--btn-primary-hover)] disabled:opacity-50 transition-colors"
-                >
-                  {migrating ? 'Importing...' : 'Import data'}
-                </button>
+                <Button variant="ghost" size="sm" onClick={handleSkipMigration}>Skip</Button>
+                <Button size="sm" onClick={handleMigrate} disabled={migrating} loading={migrating} loadingText="Importing">
+                  Import data
+                </Button>
               </div>
             </div>
           )}

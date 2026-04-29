@@ -5,6 +5,9 @@ import { useBoardStore } from '../../store/boardStore'
 import DynamicIcon from './DynamicIcon'
 import IconPicker from './IconPicker'
 import Modal from '../ui/Modal'
+import Button from '../ui/Button'
+import Input from '../ui/Input'
+import Skeleton from '../ui/Skeleton'
 
 const TEMPLATES = [
   {
@@ -74,11 +77,7 @@ function SkeletonPreview({ columns }) {
             </div>
             <div className="flex flex-col gap-2">
               {pattern.map((h, gi) => (
-                <div
-                  key={gi}
-                  className="rounded-lg bg-[var(--surface-raised)] animate-pulse"
-                  style={{ height: h }}
-                />
+                <Skeleton key={gi} className="rounded-lg" height={h} />
               ))}
             </div>
           </div>
@@ -207,7 +206,7 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
                       <Kanban className="w-4 h-4 text-[var(--text-muted)]" />
                     )}
                   </button>
-                  <input
+                  <Input
                     ref={nameRef}
                     type="text"
                     value={name}
@@ -216,7 +215,7 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
                     autoFocus
                     maxLength={200}
                     placeholder="e.g. Product Roadmap"
-                    className="flex-1 h-10 px-3 text-sm rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+                    className="flex-1"
                   />
                 </div>
               </div>
@@ -286,21 +285,15 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
 
           {/* Footer */}
           <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[var(--border-default)]">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-xl hover:bg-[var(--surface-hover)] transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button
               onClick={handleCreate}
               disabled={!canCreate}
-              className="px-4 py-2 text-sm font-medium rounded-xl transition-colors bg-[var(--btn-primary-bg)] text-white hover:bg-[var(--btn-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
+              loading={creating}
+              loadingText="Creating"
             >
-              {creating ? 'Creating...' : 'Create'}
-            </button>
+              Create
+            </Button>
           </div>
         </div>
       </Modal>

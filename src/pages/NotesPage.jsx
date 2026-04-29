@@ -129,7 +129,7 @@ export default function NotesPage() {
                   </div>
                   <button
                     onClick={(e) => handleDeleteNote(e, note.id)}
-                    className="p-1 opacity-0 group-hover:opacity-100 hover:bg-[var(--surface-hover)] hover:text-[var(--color-bark)] rounded text-[var(--text-muted)] cursor-pointer transition-opacity"
+                    className="p-1 opacity-0 group-hover:opacity-100 hover:bg-[var(--surface-hover)] hover:text-[var(--color-copper)] rounded text-[var(--text-muted)] cursor-pointer transition-opacity"
                   >
                     <Trash className="w-3.5 h-3.5" />
                   </button>

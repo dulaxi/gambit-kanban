@@ -6,6 +6,8 @@ import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
 import { getAvatarColor, getAvatarTextColor, getInitials } from '../../utils/formatting'
 import { supabase } from '../../lib/supabase'
+import Button from '../ui/Button'
+import Input from '../ui/Input'
 
 // Stable empty-array reference — if put inline as `|| []` inside a Zustand selector,
 // useSyncExternalStore sees a new reference every render and re-renders infinitely.
@@ -265,23 +267,23 @@ export default function WorkspaceDetailView({ workspaceId }) {
             <p className="mt-1 text-xs text-[var(--text-muted)]">Enter an email. They'll join the workspace next time they sign in.</p>
 
             <form onSubmit={handleInvite} className="mt-4 flex items-stretch gap-2">
-              <div className="relative flex-1">
-                <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
-                <input
-                  type="email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="teammate@example.com"
-                  className="w-full h-9 pl-9 pr-3 py-2 rounded-lg bg-[var(--surface-card)] border border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--text-muted)] transition-colors placeholder:text-[var(--text-faint)] text-sm focus:outline-none"
-                />
-              </div>
-              <button
+              <Input
+                type="email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="teammate@example.com"
+                leadingIcon={<Envelope className="w-4 h-4" />}
+                wrapperClassName="flex-1"
+              />
+              <Button
                 type="submit"
                 disabled={!inviteEmail.trim() || inviting}
-                className="h-9 px-4 py-2 rounded-lg whitespace-nowrap bg-[var(--btn-primary-bg)] hover:bg-[var(--btn-primary-hover)] text-[var(--btn-primary-text)] transition-colors text-sm font-medium disabled:opacity-50"
+                loading={inviting}
+                loadingText="Sending"
+                className="whitespace-nowrap"
               >
                 Send invite
-              </button>
+              </Button>
             </form>
 
             {sentInvitations.length > 0 && (
@@ -337,7 +339,7 @@ export default function WorkspaceDetailView({ workspaceId }) {
                     <button
                       type="button"
                       onClick={() => deleteWorkspace(workspaceId)}
-                      className="h-9 px-4 rounded-lg whitespace-nowrap bg-[var(--color-copper)] hover:bg-[var(--color-bark)] text-white transition-colors text-sm font-medium inline-flex items-center gap-2"
+                      className="h-9 px-4 rounded-lg whitespace-nowrap bg-[var(--color-copper)] hover:bg-[var(--color-copper-dark)] text-white transition-colors text-sm font-medium inline-flex items-center gap-2"
                     >
                       <Check className="w-4 h-4" /> Confirm delete
                     </button>
@@ -370,7 +372,7 @@ export default function WorkspaceDetailView({ workspaceId }) {
                     <button
                       type="button"
                       onClick={() => leaveWorkspace(workspaceId)}
-                      className="h-9 px-4 rounded-lg whitespace-nowrap bg-[var(--color-copper)] hover:bg-[var(--color-bark)] text-white transition-colors text-sm font-medium inline-flex items-center gap-2"
+                      className="h-9 px-4 rounded-lg whitespace-nowrap bg-[var(--color-copper)] hover:bg-[var(--color-copper-dark)] text-white transition-colors text-sm font-medium inline-flex items-center gap-2"
                     >
                       <Check className="w-4 h-4" /> Confirm leave
                     </button>

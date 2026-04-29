@@ -57,7 +57,7 @@ export default function CardDetailChecklist({ checklist, onToggle, onRemove, onA
             <button
               type="button"
               onClick={() => onRemove(idx)}
-              className="opacity-0 group-hover:opacity-100 p-0.5 text-[var(--text-muted)] hover:text-[var(--color-bark)] transition-opacity"
+              className="opacity-0 group-hover:opacity-100 p-0.5 text-[var(--text-muted)] hover:text-[var(--color-copper)] transition-opacity"
             >
               <X className="w-3.5 h-3.5" />
             </button>

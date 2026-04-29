@@ -12,16 +12,16 @@ export default function ActionCard({ icon: Icon, title, description, onClick, to
     disabled
       ? 'opacity-50 cursor-not-allowed'
       : isDanger
-        ? 'hover:bg-[var(--color-bark-wash)]/40 hover:border-[var(--color-bark)]/30 cursor-pointer'
+        ? 'hover:bg-[var(--color-copper-wash)]/40 hover:border-[var(--color-copper)]/30 cursor-pointer'
         : 'hover:bg-[var(--surface-raised)] cursor-pointer'
   }`
 
   const iconWrapClasses = `flex shrink-0 items-center justify-center rounded-full p-2.5 ${
-    isDanger ? 'bg-[var(--color-bark-wash)]' : 'bg-[var(--accent-lime-wash)]'
+    isDanger ? 'bg-[var(--color-copper-wash)]' : 'bg-[var(--accent-lime-wash)]'
   }`
 
-  const iconColor = isDanger ? 'text-[var(--color-bark)]' : 'text-[var(--color-logo)]'
-  const titleColor = isDanger ? 'text-[var(--color-bark)]' : 'text-[var(--text-primary)]'
+  const iconColor = isDanger ? 'text-[var(--color-copper)]' : 'text-[var(--color-logo)]'
+  const titleColor = isDanger ? 'text-[var(--color-copper)]' : 'text-[var(--text-primary)]'
 
   const content = (
     <>

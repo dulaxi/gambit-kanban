@@ -8,6 +8,7 @@ import { useNoteStore } from '../store/noteStore'
 import DynamicIcon from '../components/board/DynamicIcon'
 import IconPicker from '../components/board/IconPicker'
 import ActionCard from '../components/ActionCard'
+import Button from '../components/ui/Button'
 import { PROFILE_COLORS } from '../constants/colors'
 
 const themes = [
@@ -300,27 +301,21 @@ export default function SettingsPage() {
 
       {/* Inline clear-data confirmation */}
       {confirmingClear && (
-        <div className="bg-[var(--color-bark-wash)]/40 border border-[#D4A07A] rounded-2xl p-5 mb-4">
+        <div className="bg-[var(--color-copper-wash)]/40 border border-[var(--color-copper)]/40 rounded-2xl p-5 mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Warning className="w-4 h-4 text-[var(--color-copper)]" />
-            <h2 className="text-sm font-semibold text-[var(--color-bark)]">Confirm — this cannot be undone</h2>
+            <h2 className="text-sm font-semibold text-[var(--color-copper)]">Confirm — this cannot be undone</h2>
           </div>
           <p className="text-sm text-[var(--text-secondary)] mb-4">
             Permanently delete all your boards, notes, and settings.
           </p>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleClearData}
-              className="px-4 py-2 bg-[var(--color-bark)] text-white text-sm font-medium rounded-xl hover:bg-[#6B4D38] cursor-pointer transition-colors"
-            >
+            <Button variant="destructive" onClick={handleClearData}>
               Yes, delete everything
-            </button>
-            <button
-              onClick={() => setConfirmingClear(false)}
-              className="px-4 py-2 border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium rounded-xl hover:bg-[var(--surface-raised)] cursor-pointer transition-colors"
-            >
+            </Button>
+            <Button variant="secondary" onClick={() => setConfirmingClear(false)}>
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       )}

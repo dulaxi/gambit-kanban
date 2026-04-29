@@ -6,14 +6,21 @@ import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import DynamicIcon from './DynamicIcon'
 import { PRIORITY_OPTIONS } from '../../constants/colors'
+import Popover from '../ui/Popover'
+import Menu from '../ui/Menu'
 const BoardShareModal = lazy(() => import('./BoardShareModal'))
 
 function FilterPill({ label, active, children }) {
   const [isOpen, setIsOpen] = useState(false)
-  const ref = useClickOutside(() => setIsOpen(false))
 
   return (
-    <div className="relative" ref={ref}>
+    <Popover
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      placement="bottom-start"
+      panel={children}
+      panelClassName="min-w-[160px]"
+    >
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -26,12 +33,7 @@ function FilterPill({ label, active, children }) {
         {label}
         <CaretDown className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      {isOpen && (
-        <div className="absolute left-0 top-full mt-1 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-xl shadow-lg py-1 z-40 min-w-[160px]">
-          {children}
-        </div>
-      )}
-    </div>
+    </Popover>
   )
 }
 
@@ -49,20 +51,15 @@ function PriorityFilter({ filters, setFilters }) {
   return (
     <FilterPill label="Priority" active={selected.length > 0}>
       {priorities.map((p) => (
-        <button
+        <Menu.Item
           key={p.value}
-          type="button"
-          onClick={() => toggle(p.value)}
-          className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] transition-colors"
+          checkbox
+          selected={selected.includes(p.value)}
+          onSelect={() => toggle(p.value)}
         >
-          <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
-            selected.includes(p.value) ? 'bg-[var(--soft-lime)] border-[var(--soft-lime)]' : 'border-[var(--border-default)]'
-          }`}>
-            {selected.includes(p.value) && <Check className="w-2.5 h-2.5 text-white" />}
-          </span>
-          <span className={`w-2 h-2 rounded-full ${p.color}`} />
+          <span className={`w-2 h-2 rounded-full inline-block mr-2 ${p.color}`} />
           {p.label}
-        </button>
+        </Menu.Item>
       ))}
     </FilterPill>
   )
@@ -78,22 +75,21 @@ function AssigneeFilter({ filters, setFilters, assignees }) {
   return (
     <FilterPill label="Assignee" active={!!selected}>
       {assignees.length === 0 ? (
-        <div className="px-3 py-2 text-xs text-[var(--text-muted)]">No assignees</div>
+        <div className="px-2.5 py-2 text-xs text-[var(--text-muted)]">No assignees</div>
       ) : (
         assignees.map((name) => (
-          <button
+          <Menu.Item
             key={name}
-            type="button"
-            onClick={() => select(name)}
-            className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
-              selected === name ? 'bg-[var(--soft-lime)] text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
-            }`}
+            selected={selected === name}
+            onSelect={() => select(name)}
+            icon={
+              <span className="w-5 h-5 rounded-full bg-[#E0DBD5] flex items-center justify-center text-[10px] font-medium text-[var(--text-secondary)]">
+                {name.charAt(0).toUpperCase()}
+              </span>
+            }
           >
-            <span className="w-5 h-5 rounded-full bg-[#E0DBD5] flex items-center justify-center text-[10px] font-medium text-[var(--text-secondary)] shrink-0">
-              {name.charAt(0).toUpperCase()}
-            </span>
             {name}
-          </button>
+          </Menu.Item>
         ))
       )}
     </FilterPill>
@@ -123,24 +119,19 @@ function LabelFilter({ filters, setFilters, labels }) {
   return (
     <FilterPill label="Label" active={selected.length > 0}>
       {labels.length === 0 ? (
-        <div className="px-3 py-2 text-xs text-[var(--text-muted)]">No labels</div>
+        <div className="px-2.5 py-2 text-xs text-[var(--text-muted)]">No labels</div>
       ) : (
         labels.map((lbl) => (
-          <button
+          <Menu.Item
             key={lbl.text}
-            type="button"
-            onClick={() => toggle(lbl.text)}
-            className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] transition-colors"
+            checkbox
+            selected={selected.includes(lbl.text)}
+            onSelect={() => toggle(lbl.text)}
           >
-            <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
-              selected.includes(lbl.text) ? 'bg-[var(--soft-lime)] border-[var(--soft-lime)]' : 'border-[var(--border-default)]'
-            }`}>
-              {selected.includes(lbl.text) && <Check className="w-2.5 h-2.5 text-white" />}
-            </span>
             <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${labelColors[lbl.color] || labelColors.gray}`}>
               {lbl.text}
             </span>
-          </button>
+          </Menu.Item>
         ))
       )}
     </FilterPill>
@@ -163,16 +154,13 @@ function DueFilter({ filters, setFilters }) {
   return (
     <FilterPill label="Due" active={!!selected}>
       {options.map((opt) => (
-        <button
+        <Menu.Item
           key={opt.value}
-          type="button"
-          onClick={() => select(opt.value)}
-          className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
-            selected === opt.value ? 'bg-[var(--soft-lime)] text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
-          }`}
+          selected={selected === opt.value}
+          onSelect={() => select(opt.value)}
         >
           {opt.label}
-        </button>
+        </Menu.Item>
       ))}
     </FilterPill>
   )
@@ -271,17 +259,13 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
           {activeBoardId && activeBoardId !== '__all__' && (
             <FilterPill label={sortBy === 'manual' ? 'Sort' : SORT_OPTIONS.find((o) => o.value === sortBy)?.label} active={sortBy !== 'manual'}>
               {SORT_OPTIONS.map((opt) => (
-                <button
+                <Menu.Item
                   key={opt.value}
-                  type="button"
-                  onClick={() => setSortBy(opt.value)}
-                  className={`flex items-center justify-between gap-2 w-full px-3 py-1.5 text-sm transition-colors ${
-                    sortBy === opt.value ? 'bg-[var(--soft-lime)] text-[var(--text-primary)] font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
-                  }`}
+                  selected={sortBy === opt.value}
+                  onSelect={() => setSortBy(opt.value)}
                 >
                   {opt.label}
-                  {sortBy === opt.value && <Check className="w-3.5 h-3.5" />}
-                </button>
+                </Menu.Item>
               ))}
             </FilterPill>
           )}
@@ -371,7 +355,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy, 
                     <button
                       type="button"
                       onClick={() => deleteCard(card.id)}
-                      className="p-1 text-[var(--text-faint)] hover:text-[var(--color-bark)] transition-colors"
+                      className="p-1 text-[var(--text-faint)] hover:text-[var(--color-copper)] transition-colors"
                       title="Delete permanently"
                     >
                       <Trash className="w-3.5 h-3.5" />

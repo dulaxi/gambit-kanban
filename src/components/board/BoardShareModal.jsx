@@ -6,6 +6,8 @@ import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import Modal from '../ui/Modal'
+import Button from '../ui/Button'
+import Input from '../ui/Input'
 
 export default function BoardShareModal({ board, onClose }) {
   const isMobile = useIsMobile()
@@ -134,27 +136,27 @@ export default function BoardShareModal({ board, onClose }) {
         {isOwner && (
           <form onSubmit={handleInvite} className="px-5 py-3 border-b border-[var(--border-subtle)]">
             <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setError('') }}
-                  placeholder="Invite by email..."
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)]"
-                />
-              </div>
-              <button
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError('') }}
+                placeholder="Invite by email..."
+                leadingIcon={<Envelope className="w-4 h-4" />}
+                error={!!error}
+                wrapperClassName="flex-1"
+              />
+              <Button
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="flex items-center gap-1.5 px-3 py-2 bg-[var(--text-primary)] text-white text-sm font-medium rounded-xl hover:bg-[var(--text-primary)] disabled:opacity-50 transition-colors"
+                loading={loading}
+                loadingText="Inviting"
               >
                 <UserPlus className="w-4 h-4" />
                 Invite
-              </button>
+              </Button>
             </div>
             {error && (
-              <p className="text-xs text-[var(--color-bark)] mt-1.5">{error}</p>
+              <p className="text-xs text-[var(--color-copper)] mt-1.5">{error}</p>
             )}
           </form>
         )}
@@ -191,7 +193,7 @@ export default function BoardShareModal({ board, onClose }) {
                     <button
                       type="button"
                       onClick={() => handleRemoveMember(m.user_id)}
-                      className="p-1 text-[var(--text-muted)] hover:text-[var(--color-bark)] opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="p-1 text-[var(--text-muted)] hover:text-[var(--color-copper)] opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash className="w-3.5 h-3.5" />
                     </button>
@@ -225,7 +227,7 @@ export default function BoardShareModal({ board, onClose }) {
                       <button
                         type="button"
                         onClick={() => handleCancelInvitation(inv.id)}
-                        className="p-1 text-[var(--text-muted)] hover:text-[var(--color-bark)] opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="p-1 text-[var(--text-muted)] hover:text-[var(--color-copper)] opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>

@@ -4,6 +4,7 @@ import { useBoardStore } from '../store/boardStore'
 import BoardSelector from '../components/board/BoardSelector'
 import BoardView from '../components/board/BoardView'
 import CreateBoardModal from '../components/board/CreateBoardModal'
+import Button from '../components/ui/Button'
 
 const CardDetailPanel = lazy(() => import('../components/board/CardDetailPanel'))
 
@@ -105,14 +106,10 @@ export default function BoardsPage() {
             </div>
             <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-1">Create your first board</h2>
             <p className="text-sm text-[var(--text-muted)] mb-5 max-w-xs">Organize tasks into columns that match your workflow.</p>
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[var(--btn-primary-bg)] hover:bg-[var(--btn-primary-hover)] rounded-xl transition-colors"
-            >
+            <Button onClick={() => setShowCreateModal(true)}>
               <SquaresFour className="w-4 h-4" />
               New Board
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-[var(--text-muted)]">

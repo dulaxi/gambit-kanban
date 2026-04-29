@@ -1,6 +1,7 @@
 import { Trash } from '@phosphor-icons/react'
 import { formatDistanceToNow } from 'date-fns'
 import MentionInput from './MentionInput'
+import Button from '../ui/Button'
 
 function parseMentions(text, boardMembers) {
   const mentions = []
@@ -58,7 +59,7 @@ export default function CardDetailComments({
                     type="button"
                     onClick={() => deleteComment(comment.id, cardId)}
                     aria-label="Delete comment"
-                    className="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--color-bark)] transition-all"
+                    className="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--color-copper)] transition-all"
                   >
                     <Trash className="w-3 h-3" />
                   </button>
@@ -85,13 +86,7 @@ export default function CardDetailComments({
           placeholder="Add a comment... (@ to mention)"
           onSubmit={handleSubmit}
         />
-        <button
-          type="button"
-          onClick={handleSubmit}
-          className="px-3 py-1.5 text-xs font-medium bg-[var(--text-primary)] text-white rounded-lg hover:bg-[var(--btn-primary-hover)] transition-colors"
-        >
-          Send
-        </button>
+        <Button size="sm" onClick={handleSubmit}>Send</Button>
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ import { useIsMobile } from '../../hooks/useMediaQuery'
 import DynamicIcon from './DynamicIcon'
 import { PHOSPHOR_CATEGORIES, ALL_PHOSPHOR_ICONS } from '../../data/phosphorIcons'
 import Modal from '../ui/Modal'
+import Button from '../ui/Button'
 
 // Lazy-load Material data only when the user switches to the Material tab.
 // This keeps the 139KB file out of the main JS chunk.
@@ -112,9 +113,9 @@ export default function IconPicker({ value, onChange, onClose }) {
               ))}
             </div>
           </div>
-          <button type="button" onClick={onClose} className="p-1 text-[var(--text-muted)] hover:text-[var(--text-secondary)] rounded-lg hover:bg-[var(--surface-hover)]">
+          <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close">
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Search */}
@@ -163,7 +164,7 @@ export default function IconPicker({ value, onChange, onClose }) {
               <button
                 type="button"
                 onClick={() => { onChange(null); onClose() }}
-                className="mb-3 text-xs text-[var(--text-muted)] hover:text-[var(--color-bark)] transition-colors cursor-pointer"
+                className="mb-3 text-xs text-[var(--text-muted)] hover:text-[var(--color-copper)] transition-colors cursor-pointer"
               >
                 Remove icon
               </button>
