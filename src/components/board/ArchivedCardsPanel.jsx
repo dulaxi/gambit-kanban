@@ -1,4 +1,5 @@
 import { ArrowCounterClockwise, Trash, X } from '@phosphor-icons/react'
+import Tooltip from '../ui/Tooltip'
 
 export default function ArchivedCardsPanel({ archivedCards, columns, onClose, onRestore, onDelete }) {
   if (archivedCards.length === 0) return null
@@ -19,22 +20,26 @@ export default function ArchivedCardsPanel({ archivedCards, columns, onClose, on
               <p className="text-[10px] text-[var(--text-faint)]">{columns[card.column_id]?.title || 'Unknown section'}</p>
             </div>
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                type="button"
-                onClick={() => onRestore(card.id)}
-                className="p-1 text-[var(--text-faint)] hover:text-[var(--color-lime-dark)] transition-colors"
-                title="Restore"
-              >
-                <ArrowCounterClockwise className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onDelete(card.id)}
-                className="p-1 text-[var(--text-faint)] hover:text-[var(--color-copper)] transition-colors"
-                title="Delete permanently"
-              >
-                <Trash className="w-3.5 h-3.5" />
-              </button>
+              <Tooltip content="Restore" placement="top">
+                <button
+                  type="button"
+                  onClick={() => onRestore(card.id)}
+                  aria-label="Restore"
+                  className="p-1 text-[var(--text-faint)] hover:text-[var(--color-lime-dark)] transition-colors"
+                >
+                  <ArrowCounterClockwise className="w-3.5 h-3.5" />
+                </button>
+              </Tooltip>
+              <Tooltip content="Delete permanently" placement="top">
+                <button
+                  type="button"
+                  onClick={() => onDelete(card.id)}
+                  aria-label="Delete permanently"
+                  className="p-1 text-[var(--text-faint)] hover:text-[var(--color-copper)] transition-colors"
+                >
+                  <Trash className="w-3.5 h-3.5" />
+                </button>
+              </Tooltip>
             </div>
           </div>
         ))}

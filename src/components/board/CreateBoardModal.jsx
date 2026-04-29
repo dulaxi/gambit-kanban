@@ -7,6 +7,7 @@ import IconPicker from './IconPicker'
 import Modal from '../ui/Modal'
 import Button from '../ui/Button'
 import Input from '../ui/Input'
+import Tooltip from '../ui/Tooltip'
 import TemplatePicker from './createBoard/TemplatePicker'
 import BoardSkeletonPreview from './createBoard/BoardSkeletonPreview'
 import { TEMPLATES } from './createBoard/templates'
@@ -92,18 +93,20 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-medium text-[var(--text-secondary)]">Board name</label>
                 <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowIconPicker(true)}
-                    className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] hover:bg-[var(--surface-raised)] transition-colors"
-                    title="Choose icon"
-                  >
-                    {icon ? (
-                      <DynamicIcon name={icon} className="w-4 h-4 text-[var(--text-secondary)]" />
-                    ) : (
-                      <Kanban className="w-4 h-4 text-[var(--text-muted)]" />
-                    )}
-                  </button>
+                  <Tooltip content="Choose icon" placement="top">
+                    <button
+                      type="button"
+                      onClick={() => setShowIconPicker(true)}
+                      aria-label="Choose icon"
+                      className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] hover:bg-[var(--surface-raised)] transition-colors"
+                    >
+                      {icon ? (
+                        <DynamicIcon name={icon} className="w-4 h-4 text-[var(--text-secondary)]" />
+                      ) : (
+                        <Kanban className="w-4 h-4 text-[var(--text-muted)]" />
+                      )}
+                    </button>
+                  </Tooltip>
                   <Input
                     ref={nameRef}
                     type="text"

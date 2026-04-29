@@ -5,6 +5,7 @@ import { ArrowRight, At, Bell, ChatCircle, UserPlus } from '@phosphor-icons/reac
 import { useNotificationStore } from '../../store/notificationStore'
 import { useBoardStore } from '../../store/boardStore'
 import Popover from '../ui/Popover'
+import Tooltip from '../ui/Tooltip'
 
 export default function NotificationBell({ placement = 'top' }) {
   const [open, setOpen] = useState(false)
@@ -79,20 +80,21 @@ export default function NotificationBell({ placement = 'top' }) {
 
   return (
     <Popover open={open} onOpenChange={setOpen} placement={popoverPlacement} panel={panel} panelClassName="p-0 overflow-hidden">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
-        title="Notifications"
-        className="relative p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
-      >
-        <Bell size={18} weight={open ? 'fill' : 'regular'} />
-        {unreadCount > 0 && (
-          <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[var(--color-copper)] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
+      <Tooltip content="Notifications" placement={placement === 'top' ? 'top' : 'bottom'} disabled={open}>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
+          className="relative p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
+        >
+          <Bell size={18} weight={open ? 'fill' : 'regular'} />
+          {unreadCount > 0 && (
+            <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[var(--color-copper)] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
+      </Tooltip>
     </Popover>
   )
 }

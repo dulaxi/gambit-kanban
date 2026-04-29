@@ -6,6 +6,7 @@ import WorkspaceCreateModal from '../components/workspace/WorkspaceCreateModal'
 import WorkspaceDetailView from '../components/workspace/WorkspaceDetailView'
 import DynamicIcon from '../components/board/DynamicIcon'
 import Button from '../components/ui/Button'
+import Tooltip from '../components/ui/Tooltip'
 
 /**
  * WorkspacePage — routes between two views:
@@ -72,14 +73,16 @@ export default function WorkspacePage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => declineInvitation(inv.id)}
-                        title="Decline"
-                        className="h-8 w-8 rounded-lg inline-flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                      <Tooltip content="Decline" placement="top">
+                        <button
+                          type="button"
+                          onClick={() => declineInvitation(inv.id)}
+                          aria-label="Decline"
+                          className="h-8 w-8 rounded-lg inline-flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </Tooltip>
                       <Button size="sm" onClick={() => acceptInvitation(inv.id)}>
                         <Check className="w-4 h-4" />
                         Accept

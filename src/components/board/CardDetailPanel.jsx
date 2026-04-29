@@ -15,6 +15,7 @@ import Avatar from '../ui/Avatar'
 import Modal from '../ui/Modal'
 import Popover from '../ui/Popover'
 import Menu from '../ui/Menu'
+import Tooltip from '../ui/Tooltip'
 import AssigneePicker from './cardDetail/AssigneePicker'
 import CardChecklist from './cardDetail/CardChecklist'
 import CardFiles from './cardDetail/CardFiles'
@@ -180,23 +181,29 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                       />
                     }
                   >
-                    <button
-                      type="button"
-                      onClick={() => toggleMenu('due')}
-                      className={`h-8 rounded-md flex items-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer ${dueDate ? 'px-2' : 'w-8 justify-center'} ${dateColor}`}
-                      title={dueDate ? `Due: ${new Date(dueDate).toLocaleDateString()}` : 'Set due date'}
+                    <Tooltip
+                      content={dueDate ? `Due: ${new Date(dueDate).toLocaleDateString()}` : 'Set due date'}
+                      placement="bottom"
                     >
-                      <Calendar className="w-4 h-4" />
-                      {dateLabel && <span className="text-xs font-medium">{dateLabel}</span>}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleMenu('due')}
+                        aria-label={dueDate ? 'Change due date' : 'Set due date'}
+                        className={`h-8 rounded-md flex items-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer ${dueDate ? 'px-2' : 'w-8 justify-center'} ${dateColor}`}
+                      >
+                        <Calendar className="w-4 h-4" />
+                        {dateLabel && <span className="text-xs font-medium">{dateLabel}</span>}
+                      </button>
+                    </Tooltip>
                   </Popover>
                 )
               })()}
             </div>
             {/* Attach file */}
+            <Tooltip content="Attach files" placement="bottom">
             <label
               className="h-8 w-8 rounded-md flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-              title="Attach files"
+              aria-label="Attach files"
             >
               <Paperclip className="w-4 h-4" />
               <input
@@ -216,6 +223,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                 }}
               />
             </label>
+            </Tooltip>
             {/* 3-dot menu */}
             <Menu
               open={openMenu === 'menu'}

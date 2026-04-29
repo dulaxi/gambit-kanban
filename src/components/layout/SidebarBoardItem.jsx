@@ -1,6 +1,7 @@
 import { Kanban, Trash } from '@phosphor-icons/react'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
+import Tooltip from '../ui/Tooltip'
 
 /**
  * Single board row used inside the sidebar lists.
@@ -47,18 +48,20 @@ export default function SidebarBoardItem({
     >
       <span className="flex items-center gap-3 truncate">
         {editable ? (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              onToggleIconPicker?.(board.id)
-            }}
-            className="shrink-0 hover:bg-[var(--border-default)] rounded p-0.5 transition-colors flex items-center justify-center"
-            style={{ width: 16, height: 16 }}
-            title="Change icon"
-          >
-            {iconGlyph}
-          </button>
+          <Tooltip content="Change icon" placement="right">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggleIconPicker?.(board.id)
+              }}
+              aria-label="Change icon"
+              className="shrink-0 hover:bg-[var(--border-default)] rounded p-0.5 transition-colors flex items-center justify-center"
+              style={{ width: 16, height: 16 }}
+            >
+              {iconGlyph}
+            </button>
+          </Tooltip>
         ) : (
           <span className="flex items-center justify-center shrink-0" style={{ width: 16, height: 16 }}>
             {iconGlyph}
