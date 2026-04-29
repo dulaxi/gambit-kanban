@@ -18,7 +18,7 @@ export default function TemplatePicker({ selectedKey, onSelect }) {
               onClick={() => onSelect(tpl)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
                 isActive
-                  ? 'bg-[var(--soft-lime)]'
+                  ? 'bg-[var(--accent-lime-soft)]'
                   : 'hover:bg-[var(--surface-raised)]'
               }`}
             >

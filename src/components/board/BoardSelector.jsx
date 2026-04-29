@@ -91,7 +91,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
               onClick={() => setShowFilters(!showFilters)}
               className={`relative flex items-center gap-1.5 h-8 px-2.5 text-sm rounded-lg border-[0.5px] transition-all duration-75 cursor-pointer active:scale-[0.995] ${
                 showFilters || activeFilterCount > 0
-                  ? 'bg-[var(--soft-lime)] text-[var(--text-primary)] border-[var(--soft-lime)]'
+                  ? 'bg-[var(--accent-lime-soft)] text-[var(--text-primary)] border-[var(--accent-lime-soft)]'
                   : 'text-[var(--text-secondary)] bg-[var(--surface-card)] border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
               }`}
             >

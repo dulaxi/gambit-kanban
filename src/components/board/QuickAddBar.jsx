@@ -4,6 +4,7 @@ import { ArrowUp, Sparkle, Waveform } from '@phosphor-icons/react'
 import { useBoardStore } from '../../store/boardStore'
 import { executeTool } from '../../lib/toolExecutor'
 import { streamChat } from '../../lib/aiClient'
+import { logError } from '../../utils/logger'
 import Modal from '../ui/Modal'
 import Button from '../ui/Button'
 
@@ -66,13 +67,13 @@ export default function QuickAddBar({ boardId }) {
               },
               onTier: () => {},
               onDone: resolve,
-              onError: (err) => { console.error('[QuickAdd]', err); resolve() },
+              onError: (err) => { logError('[QuickAdd]', err); resolve() },
             },
           )
         })
       }
     } catch (err) {
-      console.error('[QuickAdd]', err)
+      logError('[QuickAdd]', err)
     }
 
     setProcessing(false)

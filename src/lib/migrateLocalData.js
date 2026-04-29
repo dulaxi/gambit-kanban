@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { logError } from '../utils/logger'
 
 /**
  * Detects existing localStorage data and migrates it to Supabase
@@ -49,7 +50,7 @@ export async function migrateLocalData() {
           .single()
 
         if (boardError || !newBoard) {
-          console.error('Failed to migrate board:', board.name, boardError)
+          logError('Failed to migrate board:', board.name, boardError)
           boardsMigrated = false
           continue
         }
@@ -69,7 +70,7 @@ export async function migrateLocalData() {
             .single()
 
           if (colError || !newCol) {
-            console.error('Failed to migrate column:', col.title, colError)
+            logError('Failed to migrate column:', col.title, colError)
             boardsMigrated = false
             continue
           }
@@ -97,14 +98,14 @@ export async function migrateLocalData() {
               checklist: card.checklist || [],
             })
             if (cardError) {
-              console.error('Failed to migrate card:', card.title, cardError)
+              logError('Failed to migrate card:', card.title, cardError)
               boardsMigrated = false
             }
           }
         }
       }
     } catch (err) {
-      console.error('Board migration error:', err)
+      logError('Board migration error:', err)
       boardsMigrated = false
     }
   }
@@ -123,12 +124,12 @@ export async function migrateLocalData() {
           content: note.content || '',
         })
         if (noteError) {
-          console.error('Failed to migrate note:', note.title, noteError)
+          logError('Failed to migrate note:', note.title, noteError)
           notesMigrated = false
         }
       }
     } catch (err) {
-      console.error('Notes migration error:', err)
+      logError('Notes migration error:', err)
       notesMigrated = false
     }
   }
