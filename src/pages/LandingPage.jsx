@@ -1630,10 +1630,10 @@ function DemoBoard() {
   function DroppableColumn({ col, colCards }) {
     const { setNodeRef } = useDroppable({ id: col.id })
     return (
-      <div ref={setNodeRef} className="flex-1 min-w-0 flex flex-col h-full">
+      <div ref={setNodeRef} className="w-[260px] lg:w-[290px] shrink-0 flex flex-col h-full">
         <div className="flex items-center justify-between px-1 mb-2">
-          <span className="text-sm font-semibold text-[#1B1B18] font-logo">{col.title}</span>
-          <span className="text-xs text-[#8E8E89]">{colCards.length}</span>
+          <span className="text-sm font-semibold text-[var(--text-primary)] font-logo">{col.title}</span>
+          <span className="text-xs text-[var(--text-muted)]">{colCards.length}</span>
         </div>
         <SortableContext items={colCards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col gap-2 flex-1 rounded-xl p-1">
