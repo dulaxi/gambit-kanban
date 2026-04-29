@@ -52,13 +52,20 @@ export default function AppLayout() {
     }
   }, [])
 
-  // Global keyboard shortcuts
+  // Global keyboard shortcuts.
+  //
+  // Open shortcuts/search dialogs and the sidebar toggle are suppressed
+  // while one of our dialogs is already on screen — otherwise pressing
+  // `/` while the `?` sheet is open would stack a search modal on top.
+  // The `?` toggle stays live so users can dismiss the sheet with the
+  // same key that opened it.
+  const aDialogIsOpen = searchOpen || shortcutsOpen
   const shortcuts = useMemo(() => [
-    { key: 'k', mod: true, handler: (e) => { e.preventDefault(); setSearchOpen(true) } },
-    { key: 'b', mod: true, handler: (e) => { e.preventDefault(); toggleSidebar() } },
-    { key: '/', handler: (e) => { e.preventDefault(); setSearchOpen(true) } },
+    { key: 'k', mod: true, when: () => !aDialogIsOpen, handler: (e) => { e.preventDefault(); setSearchOpen(true) } },
+    { key: 'b', mod: true, when: () => !aDialogIsOpen, handler: (e) => { e.preventDefault(); toggleSidebar() } },
+    { key: '/', when: () => !aDialogIsOpen, handler: (e) => { e.preventDefault(); setSearchOpen(true) } },
     { key: '?', shift: true, handler: (e) => { e.preventDefault(); setShortcutsOpen((v) => !v) } },
-  ], [toggleSidebar])
+  ], [toggleSidebar, aDialogIsOpen])
   useKeyboardShortcuts(shortcuts)
   const location = useLocation()
   const user = useAuthStore((s) => s.user)

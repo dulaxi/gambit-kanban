@@ -1,64 +1,34 @@
 import Modal from './ui/Modal'
 
-const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform)
-const MOD = isMac ? '⌘' : 'Ctrl'
-
-const GROUPS = [
-  {
-    title: 'Global',
-    items: [
-      { keys: [MOD, 'K'], desc: 'Open search' },
-      { keys: ['/'], desc: 'Focus search (alias)' },
-      { keys: [MOD, 'B'], desc: 'Toggle sidebar' },
-      { keys: ['?'], desc: 'Show / hide this sheet' },
-      { keys: ['Esc'], desc: 'Close any open dialog' },
-    ],
-  },
+const ITEMS = [
+  { keys: ['Ctrl', 'K'], desc: 'Open search' },
+  { keys: ['/'], desc: 'Focus search' },
+  { keys: ['Ctrl', 'B'], desc: 'Toggle sidebar' },
+  { keys: ['?'], desc: 'Show / hide shortcuts' },
+  { keys: ['Esc'], desc: 'Close any open dialog' },
 ]
-
-function Kbd({ children }) {
-  return (
-    <kbd className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 text-[11px] font-mono font-medium text-[var(--text-secondary)] bg-[var(--surface-card)] border border-[var(--border-default)] rounded-md shadow-[0_1px_0_0_var(--border-default)]">
-      {children}
-    </kbd>
-  )
-}
 
 export default function ShortcutsSheet({ open, onClose }) {
   if (!open) return null
 
   return (
     <Modal open={open} onClose={onClose} contentClassName="flex items-center justify-center">
-      <div className="bg-[var(--surface-card)] rounded-2xl shadow-xl w-full max-w-md mx-4 p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-[var(--text-primary)]">Keyboard shortcuts</h2>
-          <span className="text-xs text-[var(--text-muted)]">Press <Kbd>?</Kbd> to toggle</span>
-        </div>
+      <div className="bg-[var(--surface-card)] rounded-2xl shadow-xl w-full max-w-md mx-4 p-7">
+        <h2 className="font-heading text-2xl text-[var(--text-primary)] mb-6">Keyboard shortcuts</h2>
 
-        <div className="space-y-5">
-          {GROUPS.map((group) => (
-            <div key={group.title}>
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
-                {group.title}
-              </h3>
-              <ul className="space-y-1.5">
-                {group.items.map(({ keys, desc }) => (
-                  <li key={desc} className="flex items-center justify-between gap-3 py-1">
-                    <span className="text-sm text-[var(--text-secondary)]">{desc}</span>
-                    <span className="flex items-center gap-1 shrink-0">
-                      {keys.map((k, i) => (
-                        <span key={i} className="flex items-center gap-1">
-                          {i > 0 && <span className="text-xs text-[var(--text-faint)]">+</span>}
-                          <Kbd>{k}</Kbd>
-                        </span>
-                      ))}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <ul className="divide-y divide-[var(--border-subtle)]">
+          {ITEMS.map(({ keys, desc }) => (
+            <li
+              key={desc}
+              className="flex items-center gap-3 py-3 font-mono text-[12px] text-[var(--text-primary)]"
+            >
+              <span className="flex-1 truncate">{desc}</span>
+              <span className="font-mono text-[11px] text-[var(--accent-lime-dark)] bg-[var(--accent-lime-wash)] px-2 py-0.5 rounded-md">
+                {keys.join(' + ')}
+              </span>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </Modal>
   )
