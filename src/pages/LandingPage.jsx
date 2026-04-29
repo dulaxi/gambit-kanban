@@ -14,31 +14,32 @@ import SortableCard from '../components/board/SortableCard'
 import Card from '../components/board/Card'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import { LABEL_BG, PRIORITY_DOT } from '../utils/formatting'
 import { useAuthStore } from '../store/authStore'
 
 /* ── Mock board data for hero preview ── */
 const mockColumns = [
   {
     title: 'To Do',
-    color: '#E8E2DB',
+    color: 'var(--label-gray-bg)',
     cards: [
       {
         title: 'Design system tokens',
         desc: 'Define color, spacing, and typography tokens for the component library',
-        labels: [{ text: 'Design', bg: 'bg-[#E8DDE2]', fg: 'text-[#6E5A65]' }],
+        labels: [{ text: 'Design', color: 'purple' }],
         priority: 'high',
         id: 1,
       },
       {
         title: 'Set up CI pipeline',
-        labels: [{ text: 'DevOps', bg: 'bg-[#DAE0F0]', fg: 'text-[#4A5578]' }],
+        labels: [{ text: 'DevOps', color: 'blue' }],
         priority: 'medium',
         dueDate: 'Mar 8',
         id: 2,
       },
       {
         title: 'Write onboarding docs',
-        labels: [{ text: 'Docs', bg: 'bg-[#F5EDCF]', fg: 'text-[#8B7322]' }],
+        labels: [{ text: 'Docs', color: 'yellow' }],
         checklist: { done: 1, total: 5 },
         id: 3,
       },
@@ -46,12 +47,12 @@ const mockColumns = [
   },
   {
     title: 'In Progress',
-    color: '#DAE0F0',
+    color: 'var(--label-blue-bg)',
     cards: [
       {
         title: 'Auth flow redesign',
         desc: 'Migrate from session-based to JWT tokens with refresh flow',
-        labels: [{ text: 'Feature', bg: 'bg-[#EEF2D6]', fg: 'text-[#6B7A12]' }],
+        labels: [{ text: 'Feature', color: 'green' }],
         priority: 'high',
         assignee: 'A',
         checklist: { done: 3, total: 6 },
@@ -59,7 +60,7 @@ const mockColumns = [
       },
       {
         title: 'API rate limiting',
-        labels: [{ text: 'Backend', bg: 'bg-[#F2D9C7]', fg: 'text-[#8B5A33]' }],
+        labels: [{ text: 'Backend', color: 'red' }],
         priority: 'medium',
         assignee: 'M',
         dueDate: 'Mar 5',
@@ -69,19 +70,19 @@ const mockColumns = [
   },
   {
     title: 'Review',
-    color: '#F5EDCF',
+    color: 'var(--label-yellow-bg)',
     cards: [
       {
         title: 'Landing page copy',
         desc: 'Final copy review for hero section and feature descriptions',
-        labels: [{ text: 'Content', bg: 'bg-[#E8DDE2]', fg: 'text-[#6E5A65]' }],
+        labels: [{ text: 'Content', color: 'purple' }],
         assignee: 'S',
         checklist: { done: 4, total: 4 },
         id: 6,
       },
       {
         title: 'Mobile nav polish',
-        labels: [{ text: 'UI', bg: 'bg-[#E8DDE2]', fg: 'text-[#6E5A65]' }],
+        labels: [{ text: 'UI', color: 'purple' }],
         priority: 'low',
         assignee: 'J',
         dueDate: 'Mar 10',
@@ -91,18 +92,18 @@ const mockColumns = [
   },
   {
     title: 'Done',
-    color: '#EEF2D6',
+    color: 'var(--label-green-bg)',
     cards: [
       {
         title: 'User signup flow',
-        labels: [{ text: 'Feature', bg: 'bg-[#EEF2D6]', fg: 'text-[#6B7A12]' }],
+        labels: [{ text: 'Feature', color: 'green' }],
         assignee: 'A',
         id: 8,
         done: true,
       },
       {
         title: 'Database schema v2',
-        labels: [{ text: 'Backend', bg: 'bg-[#F2D9C7]', fg: 'text-[#8B5A33]' }],
+        labels: [{ text: 'Backend', color: 'red' }],
         assignee: 'M',
         id: 9,
         done: true,
@@ -118,8 +119,8 @@ const mockDetailCard = {
   taskNumber: 'GB-24',
   desc: 'Migrate the authentication system from session-based cookies to JWT tokens with a refresh token rotation strategy. This includes updating all protected API endpoints and the client-side token management.',
   labels: [
-    { text: 'Feature', bg: 'bg-[#EEF2D6]', fg: 'text-[#6B7A12]' },
-    { text: 'Backend', bg: 'bg-[#F2D9C7]', fg: 'text-[#8B5A33]' },
+    { text: 'Feature', color: 'green' },
+    { text: 'Backend', color: 'red' },
   ],
   priority: 'high',
   assignee: { name: 'Alex Chen', initial: 'A' },
@@ -174,43 +175,39 @@ const features = [
   },
 ]
 
-/* ── Priority dot ── */
-function PriorityDot({ priority }) {
-  if (!priority) return null
-  const colors = { high: 'bg-[#C27A4A]', medium: 'bg-[#D4A843]', low: 'bg-[#A8BA32]' }
-  return <span className={`w-1.5 h-1.5 rounded-full ${colors[priority]}`} />
-}
-
 /* ── Mock card component (enriched) ── */
 function MockCard({ card }) {
+  const checklistComplete = card.checklist && card.checklist.done === card.checklist.total
   return (
-    <div className="bg-white rounded-lg p-2.5 shadow-sm border border-[#E8E2DB] hover:shadow-md transition-all duration-200">
+    <div className="bg-[var(--surface-card)] rounded-lg p-2.5 shadow-sm border border-[var(--color-cream-dark)] hover:shadow-md transition-all duration-200">
       <div className="flex items-start justify-between gap-2">
-        <p className={`text-[11px] font-medium leading-snug ${card.done ? 'text-[#8E8E89] line-through' : 'text-[#1B1B18]'}`}>
+        <p className={`text-[11px] font-medium leading-snug ${card.done ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-primary)]'}`}>
           {card.title}
         </p>
-        <PriorityDot priority={card.priority} />
+        {card.priority && (
+          <span className={`w-1.5 h-1.5 rounded-full ${PRIORITY_DOT[card.priority]}`} />
+        )}
       </div>
       {card.desc && (
-        <p className="text-[9px] text-[#8E8E89] leading-snug mt-1 line-clamp-1">{card.desc}</p>
+        <p className="text-[9px] text-[var(--text-muted)] leading-snug mt-1 line-clamp-1">{card.desc}</p>
       )}
       <div className="flex items-center justify-between mt-2 gap-2">
         <div className="flex items-center gap-1 flex-wrap min-w-0">
           {card.labels?.map((l) => (
-            <span key={l.text} className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${l.bg} ${l.fg}`}>
+            <span key={l.text} className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${LABEL_BG[l.color]}`}>
               {l.text}
             </span>
           ))}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           {card.dueDate && (
-            <span className="text-[8px] text-[#8E8E89] font-medium flex items-center gap-0.5">
+            <span className="text-[8px] text-[var(--text-muted)] font-medium flex items-center gap-0.5">
               <Clock className="w-2.5 h-2.5" />
               {card.dueDate}
             </span>
           )}
           {card.assignee && (
-            <span className="w-5 h-5 rounded-full bg-[#1B1B18] text-white text-[9px] font-bold flex items-center justify-center">
+            <span className="w-5 h-5 rounded-full bg-[var(--color-ink)] text-white text-[9px] font-bold flex items-center justify-center">
               {card.assignee}
             </span>
           )}
@@ -218,13 +215,13 @@ function MockCard({ card }) {
       </div>
       {card.checklist && (
         <div className="mt-2 flex items-center gap-1.5">
-          <div className="flex-1 h-1 bg-[#E8E2DB] rounded-full overflow-hidden">
+          <div className="flex-1 h-1 bg-[var(--color-cream-dark)] rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${card.checklist.done === card.checklist.total ? 'bg-[#A8BA32]' : 'bg-[#A8BA32]'}`}
+              className="h-full rounded-full transition-all bg-[var(--color-lime-dark)]"
               style={{ width: `${(card.checklist.done / card.checklist.total) * 100}%` }}
             />
           </div>
-          <span className={`text-[8px] font-semibold ${card.checklist.done === card.checklist.total ? 'text-[#A8BA32]' : 'text-[#8E8E89]'}`}>
+          <span className={`text-[8px] font-semibold ${checklistComplete ? 'text-[var(--color-lime-dark)]' : 'text-[var(--text-muted)]'}`}>
             {card.checklist.done}/{card.checklist.total}
           </span>
         </div>
@@ -239,8 +236,8 @@ function MockColumn({ column }) {
     <div className="min-w-[195px] flex-1">
       <div className="flex items-center gap-2 mb-2.5 px-1">
         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: column.color }} />
-        <span className="text-[11px] font-bold text-[#5C5C57] uppercase tracking-wider">{column.title}</span>
-        <span className="text-[10px] text-[#8E8E89] font-medium ml-auto">{column.cards.length}</span>
+        <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">{column.title}</span>
+        <span className="text-[10px] text-[var(--text-muted)] font-medium ml-auto">{column.cards.length}</span>
       </div>
       <div className="space-y-2">
         {column.cards.map((card) => (
@@ -256,11 +253,11 @@ function MockDetailPanel() {
   const card = mockDetailCard
   const checkDone = card.checklist.filter((c) => c.done).length
   return (
-    <div className="rounded-2xl border border-[#E0DBD5]/80 bg-white shadow-2xl shadow-[#E0DBD5]/60 overflow-hidden w-full max-w-sm">
+    <div className="rounded-2xl border border-[var(--color-sand)]/80 bg-[var(--surface-card)] shadow-2xl shadow-[var(--color-sand)]/60 overflow-hidden w-full max-w-sm">
       {/* Header */}
-      <div className="px-5 pt-5 pb-3 border-b border-[#E8E2DB]">
-        <div className="text-[10px] text-[#8E8E89] font-medium mb-1">{card.taskNumber}</div>
-        <h3 className="text-sm font-bold text-[#1B1B18] leading-snug" style={{ fontFamily: 'var(--font-logo)' }}>{card.title}</h3>
+      <div className="px-5 pt-5 pb-3 border-b border-[var(--color-cream-dark)]">
+        <div className="text-[10px] text-[var(--text-muted)] font-medium mb-1">{card.taskNumber}</div>
+        <h3 className="text-sm font-bold text-[var(--text-primary)] leading-snug" style={{ fontFamily: 'var(--font-logo)' }}>{card.title}</h3>
       </div>
 
       {/* Body */}
@@ -268,31 +265,31 @@ function MockDetailPanel() {
         {/* Meta row */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <div className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider mb-1">Assignee</div>
+            <div className="text-[9px] text-[var(--text-muted)] font-medium uppercase tracking-wider mb-1">Assignee</div>
             <div className="flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#1B1B18] text-white text-[9px] font-bold flex items-center justify-center">{card.assignee.initial}</span>
-              <span className="text-[11px] text-[#5C5C57] font-medium">{card.assignee.name}</span>
+              <span className="w-5 h-5 rounded-full bg-[var(--color-ink)] text-white text-[9px] font-bold flex items-center justify-center">{card.assignee.initial}</span>
+              <span className="text-[11px] text-[var(--text-secondary)] font-medium">{card.assignee.name}</span>
             </div>
           </div>
           <div>
-            <div className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider mb-1">Due Date</div>
+            <div className="text-[9px] text-[var(--text-muted)] font-medium uppercase tracking-wider mb-1">Due Date</div>
             <div className="flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-[#8E8E89]" />
-              <span className="text-[11px] text-[#5C5C57] font-medium">{card.dueDate}</span>
+              <Calendar className="w-3 h-3 text-[var(--text-muted)]" />
+              <span className="text-[11px] text-[var(--text-secondary)] font-medium">{card.dueDate}</span>
             </div>
           </div>
           <div>
-            <div className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider mb-1">Priority</div>
+            <div className="text-[9px] text-[var(--text-muted)] font-medium uppercase tracking-wider mb-1">Priority</div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#C27A4A]" />
-              <span className="text-[11px] text-[#5C5C57] font-medium capitalize">{card.priority}</span>
+              <span className={`w-2 h-2 rounded-full ${PRIORITY_DOT[card.priority]}`} />
+              <span className="text-[11px] text-[var(--text-secondary)] font-medium capitalize">{card.priority}</span>
             </div>
           </div>
           <div>
-            <div className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider mb-1">Labels</div>
+            <div className="text-[9px] text-[var(--text-muted)] font-medium uppercase tracking-wider mb-1">Labels</div>
             <div className="flex items-center gap-1">
               {card.labels.map((l) => (
-                <span key={l.text} className={`text-[8px] font-semibold px-1.5 py-0.5 rounded-full ${l.bg} ${l.fg}`}>
+                <span key={l.text} className={`text-[8px] font-semibold px-1.5 py-0.5 rounded-full ${LABEL_BG[l.color]}`}>
                   {l.text}
                 </span>
               ))}
@@ -303,24 +300,24 @@ function MockDetailPanel() {
         {/* Description */}
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
-            <TextAlignLeft className="w-3 h-3 text-[#8E8E89]" />
-            <span className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider">Description</span>
+            <TextAlignLeft className="w-3 h-3 text-[var(--text-muted)]" />
+            <span className="text-[9px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Description</span>
           </div>
-          <p className="text-[11px] text-[#5C5C57] leading-relaxed">{card.desc}</p>
+          <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">{card.desc}</p>
         </div>
 
         {/* Checklist */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
-              <CheckSquare className="w-3 h-3 text-[#8E8E89]" />
-              <span className="text-[9px] text-[#8E8E89] font-medium uppercase tracking-wider">Checklist</span>
+              <CheckSquare className="w-3 h-3 text-[var(--text-muted)]" />
+              <span className="text-[9px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Checklist</span>
             </div>
-            <span className="text-[9px] font-semibold text-[#5C5C57]">{checkDone}/{card.checklist.length}</span>
+            <span className="text-[9px] font-semibold text-[var(--text-secondary)]">{checkDone}/{card.checklist.length}</span>
           </div>
-          <div className="h-1 bg-[#E8E2DB] rounded-full overflow-hidden mb-2.5">
+          <div className="h-1 bg-[var(--color-cream-dark)] rounded-full overflow-hidden mb-2.5">
             <div
-              className="h-full bg-[#A8BA32] rounded-full"
+              className="h-full bg-[var(--color-lime-dark)] rounded-full"
               style={{ width: `${(checkDone / card.checklist.length) * 100}%` }}
             />
           </div>
@@ -328,13 +325,13 @@ function MockDetailPanel() {
             {card.checklist.map((item) => (
               <div key={item.text} className="flex items-center gap-2 py-0.5">
                 {item.done ? (
-                  <div className="w-3.5 h-3.5 rounded bg-[#A8BA32] flex items-center justify-center shrink-0">
+                  <div className="w-3.5 h-3.5 rounded bg-[var(--color-lime-dark)] flex items-center justify-center shrink-0">
                     <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                   </div>
                 ) : (
-                  <Square className="w-3.5 h-3.5 text-[#8E8E89] shrink-0" />
+                  <Square className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
                 )}
-                <span className={`text-[11px] ${item.done ? 'text-[#8E8E89] line-through' : 'text-[#5C5C57]'}`}>
+                <span className={`text-[11px] ${item.done ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-secondary)]'}`}>
                   {item.text}
                 </span>
               </div>
