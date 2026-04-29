@@ -4,7 +4,7 @@ import '@fontsource-variable/plus-jakarta-sans'
 
 import { SiGmail } from 'react-icons/si'
 import { BsSlack, BsMicrosoftTeams } from 'react-icons/bs'
-import { TextAlignLeft, ArrowRight, ArrowUpRight, Browser, Calendar, CaretDoubleRight, CaretLeft, CaretRight, ChartBar, ChartPie, Check, CheckCircle, CheckSquare, Clock, Columns, CreditCard, DotsSixVertical, FileText, Gauge, Gear, Hash, Kanban, SquaresFour, Lightning, List, CursorClick, Notepad, Tag, Plus, ShareNetwork, Shield, ShieldCheck, ShoppingCart, Sparkle, Square, Target, TrendUp, User, Users, X } from '@phosphor-icons/react'
+import { TextAlignLeft, ArrowRight, ArrowUpRight, Browser, Calendar, CalendarDot, CaretDoubleRight, CaretLeft, CaretRight, ChartBar, ChartPie, Check, CheckCircle, CheckSquare, Clock, Columns, CreditCard, DotsSixVertical, FileText, Gauge, Gear, Hash, Kanban, SquaresFour, Lightning, List, CursorClick, Notepad, Tag, Plus, ShareNetwork, Shield, ShieldCheck, ShoppingCart, Sparkle, Square, Target, TrendUp, User, Users, X } from '@phosphor-icons/react'
 import {
   DndContext, DragOverlay, pointerWithin, rectIntersection,
   PointerSensor, useSensor, useSensors, useDroppable,
@@ -12,6 +12,7 @@ import {
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import SortableCard from '../components/board/SortableCard'
 import Card from '../components/board/Card'
+import Avatar from '../components/ui/Avatar'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import { LABEL_BG, PRIORITY_DOT } from '../utils/formatting'
@@ -371,18 +372,6 @@ function computeLineStarts() {
   return { starts, typingEnd }
 }
 const { starts: LINE_STARTS, typingEnd: LEFT_TYPING_END } = computeLineStarts()
-
-// Real LABEL_BG colors from src/utils/formatting.js
-const LANDING_LABEL_BG = {
-  red:    { bg: '#F2D9C7', text: '#8B5A33' },
-  blue:   { bg: '#DAE0F0', text: '#4A5578' },
-  green:  { bg: '#EEF2D6', text: '#6B7A12' },
-  yellow: { bg: '#F5EDCF', text: '#8B7322' },
-  purple: { bg: '#E8DDE2', text: '#6E5A65' },
-  pink:   { bg: '#F0E0D2', text: '#7A5C44' },
-  gray:   { bg: '#E8E2DB', text: '#5C5C57' },
-}
-const LANDING_PRIORITY_DOT = { high: '#C27A4A', medium: '#D4A843', low: '#A8BA32' }
 
 const AI_CARDS = [
   {
@@ -815,80 +804,83 @@ function MirrorNotes({ lineOpacities }) {
 }
 
 function AICard({ card, opacity, sweepProgress, iconMap }) {
-  const dotColor = LANDING_PRIORITY_DOT[card.priority]
-  const labelStyles = card.labels.map((l) => LANDING_LABEL_BG[l.color])
   const revealVar = `${sweepProgress * 124 - 12}%`
   const PhosphorIcon = (iconMap || PHOSPHOR_ICON_MAP)[card.icon]
+  const checklistComplete = card.checklist && card.checklist.done === card.checklist.total
+  const checkColor = card.priority === 'high'
+    ? 'text-[var(--color-copper)]'
+    : card.priority === 'low'
+    ? 'text-[var(--color-lime-dark)]'
+    : 'text-[var(--color-honey)]'
+
   return (
     <div
-      className="relative overflow-hidden w-full rounded-xl border shadow-sm flex bg-white border-[#E0DBD5]"
+      className="w-full flex flex-col gap-3 rounded-2xl border bg-[var(--surface-card)] border-[var(--color-mist)] p-4 shadow-sm"
       style={{ opacity }}
     >
-      <div className="flex items-center pl-3 shrink-0">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#E8E2DB] text-[#8E8E89]">
-          {PhosphorIcon && <PhosphorIcon size={16} weight="regular" />}
+      {/* Top row: icon + title + check */}
+      <div className="flex items-center gap-3">
+        <div className="flex w-10 h-10 shrink-0 items-center justify-center rounded-lg border-0.5 border-[var(--border-default)] bg-[var(--surface-raised)]">
+          <div className="w-5 h-5 flex items-center justify-center text-[var(--text-primary)]">
+            {PhosphorIcon && <PhosphorIcon size={20} weight="regular" />}
+          </div>
         </div>
-      </div>
-      <div className="flex-1 min-w-0 pl-2.5 pr-3.5 py-3">
-        {card.labels.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {card.labels.map((label, idx) => (
-              <span
-                key={label.text}
-                className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: labelStyles[idx].bg, color: labelStyles[idx].text }}
-              >
-                {label.text}
+        <div className="flex min-w-0 grow flex-col gap-0.5">
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span
+              className="text-sm font-medium flex-1 ai-shimmer-reveal"
+              style={{ '--reveal': revealVar }}
+            >
+              {card.title}
+            </span>
+            <CheckCircle className={`w-4 h-4 shrink-0 ${checkColor}`} />
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+            {card.labels?.length > 0 && card.labels.map((label) => (
+              <span key={label.text} className="font-medium text-[var(--text-secondary)] lowercase">
+                /{label.text}
               </span>
             ))}
           </div>
-        )}
-        <div className="flex items-center gap-1.5 mb-0.5">
-          <CheckCircle className="w-4 h-4 shrink-0 text-[#8E8E89]" />
-          <span className="text-[11px] font-medium text-[#5C5C57]">Task #{card.taskNumber}</span>
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dotColor }} />
         </div>
+      </div>
+
+      {/* Description */}
+      {card.description && (
         <p
-          className="text-[13px] font-medium leading-snug ai-shimmer-reveal"
+          className="line-clamp-2 text-xs leading-relaxed ai-shimmer-reveal"
           style={{ '--reveal': revealVar }}
         >
-          {card.title}
+          {card.description}
         </p>
-        {card.description && (
-          <p
-            className="text-[12px] leading-relaxed mt-1 line-clamp-2 ai-shimmer-reveal"
-            style={{ '--reveal': revealVar }}
-          >
-            {card.description}
-          </p>
-        )}
-        <div className="flex items-center justify-between gap-2 mt-2.5">
-          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+      )}
+
+      {/* Bottom metadata row */}
+      {(card.dueDate || card.checklist || card.assignee) && (
+        <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-2">
             {card.dueDate && (
-              <span className="text-[10px] font-medium flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#EEF2D6] text-[#A8BA32]">
-                <Calendar className="w-3 h-3" />
+              <span className="font-semibold flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[var(--color-lime-wash)] text-[var(--color-lime-dark)]">
+                <CalendarDot size={12} weight="bold" />
                 {card.dueDate}
               </span>
             )}
             {card.checklist && (
-              <span className="text-[10px] font-medium flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E8E2DB] text-[#8E8E89]">
-                <CheckSquare className="w-3 h-3" />
+              <span className={`font-semibold flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${
+                checklistComplete
+                  ? 'bg-[var(--color-lime-wash)] text-[var(--color-lime-dark)]'
+                  : 'bg-[var(--surface-hover)] text-[var(--text-muted)]'
+              }`}>
+                <CheckSquare size={12} weight="bold" />
                 {card.checklist.done}/{card.checklist.total}
-              </span>
-            )}
-            {card.description && (
-              <span className="text-[10px] flex items-center text-[#8E8E89]">
-                <TextAlignLeft className="w-3 h-3" />
               </span>
             )}
           </div>
           {card.assignee && (
-            <span className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white bg-[#1B1B18]">
-              {card.assignee}
-            </span>
+            <Avatar name={card.assignee} size="sm" ringed className="text-[10px]" />
           )}
         </div>
-      </div>
+      )}
     </div>
   )
 }
@@ -898,8 +890,8 @@ function AIGeneratedCards({ cardStates }) {
     <div className="pt-5 px-4 flex justify-center select-none">
       <div className="flex flex-col w-full max-w-[290px]">
         <div className="flex items-baseline gap-2 px-0.5 pb-3">
-          <h3 className="text-sm font-semibold text-[#1B1B18]">to do</h3>
-          <span className="text-xs text-[#8E8E89]">{AI_CARDS.length}</span>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">to do</h3>
+          <span className="text-xs text-[var(--text-muted)]">{AI_CARDS.length}</span>
         </div>
         <div className="flex flex-col gap-2">
           {AI_CARDS.map((card, idx) => (
@@ -1052,8 +1044,8 @@ function SlackExtractedCards({ elapsed }) {
       <div className="pt-5 px-4 flex justify-center select-none">
         <div className="flex flex-col w-full max-w-[290px]">
           <div className="flex items-baseline gap-2 px-0.5 pb-3">
-            <h3 className="text-sm font-semibold text-[#1B1B18]">to do</h3>
-            <span className="text-xs text-[#8E8E89]">{AI_CARDS.length}</span>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">to do</h3>
+            <span className="text-xs text-[var(--text-muted)]">{AI_CARDS.length}</span>
           </div>
           <div className="flex flex-col gap-2">
             {AI_CARDS.map((card, idx) => (
@@ -1177,8 +1169,8 @@ function TeamsExtractedCards({ elapsed }) {
       <div className="pt-5 px-4 flex justify-center select-none">
         <div className="flex flex-col w-full max-w-[290px]">
           <div className="flex items-baseline gap-2 px-0.5 pb-3">
-            <h3 className="text-sm font-semibold text-[#1B1B18]">In Progress</h3>
-            <span className="text-xs text-[#8E8E89]">{TEAMS_AI_CARDS.length}</span>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">In Progress</h3>
+            <span className="text-xs text-[var(--text-muted)]">{TEAMS_AI_CARDS.length}</span>
           </div>
           <div className="flex flex-col gap-2">
             {TEAMS_AI_CARDS.map((card, idx) => (
@@ -1336,8 +1328,8 @@ function GmailExtractedCards({ elapsed }) {
       <div className="pt-5 px-4 flex justify-center select-none">
         <div className="flex flex-col w-full max-w-[290px]">
           <div className="flex items-baseline gap-2 px-0.5 pb-3">
-            <h3 className="text-sm font-semibold text-[#1B1B18]">to do</h3>
-            <span className="text-xs text-[#8E8E89]">{GMAIL_AI_CARDS.length}</span>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">to do</h3>
+            <span className="text-xs text-[var(--text-muted)]">{GMAIL_AI_CARDS.length}</span>
           </div>
           <div className="flex flex-col gap-2">
             {GMAIL_AI_CARDS.map((card, idx) => (
