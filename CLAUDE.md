@@ -72,8 +72,15 @@ src/
 │   ├── settingsStore.js            # Local-only: sidebar, theme, font
 │   └── selectors.js                # Cross-store derived selectors
 ├── components/
-│   ├── ui/                         # Design-system primitives (TODO: mostly empty — see Coherency Rules)
-│   │   └── Avatar.jsx
+│   ├── ui/                         # Design-system primitives — see Design System → Primitives
+│   │   ├── Avatar.jsx              # Initials avatar, hash-derived color, 4 sizes
+│   │   ├── Button.jsx              # 5 variants × 6 sizes, loading + asChild support
+│   │   ├── Input.jsx + Textarea.jsx # Bordered fields, leading-icon + error states
+│   │   ├── Modal.jsx               # Portal, focus trap, body scroll lock, stacked-modal aware
+│   │   ├── Popover.jsx             # Anchored overlay with click-outside + escape
+│   │   ├── Menu.jsx                # Popover + Item/Divider/Label sub-components
+│   │   ├── Tooltip.jsx             # Hover/focus tip — replaces title= attributes
+│   │   └── Skeleton.jsx            # Default + ai-shimmer tones
 │   ├── auth/ProtectedRoute.jsx
 │   ├── chat/                       # Chat UI (message list, composer, tool-call cards)
 │   ├── workspace/                  # Workspace switcher, settings, member list
@@ -185,27 +192,30 @@ Tailwind arbitrary values: `bg-[var(--surface-card)]`.
 | `--font-pill`    | Google Sans Text      | Pill labels (PRO, BETA, NEW)       |
 | `.landing-font`  | Plus Jakarta Sans     | Landing page only (scoped class)   |
 
-### Existing primitives
+### Primitives
 
-- `src/components/ui/Avatar.jsx` — initials avatar, hash-derived color, 4 sizes, optional ring for stacking.
-- `src/utils/formatting.js` — `LABEL_BG`, `LABEL_BG_QUIET`, `PRIORITY_DOT`, `AVATAR_COLORS` exported as Tailwind class strings (not components).
+`src/components/ui/` is the design-system layer. **Always reach for these
+primitives before hand-rolling — they encode the coherency rules.** Tests live
+in `src/__tests__/{Button,Input,Menu,Popover,Tooltip}.test.jsx`; design-decision
+mockups live in `public/{button,input,menu,ghost-buttons}-decisions.html`.
+
+| Primitive  | API surface                                                       |
+|------------|-------------------------------------------------------------------|
+| `Avatar`   | `name`, `size` (xs/sm/md/lg), `ring`. Hash-derived color.         |
+| `Button`   | `variant` (primary/accent/secondary/ghost/destructive), `size` (sm/md/lg + icon-{sm,md,lg}), `loading`, `loadingText`, `asChild` (Slot pattern). Defaults to `type="button"`. |
+| `Input`    | `error`, `leadingIcon`, `wrapperClassName`. 1px ink focus border. |
+| `Textarea` | `error`, `rows`. Same focus + error states as `Input`.            |
+| `Modal`    | `open`, `onClose`, `contentClassName`. Portal, focus trap, body scroll lock, stacked-modal aware (only topmost responds to Escape). Suppresses stale `:focus-visible` on trigger after mouse-driven close. |
+| `Popover`  | `open`, `onOpenChange`, `placement` (bottom-start/bottom-end/top-start/top-end), `panel`, `closeOnEscape`, `closeOnOutsideClick`. |
+| `Menu`     | Wraps `Popover`. Sub-components: `Menu.Item` (with `icon`, `shortcut`, `destructive`, `selected`, `checkbox`), `Menu.Divider`, `Menu.Label`. |
+| `Tooltip`  | `content`, `placement`, `delay` (default 300ms), `disabled`. Wraps a single child. |
+| `Skeleton` | `variant` (block/line/circle/pill), `tone` (default/ai), `width`, `height`. |
+
+### Other shared helpers
+
+- `src/utils/formatting.js` — `LABEL_BG`, `LABEL_BG_QUIET`, `PRIORITY_DOT`, `AVATAR_COLORS` exported as Tailwind class strings (not components). Use these instead of hand-coding label/priority colors.
 - `src/utils/toast.js` — `showToast.{success|error|delete|archive|restore|info|warn|overdue}`. Powered by `react-hot-toast`. Configured globally as `<Toaster position="top-center">` in `App.jsx`. Style: 420px fixed width, 1px solid `#1B1B18` border, 10px radius, IBM Plex Mono / SF Mono 12px, Phosphor icon + message + dismiss button. Eight intents each with their own background color and duration (3-5s). **Never roll your own toast — always import this helper.**
-
-### Missing primitives (coherency-phase TODO)
-
-`src/components/ui/` is the design-system layer but currently only contains `Avatar`.
-Extract these from existing inline usages, in roughly this priority order based
-on usage frequency:
-
-1. **Button** — 5 variants (primary/accent/secondary/ghost/destructive), 3 sizes, loading + disabled states.
-2. **Input / Textarea** — with label, helper, error states. Search variant with leading icon.
-3. **Modal / Dialog** — backdrop (no blur), scale-in, header/body/footer, escape + outside-click close.
-4. **Menu / Dropdown** — anchored popover with items, dividers, shortcut hints, destructive variant.
-5. **Tooltip** — replace scattered `title` attributes.
-6. **Skeleton** — generalize the AI-card shimmer pattern in `index.css`.
-
-Reference: `public/ui-inventory.html` has live mockups of all of these in the
-target style. Open via `npm run dev` then `/ui-inventory.html`.
+- `src/hooks/useClickOutside.js`, `src/hooks/useKeyboardShortcuts.js`, `src/hooks/useAppData.js`, `src/hooks/useBoardDnd.js` — extracted hooks. Prefer these over reinventing.
 
 ## Coherency Rules
 
