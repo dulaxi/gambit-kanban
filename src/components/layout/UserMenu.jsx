@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CaretDown, Gear, SignOut, User } from '@phosphor-icons/react'
+import { CaretDown, Gear, Keyboard, SignOut, User } from '@phosphor-icons/react'
 import { useAuthStore } from '../../store/authStore'
 import DynamicIcon from '../board/DynamicIcon'
 import Menu from '../ui/Menu'
@@ -43,6 +43,13 @@ export default function UserMenu({ variant = 'header', collapsed = false }) {
       </div>
       <Menu.Item icon={<Gear size={16} />} onSelect={() => { setOpen(false); navigate('/settings') }}>
         Settings
+      </Menu.Item>
+      <Menu.Item
+        icon={<Keyboard size={16} />}
+        shortcut="?"
+        onSelect={() => { setOpen(false); window.dispatchEvent(new CustomEvent('kolumn:open-shortcuts')) }}
+      >
+        Keyboard shortcuts
       </Menu.Item>
       <Menu.Item icon={<SignOut size={16} />} destructive onSelect={handleSignOut}>
         Sign out

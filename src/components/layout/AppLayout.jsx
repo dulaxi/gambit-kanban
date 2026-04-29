@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import WorkspaceSidebar from './WorkspaceSidebar'
 import Header from './Header'
 import SearchDialog from '../SearchDialog'
+import ShortcutsSheet from '../ShortcutsSheet'
 import BottomTabBar from './BottomTabBar'
 import Button from '../ui/Button'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useIsDesktop } from '../../hooks/useMediaQuery'
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { useAuthStore } from '../../store/authStore'
 import { useBoardStore } from '../../store/boardStore'
 import { useNoteStore } from '../../store/noteStore'
@@ -35,20 +37,29 @@ export default function AppLayout() {
   const font = useSettingsStore((s) => s.font)
   const isDesktop = useIsDesktop()
   const [searchOpen, setSearchOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const toggleSidebar = useSettingsStore((s) => s.toggleSidebar)
 
-  // Open search dialog from sidebar or Ctrl+K
+  // Listen for global "open this dialog" events so menus can trigger them
   useEffect(() => {
     const openSearch = () => setSearchOpen(true)
-    const handleKeyDown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setSearchOpen(true) }
-    }
+    const openShortcuts = () => setShortcutsOpen(true)
     window.addEventListener('kolumn:focus-search', openSearch)
-    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('kolumn:open-shortcuts', openShortcuts)
     return () => {
       window.removeEventListener('kolumn:focus-search', openSearch)
-      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('kolumn:open-shortcuts', openShortcuts)
     }
   }, [])
+
+  // Global keyboard shortcuts
+  const shortcuts = useMemo(() => [
+    { key: 'k', mod: true, handler: (e) => { e.preventDefault(); setSearchOpen(true) } },
+    { key: 'b', mod: true, handler: (e) => { e.preventDefault(); toggleSidebar() } },
+    { key: '/', handler: (e) => { e.preventDefault(); setSearchOpen(true) } },
+    { key: '?', shift: true, handler: (e) => { e.preventDefault(); setShortcutsOpen((v) => !v) } },
+  ], [toggleSidebar])
+  useKeyboardShortcuts(shortcuts)
   const location = useLocation()
   const user = useAuthStore((s) => s.user)
   const fetchBoards = useBoardStore((s) => s.fetchBoards)
@@ -212,6 +223,7 @@ export default function AppLayout() {
   return (
     <div className="h-screen flex flex-col bg-[var(--surface-board)] overflow-hidden">
       <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <ShortcutsSheet open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <OfflineBanner />
       <InlineErrorBoundary name="sidebar">
         <Sidebar />
