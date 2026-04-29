@@ -14,47 +14,11 @@ import IconPicker from './IconPicker'
 import { formatDueDateLabel } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
 import Modal from '../ui/Modal'
+import AssigneePicker from './cardDetail/AssigneePicker'
+import CardChecklist from './cardDetail/CardChecklist'
+import CardFiles from './cardDetail/CardFiles'
 import { showToast } from '../../utils/toast'
 import { useTemplateStore } from '../../store/templateStore'
-
-function ChecklistItem({ item, onToggle, onEdit, onDelete }) {
-  const [editing, setEditing] = useState(false)
-  const [text, setText] = useState(item.text)
-  return (
-    <div className="flex items-center gap-2 py-1 group/check">
-      <button type="button" onClick={onToggle} className="shrink-0">
-        <CheckCircle className={`w-4 h-4 transition-colors ${item.done ? 'text-[var(--accent-lime-dark)]' : 'text-[var(--text-faint)] hover:text-[var(--text-muted)]'}`} />
-      </button>
-      {editing ? (
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') { onEdit(text.trim() || item.text); setEditing(false) }
-            else if (e.key === 'Escape') { setText(item.text); setEditing(false) }
-          }}
-          onBlur={() => { onEdit(text.trim() || item.text); setEditing(false) }}
-          autoFocus
-          className="text-sm text-[var(--text-secondary)] bg-transparent focus:outline-none border border-[var(--border-default)] rounded-xl px-1 -mx-1"
-        />
-      ) : (
-        <span
-          className={`text-sm cursor-pointer ${item.done ? 'line-through text-[var(--text-faint)]' : 'text-[var(--text-secondary)]'}`}
-          onClick={() => setEditing(true)}
-        >
-          {item.text}
-        </span>
-      )}
-      <button
-        type="button"
-        onClick={onDelete}
-        className="shrink-0 opacity-0 group-hover/check:opacity-100 text-[var(--text-faint)] hover:text-[var(--color-copper)] transition-all"
-      >
-        <X className="w-3 h-3" />
-      </button>
-    </div>
-  )
-}
 
 export default memo(function CardDetailPanel({ cardId, onClose }) {
   const card = useBoardStore((s) => s.cards[cardId])
@@ -360,162 +324,15 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
               )}
             </div>
           </div>
-          {/* Assignees — multi-select, right aligned */}
-          {(() => {
-            const lightColors = ['bg-[#8E8E89]', 'bg-[#E0DBD5]', 'bg-[#E8E2DB]', 'bg-[#C2D64A]', 'bg-[#A8BA32]', 'bg-[#D4A843]', 'bg-[#C27A4A]']
-            const isMeName = (n) => profile?.display_name && n.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
-            const iconText = lightColors.includes(profile?.color) ? 'text-[var(--text-primary)]' : 'text-white'
-            const maxVisible = 3
-            const visible = assignees.slice(0, maxVisible)
-            const overflow = Math.max(0, assignees.length - maxVisible)
-
-            const toggleAssignee = (name) => {
-              const next = assignees.some((a) => a.toLowerCase() === name.toLowerCase())
-                ? assignees.filter((a) => a.toLowerCase() !== name.toLowerCase())
-                : [...assignees, name]
-              setAssignees(next)
-              scheduleSave()
-            }
-
-            return (
-          <div className="relative shrink-0" data-menu-root>
-            <button
-              type="button"
-              onClick={() => { toggleMenu('assignee'); setAssigneeSearch('') }}
-              className="flex items-center cursor-pointer"
-              title={assignees.length === 0 ? 'Assign someone' : assignees.join(', ')}
-            >
-              {assignees.length === 0 ? (
-                <span className="w-7 h-7 rounded-full flex items-center justify-center bg-[var(--surface-hover)] text-[var(--text-faint)] hover:text-[var(--text-muted)] transition-colors">
-                  <User className="w-3.5 h-3.5" />
-                </span>
-              ) : (
-                <span className="flex -space-x-2">
-                  {visible.map((name) => {
-                    const isMe = isMeName(name)
-                    if (isMe && profile?.icon) {
-                      return (
-                        <span
-                          key={name}
-                          className={`w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-[var(--surface-page)] ${iconText} ${profile.color}`}
-                        >
-                          <DynamicIcon name={profile.icon} className="w-3.5 h-3.5" />
-                        </span>
-                      )
-                    }
-                    return <Avatar key={name} name={name} size="lg" ringed className="ring-[var(--surface-page)] w-7 h-7 text-[11px]" />
-                  })}
-                  {overflow > 0 && (
-                    <span className="w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-[var(--surface-page)] bg-[var(--surface-hover)] text-[10px] font-medium text-[var(--text-secondary)]">
-                      +{overflow}
-                    </span>
-                  )}
-                </span>
-              )}
-            </button>
-            {openMenu === 'assignee' && (
-              <div className="absolute right-0 top-full mt-2 p-1.5 bg-[var(--surface-card)] border-0.5 border-[var(--color-mist)] backdrop-blur-xl rounded-xl min-w-[14rem] text-[var(--text-primary)] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)] z-50 overflow-hidden">
-                <div className="px-1.5 pb-1.5">
-                  <input
-                    value={assigneeSearch}
-                    onChange={(e) => setAssigneeSearch(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        const name = assigneeSearch.trim()
-                        if (!name) return
-                        // Add if not already there (picker stays open)
-                        if (!assignees.some((a) => a.toLowerCase() === name.toLowerCase())) {
-                          toggleAssignee(name)
-                        }
-                        setAssigneeSearch('')
-                      } else if (e.key === 'Escape') {
-                        setOpenMenu(null)
-                      }
-                    }}
-                    autoFocus
-                    placeholder="Search or type name..."
-                    className="w-full text-sm rounded-lg px-2 py-1.5 border border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--border-focus)] focus:outline-none placeholder-[var(--text-faint)]"
-                  />
-                </div>
-                <div className="max-h-56 overflow-y-auto">
-                  {/* Already-selected external names (not in board member list) shown first */}
-                  {assignees
-                    .filter((a) => !boardMemberNames.some((m) => m.toLowerCase() === a.toLowerCase()))
-                    .filter((a) => !assigneeSearch.trim() || a.toLowerCase().includes(assigneeSearch.trim().toLowerCase()))
-                    .map((name) => (
-                      <div
-                        key={`ext-${name}`}
-                        role="menuitem"
-                        onClick={() => toggleAssignee(name)}
-                        className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs bg-[var(--surface-hover)] font-medium"
-                      >
-                        <div className="flex items-center gap-2 w-full">
-                          <Avatar name={name} />
-                          <span className="flex-1 truncate">{name}</span>
-                        </div>
-                        <Check className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                      </div>
-                    ))}
-                  {/* Board/workspace members */}
-                  {boardMemberNames
-                    .filter((m) => !assigneeSearch.trim() || m.toLowerCase().includes(assigneeSearch.trim().toLowerCase()))
-                    .map((member) => {
-                      const checked = assignees.some((a) => a.toLowerCase() === member.toLowerCase())
-                      return (
-                        <div
-                          key={member}
-                          role="menuitem"
-                          onClick={() => toggleAssignee(member)}
-                          className={`min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs ${checked ? 'bg-[var(--surface-hover)] font-medium' : ''}`}
-                        >
-                          <div className="flex items-center gap-2 w-full">
-                            <Avatar name={member} />
-                            <span className="flex-1 truncate">{member}</span>
-                          </div>
-                          {checked && <Check className="w-3.5 h-3.5 text-[var(--text-secondary)]" />}
-                        </div>
-                      )
-                    })}
-                  {/* Free-text "add" when search doesn't match anyone and not already assigned */}
-                  {assigneeSearch.trim() &&
-                    !boardMemberNames.some((m) => m.toLowerCase() === assigneeSearch.trim().toLowerCase()) &&
-                    !assignees.some((a) => a.toLowerCase() === assigneeSearch.trim().toLowerCase()) && (
-                    <>
-                      <div role="separator" className="h-[0.5px] bg-[var(--border-subtle)] my-1.5 mx-2" />
-                      <div
-                        role="menuitem"
-                        onClick={() => { toggleAssignee(assigneeSearch.trim()); setAssigneeSearch('') }}
-                        className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs text-[var(--text-secondary)]"
-                      >
-                        <div className="flex items-center gap-2 w-full">
-                          <div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus className="w-3.5 h-3.5" /></div>
-                          <span className="flex-1 truncate">Add "{assigneeSearch.trim()}"</span>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  {/* Clear all */}
-                  {assignees.length > 0 && (
-                    <>
-                      <div role="separator" className="h-[0.5px] bg-[var(--border-subtle)] my-1.5 mx-2" />
-                      <div
-                        role="menuitem"
-                        onClick={() => { setAssignees([]); scheduleSave() }}
-                        className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs text-[var(--text-muted)]"
-                      >
-                        <div className="flex items-center gap-2 w-full">
-                          <div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X className="w-3.5 h-3.5" /></div>
-                          <span className="flex-1 truncate">Clear all</span>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-          )
-          })()}
+          <AssigneePicker
+            assignees={assignees}
+            setAssignees={setAssignees}
+            boardMemberNames={boardMemberNames}
+            profile={profile}
+            scheduleSave={scheduleSave}
+            open={openMenu === 'assignee'}
+            onOpenChange={(next) => setOpenMenu(next === 'assignee' ? 'assignee' : null)}
+          />
         </div>
 
         {/* Content */}
@@ -543,98 +360,18 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
             </div>
           )}
 
-          {/* Checklist */}
-          <div className="mt-5 max-w-sm">
-            {checklist.map((item, idx) => (
-              <ChecklistItem
-                key={`${item.text}-${idx}`}
-                item={item}
-                onToggle={() => { setChecklist(checklist.map((c, i) => i === idx ? { ...c, done: !c.done } : c)); scheduleSave() }}
-                onEdit={(text) => { setChecklist(checklist.map((c, i) => i === idx ? { ...c, text } : c)); scheduleSave() }}
-                onDelete={() => { setChecklist(checklist.filter((_, i) => i !== idx)); scheduleSave() }}
-              />
-            ))}
-            <div className="flex items-center gap-2 py-1">
-              <Plus className="w-4 h-4 text-[var(--text-faint)] shrink-0" />
-              <input
-                value={newCheckItem}
-                onChange={(e) => setNewCheckItem(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') { const t = newCheckItem.trim(); if (t) { setChecklist([...checklist, { text: t, done: false }]); setNewCheckItem(''); scheduleSave() } } }}
-                placeholder="Add an item..."
-                className="text-sm text-[var(--text-secondary)] bg-transparent focus:outline-none placeholder-[var(--text-faint)]"
-              />
-            </div>
-          </div>
+          <CardChecklist
+            checklist={checklist}
+            setChecklist={setChecklist}
+            scheduleSave={scheduleSave}
+          />
 
-          {/* Files — only shown when files exist */}
-          {attachmentItems && attachmentItems.length > 0 && (
-          <div className="w-full py-4 mt-4 border-t-0.5 border-[var(--border-subtle)]">
-            <div className="h-6 w-full flex flex-row items-center justify-between gap-4 mb-1">
-              <h3 className="text-[var(--text-secondary)] text-sm font-semibold">Files</h3>
-            </div>
-            {(
-              <ul className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-3 mt-3">
-                {attachmentItems.map((file) => {
-                  const ext = (file.file_name || '').split('.').pop()?.toLowerCase() || 'file'
-                  const isImage = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)
-                  return (
-                    <li key={file.id} className="relative group/file">
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            const url = await getAttachmentUrl(file.storage_path)
-                            if (url) window.open(url, '_blank')
-                          } catch (err) {
-                            showToast.error('Failed to open file')
-                          }
-                        }}
-                        className="w-full rounded-lg text-left block cursor-pointer transition-all border border-[var(--color-sand)] flex flex-col justify-between gap-2.5 overflow-hidden px-2.5 py-2 bg-[var(--surface-card)] hover:border-[var(--color-mist)] shadow-[0_0_0_1px_rgba(0,0,0,0.02),0_2px_6px_rgba(0,0,0,0.04)]"
-                        style={{ height: 120, minWidth: '100%' }}
-                        aria-label={`${file.file_name}, ${ext}`}
-                      >
-                        <div className="flex flex-col gap-1 min-h-0">
-                          <h3 className="text-[12px] break-words text-[var(--text-primary)] line-clamp-3">
-                            {file.file_name}
-                          </h3>
-                          {file.file_size > 0 && (
-                            <p className="text-[10px] line-clamp-1 break-words text-[var(--text-faint)]">
-                              {file.file_size < 1024 ? `${file.file_size} B` : file.file_size < 1048576 ? `${(file.file_size / 1024).toFixed(1)} KB` : `${(file.file_size / 1048576).toFixed(1)} MB`}
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <div className="relative flex flex-row items-center gap-1 justify-between">
-                            <div className="flex flex-row gap-1 shrink min-w-0">
-                              <div className="min-w-0 h-[18px] flex flex-row items-center justify-center gap-0.5 px-1 border-0.5 border-[var(--border-default)] shadow-sm rounded bg-[var(--surface-card)]/70 backdrop-blur-sm font-medium">
-                                <p className="uppercase truncate text-[var(--text-secondary)] text-[11px] leading-[13px]">{ext}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </button>
-                      {/* Delete badge on hover */}
-                      <button
-                        type="button"
-                        onClick={async (e) => {
-                          e.stopPropagation()
-                          try {
-                            await deleteAttachment(cardId, file.id, file.storage_path)
-                          } catch (err) {
-                            showToast.error('Failed to delete')
-                          }
-                        }}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] flex items-center justify-center text-[var(--text-faint)] hover:text-[var(--color-copper)] hover:bg-[var(--surface-hover)] opacity-0 group-hover/file:opacity-100 transition-all"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </div>
-          )}
+          <CardFiles
+            cardId={cardId}
+            attachmentItems={attachmentItems}
+            getAttachmentUrl={getAttachmentUrl}
+            deleteAttachment={deleteAttachment}
+          />
         </div>
       </div>
     </Modal>
