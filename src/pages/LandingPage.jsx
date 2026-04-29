@@ -1793,23 +1793,23 @@ function HeroAuthCard() {
 function MobileNav() {
   const [menuOpen, setMenuOpen] = useState(false)
   return (
-    <nav className="sticky top-0 z-50 bg-[#FAF8F6]">
+    <nav className="sticky top-0 z-50 bg-[var(--surface-page)]">
       {/* Desktop nav */}
       <div className="hidden sm:flex items-center justify-between max-w-[90rem] mx-auto" style={{ width: 'calc(100% - (2 * clamp(2rem, 1.43rem + 2.86vw, 4rem)))' }}>
         <div className="flex items-center">
-          <Kanban size={30} weight="fill" className="text-[#8BA32E]" />
-          <span className="text-[23px] font-[450] text-[#1B1B18] tracking-tight leading-none ml-2 font-logo">Kolumn</span>
+          <Kanban size={30} weight="fill" className="text-[var(--color-logo)]" />
+          <span className="text-[23px] font-[450] text-[var(--text-primary)] tracking-tight leading-none ml-2 font-logo">Kolumn</span>
         </div>
         <div className="flex items-center gap-3 py-6">
           <Link
             to="/login"
-            className="inline-flex items-center justify-center h-9 px-5 min-w-[5rem] whitespace-nowrap text-[15px] font-normal text-[#5C5C57] hover:text-[#1B1B18] border-[0.5px] border-[#E0DBD5] rounded-lg transition-all duration-200"
+            className="inline-flex items-center justify-center h-9 px-5 min-w-[5rem] whitespace-nowrap text-[15px] font-normal text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[0.5px] border-[var(--color-sand)] rounded-lg transition-all duration-200"
           >
             Sign in
           </Link>
           <Link
             to="/signup"
-            className="inline-flex items-center justify-center h-9 px-5 min-w-[5rem] whitespace-nowrap text-[15px] font-normal bg-[#1B1B18] text-white rounded-lg overflow-hidden transition-transform will-change-transform ease-[cubic-bezier(0.165,0.85,0.45,1)] duration-150 hover:scale-y-[1.015] hover:scale-x-[1.005]"
+            className="inline-flex items-center justify-center h-9 px-5 min-w-[5rem] whitespace-nowrap text-[15px] font-normal bg-[var(--text-primary)] text-white rounded-lg overflow-hidden transition-transform will-change-transform ease-[cubic-bezier(0.165,0.85,0.45,1)] duration-150 hover:scale-y-[1.015] hover:scale-x-[1.005]"
           >
             Get started
           </Link>
@@ -1819,12 +1819,12 @@ function MobileNav() {
       {/* Mobile nav */}
       <div className="flex sm:hidden items-center justify-between px-5 py-4">
         <div className="flex items-center">
-          <Kanban size={26} weight="fill" className="text-[#8BA32E]" />
-          <span className="text-[20px] font-[450] text-[#1B1B18] tracking-tight leading-none ml-1.5 font-logo">Kolumn</span>
+          <Kanban size={26} weight="fill" className="text-[var(--color-logo)]" />
+          <span className="text-[20px] font-[450] text-[var(--text-primary)] tracking-tight leading-none ml-1.5 font-logo">Kolumn</span>
         </div>
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="w-9 h-9 flex items-center justify-center rounded-lg text-[#5C5C57] hover:bg-[#E8E2DB] transition-colors"
+          className="w-9 h-9 flex items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--color-cream-dark)] transition-colors"
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
         >
           {menuOpen ? <X className="w-5 h-5" /> : <List className="w-5 h-5" />}
@@ -1833,16 +1833,16 @@ function MobileNav() {
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="sm:hidden border-t border-[#E8E2DB] bg-[#FAF8F6] px-5 pb-4 pt-3 flex flex-col gap-2 animate-dropdown">
+        <div className="sm:hidden border-t border-[var(--color-cream-dark)] bg-[var(--surface-page)] px-5 pb-4 pt-3 flex flex-col gap-2 animate-dropdown">
           <Link
             to="/login"
-            className="flex items-center justify-center h-10 text-[15px] font-normal text-[#5C5C57] border border-[#E0DBD5] rounded-lg transition-colors hover:text-[#1B1B18]"
+            className="flex items-center justify-center h-10 text-[15px] font-normal text-[var(--text-secondary)] border border-[var(--color-sand)] rounded-lg transition-colors hover:text-[var(--text-primary)]"
           >
             Sign in
           </Link>
           <Link
             to="/signup"
-            className="flex items-center justify-center h-10 text-[15px] font-normal bg-[#1B1B18] text-white rounded-lg"
+            className="flex items-center justify-center h-10 text-[15px] font-normal bg-[var(--text-primary)] text-white rounded-lg"
           >
             Get started
           </Link>
@@ -1864,8 +1864,8 @@ export default function LandingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF8F6] flex items-center justify-center">
-        <div className="text-sm text-[#8E8E89]">Loading...</div>
+      <div className="min-h-screen bg-[var(--surface-page)] flex items-center justify-center">
+        <div className="text-sm text-[var(--text-muted)]">Loading...</div>
       </div>
     )
   }
@@ -1875,7 +1875,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className={`landing-font min-h-screen bg-[#FAF8F6] transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`landing-font min-h-screen bg-[var(--surface-page)] transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
 
       {/* ─── Nav ─── */}
       <MobileNav />
@@ -2005,20 +2005,20 @@ export default function LandingPage() {
       {/* ─── Features Grid ─── */}
       <section className="px-6 sm:px-10 py-16 max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <h2 className="text-3xl sm:text-4xl font-normal text-[#1B1B18] tracking-tight mb-2">Built for how teams <span className="text-[#8BA32E] font-heading">actually work</span></h2>
-          <p className="text-sm text-[#5C5C57] max-w-md mx-auto">No bloat, no learning curve. Just the tools that matter — designed to feel invisible.</p>
+          <h2 className="text-3xl sm:text-4xl font-normal text-[var(--text-primary)] tracking-tight mb-2">Built for how teams <span className="text-[var(--color-logo)] font-heading">actually work</span></h2>
+          <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">No bloat, no learning curve. Just the tools that matter — designed to feel invisible.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f) => (
             <div
               key={f.title}
-              className="group bg-white border border-[#E0DBD5]/80 rounded-2xl p-5 hover:shadow-lg hover:border-[#E0DBD5]/80 transition-all duration-300"
+              className="group bg-[var(--surface-card)] border border-[var(--color-sand)]/80 rounded-2xl p-5 hover:shadow-lg hover:border-[var(--color-sand)]/80 transition-all duration-300"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#C2D64A]/20 group-hover:bg-[#1B1B18] flex items-center justify-center mb-3.5 transition-colors duration-300">
-                <f.icon className="w-4.5 h-4.5 text-[#1B1B18] group-hover:text-white transition-colors duration-300" />
+              <div className="w-9 h-9 rounded-xl bg-[var(--accent-lime)]/20 group-hover:bg-[var(--text-primary)] flex items-center justify-center mb-3.5 transition-colors duration-300">
+                <f.icon className="w-4.5 h-4.5 text-[var(--text-primary)] group-hover:text-white transition-colors duration-300" />
               </div>
-              <h3 className="text-base font-normal text-[#1B1B18] mb-1">{f.title}</h3>
-              <p className="text-[13px] text-[#5C5C57] leading-relaxed">{f.desc}</p>
+              <h3 className="text-base font-normal text-[var(--text-primary)] mb-1">{f.title}</h3>
+              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -2026,18 +2026,18 @@ export default function LandingPage() {
 
       {/* ─── CTA ─── */}
       <section className="relative px-6 sm:px-10 py-16 max-w-5xl mx-auto text-center">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-r from-[#1B1B18]/25 to-[#C2D64A]/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-r from-[var(--text-primary)]/25 to-[var(--accent-lime)]/25 rounded-full blur-3xl pointer-events-none" />
         <div className="relative">
-        <div className="w-10 h-[1px] bg-[#E0DBD5] mx-auto mb-10" />
-        <h2 className="text-3xl sm:text-4xl font-normal text-[#1B1B18] tracking-tight mb-3">
-          Your team's <span className="text-[#8BA32E] font-heading">next move</span> starts here
+        <div className="w-10 h-[1px] bg-[var(--color-sand)] mx-auto mb-10" />
+        <h2 className="text-3xl sm:text-4xl font-normal text-[var(--text-primary)] tracking-tight mb-3">
+          Your team's <span className="text-[var(--color-logo)] font-heading">next move</span> starts here
         </h2>
-        <p className="text-sm text-[#5C5C57] max-w-sm mx-auto mb-8 leading-relaxed">
+        <p className="text-sm text-[var(--text-secondary)] max-w-sm mx-auto mb-8 leading-relaxed">
           Set up your first board in under 60 seconds. No credit card, no setup wizard.
         </p>
         <Link
           to="/signup"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[#1B1B18] text-white text-sm font-normal rounded-lg hover:bg-[#333] transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--text-primary)] text-white text-sm font-normal rounded-lg hover:bg-[var(--btn-primary-hover)] transition-colors"
         >
           Get started free
           <ArrowRight className="w-4 h-4" />
@@ -2047,20 +2047,20 @@ export default function LandingPage() {
 
       {/* ─── Footer ─── */}
       <footer className="px-6 sm:px-10 pb-8 pt-4 max-w-5xl mx-auto">
-        <div className="border-t border-[#E0DBD5] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs text-[#8E8E89]">
-            <Kanban size={16} weight="regular" className="text-[#8E8E89]" />
+        <div className="border-t border-[var(--color-sand)] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+            <Kanban size={16} weight="regular" className="text-[var(--text-muted)]" />
             <span className="font-bold font-logo">Kolumn</span>
-            <span className="text-[#8E8E89] mx-1">&middot;</span>
+            <span className="text-[var(--text-muted)] mx-1">&middot;</span>
             <span>Built for teams that ship.</span>
           </div>
-          <div className="flex items-center gap-4 text-xs text-[#8E8E89]">
-            <a href="mailto:hello@kolumn.app" className="hover:text-[#5C5C57] transition-colors">Contact</a>
-            <Link to="/login" className="hover:text-[#5C5C57] transition-colors">Sign in</Link>
-            <Link to="/signup" className="hover:text-[#5C5C57] transition-colors">Sign up</Link>
+          <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]">
+            <a href="mailto:hello@kolumn.app" className="hover:text-[var(--text-secondary)] transition-colors">Contact</a>
+            <Link to="/login" className="hover:text-[var(--text-secondary)] transition-colors">Sign in</Link>
+            <Link to="/signup" className="hover:text-[var(--text-secondary)] transition-colors">Sign up</Link>
           </div>
         </div>
-        <p className="text-center text-xs text-[#C4BFB8] mt-4">&copy; {new Date().getFullYear()} Kolumn. All rights reserved.</p>
+        <p className="text-center text-xs text-[var(--text-faint)] mt-4">&copy; {new Date().getFullYear()} Kolumn. All rights reserved.</p>
       </footer>
     </div>
   )
