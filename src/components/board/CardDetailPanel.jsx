@@ -6,7 +6,6 @@ import DynamicIcon from './DynamicIcon'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import { useIsMobile } from '../../hooks/useMediaQuery'
-import { useClickOutside } from '../../hooks/useClickOutside'
 import { useMenuState } from '../../hooks/useMenuState'
 import { useCardEditState } from '../../hooks/useCardEditState'
 import { useBoardMemberNames } from '../../hooks/useBoardMemberNames'
@@ -14,6 +13,8 @@ import IconPicker from './IconPicker'
 import { formatDueDateLabel } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
 import Modal from '../ui/Modal'
+import Popover from '../ui/Popover'
+import Menu from '../ui/Menu'
 import AssigneePicker from './cardDetail/AssigneePicker'
 import CardChecklist from './cardDetail/CardChecklist'
 import CardFiles from './cardDetail/CardFiles'
@@ -161,32 +162,36 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                   else dateColor = 'text-[var(--text-secondary)]'
                 }
                 return (
-                  <button
-                    type="button"
-                    onClick={() => toggleMenu('due')}
-                    className={`h-8 rounded-md flex items-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer ${dueDate ? 'px-2' : 'w-8 justify-center'} ${dateColor}`}
-                    title={dueDate ? `Due: ${new Date(dueDate).toLocaleDateString()}` : 'Set due date'}
+                  <Popover
+                    open={openMenu === 'due'}
+                    onOpenChange={(next) => setOpenMenu(next ? 'due' : null)}
+                    placement="bottom-end"
+                    panel={
+                      <input
+                        type="date"
+                        value={dueDate ? dueDate.split('T')[0] : ''}
+                        onChange={(e) => {
+                          setDueDate(e.target.value ? `${e.target.value}T23:59:59` : '')
+                          setOpenMenu(null)
+                          scheduleSave()
+                        }}
+                        autoFocus
+                        className="text-sm text-[var(--text-primary)] bg-transparent border border-[var(--border-default)] rounded-lg px-2 py-1.5 focus:border-[var(--border-focus)] focus:outline-none"
+                      />
+                    }
                   >
-                    <Calendar className="w-4 h-4" />
-                    {dateLabel && <span className="text-xs font-medium">{dateLabel}</span>}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleMenu('due')}
+                      className={`h-8 rounded-md flex items-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer ${dueDate ? 'px-2' : 'w-8 justify-center'} ${dateColor}`}
+                      title={dueDate ? `Due: ${new Date(dueDate).toLocaleDateString()}` : 'Set due date'}
+                    >
+                      <Calendar className="w-4 h-4" />
+                      {dateLabel && <span className="text-xs font-medium">{dateLabel}</span>}
+                    </button>
+                  </Popover>
                 )
               })()}
-              {openMenu === 'due' && (
-                <div className="absolute right-0 top-full mt-1 p-2 bg-[var(--surface-card)] border-0.5 border-[var(--color-mist)] backdrop-blur-xl rounded-xl shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)] z-50">
-                  <input
-                    type="date"
-                    value={dueDate ? dueDate.split('T')[0] : ''}
-                    onChange={(e) => {
-                      setDueDate(e.target.value ? `${e.target.value}T23:59:59` : '')
-                      setOpenMenu(null)
-                      scheduleSave()
-                    }}
-                    autoFocus
-                    className="text-sm text-[var(--text-primary)] bg-transparent border border-[var(--border-default)] rounded-lg px-2 py-1.5 focus:border-[var(--border-focus)] focus:outline-none"
-                  />
-                </div>
-              )}
             </div>
             {/* Attach file */}
             <label
@@ -212,7 +217,47 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
               />
             </label>
             {/* 3-dot menu */}
-            <div className="relative" data-menu-root>
+            <Menu
+              open={openMenu === 'menu'}
+              onOpenChange={(next) => setOpenMenu(next ? 'menu' : null)}
+              placement="bottom-end"
+              panelClassName="w-44"
+              panel={
+                <>
+                  <Menu.Item
+                    icon={<Copy size={14} />}
+                    onSelect={() => { duplicateCard(cardId); showToast.success('Duplicated'); setOpenMenu(null) }}
+                  >
+                    Duplicate
+                  </Menu.Item>
+                  <Menu.Item
+                    icon={<Bookmark size={14} />}
+                    onSelect={() => {
+                      addTemplate({
+                        name: card.title,
+                        title: card.title,
+                        description: card.description || '',
+                        priority: card.priority || 'medium',
+                        labels: card.labels || [],
+                        checklist: (card.checklist || []).map((item) => ({ text: item.text, done: false })),
+                      })
+                      showToast.success('Saved as template')
+                      setOpenMenu(null)
+                    }}
+                  >
+                    Template
+                  </Menu.Item>
+                  <Menu.Divider />
+                  <Menu.Item
+                    icon={<Trash size={14} />}
+                    destructive
+                    onSelect={() => { deleteCard(cardId); onClose(); setOpenMenu(null) }}
+                  >
+                    Delete
+                  </Menu.Item>
+                </>
+              }
+            >
               <button
                 type="button"
                 onClick={() => toggleMenu('menu')}
@@ -221,44 +266,41 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
               >
                 <DotsThreeVertical className="w-5 h-5" />
               </button>
-              {openMenu === 'menu' && (
-                <div className="absolute right-0 top-full mt-1 p-1.5 bg-[var(--surface-card)] border-0.5 border-[var(--color-mist)] backdrop-blur-xl rounded-xl min-w-[8rem] text-[var(--text-primary)] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)] z-50">
-                  <div role="menuitem" onClick={() => { duplicateCard(cardId); showToast.success('Duplicated'); setOpenMenu(null) }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs">
-                    <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Copy className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Duplicate</span></div>
-                  </div>
-                  <div role="menuitem" onClick={() => { addTemplate({ name: card.title, title: card.title, description: card.description || '', priority: card.priority || 'medium', labels: card.labels || [], checklist: (card.checklist || []).map((item) => ({ text: item.text, done: false })) }); showToast.success('Saved as template'); setOpenMenu(null) }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs">
-                    <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Bookmark className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Template</span></div>
-                  </div>
-                  <div role="separator" className="h-[0.5px] bg-[var(--border-subtle)] my-1.5 mx-2" />
-                  <div role="menuitem" onClick={() => { deleteCard(cardId); onClose(); setOpenMenu(null) }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--color-copper)]/10 text-[var(--color-copper)] text-xs">
-                    <div className="flex items-center gap-2 w-full"><div style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash className="w-4 h-4 shrink-0" /></div><span className="flex-1 truncate">Delete</span></div>
-                  </div>
-                </div>
-              )}
-            </div>
+            </Menu>
             {/* Priority flag */}
-            <div className="relative" data-menu-root>
-              <button
-                type="button"
-                onClick={() => toggleMenu('priority')}
-                className="h-8 w-8 rounded-md flex items-center justify-center hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-              >
-                <Flag className="w-4 h-4" fill={priColor} style={{ color: priColor }} />
-              </button>
-              {openMenu === 'priority' && (
-                <div className="absolute right-0 top-full mt-1 p-1.5 bg-[var(--surface-card)] border-0.5 border-[var(--color-mist)] backdrop-blur-xl rounded-xl min-w-[8rem] text-[var(--text-primary)] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)] z-50">
+            <Menu
+              open={openMenu === 'priority'}
+              onOpenChange={(next) => setOpenMenu(next ? 'priority' : null)}
+              placement="bottom-end"
+              panelClassName="w-36"
+              panel={
+                <>
                   {[
                     { value: 'low', label: 'Low', color: '#A8BA32' },
                     { value: 'medium', label: 'Medium', color: '#D4A843' },
                     { value: 'high', label: 'High', color: '#C27A4A' },
                   ].map((opt) => (
-                    <div key={opt.value} role="menuitem" onClick={() => { setPriority(opt.value); setOpenMenu(null); scheduleSave() }} className="min-h-7 px-2 py-1 rounded-lg cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis grid grid-cols-[minmax(0,_1fr)_auto] gap-1.5 items-center select-none hover:bg-[var(--surface-hover)] text-xs">
-                      <div className="flex items-center gap-2 w-full"><Flag className="w-3.5 h-3.5 shrink-0" fill={opt.color} style={{ color: opt.color }} /><span className="flex-1 truncate">{opt.label}</span></div>
-                    </div>
+                    <Menu.Item
+                      key={opt.value}
+                      selected={priority === opt.value}
+                      onSelect={() => { setPriority(opt.value); setOpenMenu(null); scheduleSave() }}
+                      icon={<Flag className="w-3.5 h-3.5" fill={opt.color} style={{ color: opt.color }} />}
+                    >
+                      {opt.label}
+                    </Menu.Item>
                   ))}
-                </div>
-              )}
-            </div>
+                </>
+              }
+            >
+              <button
+                type="button"
+                onClick={() => toggleMenu('priority')}
+                aria-label="Set priority"
+                className="h-8 w-8 rounded-md flex items-center justify-center hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+              >
+                <Flag className="w-4 h-4" fill={priColor} style={{ color: priColor }} />
+              </button>
+            </Menu>
           </div>
         </div>
 
