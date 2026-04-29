@@ -2032,7 +2032,7 @@ export default function LandingPage() {
             <div className="hidden lg:flex flex-col gap-3 w-full">
               <DemoToggle variant={demoVariant} onChange={setDemoVariant} />
               <div className="flex justify-center items-center w-full">
-                <div className="rounded-2xl w-full overflow-hidden border border-[var(--color-sand)]/80 bg-[var(--surface-card)] shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
+                <div className="rounded-2xl w-full h-[85vh] min-h-[500px] overflow-hidden border border-[var(--color-sand)]/80 bg-[var(--surface-card)] shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
                   <div className={`w-full h-full overflow-hidden font-sans ${demoVariant === 'editorial' ? 'p-8' : 'p-6'}`}>
                     <DemoBoard variant={demoVariant} />
                   </div>
