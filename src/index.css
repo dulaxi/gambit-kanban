@@ -22,6 +22,7 @@
   --color-lime-wash: #EEF2D6;
   --color-logo: #8BA32E;
   --color-copper: #C27A4A;
+  --color-copper-dark: #A86434;
   --color-copper-wash: #F2D9C7;
   --color-honey: #D4A843;
   --color-honey-wash: #F5EDCF;
@@ -35,12 +36,12 @@
   --color-mauve-cream: #F0E8EB;
 
   /* Selected-state fills — two intents, two colors:
-     - --soft-lime: "I just toggled this on" (filter pills, icon pick,
-       search keyboard, template pick, mention pick, calendar day)
+     - --accent-lime-soft: "I just toggled this on" (filter pills, icon
+       pick, search keyboard, template pick, mention pick, calendar day)
+       — defined per-theme below so dark mode renders correctly.
      - --color-mauve-cream: "I'm currently inside this" (active sidebar
        nav row, open kanban card) — quieter, used on the largest
        most-persistent surfaces */
-  --soft-lime: #D4E07A;
 
   --animate-fadeIn: fadeIn 1s ease forwards;
 }
@@ -74,6 +75,7 @@
   --accent-lime: #C2D64A;
   --accent-lime-dark: #A8BA32;
   --accent-lime-wash: #EEF2D6;
+  --accent-lime-soft: #D4E07A;
 
   --btn-primary-bg: #1B1B18;
   --btn-primary-text: #FFFFFF;
@@ -109,6 +111,7 @@
   --accent-lime: #C2D64A;
   --accent-lime-dark: #A8BA32;
   --accent-lime-wash: #2E3B1A;
+  --accent-lime-soft: #4F6520;
 
   --btn-primary-bg: #C2D64A;
   --btn-primary-text: #1C1C1A;
@@ -249,6 +252,23 @@
 @keyframes ai-card-shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+/* Button loading dots — cycles ., .., ... after the verb (e.g. "Saving...") */
+@keyframes button-dots-cycle {
+  0%, 100% { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+}
+.btn-dots {
+  display: inline-block;
+  min-width: 1ch;
+  text-align: left;
+}
+.btn-dots::after {
+  content: '';
+  animation: button-dots-cycle 1.4s steps(4, end) infinite;
 }
 
 .ai-skeleton-block {

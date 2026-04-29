@@ -8,6 +8,7 @@ import { useNoteStore } from '../store/noteStore'
 import DynamicIcon from '../components/board/DynamicIcon'
 import IconPicker from '../components/board/IconPicker'
 import ActionCard from '../components/ActionCard'
+import Button from '../components/ui/Button'
 import { PROFILE_COLORS } from '../constants/colors'
 
 const themes = [
@@ -183,7 +184,7 @@ export default function SettingsPage() {
                   onClick={() => handleProfileUpdate({ color: c.value })}
                   className={`w-7 h-7 rounded-full transition-all ${
                     profile?.color === c.value
-                      ? 'ring-2 ring-offset-2 ring-[var(--soft-lime)]'
+                      ? 'ring-2 ring-offset-2 ring-[var(--accent-lime-soft)]'
                       : 'hover:scale-110'
                   }`}
                   style={{ backgroundColor: c.hex }}
@@ -210,7 +211,7 @@ export default function SettingsPage() {
               onClick={() => setTheme(t.id)}
               className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border-2 cursor-pointer transition-colors ${
                 theme === t.id
-                  ? 'border-[var(--soft-lime)] bg-[var(--soft-lime)]'
+                  ? 'border-[var(--accent-lime-soft)] bg-[var(--accent-lime-soft)]'
                   : 'border-[var(--border-default)] hover:border-[var(--border-default)]'
               }`}
             >
@@ -245,7 +246,7 @@ export default function SettingsPage() {
             onClick={() => setFont('mona-sans')}
             className={`flex flex-col items-center gap-2 px-5 py-3 rounded-xl border-2 cursor-pointer transition-colors ${
               font === 'mona-sans'
-                ? 'border-[var(--soft-lime)] bg-[var(--soft-lime)]'
+                ? 'border-[var(--accent-lime-soft)] bg-[var(--accent-lime-soft)]'
                 : 'border-[var(--border-default)] hover:border-[var(--border-default)]'
             }`}
           >
@@ -256,7 +257,7 @@ export default function SettingsPage() {
             onClick={() => setFont('sf-mono')}
             className={`flex flex-col items-center gap-2 px-5 py-3 rounded-xl border-2 cursor-pointer transition-colors ${
               font === 'sf-mono'
-                ? 'border-[var(--soft-lime)] bg-[var(--soft-lime)]'
+                ? 'border-[var(--accent-lime-soft)] bg-[var(--accent-lime-soft)]'
                 : 'border-[var(--border-default)] hover:border-[var(--border-default)]'
             }`}
           >
@@ -300,27 +301,21 @@ export default function SettingsPage() {
 
       {/* Inline clear-data confirmation */}
       {confirmingClear && (
-        <div className="bg-[var(--color-bark-wash)]/40 border border-[#D4A07A] rounded-2xl p-5 mb-4">
+        <div className="bg-[var(--color-copper-wash)]/40 border border-[var(--color-copper)]/40 rounded-2xl p-5 mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Warning className="w-4 h-4 text-[var(--color-copper)]" />
-            <h2 className="text-sm font-semibold text-[var(--color-bark)]">Confirm — this cannot be undone</h2>
+            <h2 className="text-sm font-semibold text-[var(--color-copper)]">Confirm — this cannot be undone</h2>
           </div>
           <p className="text-sm text-[var(--text-secondary)] mb-4">
             Permanently delete all your boards, notes, and settings.
           </p>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleClearData}
-              className="px-4 py-2 bg-[var(--color-bark)] text-white text-sm font-medium rounded-xl hover:bg-[#6B4D38] cursor-pointer transition-colors"
-            >
+            <Button variant="destructive" onClick={handleClearData}>
               Yes, delete everything
-            </button>
-            <button
-              onClick={() => setConfirmingClear(false)}
-              className="px-4 py-2 border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium rounded-xl hover:bg-[var(--surface-raised)] cursor-pointer transition-colors"
-            >
+            </Button>
+            <Button variant="secondary" onClick={() => setConfirmingClear(false)}>
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       )}

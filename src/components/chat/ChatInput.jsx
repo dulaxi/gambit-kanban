@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { ArrowUp, Plus } from '@phosphor-icons/react'
+import Button from '../ui/Button'
 
 export default function ChatInput({ onSend, autoFocus = false }) {
   const [input, setInput] = useState('')
@@ -45,16 +46,16 @@ export default function ChatInput({ onSend, autoFocus = false }) {
               }}
             />
             <div className="flex items-center gap-2">
-              <button type="button" aria-label="Add files" className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-[var(--surface-hover)] text-[var(--text-secondary)] transition-colors cursor-pointer">
+              <Button variant="ghost" size="icon-sm" aria-label="Add files">
                 <Plus className="w-5 h-5" />
-              </button>
+              </Button>
               <div className="flex-1" />
               {input.trim() ? (
-                <button type="button" onClick={handleSubmit} aria-label="Send message" className="h-8 w-8 rounded-lg flex items-center justify-center bg-[var(--text-primary)] text-[var(--surface-card)] hover:opacity-90 transition-opacity cursor-pointer">
+                <Button size="icon-sm" onClick={handleSubmit} aria-label="Send message">
                   <ArrowUp className="w-4 h-4" strokeWidth={2.5} />
-                </button>
+                </Button>
               ) : (
-                <button type="button" aria-label="Use voice mode" className="h-8 px-1.5 rounded-lg flex items-center justify-center hover:bg-[var(--surface-hover)] text-[var(--text-secondary)] transition-colors cursor-pointer">
+                <Button variant="ghost" size="icon-sm" aria-label="Use voice mode">
                   <svg width="20" height="20" viewBox="0 0 21 21" fill="none" className="block">
                     <rect x="0" y="7.5" height="6" fill="currentColor" width="1" rx="0.5" />
                     <rect x="4" y="5.5" height="10" fill="currentColor" width="1" rx="0.5" />
@@ -63,7 +64,7 @@ export default function ChatInput({ onSend, autoFocus = false }) {
                     <rect x="16" y="2.5" height="16" fill="currentColor" width="1" rx="0.5" />
                     <rect x="20" y="7.5" height="6" fill="currentColor" width="1" rx="0.5" />
                   </svg>
-                </button>
+                </Button>
               )}
             </div>
           </div>

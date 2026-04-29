@@ -1,344 +1,42 @@
-import { ArrowRight, At, Bell, Gear, Kanban, MagnifyingGlass, ChatCircle, SignOut, SquaresFour, User, UserPlus, X } from '@phosphor-icons/react'
-import { useState, useRef, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { formatDistanceToNow } from 'date-fns'
-import { useAuthStore } from '../../store/authStore'
-import { useBoardStore } from '../../store/boardStore'
-import { useNoteStore } from '../../store/noteStore'
+import { useState } from 'react'
+import { MagnifyingGlass, SquaresFour } from '@phosphor-icons/react'
 import { useSettingsStore } from '../../store/settingsStore'
-import { useNotificationStore } from '../../store/notificationStore'
 import { useIsDesktop } from '../../hooks/useMediaQuery'
-import { useClickOutside } from '../../hooks/useClickOutside'
-import DynamicIcon from '../board/DynamicIcon'
+import Button from '../ui/Button'
+import MobileSearchOverlay from './MobileSearchOverlay'
+import MobileUserMenu from './MobileUserMenu'
 
 export default function Header({ title }) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [searchFocused, setSearchFocused] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-  const [notifOpen, setNotifOpen] = useState(false)
-  const mobileSearchRef = useRef(null)
-  const searchInputRef = useRef(null)
-  const menuRef = useClickOutside(() => setMenuOpen(false))
-  const searchRef = useClickOutside(() => setSearchFocused(false))
-  const notifRef = useClickOutside(() => setNotifOpen(false))
-  const navigate = useNavigate()
-  const profile = useAuthStore((s) => s.profile)
-  const signOut = useAuthStore((s) => s.signOut)
   const isDesktop = useIsDesktop()
   const toggleMobileMenu = useSettingsStore((s) => s.toggleMobileMenu)
 
-  const notifications = useNotificationStore((s) => s.notifications)
-  const unreadCount = useNotificationStore((s) => s.unreadCount)
-  const markAsRead = useNotificationStore((s) => s.markAsRead)
-  const markAllAsRead = useNotificationStore((s) => s.markAllAsRead)
-
-  const isLightColor = (color) => ['bg-[#E0DBD5]', 'bg-[#E8E2DB]', 'bg-[#C2D64A]', 'bg-[#A8BA32]', 'bg-[#D4A843]'].includes(color)
-
-  const cards = useBoardStore((s) => s.cards)
-  const boards = useBoardStore((s) => s.boards)
-  const setActiveBoard = useBoardStore((s) => s.setActiveBoard)
-  const notes = useNoteStore((s) => s.notes)
-
-  const searchResults = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase()
-    if (!q || q.length < 2) return { cards: [], notes: [] }
-
-    const matchedCards = Object.values(cards)
-      .filter((c) => {
-        const title = (c.title || '').toLowerCase()
-        const desc = (c.description || '').toLowerCase()
-        const taskNum = `#${c.task_number}`
-        return title.includes(q) || desc.includes(q) || taskNum.includes(q)
-      })
-      .slice(0, 6)
-
-    const matchedNotes = Object.values(notes)
-      .filter((n) => {
-        const title = (n.title || '').toLowerCase()
-        const content = (n.content || '').toLowerCase()
-        return title.includes(q) || content.includes(q)
-      })
-      .slice(0, 3)
-
-    return { cards: matchedCards, notes: matchedNotes }
-  }, [searchQuery, cards, notes])
-
-  const hasResults = searchResults.cards.length > 0 || searchResults.notes.length > 0
-  const showDropdown = searchFocused && searchQuery.trim().length >= 2
-
-  const handleCardResult = (card) => {
-    setActiveBoard(card.board_id)
-    setSearchQuery('')
-    setSearchFocused(false)
-    navigate('/boards')
-    // Dispatch a custom event so BoardsPage can open this card
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('kolumn:open-card', { detail: { cardId: card.id } }))
-    }, 100)
-  }
-
-  const handleNoteResult = (note) => {
-    setSearchQuery('')
-    setSearchFocused(false)
-    navigate('/notes')
-  }
-
-  const handleSignOut = async () => {
-    await signOut()
-    navigate('/')
-  }
-
-  const closeMobileSearch = () => {
-    setMobileSearchOpen(false)
-    setSearchQuery('')
-    setSearchFocused(false)
-  }
-
-  // Auto-focus mobile search input when opened
-  useEffect(() => {
-    if (mobileSearchOpen && mobileSearchRef.current) {
-      mobileSearchRef.current.focus()
-    }
-  }, [mobileSearchOpen])
-
+  // On desktop, the header's contents have moved into the sidebar (avatar, bell)
+  // and SearchDialog (⌘K). The header just keeps the page-level title row on mobile.
   return (
     <header className="relative h-16 bg-[var(--surface-page)] flex items-center justify-between px-4 sm:px-6">
-      {/* Mobile search overlay */}
       {!isDesktop && mobileSearchOpen ? (
-        <div className="absolute inset-0 bg-[var(--surface-card)] flex items-center gap-2 px-4 z-40">
-          <MagnifyingGlass className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-          <input
-            ref={mobileSearchRef}
-            type="text"
-            aria-label="Search tasks and notes"
-            placeholder="Search tasks, notes..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            className="flex-1 text-sm py-2 bg-transparent focus:outline-none placeholder-gray-400"
-          />
-          <button
-            type="button"
-            onClick={closeMobileSearch}
-            aria-label="Close search"
-            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-
-          {/* Mobile search results */}
-          {showDropdown && (
-            <div className="absolute left-0 right-0 top-full bg-[var(--surface-card)] border-t-0.5 border-[var(--border-default)] shadow-[0_4px_16px_rgba(0,0,0,0.1)] z-50 max-h-[70vh] overflow-y-auto">
-              {!hasResults && (
-                <p className="px-4 py-3 text-sm text-[var(--text-muted)]">No results found</p>
-              )}
-              {searchResults.cards.length > 0 && (
-                <div>
-                  <p className="px-3 py-1.5 text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider bg-[var(--surface-raised)]">Tasks</p>
-                  {searchResults.cards.map((card) => (
-                    <button
-                      key={card.id}
-                      type="button"
-                      onClick={() => { handleCardResult(card); closeMobileSearch() }}
-                      className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-[var(--surface-raised)] transition-colors"
-                    >
-                      <span className="text-[11px] font-mono text-[var(--text-muted)] shrink-0">#{card.task_number}</span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm text-[var(--text-primary)] truncate">{card.title}</p>
-                        {boards[card.board_id] && (
-                          <p className="text-[11px] text-[var(--text-muted)] truncate">{boards[card.board_id].name}</p>
-                        )}
-                      </div>
-                      {card.priority && (
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${
-                          card.priority === 'high' ? 'bg-[var(--color-copper)]' : card.priority === 'medium' ? 'bg-[var(--color-honey)]' : 'bg-[var(--color-lime-dark)]'
-                        }`} />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {searchResults.notes.length > 0 && (
-                <div>
-                  <p className="px-3 py-1.5 text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider bg-[var(--surface-raised)]">Notes</p>
-                  {searchResults.notes.map((note) => (
-                    <button
-                      key={note.id}
-                      type="button"
-                      onClick={() => { handleNoteResult(note); closeMobileSearch() }}
-                      className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-[var(--surface-raised)] transition-colors"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm text-[var(--text-primary)] truncate">{note.title}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+        <MobileSearchOverlay onClose={() => setMobileSearchOpen(false)} />
+      ) : (
+        <div className="flex items-center gap-2.5 min-w-0">
+          {!isDesktop && (
+            <Button variant="ghost" size="icon-sm" onClick={toggleMobileMenu} aria-label="Toggle menu" className="-ml-1.5">
+              <SquaresFour className="w-[18px] h-[18px]" />
+            </Button>
+          )}
+          {!isDesktop && (
+            <span className="text-sm font-medium text-[var(--text-secondary)] truncate">{title}</span>
           )}
         </div>
-      ) : (
-        <>
-      {/* Left: grid button (mobile) + title (mobile) / title (desktop) */}
-      <div className="flex items-center gap-2.5 min-w-0">
-        {!isDesktop && (
-          <button
-            type="button"
-            onClick={toggleMobileMenu}
-            aria-label="Toggle menu"
-            className="p-1.5 -ml-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
-          >
-            <SquaresFour className="w-[18px] h-[18px]" />
-          </button>
-        )}
-        {!isDesktop && (
-          <span className="text-sm font-medium text-[var(--text-secondary)] truncate">{title}</span>
-        )}
-      </div>
-      </>
       )}
 
-      {/* Right: search (mobile) + notifications + avatar */}
       <div className="flex items-center gap-1">
-        {/* Mobile search trigger */}
         {!isDesktop && !mobileSearchOpen && (
-          <button
-            type="button"
-            onClick={() => setMobileSearchOpen(true)}
-            aria-label="Search"
-            className="p-2 rounded-lg text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors"
-          >
+          <Button variant="ghost" size="icon-sm" onClick={() => setMobileSearchOpen(true)} aria-label="Search">
             <MagnifyingGlass className="w-[18px] h-[18px]" />
-          </button>
+          </Button>
         )}
-
-        {/* Notification bell */}
-        <div className="relative" ref={notifRef}>
-          <button
-            type="button"
-            onClick={() => { setNotifOpen(!notifOpen); setMenuOpen(false) }}
-            aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
-            className="relative p-2 rounded-lg text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors"
-          >
-            <Bell className="w-[18px] h-[18px]" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-[var(--color-copper)] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </button>
-
-          {notifOpen && (
-            <div className="absolute right-0 top-full mt-1.5 w-80 bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.1)] z-50 overflow-hidden animate-dropdown">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b-0.5 border-[var(--border-subtle)]">
-                <span className="text-sm font-semibold text-[var(--text-primary)]">Notifications</span>
-                {unreadCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={markAllAsRead}
-                    className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                  >
-                    Mark all read
-                  </button>
-                )}
-              </div>
-              <div className="max-h-72 overflow-y-auto">
-                {notifications.length === 0 && (
-                  <p className="px-4 py-6 text-sm text-[var(--text-muted)] text-center">No notifications yet</p>
-                )}
-                {notifications.map((n) => {
-                  const icon = n.type === 'mention' ? <At className="w-3.5 h-3.5 text-[var(--color-lime-dark)]" />
-                    : n.type === 'assigned' ? <UserPlus className="w-3.5 h-3.5 text-[var(--color-lime-dark)]" />
-                    : n.type === 'moved' ? <ArrowRight className="w-3.5 h-3.5 text-[var(--color-mauve)]" />
-                    : <ChatCircle className="w-3.5 h-3.5 text-[var(--text-faint)]" />
-
-                  return (
-                    <button
-                      key={n.id}
-                      type="button"
-                      onClick={() => {
-                        if (!n.read) markAsRead(n.id)
-                        if (n.card_id && n.board_id) {
-                          setActiveBoard(n.board_id)
-                          setNotifOpen(false)
-                          navigate('/boards')
-                          setTimeout(() => {
-                            window.dispatchEvent(new CustomEvent('kolumn:open-card', { detail: { cardId: n.card_id } }))
-                          }, 100)
-                        }
-                      }}
-                      className={`flex items-start gap-2.5 w-full px-4 py-2.5 text-left hover:bg-[var(--surface-raised)] transition-colors ${!n.read ? 'bg-[var(--surface-raised)]' : ''}`}
-                    >
-                      <div className="mt-0.5 shrink-0">{icon}</div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[12px] text-[var(--text-secondary)]">
-                          <span className="font-medium">{n.actor_name || 'Someone'}</span>{' '}
-                          {n.title}
-                        </p>
-                        {n.body && <p className="text-[11px] text-[var(--text-muted)] truncate mt-0.5">{n.body}</p>}
-                        <p className="text-[10px] text-[var(--text-faint)] mt-0.5">
-                          {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
-                        </p>
-                      </div>
-                      {!n.read && <span className="mt-1.5 w-2 h-2 rounded-full bg-[var(--color-lime)] shrink-0" />}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-      <div className="relative" ref={menuRef}>
-        <button
-          type="button"
-          onClick={() => { setMenuOpen(!menuOpen); setNotifOpen(false) }}
-          aria-label="User menu"
-          className={`w-9 h-9 rounded-full flex items-center justify-center cursor-pointer ${
-            isDesktop
-              ? profile?.icon ? `${isLightColor(profile.color) ? 'text-[var(--text-primary)]' : 'text-white'} ${profile.color || 'bg-[#E0DBD5]'}` : 'bg-[var(--surface-hover)]'
-              : ''
-          }`}
-        >
-          {!isDesktop ? (
-            <Kanban className="w-[22px] h-[22px] text-[var(--text-primary)]" strokeWidth={1.75} />
-          ) : profile?.icon ? (
-            <DynamicIcon name={profile.icon} className="w-5 h-5" />
-          ) : (
-            <User className="w-5 h-5 text-[var(--text-secondary)]" />
-          )}
-        </button>
-
-        {menuOpen && (
-          <div className="absolute right-0 top-full mt-1.5 bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.1)] py-1 z-50 w-48 animate-dropdown">
-            <div className="px-3 py-2 border-b-0.5 border-[var(--border-subtle)]">
-              <p className="text-sm font-medium text-[var(--text-primary)] truncate">{profile?.display_name || 'User'}</p>
-              <p className="text-xs text-[var(--text-muted)] truncate">{profile?.email || ''}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false)
-                navigate('/settings')
-              }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] cursor-pointer"
-            >
-              <Gear className="w-4 h-4" />
-              Settings
-            </button>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--color-bark)] hover:bg-[var(--surface-raised)] cursor-pointer"
-            >
-              <SignOut className="w-4 h-4" />
-              Sign out
-            </button>
-          </div>
-        )}
-      </div>
+        {!isDesktop && <MobileUserMenu />}
       </div>
     </header>
   )

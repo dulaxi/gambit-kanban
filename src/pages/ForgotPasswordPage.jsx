@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { ArrowLeft, Envelope, Kanban } from '@phosphor-icons/react'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -54,32 +56,33 @@ export default function ForgotPasswordPage() {
         ) : (
           <form onSubmit={handleSubmit} className="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-2xl p-6 shadow-sm space-y-4">
             {error && (
-              <div className="text-sm text-[var(--color-bark)] bg-[var(--color-bark-wash)] rounded-xl px-3 py-2">
+              <div className="text-sm text-[var(--color-copper)] bg-[var(--color-copper-wash)] rounded-xl px-3 py-2">
                 {error}
               </div>
             )}
 
             <div>
               <label className="text-xs font-medium text-[var(--text-secondary)] mb-1 block">Email</label>
-              <input
+              <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoFocus
-                className="w-full text-sm rounded-xl px-3 py-2.5 border border-[var(--border-default)] focus:outline-none focus:border-[var(--text-primary)]"
                 placeholder="you@example.com"
               />
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--btn-primary-bg)] text-white text-sm font-medium rounded-xl hover:bg-[var(--btn-primary-hover)] transition-colors disabled:opacity-50"
+              size="lg"
+              loading={loading}
+              loadingText="Sending"
+              className="w-full"
             >
               <Envelope className="w-4 h-4" />
-              {loading ? 'Sending...' : 'Send reset link'}
-            </button>
+              Send reset link
+            </Button>
           </form>
         )}
 
