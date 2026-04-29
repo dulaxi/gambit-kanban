@@ -12,6 +12,8 @@ import {
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import SortableCard from '../components/board/SortableCard'
 import Card from '../components/board/Card'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
 import { useAuthStore } from '../store/authStore'
 
 /* ── Mock board data for hero preview ── */
@@ -1718,74 +1720,70 @@ function HeroAuthCard() {
 
   return (
     <div className="max-w-sm">
-      <div className="bg-white border border-[#E0DBD5] rounded-2xl p-5 shadow-[0_4px_24px_0_rgba(0,0,0,0.04),0_2px_64px_0_rgba(0,0,0,0.02)] space-y-4">
+      <div className="bg-[var(--surface-card)] border border-[var(--color-sand)] rounded-2xl p-5 shadow-[0_4px_24px_0_rgba(0,0,0,0.04),0_2px_64px_0_rgba(0,0,0,0.02)] space-y-4">
         {error && (
-          <div className="text-sm text-[#7A5C44] bg-[#F0E0D2] rounded-xl px-3 py-2">
+          <div className="text-sm text-[var(--color-copper)] bg-[var(--color-copper-wash)]/60 border border-[var(--color-copper)]/30 rounded-xl px-3 py-2.5">
             {error}
           </div>
         )}
 
         {mode === 'email' ? (
           <form onSubmit={handleEmailContinue} className="space-y-3">
-            <input
+            <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
-              className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--color-ink)] focus:outline-none transition-colors"
             />
-            <button
-              type="submit"
-              className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#1B1B18] text-white text-sm font-medium rounded-[0.6rem] transition-transform will-change-transform ease-[cubic-bezier(0.165,0.85,0.45,1)] duration-150 hover:scale-y-[1.015] hover:scale-x-[1.005]"
-            >
+            <Button type="submit" size="lg" className="w-full">
               Continue with email
               <ArrowRight className="w-4 h-4" />
-            </button>
-            <p className="text-center text-xs text-[#8E8E89] pt-1">
+            </Button>
+            <p className="text-center text-xs text-[var(--text-muted)] pt-1">
               Already have an account?{' '}
-              <Link to="/login" className="text-[#5C5C57] underline underline-offset-2 decoration-[#E0DBD5] hover:decoration-[#5C5C57] transition-colors">
+              <Link to="/login" className="text-[var(--text-secondary)] underline underline-offset-2 decoration-[var(--color-sand)] hover:decoration-[var(--text-secondary)] transition-colors">
                 Sign in
               </Link>
             </p>
           </form>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="flex items-center gap-2 px-3 py-2 bg-[#F2EDE8] rounded-[0.6rem] text-sm text-[#5C5C57]">
+            <div className="flex items-center gap-2 px-3 py-2 bg-[var(--surface-hover)] rounded-lg text-sm text-[var(--text-secondary)]">
               <span className="truncate flex-1">{email}</span>
-              <button type="button" onClick={() => { setMode('email'); setError('') }} className="text-xs text-[#8E8E89] hover:text-[#5C5C57] shrink-0">
+              <button type="button" onClick={() => { setMode('email'); setError('') }} className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] shrink-0">
                 Change
               </button>
             </div>
             {mode === 'signup' && (
-              <input
+              <Input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
                 autoFocus
-                className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--color-ink)] focus:outline-none transition-colors"
               />
             )}
-            <input
+            <Input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={mode === 'signup' ? 'Create a password' : 'Enter your password'}
               required
               autoFocus={mode === 'signin'}
-              className="w-full text-sm rounded-[0.6rem] px-3 py-2.5 border border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--color-ink)] focus:outline-none transition-colors"
             />
-            <button
+            <Button
               type="submit"
-              disabled={submitting}
-              className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#1B1B18] text-white text-sm font-medium rounded-[0.6rem] transition-transform will-change-transform ease-[cubic-bezier(0.165,0.85,0.45,1)] duration-150 hover:scale-y-[1.015] hover:scale-x-[1.005] disabled:opacity-50 disabled:pointer-events-none"
+              size="lg"
+              loading={submitting}
+              loadingText="Please wait…"
+              className="w-full"
             >
-              {submitting ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
-            </button>
-            <p className="text-center text-xs text-[#8E8E89] pt-1">
+              {mode === 'signup' ? 'Create account' : 'Sign in'}
+            </Button>
+            <p className="text-center text-xs text-[var(--text-muted)] pt-1">
               {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
-              <button type="button" onClick={() => { setMode(mode === 'signup' ? 'signin' : 'signup'); setError('') }} className="text-[#5C5C57] underline underline-offset-2 decoration-[#E0DBD5] hover:decoration-[#5C5C57] transition-colors">
+              <button type="button" onClick={() => { setMode(mode === 'signup' ? 'signin' : 'signup'); setError('') }} className="text-[var(--text-secondary)] underline underline-offset-2 decoration-[var(--color-sand)] hover:decoration-[var(--text-secondary)] transition-colors">
                 {mode === 'signup' ? 'Sign in' : 'Sign up'}
               </button>
             </p>
