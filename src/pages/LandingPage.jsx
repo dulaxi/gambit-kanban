@@ -1516,89 +1516,33 @@ const DEMO_COLUMNS = [
 
 const DEMO_CARDS_INIT = [
   {
-    id: 'demo-1', title: 'Design system tokens',
-    description: 'Define color, spacing, and typography tokens. Must support light + dark modes and ship with the component library.',
-    column_id: 'demo-col-1', position: 0, priority: 'high', task_number: 12, completed: false,
-    labels: [{ text: 'Design', color: 'purple' }],
-    checklist: null, due_date: null, assignees: ['Sarah Chen'],
-    icon: null, board_id: 'demo', archived: false,
+    id: 'demo-1', title: 'Design system tokens', description: 'Define color, spacing, and typography tokens for the component library',
+    column_id: 'demo-col-1', position: 0, priority: 'high', task_number: 1, completed: false,
+    labels: [{ text: 'Design', color: 'purple' }], checklist: null, due_date: null, assignee_name: null, icon: null, board_id: 'demo', archived: false,
   },
   {
-    id: 'demo-2', title: 'Set up CI pipeline',
-    description: '',
-    column_id: 'demo-col-1', position: 1, priority: 'medium', task_number: 13, completed: false,
-    labels: [{ text: 'DevOps', color: 'blue' }],
-    checklist: null, due_date: '2026-05-08', assignees: ['Marcus Liu'],
-    icon: null, board_id: 'demo', archived: false,
+    id: 'demo-2', title: 'Set up CI pipeline', description: '',
+    column_id: 'demo-col-1', position: 1, priority: 'medium', task_number: 2, completed: false,
+    labels: [{ text: 'DevOps', color: 'blue' }], checklist: null, due_date: '2026-04-10', assignee_name: 'Marcus', icon: null, board_id: 'demo', archived: false,
   },
   {
-    id: 'demo-3', title: 'Write onboarding docs',
-    description: '',
-    column_id: 'demo-col-1', position: 2, priority: 'low', task_number: 14, completed: false,
-    labels: [{ text: 'Docs', color: 'yellow' }],
-    checklist: [
-      { text: 'Intro guide', done: true },
-      { text: 'API reference', done: false },
-      { text: 'Tutorials', done: false },
-      { text: 'FAQ', done: false },
-      { text: 'Migration guide', done: false },
-    ],
-    due_date: null, assignees: [],
-    icon: null, board_id: 'demo', archived: false,
+    id: 'demo-3', title: 'Write onboarding docs', description: '',
+    column_id: 'demo-col-1', position: 2, priority: 'low', task_number: 3, completed: false,
+    labels: [{ text: 'Docs', color: 'yellow' }], checklist: [{ text: 'Intro guide', done: true }, { text: 'API reference', done: false }, { text: 'Tutorials', done: false }], due_date: null, assignee_name: null, icon: null, board_id: 'demo', archived: false,
   },
   {
-    id: 'demo-4', title: 'Refactor auth middleware',
-    description: 'Replace the legacy session middleware with the new JWT stack from the platform team.',
-    column_id: 'demo-col-1', position: 3, priority: 'high', task_number: 15, completed: false,
-    labels: [{ text: 'Backend', color: 'red' }],
-    checklist: null, due_date: null,
-    assignees: ['Aisha Rao', 'Marcus Liu', 'Jordan West', 'Sam Patel'],
-    icon: null, board_id: 'demo', archived: false,
+    id: 'demo-4', title: 'Auth flow redesign', description: 'Migrate from session-based to JWT tokens with refresh flow',
+    column_id: 'demo-col-2', position: 0, priority: 'high', task_number: 4, completed: false,
+    labels: [{ text: 'Feature', color: 'green' }], checklist: [{ text: 'JWT setup', done: true }, { text: 'Refresh flow', done: true }, { text: 'Session migration', done: false }], due_date: null, assignee_name: 'Aisha', icon: null, board_id: 'demo', archived: false,
   },
   {
-    id: 'demo-5', title: 'Auth flow redesign',
-    description: 'Migrate from session-based cookies to JWT tokens with refresh-rotation strategy.',
-    column_id: 'demo-col-2', position: 0, priority: 'high', task_number: 16, completed: false,
-    labels: [{ text: 'Feature', color: 'green' }],
-    checklist: [
-      { text: 'JWT setup', done: true },
-      { text: 'Refresh flow', done: true },
-      { text: 'Session migration', done: true },
-      { text: 'Update protected routes', done: false },
-      { text: 'Add token rotation', done: false },
-      { text: 'Write integration tests', done: false },
-    ],
-    due_date: null, assignees: ['Aisha Rao'],
-    icon: null, board_id: 'demo', archived: false,
-  },
-  {
-    id: 'demo-6', title: 'API rate limiting',
-    description: '',
-    column_id: 'demo-col-2', position: 1, priority: 'medium', task_number: 17, completed: false,
-    labels: [{ text: 'Backend', color: 'red' }],
-    checklist: null, due_date: '2026-05-05', assignees: ['Marcus Liu'],
-    icon: null, board_id: 'demo', archived: false,
-  },
-  {
-    id: 'demo-7', title: 'Mobile nav polish',
-    description: 'Tighten the drawer transition; bottom-tab active state has the wrong easing.',
-    column_id: 'demo-col-2', position: 2, priority: 'low', task_number: 18, completed: false,
-    labels: [{ text: 'UI', color: 'purple' }],
-    checklist: null, due_date: '2026-05-12', assignees: ['Jordan West'],
-    icon: null, board_id: 'demo', archived: false,
-  },
-  {
-    id: 'demo-8', title: 'Stripe integration',
-    description: '',
-    column_id: 'demo-col-2', position: 3, priority: 'high', task_number: 19, completed: false,
-    labels: [{ text: 'Feature', color: 'green' }, { text: 'Backend', color: 'red' }],
-    checklist: null, due_date: '2026-05-03',
-    assignees: ['Aisha Rao', 'Sarah Chen'],
-    icon: null, board_id: 'demo', archived: false,
+    id: 'demo-5', title: 'API rate limiting', description: '',
+    column_id: 'demo-col-2', position: 1, priority: 'medium', task_number: 5, completed: false,
+    labels: [{ text: 'Backend', color: 'red' }], checklist: null, due_date: '2026-04-08', assignee_name: 'Marcus', icon: null, board_id: 'demo', archived: false,
   },
 ]
 
-function DemoBoard({ variant = 'density' }) {
+function DemoBoard() {
   const [cards, setCards] = useState(DEMO_CARDS_INIT)
   const [activeCardId, setActiveCardId] = useState(null)
   const cardsRef = useRef(cards)
@@ -1683,60 +1627,21 @@ function DemoBoard({ variant = 'density' }) {
 
   const activeCard = activeCardId ? cards.find((c) => c.id === activeCardId) : null
 
-  const colGap = variant === 'editorial' ? 'gap-8' : 'gap-6'
-  const cardGap = variant === 'editorial' ? 'gap-4' : 'gap-3'
-
   function DroppableColumn({ col, colCards }) {
     const { setNodeRef } = useDroppable({ id: col.id })
-    const isInProgress = col.id === 'demo-col-2'
-
     return (
-      <div ref={setNodeRef} className="w-[260px] @[612px]:w-[290px] shrink-0 flex flex-col h-full">
-        {/* Header */}
-        {variant === 'density' ? (
-          <div className="flex items-center justify-between px-0.5 pb-3">
-            <div className="flex items-baseline gap-2">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)]">{col.title}</h3>
-              <span className="text-xs text-[var(--text-muted)]">{colCards.length}</span>
-            </div>
-            <button
-              type="button"
-              aria-label="Add task"
-              className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors cursor-default"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-        ) : (
-          <div className="px-0.5 pb-3 mb-3 border-b border-[var(--color-cream-dark)]">
-            <div className="flex items-baseline gap-2 pb-2">
-              {isInProgress && (
-                <span className="self-center w-1.5 h-1.5 rounded-full bg-[var(--color-lime)] animate-pulse shrink-0" />
-              )}
-              <h3 className="text-base font-medium font-heading text-[var(--text-primary)] tracking-tight">{col.title}</h3>
-              <span className="text-xs text-[var(--text-muted)] tabular-nums ml-auto">{colCards.length}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Cards */}
+      <div ref={setNodeRef} className="flex-1 min-w-0 flex flex-col h-full">
+        <div className="flex items-center justify-between px-1 mb-2">
+          <span className="text-sm font-semibold text-[var(--text-primary)] font-logo">{col.title}</span>
+          <span className="text-xs text-[var(--text-muted)]">{colCards.length}</span>
+        </div>
         <SortableContext items={colCards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-          <div className={`flex flex-col ${cardGap} flex-1 rounded-xl px-1`}>
+          <div className="flex flex-col gap-2 flex-1 rounded-xl p-1">
             {colCards.map((card) => (
               <SortableCard key={card.id} card={card} onClick={() => {}} onComplete={() => {}} isSelected={false} />
             ))}
           </div>
         </SortableContext>
-
-        {/* Footer add-task affordance */}
-        <button
-          type="button"
-          className={`text-left px-3 py-2 mt-2 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors cursor-default ${
-            variant === 'editorial' ? 'italic font-heading' : ''
-          }`}
-        >
-          + Add a task
-        </button>
       </div>
     )
   }
@@ -1749,7 +1654,7 @@ function DemoBoard({ variant = 'density' }) {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={`@container flex ${colGap} h-full`}>
+      <div className="flex gap-3 h-full">
         {DEMO_COLUMNS.map((col) => (
           <DroppableColumn key={col.id} col={col} colCards={getColumnCards(col.id)} />
         ))}
@@ -1758,38 +1663,6 @@ function DemoBoard({ variant = 'density' }) {
         {activeCard && <Card card={activeCard} onClick={() => {}} onComplete={() => {}} isSelected={false} />}
       </DragOverlay>
     </DndContext>
-  )
-}
-
-function DemoToggle({ variant, onChange }) {
-  return (
-    <div className="flex justify-end">
-      <div
-        role="tablist"
-        aria-label="Demo board layout"
-        className="inline-flex rounded-full border border-[var(--color-sand)] p-0.5 bg-[var(--surface-card)] shadow-sm"
-      >
-        {[
-          { id: 'density', label: 'Density' },
-          { id: 'editorial', label: 'Editorial' },
-        ].map((opt) => (
-          <button
-            key={opt.id}
-            type="button"
-            role="tab"
-            aria-selected={variant === opt.id}
-            onClick={() => onChange(opt.id)}
-            className={`px-3.5 py-1 text-[11px] font-medium tracking-tight rounded-full transition-colors ${
-              variant === opt.id
-                ? 'bg-[var(--accent-lime-soft)] text-[var(--text-primary)]'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-    </div>
   )
 }
 
@@ -1975,7 +1848,6 @@ export default function LandingPage() {
   const user = useAuthStore((s) => s.user)
   const loading = useAuthStore((s) => s.loading)
   const [visible, setVisible] = useState(false)
-  const [demoVariant, setDemoVariant] = useState('density')
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 50)
@@ -2003,7 +1875,7 @@ export default function LandingPage() {
       {/* ─── Hero ─── */}
       <section className="relative overflow-hidden">
         <div className="px-6 sm:px-10 pb-8 max-w-[90rem] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,_420px)_1fr] gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Left — Copy (center-aligned) */}
             <div className="flex w-full min-h-[85vh] items-center">
             <div className="text-center flex flex-col items-center w-full">
@@ -2029,12 +1901,60 @@ export default function LandingPage() {
             </div>
 
             {/* Right — Live Demo Board */}
-            <div className="hidden lg:flex flex-col gap-3 w-full">
-              <DemoToggle variant={demoVariant} onChange={setDemoVariant} />
-              <div className="flex justify-center items-center w-full">
-                <div className="rounded-2xl w-full h-[85vh] min-h-[500px] overflow-hidden border border-[var(--color-sand)]/80 bg-[var(--surface-card)] shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
-                  <div className={`w-full h-full overflow-hidden font-sans ${demoVariant === 'editorial' ? 'p-8' : 'p-6'}`}>
-                    <DemoBoard variant={demoVariant} />
+            <div className="hidden lg:flex justify-center items-center w-full">
+              <div className="rounded-2xl w-full h-[85vh] min-h-[500px] overflow-hidden border border-[var(--color-sand)]/80 bg-[var(--surface-card)] shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
+                <div className="relative w-full h-full flex flex-col">
+                  {/* Browser title bar */}
+                  <div className="flex items-center gap-2 px-4 py-2.5 bg-[var(--surface-hover)] border-b border-[var(--color-cream-dark)]">
+                    <div className="flex items-center gap-1.5">
+                      {/* Apple-spec macOS traffic-light colors — kept as hex (not Kolumn design tokens) */}
+                      <span className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                      <span className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+                      <span className="w-3 h-3 rounded-full bg-[#28C840]" />
+                    </div>
+                    <div className="flex-1 flex justify-center">
+                      <div className="px-4 py-1 rounded-md bg-[var(--surface-card)] border border-[var(--color-sand)] text-[10px] text-[var(--text-muted)] font-medium">
+                        kolumn.app/boards/product-launch
+                      </div>
+                    </div>
+                    <div className="w-12" />
+                  </div>
+
+                  {/* Board content */}
+                  <div className="flex flex-1 overflow-hidden">
+                    {/* Mini sidebar — matches real collapsed Sidebar.jsx */}
+                    <div className="flex w-16 bg-[var(--surface-page)] border-r border-[var(--color-sand)] flex-col shrink-0 h-full">
+                      <div className="flex items-center justify-center h-16 border-b border-[var(--color-sand)]">
+                        <Kanban size={26} weight="fill" className="text-[var(--color-logo)]" />
+                      </div>
+                      <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
+                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)]">
+                          <SquaresFour className="w-5 h-5 shrink-0" />
+                        </div>
+                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium bg-[var(--accent-lime-wash)] text-[var(--text-primary)]">
+                          <Kanban className="w-5 h-5 shrink-0" />
+                        </div>
+                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)]">
+                          <Calendar className="w-5 h-5 shrink-0" />
+                        </div>
+                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)]">
+                          <Notepad className="w-5 h-5 shrink-0" />
+                        </div>
+                      </nav>
+                      <div className="border-t border-[var(--color-sand)] py-4 px-2 space-y-1">
+                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)]">
+                          <Gear className="w-5 h-5 shrink-0" />
+                        </div>
+                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)]">
+                          <CaretDoubleRight className="w-5 h-5" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Live columns */}
+                    <div className="flex-1 p-4 overflow-x-auto overflow-y-auto h-full font-sans">
+                      <DemoBoard />
+                    </div>
                   </div>
                 </div>
               </div>
