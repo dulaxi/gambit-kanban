@@ -4,13 +4,18 @@ import { useBoardStore } from '../store/boardStore'
 import BoardSelector from '../components/board/BoardSelector'
 import BoardView from '../components/board/BoardView'
 import CreateBoardModal from '../components/board/CreateBoardModal'
+import ConfirmModal from '../components/board/ConfirmModal'
 import Button from '../components/ui/Button'
+import { useBoardCardOrder } from '../hooks/useBoardCardOrder'
+import { useBoardKeyboardNav } from '../hooks/useBoardKeyboardNav'
 
 const CardDetailPanel = lazy(() => import('../components/board/CardDetailPanel'))
 
 export default function BoardsPage() {
   const [editingCardId, setEditingCardId] = useState(null)
   const [inlineCardId, setInlineCardId] = useState(null)
+  const [focusedCardId, setFocusedCardId] = useState(null)
+  const [confirmDeleteCardId, setConfirmDeleteCardId] = useState(null)
   const [filters, setFilters] = useState({ priority: [], assignee: null, label: [], due: null })
   const [sortBy, setSortBy] = useState('manual')
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -20,8 +25,26 @@ export default function BoardsPage() {
   const activeBoardName = useBoardStore((s) => s.boards[s.activeBoardId]?.name)
 
   const addCard = useBoardStore((s) => s.addCard)
+  const completeCard = useBoardStore((s) => s.completeCard)
+  const deleteCard = useBoardStore((s) => s.deleteCard)
+  const duplicateCard = useBoardStore((s) => s.duplicateCard)
   const columns = useBoardStore((s) => s.columns)
   const tempIdMap = useBoardStore((s) => s._tempIdMap)
+
+  const orderedCardIds = useBoardCardOrder(activeBoardId, filters, sortBy)
+
+  // Card-focused keyboard nav. Disabled while detail modal is open or
+  // an inline-editor card is showing — those own their own input focus.
+  useBoardKeyboardNav({
+    orderedIds: orderedCardIds,
+    focusedId: focusedCardId,
+    setFocusedId: setFocusedCardId,
+    enabled: !editingCardId && !inlineCardId && !confirmDeleteCardId && !showCreateModal,
+    onOpen: (id) => setEditingCardId(id),
+    onComplete: (id) => completeCard(id),
+    onDelete: (id) => setConfirmDeleteCardId(id),
+    onDuplicate: (id) => duplicateCard(id),
+  })
 
   // Swap inline card ID when temp card gets persisted to real ID
   useEffect(() => {
@@ -63,6 +86,7 @@ export default function BoardsPage() {
   const handleCardClick = useCallback((cardId) => {
     setInlineCardId(null)
     setEditingCardId(cardId)
+    setFocusedCardId(cardId)
   }, [])
 
   const handleCreateCard = useCallback((cardId) => {
@@ -96,6 +120,7 @@ export default function BoardsPage() {
             inlineCardId={inlineCardId}
             onInlineDone={handleInlineDone}
             selectedCardId={editingCardId}
+            focusedCardId={focusedCardId}
             filters={filters}
             sortBy={sortBy}
           />
@@ -132,6 +157,18 @@ export default function BoardsPage() {
         <CreateBoardModal
           onClose={() => { setShowCreateModal(false); setCreateInWorkspaceId(null) }}
           workspaceId={createInWorkspaceId}
+        />
+      )}
+
+      {confirmDeleteCardId && (
+        <ConfirmModal
+          title="Delete task"
+          message="This will permanently delete the task."
+          onConfirm={() => {
+            deleteCard(confirmDeleteCardId)
+            setConfirmDeleteCardId(null)
+          }}
+          onCancel={() => setConfirmDeleteCardId(null)}
         />
       )}
     </div>

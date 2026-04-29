@@ -14,6 +14,20 @@ const GROUPS = [
       { keys: ['Esc'], desc: 'Close any open dialog' },
     ],
   },
+  {
+    title: 'On a board (card focused)',
+    items: [
+      { keys: ['j'], desc: 'Focus next card' },
+      { keys: ['↓'], desc: 'Focus next card (alias)' },
+      { keys: ['k'], desc: 'Focus previous card' },
+      { keys: ['↑'], desc: 'Focus previous card (alias)' },
+      { keys: ['Enter'], desc: 'Open the focused card' },
+      { keys: ['e'], desc: 'Open the focused card (alias)' },
+      { keys: ['x'], desc: 'Toggle complete on the focused card' },
+      { keys: [MOD, 'D'], desc: 'Duplicate the focused card' },
+      { keys: ['Delete'], desc: 'Delete the focused card' },
+    ],
+  },
 ]
 
 function Kbd({ children }) {

@@ -19,7 +19,7 @@ import Column from './Column'
 import Card from './Card'
 import QuickAddBar from './QuickAddBar'
 
-export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCardId, onInlineDone, selectedCardId, filters, sortBy }) {
+export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCardId, onInlineDone, selectedCardId, focusedCardId, filters, sortBy }) {
   const [isAddingColumn, setIsAddingColumn] = useState(false)
   const [newColumnTitle, setNewColumnTitle] = useState('')
   const [addingColumn, setAddingColumn] = useState(false)
@@ -296,6 +296,7 @@ export default function BoardView({ boardId, onCardClick, onCreateCard, inlineCa
             inlineCardId={inlineCardId}
             onInlineDone={onInlineDone}
             selectedCardId={selectedCardId}
+            focusedCardId={focusedCardId}
             filters={filters}
             sortBy={sortBy}
           />

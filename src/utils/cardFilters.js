@@ -1,5 +1,29 @@
 import { isToday, isPast, isThisWeek, parseISO } from 'date-fns'
 
+const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 }
+
+export function sortCards(cards, sortBy) {
+  if (!sortBy || sortBy === 'manual') return cards
+  return [...cards].sort((a, b) => {
+    if (sortBy === 'due_date') {
+      if (!a.due_date && !b.due_date) return 0
+      if (!a.due_date) return 1
+      if (!b.due_date) return -1
+      return a.due_date.localeCompare(b.due_date)
+    }
+    if (sortBy === 'priority') {
+      return (PRIORITY_ORDER[a.priority] ?? 3) - (PRIORITY_ORDER[b.priority] ?? 3)
+    }
+    if (sortBy === 'created') {
+      return (b.created_at || '').localeCompare(a.created_at || '')
+    }
+    if (sortBy === 'alpha') {
+      return (a.title || '').localeCompare(b.title || '')
+    }
+    return 0
+  })
+}
+
 export function filterCards(cards, filters) {
   if (!filters) return cards
 
