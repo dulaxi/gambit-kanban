@@ -19,6 +19,7 @@ const WorkspacePage = lazy(() => import('./pages/WorkspacePage'))
 const ChatPage = lazy(() => import('./pages/ChatPage'))
 const ChatListPage = lazy(() => import('./pages/ChatListPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+const LandingBoardSandbox = lazy(() => import('./pages/LandingBoardSandbox'))
 
 function UndoListener() {
   const { toasts } = useToasterStore()
@@ -53,6 +54,7 @@ export default function App() {
       <Suspense fallback={<div className="min-h-screen bg-[var(--surface-raised)] flex items-center justify-center"><div className="text-sm text-[var(--text-muted)]">Loading...</div></div>}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/sandbox/landing-board" element={<LandingBoardSandbox />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
