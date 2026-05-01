@@ -219,6 +219,22 @@
   50.01%, 100% { opacity: 0; }
 }
 
+/* Live-transcription audio level bars — three bars in `LiveAudioBars`
+   each apply this keyframe with a different duration + negative delay so
+   they rise and fall asynchronously, like the level meter on a recording
+   app. transform-origin: bottom makes them grow from the baseline (not
+   the center) so they read as a real audio meter. */
+@keyframes audio-bar-pulse {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+.audio-bar {
+  transform-origin: bottom;
+  animation-name: audio-bar-pulse;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
 /* AI shimmer reveal — text is hidden where the rainbow band hasn't passed yet.
    The band is the leading edge of the reveal. Driven by --reveal CSS variable. */
 .ai-shimmer-reveal {

@@ -1,10 +1,10 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import { useEffect, useLayoutEffect, useState, useCallback, useMemo, useRef } from 'react'
 import '@fontsource-variable/plus-jakarta-sans'
 
 import { SiGmail } from 'react-icons/si'
 import { BsSlack, BsMicrosoftTeams } from 'react-icons/bs'
-import { TextAlignLeft, ArrowRight, ArrowUpRight, Browser, Calendar, CalendarDot, CaretDoubleRight, CaretLeft, CaretRight, ChartBar, ChartPie, Check, CheckCircle, CheckSquare, Clock, Columns, CreditCard, DotsSixVertical, FileText, Gauge, Gear, Hash, Kanban, SquaresFour, Lightning, List, CursorClick, Notepad, Tag, Plus, ShareNetwork, Shield, ShieldCheck, ShoppingCart, Sparkle, Square, Target, TrendUp, User, Users, X } from '@phosphor-icons/react'
+import { TextAlignLeft, ArrowRight, ArrowUpRight, Browser, Calendar, CalendarDot, CaretDoubleRight, CaretLeft, CaretRight, ChartBar, ChartPie, ChatsCircle, Check, CheckCircle, CheckSquare, ClipboardText, Clock, Columns, CreditCard, DotsSixVertical, Envelope, FileText, Gauge, Gear, Hash, Kanban, Megaphone, Microphone, SquaresFour, Lightning, List, CursorClick, Notepad, Tag, Plus, ShareNetwork, Shield, ShieldCheck, ShoppingCart, Sparkle, Square, Target, TrendUp, User, Users, VideoCamera, Waveform, X } from '@phosphor-icons/react'
 import {
   DndContext, DragOverlay, pointerWithin, rectIntersection,
   PointerSensor, useSensor, useSensors, useDroppable,
@@ -137,12 +137,10 @@ const mockDetailCard = {
   ],
 }
 
-const stats = [
-  { value: '10x', label: 'Faster planning' },
-  { value: '100%', label: 'Real-time sync' },
-  { value: '0', label: 'Config needed' },
-  { value: '∞', label: 'Boards & cards' },
-]
+// Stats bar removed pre-launch — old values were vanity placeholders
+// ("10x", "100%", "∞") that broke the restrained hero voice. Revisit
+// post-launch with real metrics (active boards, signup count, avg setup
+// time, etc.) and rebuild the section using credible numbers.
 
 const features = [
   {
@@ -383,7 +381,8 @@ const AI_CARDS = [
     priority: 'high',
     dueDate: null,
     checklist: null,
-    assignee: 'A',
+    // Message @-mentions @rhea, so the assignee initial must be 'R'.
+    assignee: 'R',
     icon: 'browser',
   },
   {
@@ -410,27 +409,137 @@ const AI_CARDS = [
   },
 ]
 
-// Slack thread demo — mirrors slack-thread-demo.html exactly.
-const SLACK_MESSAGES = [
+// Chat thread demo — production-incident scenario. Deliberately distinct
+// from Notes (launch-planning, hero/pricing/stripe) and Email (board deck,
+// MRR/churn/competitive). Multi-sender chat with three @-mentions, each
+// resulting in a separate task on the right.
+const CHAT_MESSAGES = [
   {
-    sender: 'Dula',
-    timestamp: '2:14 PM',
-    text: '@rhea hero section feels plain — sarah flagged it on the call, can you redo it? high prio',
-    mentions: ['@rhea'],
+    sender: 'Sarah',
+    timestamp: '11:02 AM',
+    text: '@theo can you rollback the new deploy? checkout 500ing for 3 users in the last 10 min, rate limiter looks suspect',
+    mentions: ['@theo'],
   },
   {
-    sender: 'Dula',
-    timestamp: '2:15 PM',
-    text: "also pricing page needs building — 3 tiers with monthly/annual toggle, founder's call",
+    sender: 'Theo',
+    timestamp: '11:03 AM',
+    text: 'on it. @paige pls draft a customer status post while i patch',
+    mentions: ['@paige'],
+  },
+  {
+    sender: 'Sarah',
+    timestamp: '11:05 AM',
+    text: '@anna start the postmortem doc — need it before standup tmrw',
+    mentions: ['@anna'],
+  },
+]
+
+// Cards extracted from CHAT_MESSAGES — three actions, three assignees,
+// three icons/labels distinct from the Notes/Email decks.
+const CHAT_AI_CARDS = [
+  {
+    taskNumber: 24,
+    title: 'Roll back rate-limiter deploy',
+    description: 'Checkout returning 500s — rollback first, debug after',
+    labels: [{ text: 'Backend', color: 'red' }],
+    priority: 'high',
+    dueDate: 'Today',
+    checklist: null,
+    assignee: 'T',
+    icon: 'lightning',
+  },
+  {
+    taskNumber: 25,
+    title: 'Draft customer status post',
+    description: 'Acknowledge outage, ETA, status-page link',
+    labels: [{ text: 'Comms', color: 'purple' }],
+    priority: 'high',
+    dueDate: 'Today',
+    checklist: null,
+    assignee: 'P',
+    icon: 'chats',
+  },
+  {
+    taskNumber: 26,
+    title: 'Start postmortem doc',
+    description: 'Root cause + timeline, ready before standup',
+    labels: [{ text: 'Docs', color: 'yellow' }],
+    priority: 'medium',
+    dueDate: 'Tmrw',
+    checklist: null,
+    assignee: 'A',
+    icon: 'notepad',
+  },
+]
+
+const CHAT_PHOSPHOR_ICON_MAP = { 'lightning': Lightning, 'chats': ChatsCircle, 'notepad': Notepad }
+
+// Meeting-transcript demo — deliberately non-tech to broaden the page's
+// audience (marketing/agency/ops teams, not just devs). Three speakers in
+// a Q2 campaign kickoff, three action items extracted. Distinct from the
+// other three demos:
+//   Notes → solo bullet writing (launch planning)
+//   Email → single-author block (board deck prep)
+//   Chat  → real-time bubbles (production incident)
+//   Transcript → paragraph speaker turns (planning meeting)
+const TRANSCRIPT_PARAGRAPHS = [
+  {
+    speaker: 'Emma',
+    timestamp: '0:14',
+    text: "Alright, so for the Q2 campaign we’ve got three things landing by next Friday — refreshed press kit, the 60-second brand video, and influencer outreach. I’ll grab the press kit since I’ve already got the file open from last week.",
     mentions: [],
   },
   {
-    sender: 'Dula',
-    timestamp: '2:16 PM',
-    text: '@marcus stripe integration by fri — checkout, webhooks, customer portal. high prio, legal flagged it',
-    mentions: ['@marcus'],
+    speaker: 'Ben',
+    timestamp: '1:32',
+    text: "Yeah, I’ll take the brand video. I’m thinking we cut it in two passes — rough by Wednesday so we’ve got time to iterate, then final by end of Thursday.",
+    mentions: [],
+  },
+  {
+    speaker: 'Claire',
+    timestamp: '2:05',
+    text: "And I’ll run point on the influencer side. The list’s already in HubSpot from last quarter — I’ll refresh the pitch this morning and we should be good to go.",
+    mentions: [],
   },
 ]
+
+const TRANSCRIPT_AI_CARDS = [
+  {
+    taskNumber: 31,
+    title: 'Refresh press kit',
+    description: 'Update existing kit for Q2 campaign rollout',
+    labels: [{ text: 'Marketing', color: 'pink' }],
+    priority: 'medium',
+    dueDate: 'Fri',
+    checklist: null,
+    assignee: 'E',
+    icon: 'file-text',
+  },
+  {
+    taskNumber: 32,
+    title: 'Brand video — first cut',
+    description: '60-second cut ready for review by Wednesday',
+    labels: [{ text: 'Design', color: 'purple' }],
+    priority: 'high',
+    dueDate: 'Wed',
+    checklist: null,
+    assignee: 'B',
+    icon: 'video',
+  },
+  {
+    taskNumber: 33,
+    title: 'Influencer outreach',
+    description: 'Top-50 list from HubSpot, updated pitch',
+    labels: [{ text: 'PR', color: 'green' }],
+    priority: 'medium',
+    dueDate: 'Fri',
+    checklist: null,
+    assignee: 'C',
+    icon: 'megaphone',
+  },
+]
+
+const TRANSCRIPT_PHOSPHOR_ICON_MAP = { 'file-text': FileText, 'video': VideoCamera, 'megaphone': Megaphone }
 
 // Master timeline phases
 const TOTAL_MIRROR_LINES = 2 + DRAFT_LINES.length
@@ -466,7 +575,7 @@ const SLACK_CARDS_GAP = 400
 const SLACK_CARDS_START = SLACK_MSG_3_END + SLACK_CARDS_GAP
 const SLACK_CARD_SWEEP = 750
 const SLACK_CARD_STAGGER = 600
-const SLACK_CARDS_END = SLACK_CARDS_START + (AI_CARDS.length - 1) * SLACK_CARD_STAGGER + SLACK_CARD_SWEEP
+const SLACK_CARDS_END = SLACK_CARDS_START + (CHAT_AI_CARDS.length - 1) * SLACK_CARD_STAGGER + SLACK_CARD_SWEEP
 const SLACK_HOLD_DUR = 1800
 const SLACK_MSG_FADE_OUT_DUR = 400
 const SLACK_MSG_FADE_OUT_START = SLACK_CARDS_END + SLACK_HOLD_DUR
@@ -984,24 +1093,23 @@ function SlackLogo({ className = '' }) {
 }
 
 function SlackThread({ elapsed }) {
-  const messageStates = SLACK_MESSAGES.map((_, idx) => computeSlackMessageState(elapsed, idx))
+  const messageStates = CHAT_MESSAGES.map((_, idx) => computeSlackMessageState(elapsed, idx))
   return (
     <div className="px-5 sm:px-6 pt-4 sm:pt-5 flex flex-col gap-2 select-none h-full">
-      {/* Channel header — Slack 2024: channel name + topic subtitle */}
+      {/* Header — generic team-chat framing matched to the new incident
+          scenario (replaces the old Slack #launch-prep channel header). */}
       <div className="pb-2 border-b border-[#E8E8E8]">
         <div className="flex items-center gap-1.5">
-          <Hash className="w-3.5 h-3.5 text-[#616061]" />
-          <span className="text-[13px] font-bold text-[#1D1C1D]">launch-prep</span>
-          <svg className="w-2.5 h-2.5 text-[#616061] ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          <ChatsCircle className="w-3.5 h-3.5 text-[#616061]" weight="regular" />
+          <span className="text-[13px] font-semibold text-[#1D1C1D]">Team chat — prod incident</span>
         </div>
-        <p className="text-[10px] text-[#616061] ml-[19px] mt-0.5 truncate">Sprint prep, blockers, and launch readiness</p>
       </div>
 
       {/* Messages — grouped continuation for same sender */}
       <div className="flex flex-col gap-3 pt-1">
-        {SLACK_MESSAGES.map((msg, idx) => {
+        {CHAT_MESSAGES.map((msg, idx) => {
           const state = messageStates[idx]
-          const isGrouped = idx > 0 && SLACK_MESSAGES[idx - 1].sender === msg.sender
+          const isGrouped = idx > 0 && CHAT_MESSAGES[idx - 1].sender === msg.sender
           return (
             <div
               key={idx}
@@ -1015,20 +1123,28 @@ function SlackThread({ elapsed }) {
               {isGrouped ? (
                 <div className="w-7 shrink-0" />
               ) : (
-                <div className="w-7 h-7 rounded-md shrink-0 flex items-center justify-center bg-white border border-[#E0DBD5] p-1">
-                  <SlackLogo className="w-full h-full" />
+                /* Circular letter avatar — chat-app convention (vs Notes's
+                   square documents). Mauve-wash bg + ink letter, sender's
+                   first character. */
+                <div className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center bg-[var(--color-mauve-wash)] text-[var(--text-primary)] text-[11px] font-semibold border border-[#E0DBD5]">
+                  {msg.sender.charAt(0)}
                 </div>
               )}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 flex flex-col items-start">
                 {!isGrouped && (
-                  <div className="flex items-baseline gap-2 mb-0.5">
-                    <span className="text-[13px] font-bold text-[#1D1C1D]">{msg.sender}</span>
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <span className="text-[12px] font-semibold text-[#1D1C1D]">{msg.sender}</span>
                     <span className="text-[10px] text-[#616061]">{msg.timestamp}</span>
                   </div>
                 )}
-                <p className="text-[12px] text-[#1D1C1D] leading-relaxed break-words">
-                  {renderMessageText(msg.text, msg.mentions)}
-                </p>
+                {/* Chat bubble — rounded rect with sharper top-left corner
+                    (tail-style toward the avatar). Light sand fill makes
+                    the panel feel like a chat app, not a notes/email feed. */}
+                <div className="inline-block max-w-full bg-white border border-[#E8E4DD] rounded-2xl rounded-tl-md px-3 py-2 shadow-[0_1px_2px_rgba(27,27,24,0.04)]">
+                  <p className="text-[12px] text-[#1D1C1D] leading-relaxed break-words">
+                    {renderMessageText(msg.text, msg.mentions)}
+                  </p>
+                </div>
               </div>
             </div>
           )
@@ -1039,22 +1155,23 @@ function SlackThread({ elapsed }) {
 }
 
 function SlackExtractedCards({ elapsed }) {
-  const cardStates = AI_CARDS.map((_, idx) => computeSlackCardState(elapsed, idx))
+  const cardStates = CHAT_AI_CARDS.map((_, idx) => computeSlackCardState(elapsed, idx))
   return (
     <div className="absolute inset-0 pointer-events-none">
       <div className="pt-5 px-4 flex justify-center select-none">
         <div className="flex flex-col w-full max-w-[290px]">
           <div className="flex items-baseline gap-2 px-0.5 pb-3">
             <h3 className="text-sm font-semibold text-[var(--text-primary)]">to do</h3>
-            <span className="text-xs text-[var(--text-muted)]">{AI_CARDS.length}</span>
+            <span className="text-xs text-[var(--text-muted)]">{CHAT_AI_CARDS.length}</span>
           </div>
           <div className="flex flex-col gap-2">
-            {AI_CARDS.map((card, idx) => (
+            {CHAT_AI_CARDS.map((card, idx) => (
               <AICard
                 key={card.taskNumber}
                 card={card}
                 opacity={cardStates[idx].opacity}
                 sweepProgress={cardStates[idx].sweepProgress}
+                iconMap={CHAT_PHOSPHOR_ICON_MAP}
               />
             ))}
           </div>
@@ -1064,15 +1181,19 @@ function SlackExtractedCards({ elapsed }) {
   )
 }
 
+// Reframed: was Slack chrome (purple bg + Slack logo + "Slack" label),
+// now neutral "Pasted chat" chrome — same paste-into-Kolumn framing as
+// the email demo. Function name kept (SlackChrome) so the Slack* helpers
+// in this file stay self-consistent; only the rendered output changed.
 function SlackChrome() {
   return (
-    <div className="flex items-center gap-1.5 px-3 py-2.5 shrink-0 bg-[#3F0E40]">
+    <div className="flex items-center gap-1.5 px-3 py-2.5 shrink-0 bg-white border-b border-[#E8E8E8]">
       <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
       <span className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
       <span className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
       <div className="flex items-center gap-1.5 ml-3">
-        <SlackLogo className="w-4 h-4" />
-        <span className="text-[11px] font-semibold text-white/90 tracking-tight">Slack</span>
+        <ClipboardText size={14} weight="regular" className="text-[#5F6368]" />
+        <span className="text-[11px] font-semibold text-[#5F6368] tracking-tight">Pasted chat</span>
       </div>
     </div>
   )
@@ -1095,8 +1216,10 @@ function SlackThreadDemo({ active = true }) {
         style={{ boxShadow: 'inset 0 0 0 1px #E0DBD5' }}
       >
         <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 p-4 md:p-8">
+          {/* Left panel bg = cool gray (#F2F4F7) — distinct from Notes/Email
+              cream (#FAF8F6) so the chat demo reads visually differently. */}
           <div
-            className="flex-1 rounded-lg overflow-hidden flex flex-col bg-[#FAF8F6] border border-[#E0DBD5] aspect-[4/3] md:aspect-[4/4.5]"
+            className="flex-1 rounded-lg overflow-hidden flex flex-col bg-[#F2F4F7] border border-[#E0DBD5] aspect-[4/3] md:aspect-[4/4.5]"
             style={{ boxShadow: '0 8px 24px -8px rgba(27, 27, 24, 0.10)' }}
           >
             <SlackChrome />
@@ -1106,6 +1229,163 @@ function SlackThreadDemo({ active = true }) {
           </div>
           <CreamWindow className="aspect-[4/5]">
             <SlackExtractedCards elapsed={elapsed} />
+          </CreamWindow>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Meeting Transcript Demo ──
+   Renders all three speaker paragraphs static from frame 1 (live
+   transcription tools never animate already-placed text — only the
+   leading edge moves). "Live" motion lives entirely in indicators:
+     • LiveAudioBars in chrome + header (three async bars, like a mic
+       level meter)
+     • Pulsing red REC dot
+     • Blinking caret at end of last paragraph
+   Cards on the right still extract progressively over time, reusing
+   SLACK_CARDS_* timing. */
+
+/* Three vertical bars that rise/fall asynchronously like an audio level
+   meter. The bars are HTML <span>s (not SVG <rect>s) so transform-origin
+   works portably across browsers. Three different durations + negative
+   delays keep them out of phase. Inherits color from currentColor. */
+function LiveAudioBars({ className = '', size = 14 }) {
+  const barW = Math.max(2, Math.round(size / 7))
+  const barGap = Math.max(1, Math.round(size / 14))
+  return (
+    <span
+      className={`inline-flex items-end ${className}`}
+      style={{ height: size, gap: barGap }}
+      aria-hidden="true"
+    >
+      <span
+        className="audio-bar bg-current rounded-[1px] block"
+        style={{ width: barW, height: size, animationDuration: '0.9s', animationDelay: '0s' }}
+      />
+      <span
+        className="audio-bar bg-current rounded-[1px] block"
+        style={{ width: barW, height: size, animationDuration: '1.1s', animationDelay: '-0.25s' }}
+      />
+      <span
+        className="audio-bar bg-current rounded-[1px] block"
+        style={{ width: barW, height: size, animationDuration: '0.7s', animationDelay: '-0.45s' }}
+      />
+    </span>
+  )
+}
+
+function TranscriptChrome() {
+  return (
+    <div className="flex items-center gap-1.5 px-3 py-2.5 shrink-0 bg-white border-b border-[#E8E8E8]">
+      <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
+      <span className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
+      <span className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
+      <div className="flex items-center gap-1.5 ml-3 text-[#5F6368]">
+        <LiveAudioBars size={11} />
+        <span className="text-[11px] font-semibold tracking-tight">Live transcript</span>
+        <span className="w-1.5 h-1.5 rounded-full bg-[#E03B3B] animate-pulse ml-1" />
+      </div>
+    </div>
+  )
+}
+
+function TranscriptThread() {
+  return (
+    <div className="px-5 sm:px-6 pt-4 sm:pt-5 flex flex-col gap-2 select-none h-full">
+      <div className="pb-2 border-b border-[#E8E8E8]">
+        <div className="flex items-center gap-1.5">
+          <Microphone className="w-3.5 h-3.5 text-[#616061]" weight="regular" />
+          <span className="text-[13px] font-semibold text-[#1D1C1D]">Marketing meeting · Q2 campaign</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E03B3B] animate-pulse ml-1.5" />
+          <span className="text-[10px] font-semibold text-[#E03B3B] tracking-wide">REC</span>
+        </div>
+      </div>
+      <div className="flex flex-col gap-3 pt-1">
+        {TRANSCRIPT_PARAGRAPHS.map((para, idx) => {
+          const isLast = idx === TRANSCRIPT_PARAGRAPHS.length - 1
+          return (
+            <div key={idx} className="flex flex-col">
+              <div className="flex items-baseline gap-2 mb-1">
+                <span className="text-[12px] font-semibold text-[#1D1C1D]">{para.speaker}</span>
+                <span className="text-[10px] text-[#616061] font-mono">{para.timestamp}</span>
+              </div>
+              <p className="text-[12px] text-[#1D1C1D] leading-relaxed break-words">
+                {renderMessageText(para.text, para.mentions)}
+                {isLast && (
+                  /* Live-transcription caret — sits at the end of the last
+                     paragraph, blinks like the cursor of an active recording. */
+                  <span className="inline-block w-[2px] h-[1em] -mb-[2px] ml-[1px] align-middle bg-[#1D1C1D] animate-pulse" />
+                )}
+              </p>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function TranscriptExtractedCards({ elapsed }) {
+  const cardStates = TRANSCRIPT_AI_CARDS.map((_, idx) => computeSlackCardState(elapsed, idx))
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      <div className="pt-5 px-4 flex justify-center select-none">
+        <div className="flex flex-col w-full max-w-[290px]">
+          <div className="flex items-baseline gap-2 px-0.5 pb-3">
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">to do</h3>
+            <span className="text-xs text-[var(--text-muted)]">{TRANSCRIPT_AI_CARDS.length}</span>
+          </div>
+          <div className="flex flex-col gap-2">
+            {TRANSCRIPT_AI_CARDS.map((card, idx) => (
+              <AICard
+                key={card.taskNumber}
+                card={card}
+                opacity={cardStates[idx].opacity}
+                sweepProgress={cardStates[idx].sweepProgress}
+                iconMap={TRANSCRIPT_PHOSPHOR_ICON_MAP}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function TranscriptDemo({ active = true }) {
+  const [elapsed, setElapsed] = useState(0)
+  useEffect(() => {
+    if (!active) return
+    setElapsed(0)
+    const id = setInterval(() => {
+      setElapsed((prev) => (prev + 50 >= SLACK_TIMELINE_TOTAL ? 0 : prev + 50))
+    }, 50)
+    return () => clearInterval(id)
+  }, [active])
+  return (
+    <div className="w-full max-w-5xl">
+      <div
+        className="relative overflow-hidden w-full rounded-2xl bg-[#E8DDE2]"
+        style={{ boxShadow: 'inset 0 0 0 1px #E0DBD5' }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 p-4 md:p-8">
+          {/* Cream panel bg (#FAF8F6) — matches Notes/Email so the four
+              demos read as a coherent set. Distinctness for transcript
+              comes from layout (paragraph speaker turns), Waveform icon,
+              live REC indicator, and blinking caret — not bg color. */}
+          <div
+            className="flex-1 rounded-lg overflow-hidden flex flex-col bg-[#FAF8F6] border border-[#E0DBD5] aspect-[4/3] md:aspect-[4/4.5]"
+            style={{ boxShadow: '0 8px 24px -8px rgba(27, 27, 24, 0.10)' }}
+          >
+            <TranscriptChrome />
+            <div className="flex-1 overflow-hidden relative">
+              <TranscriptThread />
+            </div>
+          </div>
+          <CreamWindow className="aspect-[4/5]">
+            <TranscriptExtractedCards elapsed={elapsed} />
           </CreamWindow>
         </div>
       </div>
@@ -1349,6 +1629,10 @@ function GmailExtractedCards({ elapsed }) {
   )
 }
 
+// Reframed from Gmail chrome → "Pasted email" chrome. The previous version
+// rendered a Gmail logo + account avatar, implying an integration we don't
+// ship. This version shows a clipboard glyph + "Pasted email" label so the
+// frame reads as "raw email text dropped into Kolumn" instead.
 function GmailChrome() {
   return (
     <div className="flex items-center gap-1.5 px-3 py-2.5 shrink-0 bg-white border-b border-[#E8E8E8]">
@@ -1356,18 +1640,8 @@ function GmailChrome() {
       <span className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
       <span className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
       <div className="flex items-center gap-1.5 ml-3">
-        <svg className="w-4 h-3" viewBox="0 0 24 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M0 0 L0 18 L10 9 Z" fill="#EA4335"/>
-          <path d="M24 0 L24 18 L14 9 Z" fill="#FBBC04"/>
-          <path d="M0 18 L12 9 L24 18 Z" fill="#34A853"/>
-          <path d="M0 0 L12 9 L24 0 Z" fill="#4285F4"/>
-          <path d="M0 0 L12 9 L24 0 L24 2 L12 11 L0 2 Z" fill="#C5221F"/>
-        </svg>
-        <span className="text-[11px] font-semibold text-[#5F6368] tracking-tight font-logo">Gmail</span>
-      </div>
-      <div className="flex items-center gap-1.5 ml-auto">
-        <span className="text-[10px] text-[#5F6368]">dula@northstar.co</span>
-        <span className="w-4 h-4 rounded-full bg-[#EA4335] flex items-center justify-center text-[9px] font-bold text-white">D</span>
+        <ClipboardText size={14} weight="regular" className="text-[#5F6368]" />
+        <span className="text-[11px] font-semibold text-[#5F6368] tracking-tight">Pasted email</span>
       </div>
     </div>
   )
@@ -1431,11 +1705,15 @@ function AppleNotesIcon({ className = '' }) {
   )
 }
 
+// Three honest input types for "Notes in, Kanban out": free-form notes,
+// pasted email, pasted chat thread. Slack + Teams + Gmail brand chrome was
+// removed — those implied integrations we don't ship. The underlying
+// thread/email demos are reused, but with neutral chrome.
 const SLIDES = [
-  { label: 'Notes', Icon: AppleNotesIcon, color: null },
-  { label: 'Gmail', Icon: SiGmail, color: '#EA4335' },
-  { label: 'Slack', Icon: BsSlack, color: '#4A154B' },
-  { label: 'Teams', Icon: BsMicrosoftTeams, color: '#5059C9' },
+  { label: 'Notes', Icon: Notepad, color: null },
+  { label: 'Email', Icon: Envelope, color: null },
+  { label: 'Chat', Icon: ChatsCircle, color: null },
+  { label: 'Transcript', Icon: Waveform, color: null },
 ]
 
 function DemoSlider() {
@@ -1484,7 +1762,7 @@ function DemoSlider() {
           <div className="w-full shrink-0"><EveryDetailDemo active={activeIdx === 0} /></div>
           <div className="w-full shrink-0"><GmailThreadDemo active={activeIdx === 1} /></div>
           <div className="w-full shrink-0"><SlackThreadDemo active={activeIdx === 2} /></div>
-          <div className="w-full shrink-0"><TeamsThreadDemo active={activeIdx === 3} /></div>
+          <div className="w-full shrink-0"><TranscriptDemo active={activeIdx === 3} /></div>
         </div>
       </div>
 
@@ -1709,7 +1987,7 @@ function HeroAuthCard() {
   }
 
   return (
-    <div className="w-full max-w-md min-w-[20rem]">
+    <div className="mx-4 sm:mx-auto w-full max-w-md min-w-[20rem]">
       <div className="bg-[var(--surface-card)] border border-[var(--color-sand)] rounded-[2rem] p-7 shadow-[0_4px_24px_0_rgba(0,0,0,0.04),0_2px_64px_0_rgba(0,0,0,0.02)] space-y-4">
         {error && (
           <div className="text-sm text-[var(--color-copper)] bg-[var(--color-copper-wash)]/60 border border-[var(--color-copper)]/30 rounded-xl px-3 py-2.5">
@@ -1794,8 +2072,8 @@ function MobileNav() {
       {/* Desktop nav */}
       <div className="hidden sm:flex items-center justify-between max-w-[90rem] mx-auto" style={{ width: 'calc(100% - (2 * clamp(2rem, 1.43rem + 2.86vw, 4rem)))' }}>
         <div className="flex items-center">
-          <Kanban size={30} weight="fill" className="text-[var(--color-logo)]" />
-          <span className="text-[23px] font-[450] text-[var(--text-primary)] tracking-tight leading-none ml-2 font-logo">Kolumn</span>
+          <Kanban size={34} weight="fill" className="text-[var(--color-logo)]" />
+          <span className="text-[28px] font-[450] text-[var(--text-primary)] tracking-tight leading-none ml-2 font-logo">Kolumn</span>
         </div>
         <div className="flex items-center gap-3 py-6">
           <Link
@@ -1816,8 +2094,8 @@ function MobileNav() {
       {/* Mobile nav */}
       <div className="flex sm:hidden items-center justify-between px-5 py-4">
         <div className="flex items-center">
-          <Kanban size={26} weight="fill" className="text-[var(--color-logo)]" />
-          <span className="text-[20px] font-[450] text-[var(--text-primary)] tracking-tight leading-none ml-1.5 font-logo">Kolumn</span>
+          <Kanban size={34} weight="fill" className="text-[var(--color-logo)]" />
+          <span className="text-[28px] font-[450] text-[var(--text-primary)] tracking-tight leading-none ml-1.5 font-logo">Kolumn</span>
         </div>
         <button
           onClick={() => setMenuOpen(!menuOpen)}
@@ -1846,6 +2124,53 @@ function MobileNav() {
         </div>
       )}
     </nav>
+  )
+}
+
+/*
+ * Renders <HeroAnimation /> at its native 720×680 design size and visually
+ * scales the entire animation down to fit any container width (down to ~320px
+ * on phones). This preserves card proportions / cursor positioning / camera
+ * math exactly — nothing inside HeroAnimation needs to know about responsive
+ * sizing. Caps at 1× so wider containers don't upscale the design.
+ */
+const HERO_DESIGN_WIDTH = 720
+const HERO_DESIGN_HEIGHT = 680
+
+function ScaledHero() {
+  const ref = useRef(null)
+  const [scale, setScale] = useState(1)
+
+  useLayoutEffect(() => {
+    if (!ref.current) return
+    const node = ref.current
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const width = entry.contentRect.width
+        setScale(Math.min(1, width / HERO_DESIGN_WIDTH))
+      }
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div
+      ref={ref}
+      className="relative w-full max-w-[720px] overflow-hidden rounded-[28px] bg-[var(--color-mauve-wash)] font-sans"
+      style={{ aspectRatio: `${HERO_DESIGN_WIDTH} / ${HERO_DESIGN_HEIGHT}` }}
+    >
+      <div
+        className="absolute top-0 left-0 origin-top-left"
+        style={{
+          width: HERO_DESIGN_WIDTH,
+          height: HERO_DESIGN_HEIGHT,
+          transform: `scale(${scale})`,
+        }}
+      >
+        <HeroAnimation />
+      </div>
+    </div>
   )
 }
 
@@ -1884,50 +2209,32 @@ export default function LandingPage() {
             {/* Left — Copy (center-aligned) */}
             <div className="flex w-full min-h-[85vh] items-center">
             <div className="text-center flex flex-col items-center w-full">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EEF2D6] text-[#6B7A12] text-xs font-normal mb-6">
-                <Sparkle className="w-3.5 h-3.5" />
-                100% free — no credit card required
-              </span>
               <h1 className="text-5xl sm:text-6xl lg:text-[3.5rem] xl:text-6xl font-light text-[#1B1B18] tracking-tight leading-[1.08] mb-5">
-                Project management
-                <br />
-                that feels{' '}
-                <span className="text-[#8BA32E] font-heading">effortless</span>
+                Kanban,<br />
+                <span className="text-[#8BA32E] font-heading">restored</span>.
               </h1>
               <p className="text-base sm:text-lg text-[#5C5C57] max-w-lg mb-8 leading-relaxed">
-                A clean Kanban workspace for teams that value focus over features.
-                Organize, collaborate, and ship — without the clutter.
+                The kanban you talk to.
               </p>
               <HeroAuthCard />
-              <p className="mt-6 text-sm text-[#8E8E89]">
-                Trusted by early adopters · launching 2026
-              </p>
             </div>
             </div>
 
             {/* Right — Animated hero sequence (sandbox parity).
-                font-sans escapes the page's landing-font scope (Plus Jakarta Sans)
-                and restores Mona Sans for the cards/board, matching the sandbox. */}
-            <div className="hidden xl:flex justify-center items-center w-full">
-              <div className="relative overflow-hidden w-full h-[85vh] min-h-[500px] rounded-[28px] bg-[var(--color-mauve-wash)] font-sans">
-                <HeroAnimation />
-              </div>
+                ScaledHero renders the animation at its native 720×680 design
+                size and CSS-scales it to fit any container width — so it stays
+                visible on phones/tablets without cards getting cut on the
+                edges. font-sans is set inside ScaledHero to escape the page's
+                landing-font (Plus Jakarta Sans) and restore Mona Sans. */}
+            <div className="flex justify-center items-center w-full mt-8 xl:mt-0">
+              <ScaledHero />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── Stats Bar ─── */}
-      <section className="px-6 sm:px-10 py-12 max-w-4xl mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="text-4xl sm:text-5xl font-normal text-[#8BA32E] tracking-tight font-logo">{s.value}</div>
-              <div className="text-xs text-[#8E8E89] font-normal mt-1 uppercase tracking-wider font-logo">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Stats Bar — removed pre-launch (see `stats` removal note near the
+          top of this file). Re-add once we have real numbers worth quoting. */}
 
       {/* ─── AI Demo Slider (Notes + Slack + Teams + Gmail) ─── */}
       <section className="px-6 sm:px-10 py-14 max-w-6xl mx-auto">
