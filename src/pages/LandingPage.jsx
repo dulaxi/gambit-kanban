@@ -17,6 +17,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import { LABEL_BG, PRIORITY_DOT } from '../utils/formatting'
 import { useAuthStore } from '../store/authStore'
+import { HeroAnimation } from './LandingBoardSandbox'
 
 /* ── Mock board data for hero preview ── */
 const mockColumns = [
@@ -1708,8 +1709,8 @@ function HeroAuthCard() {
   }
 
   return (
-    <div className="max-w-sm">
-      <div className="bg-[var(--surface-card)] border border-[var(--color-sand)] rounded-2xl p-5 shadow-[0_4px_24px_0_rgba(0,0,0,0.04),0_2px_64px_0_rgba(0,0,0,0.02)] space-y-4">
+    <div className="w-full max-w-md min-w-[20rem]">
+      <div className="bg-[var(--surface-card)] border border-[var(--color-sand)] rounded-[2rem] p-7 shadow-[0_4px_24px_0_rgba(0,0,0,0.04),0_2px_64px_0_rgba(0,0,0,0.02)] space-y-4">
         {error && (
           <div className="text-sm text-[var(--color-copper)] bg-[var(--color-copper-wash)]/60 border border-[var(--color-copper)]/30 rounded-xl px-3 py-2.5">
             {error}
@@ -1724,8 +1725,9 @@ function HeroAuthCard() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
+              className="!h-11 !rounded-[0.6rem] !text-base"
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" size="lg" className="w-full !text-base !rounded-[0.6rem]">
               Continue with email
               <ArrowRight className="w-4 h-4" />
             </Button>
@@ -1751,6 +1753,7 @@ function HeroAuthCard() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
                 autoFocus
+                className="!h-11 !rounded-[0.6rem] !text-base"
               />
             )}
             <Input
@@ -1760,12 +1763,14 @@ function HeroAuthCard() {
               placeholder={mode === 'signup' ? 'Create a password' : 'Enter your password'}
               required
               autoFocus={mode === 'signin'}
+              className="!h-11 !rounded-[0.6rem] !text-base"
             />
             <Button
               type="submit"
               loading={submitting}
               loadingText="Please wait…"
-              className="w-full"
+              size="lg"
+              className="w-full !text-base !rounded-[0.6rem]"
             >
               {mode === 'signup' ? 'Create account' : 'Sign in'}
             </Button>
@@ -1875,7 +1880,7 @@ export default function LandingPage() {
       {/* ─── Hero ─── */}
       <section className="relative overflow-hidden">
         <div className="px-6 sm:px-10 pb-8 max-w-[90rem] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_720px] gap-4">
             {/* Left — Copy (center-aligned) */}
             <div className="flex w-full min-h-[85vh] items-center">
             <div className="text-center flex flex-col items-center w-full">
@@ -1900,63 +1905,12 @@ export default function LandingPage() {
             </div>
             </div>
 
-            {/* Right — Live Demo Board */}
-            <div className="hidden lg:flex justify-center items-center w-full">
-              <div className="rounded-2xl w-full h-[85vh] min-h-[500px] overflow-hidden border border-[var(--color-sand)]/80 bg-[var(--surface-card)] shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
-                <div className="relative w-full h-full flex flex-col">
-                  {/* Browser title bar */}
-                  <div className="flex items-center gap-2 px-4 py-2.5 bg-[var(--surface-hover)] border-b border-[var(--color-cream-dark)]">
-                    <div className="flex items-center gap-1.5">
-                      {/* Apple-spec macOS traffic-light colors — kept as hex (not Kolumn design tokens) */}
-                      <span className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-                      <span className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
-                      <span className="w-3 h-3 rounded-full bg-[#28C840]" />
-                    </div>
-                    <div className="flex-1 flex justify-center">
-                      <div className="px-4 py-1 rounded-md bg-[var(--surface-card)] border border-[var(--color-sand)] text-[10px] text-[var(--text-muted)] font-medium">
-                        kolumn.app/boards/product-launch
-                      </div>
-                    </div>
-                    <div className="w-12" />
-                  </div>
-
-                  {/* Board content */}
-                  <div className="flex flex-1 overflow-hidden">
-                    {/* Mini sidebar — matches real collapsed Sidebar.jsx */}
-                    <div className="flex w-16 bg-[var(--surface-page)] border-r border-[var(--color-sand)] flex-col shrink-0 h-full">
-                      <div className="flex items-center justify-center h-16 border-b border-[var(--color-sand)]">
-                        <Kanban size={26} weight="fill" className="text-[var(--color-logo)]" />
-                      </div>
-                      <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
-                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)]">
-                          <SquaresFour className="w-5 h-5 shrink-0" />
-                        </div>
-                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium bg-[var(--accent-lime-wash)] text-[var(--text-primary)]">
-                          <Kanban className="w-5 h-5 shrink-0" />
-                        </div>
-                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)]">
-                          <Calendar className="w-5 h-5 shrink-0" />
-                        </div>
-                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)]">
-                          <Notepad className="w-5 h-5 shrink-0" />
-                        </div>
-                      </nav>
-                      <div className="border-t border-[var(--color-sand)] py-4 px-2 space-y-1">
-                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)]">
-                          <Gear className="w-5 h-5 shrink-0" />
-                        </div>
-                        <div className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-secondary)]">
-                          <CaretDoubleRight className="w-5 h-5" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Live columns */}
-                    <div className="flex-1 p-4 overflow-x-auto overflow-y-auto h-full font-sans">
-                      <DemoBoard />
-                    </div>
-                  </div>
-                </div>
+            {/* Right — Animated hero sequence (sandbox parity).
+                font-sans escapes the page's landing-font scope (Plus Jakarta Sans)
+                and restores Mona Sans for the cards/board, matching the sandbox. */}
+            <div className="hidden xl:flex justify-center items-center w-full">
+              <div className="relative overflow-hidden w-full h-[85vh] min-h-[500px] rounded-[28px] bg-[var(--color-mauve-wash)] font-sans">
+                <HeroAnimation />
               </div>
             </div>
           </div>

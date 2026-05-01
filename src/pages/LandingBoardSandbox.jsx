@@ -76,13 +76,22 @@ const TYPED_TEXT = 'Build pricing page, Stripe integration, Update landing copy'
  *  11   cursor clicks card #2 (lift)
  *  12   stage zooms IN on card #2 (close-up)
  *  13   card #2 drags to In Progress; camera pans to follow
- *  14   stage zooms OUT, hold final state, then restart
+ *  14   stage zooms OUT, hold final state
+ *  15   outro fades in (brand + caption + CTA); cursor returns to card 1
+ *  16   cursor lands on card 1 — click pulse + lift (rotate 2° + shadow)
+ *  17   card 1 drags to In Progress slot 1, cursor follows (1.4s DRAG_EASE)
+ *  18   card 1 dropped, lift releases; cursor slides over to card 3
+ *  19   cursor lands on card 3 — click pulse + lift
+ *  20   card 3 drags to In Progress slot 2, cursor follows
+ *  21   card 3 dropped, lift releases; 3s hold, then restart
  */
 const CAPTIONS = {
   0: 'Capture every task.',
   4: 'Type how you’d say it.',
   8: 'Live on your board.',
 }
+
+const OUTRO_TEXT = 'A kanban that’s still actually a kanban.'
 
 function noop() {}
 
@@ -221,6 +230,7 @@ const DemoCard = forwardRef(function DemoCard({
   isLifted = false,
   isStatic = false,
   ghost = false,
+  dragDuration = 1.4,
 }, ref) {
   const checkColor = card.priority === 'high'
     ? 'text-[var(--color-copper)]'
@@ -279,9 +289,10 @@ const DemoCard = forwardRef(function DemoCard({
           : { delay: cardStart, duration: POP_MS / 1000, ease: [0.34, 1.56, 0.64, 1] },
         // Drag x and y share duration so the card moves in a straight
         // diagonal line — matches camera pan duration to stay synced.
-        // DRAG_EASE makes the first ~40% swift, then settles.
-        x: { duration: 1.4, ease: DRAG_EASE },
-        y: { duration: 1.4, ease: DRAG_EASE },
+        // DRAG_EASE makes the first ~40% swift, then settles. Outro
+        // drags pass a shorter dragDuration to move 2× faster.
+        x: { duration: dragDuration, ease: DRAG_EASE },
+        y: { duration: dragDuration, ease: DRAG_EASE },
         rotate: { duration: 0.25, ease: 'easeOut' },
       }}
     >
@@ -355,7 +366,12 @@ function MiniColumn({ col, cards, indexOffset = 0, cardOverrides = {}, cardRefs 
   return (
     <div className="flex flex-col w-[290px] shrink-0">
       <div className="flex items-center justify-between px-0.5 pb-3">
-        <h3 className="text-sm font-semibold text-[var(--text-primary)]">{col.title}</h3>
+        <h3
+          className="text-sm font-semibold text-[var(--text-primary)]"
+          style={{ fontFamily: 'var(--font-sans)' }}
+        >
+          {col.title}
+        </h3>
         <span className="text-xs text-[var(--text-muted)]">{cards.length}</span>
       </div>
       <div className="flex flex-col gap-2 flex-1">
@@ -377,7 +393,7 @@ function MiniColumn({ col, cards, indexOffset = 0, cardOverrides = {}, cardRefs 
 }
 
 /* Hero animation orchestrator */
-function HeroAnimation() {
+export function HeroAnimation() {
   // See CAPTIONS / storyboard comment above for phase semantics.
   const [phase, setPhase] = useState(0)
   const [typed, setTyped] = useState('')
@@ -402,7 +418,9 @@ function HeroAnimation() {
   // At zoom-in we use card-2's center; at drag-end we use the drop slot.
   const ZOOM_SCALE = 2
   const [stage, setStage] = useState({
-    cardCenter: { x: 200, y: 220 },
+    card1Center: { x: 200, y: 90 },
+    card2Center: { x: 200, y: 220 },
+    card3Center: { x: 200, y: 350 },
     dropCenter: { x: 510, y: 90 },
     slotDistance: 130,
     dragPx: 310,
@@ -432,7 +450,14 @@ function HeroAnimation() {
       setTimeout(() => setPhase(12),           14550),  // zoom-in done, brief hold (300ms)
       setTimeout(() => setPhase(13),           14850),  // drag + camera pan (1400ms)
       setTimeout(() => setPhase(14),           16250),  // zoom out + hold
-      setTimeout(() => setCycle((c) => c + 1), 17850),  // restart
+      setTimeout(() => setPhase(15),           17050),  // outro fades in; cursor moves to card 1
+      setTimeout(() => setPhase(16),           17600),  // cursor on card 1, click + lift
+      setTimeout(() => setPhase(17),           17850),  // drag card 1 (0.7s — 2× speed)
+      setTimeout(() => setPhase(18),           18550),  // card 1 dropped, cursor → card 3
+      setTimeout(() => setPhase(19),           19000),  // cursor on card 3, click + lift
+      setTimeout(() => setPhase(20),           19250),  // drag card 3 (0.7s — 2× speed)
+      setTimeout(() => setPhase(21),           19950),  // card 3 dropped, hold
+      setTimeout(() => setCycle((c) => c + 1), 22950),  // restart (3s hold)
     ]
     return () => t.forEach(clearTimeout)
   }, [cycle])
@@ -453,6 +478,10 @@ function HeroAnimation() {
     const c2 = card2Ref.current.getBoundingClientRect()
     const c3 = card3Ref.current.getBoundingClientRect()
 
+    const card1Center = {
+      x: (c1.left + c1.width / 2) - stageRect.left,
+      y: (c1.top + c1.height / 2) - stageRect.top,
+    }
     const card2Center = {
       x: (c2.left + c2.width / 2) - stageRect.left,
       y: (c2.top + c2.height / 2) - stageRect.top,
@@ -488,7 +517,9 @@ function HeroAnimation() {
     }
 
     setStage({
-      cardCenter: card2Center,
+      card1Center,
+      card2Center,
+      card3Center,
       dropCenter,
       slotDistance,
       dragPx,
@@ -520,22 +551,64 @@ function HeroAnimation() {
   const captionText = CAPTIONS[phase]
   const composerVisible = !captionPhases && phase >= 1 && phase <= 7
   const expanded = phase === 3 || (phase >= 5 && phase <= 7)
-  const cardsVisible = phase >= 9 && phase <= 14
+  const cardsVisible = phase >= 9 && phase <= 21
+  const outroVisible = phase >= 15 && phase <= 21
   const cursorVisible = !captionPhases && phase >= 1 && phase <= 7
   const showCaret = phase === 5
 
   // Inner cursor — lives inside the stage so it scales with the zoom.
-  // Tracks the dragged card: at card-2 center during 10-12, follows
-  // card-2 to its drop position during 13, sits on the dropped card
-  // during 14 (briefly) before the loop restarts.
-  const innerCursorVisible = phase >= 10 && phase <= 14
-  const innerCursorX = phase >= 13
-    ? stage.cardCenter.x + stage.dragPx
-    : stage.cardCenter.x
-  const innerCursorY = phase >= 13
-    ? stage.cardCenter.y + stage.dragYPx
-    : stage.cardCenter.y
-  const innerCursorClick = phase === 11
+  // Tracks the active card across three drag sequences:
+  //   10-12  approach + click card 2 (zoomed in)
+  //   13-14  follow card 2 to its drop, sit on it (zoomed out)
+  //   15-16  slide left to card 1, click + lift
+  //   17     follow card 1 to its drop in IP slot 1
+  //   18-19  slide left to card 3 (slid-up at slot 1 of To Do), click + lift
+  //   20     follow card 3 to its drop in IP slot 2
+  //   21     hidden (final hold — clean frame)
+  const innerCursorVisible = phase >= 10 && phase <= 20
+  const innerCursorClick = phase === 11 || phase === 16 || phase === 19
+  const { innerCursorX, innerCursorY } = (() => {
+    if (phase === 13 || phase === 14) {
+      return {
+        innerCursorX: stage.card2Center.x + stage.dragPx,
+        innerCursorY: stage.card2Center.y + stage.dragYPx,
+      }
+    }
+    if (phase === 15 || phase === 16) {
+      return { innerCursorX: stage.card1Center.x, innerCursorY: stage.card1Center.y }
+    }
+    if (phase === 17) {
+      return {
+        innerCursorX: stage.card1Center.x + stage.dragPx,
+        innerCursorY: stage.card1Center.y + stage.slotDistance,
+      }
+    }
+    if (phase === 18 || phase === 19) {
+      // Card 3 visually sits one slot up from natural position during 13-19.
+      return {
+        innerCursorX: stage.card3Center.x,
+        innerCursorY: stage.card3Center.y - stage.slotDistance,
+      }
+    }
+    if (phase === 20) {
+      return {
+        innerCursorX: stage.card3Center.x + stage.dragPx,
+        innerCursorY: stage.card3Center.y,
+      }
+    }
+    // Phases 10-12 (approach + click card 2)
+    return { innerCursorX: stage.card2Center.x, innerCursorY: stage.card2Center.y }
+  })()
+  const cursorIsDragging = phase === 13 || phase === 17 || phase === 20
+  const cursorTransitionDuration = (() => {
+    if (phase === 13) return 1.4              // card 2 drag (full speed)
+    if (phase === 17 || phase === 20) return 0.7  // outro drags (2× speed)
+    if (phase === 10) return 0.7              // initial approach to card 2
+    if (phase === 15) return 0.55             // slide to card 1
+    if (phase === 18) return 0.45             // slide from card 1's drop to card 3
+    return 0.3                                 // click pulse + small adjustments
+  })()
+  const cursorTransitionEase = cursorIsDragging ? DRAG_EASE : [0.32, 0, 0.18, 1]
 
   // Stage transform — scale + camera pan. transformOrigin stays at
   // top-left so x/y are simple "where the panel's (0,0) lives in the
@@ -559,18 +632,39 @@ function HeroAnimation() {
   const stageTransitionDuration = phase === 13 ? 1.4 : 0.65
 
   // Per-card overrides for the drag choreography.
-  //   card-2 lifts at phase 11 (rotate 2deg + shadow), drag translates
-  //          to drop position during 13, settles flat at 14.
-  //   card-3 slides up by one slot during 13 (drag-over moment), stays
-  //          slid up through 14 (post-drop final state).
+  //
+  // Card 2 — phases 11-13 lifted; 13-onward translated to IP slot 0.
+  // Card 1 — phases 16-17 lifted; 17-onward translated to IP slot 1.
+  // Card 3 — slid up to slot 1 of To Do during 13-19 to make room for
+  //          card 2's drag-over; phases 19-20 lifted; 20-onward
+  //          translated to IP slot 2 (un-slides + shifts right).
+  //
+  // Sequential during outro: card 1 finishes its drag (phase 17→18)
+  // before card 3 starts (phase 19). Same drag-and-drop signature as
+  // card 2 — rotate 2° + shadow + 1.4s DRAG_EASE — minus the zoom.
+  const card1Lifted = phase === 16 || phase === 17
   const card2Lifted = phase >= 11 && phase <= 13
-  const card2DragX = phase === 13 || phase === 14 ? stage.dragPx : 0
-  const card2DragY = phase === 13 || phase === 14 ? stage.dragYPx : 0
-  const card3SlideY = phase === 13 || phase === 14 ? -stage.slotDistance : 0
+  const card3Lifted = phase === 19 || phase === 20
+
+  const card1Settled = phase >= 17
+  const card1DragX = card1Settled ? stage.dragPx : 0
+  const card1DragY = card1Settled ? stage.slotDistance : 0
+
+  const card2InIP = phase >= 13
+  const card2DragX = card2InIP ? stage.dragPx : 0
+  const card2DragY = card2InIP ? stage.dragYPx : 0
+
+  const card3SlidUp = phase >= 13 && phase <= 19
+  const card3Settled = phase >= 20
+  const card3DragX = card3Settled ? stage.dragPx : 0
+  const card3DragY = card3Settled
+    ? 0
+    : (card3SlidUp ? -stage.slotDistance : 0)
 
   const cardOverrides = {
+    'demo-1': { isLifted: card1Lifted, dragX: card1DragX, dragY: card1DragY, dragDuration: 0.7 },
     'demo-2': { isLifted: card2Lifted, dragX: card2DragX, dragY: card2DragY },
-    'demo-3': { dragY: card3SlideY },
+    'demo-3': { isLifted: card3Lifted, dragX: card3DragX, dragY: card3DragY, dragDuration: 0.7 },
   }
   const cardRefs = {
     'demo-1': card1Ref,
@@ -836,8 +930,8 @@ function HeroAnimation() {
                     className="absolute pointer-events-none"
                     style={{ top: 0, left: 0, zIndex: 40 }}
                     initial={{
-                      x: stage.cardCenter.x - 90,
-                      y: stage.cardCenter.y + 70,
+                      x: stage.card2Center.x - 90,
+                      y: stage.card2Center.y + 70,
                       opacity: 0,
                       scale: 1,
                     }}
@@ -849,18 +943,18 @@ function HeroAnimation() {
                     }}
                     exit={{ opacity: 0, transition: { duration: 0.3 } }}
                     transition={{
-                      // x and y share duration so the cursor moves in
-                      // a straight line glued to card #2 — matches the
-                      // card's drag transition (1.4s) during phase 13,
-                      // and the same DRAG_EASE so all three (card,
-                      // camera, cursor) feel identical.
+                      // x/y share duration so the cursor glides in a
+                      // straight line. During card-drag phases (13, 17,
+                      // 20) the cursor is glued to its card — matches
+                      // the card's 1.4s DRAG_EASE. Other phases are
+                      // shorter approach moves between targets.
                       x: {
-                        duration: phase === 13 ? 1.4 : (phase === 10 ? 0.7 : 0.3),
-                        ease: phase === 13 ? DRAG_EASE : [0.32, 0, 0.18, 1],
+                        duration: cursorTransitionDuration,
+                        ease: cursorTransitionEase,
                       },
                       y: {
-                        duration: phase === 13 ? 1.4 : (phase === 10 ? 0.7 : 0.3),
-                        ease: phase === 13 ? DRAG_EASE : [0.32, 0, 0.18, 1],
+                        duration: cursorTransitionDuration,
+                        ease: cursorTransitionEase,
                       },
                       scale: innerCursorClick
                         ? { duration: 0.32, times: [0, 0.5, 1], ease: 'easeInOut' }
@@ -874,6 +968,74 @@ function HeroAnimation() {
                 )}
               </AnimatePresence>
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/*
+        OUTRO — phase 15. Sits over the resolved board with a soft mauve
+        scrim for legibility. Closing caption (Clash Grotesk) fades up,
+        CTA pill follows ~200ms behind. Pill is non-functional inside the
+        sandbox (the loop restarts seconds later); the live landing will
+        wire its onClick to /signup.
+      */}
+      <AnimatePresence>
+        {outroVisible && (
+          <motion.div
+            key={`outro-${cycle}`}
+            className="absolute inset-0 z-40 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.3 } }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            // Lighter scrim than a full overlay — cards visibly slide
+            // into In Progress behind the text. 0.55 keeps the dark-ink
+            // caption legible while letting motion peek through.
+            style={{ backgroundColor: 'rgba(244, 234, 240, 0.65)' }}
+          >
+            {/* Brand lockup — bookends the phase-0 placement (top: 25%) */}
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute left-0 right-0 flex justify-center"
+              style={{ top: '25%', transform: 'translateY(-50%)' }}
+            >
+              <div className="flex items-center gap-2">
+                <Kanban size={28} weight="fill" className="text-[var(--color-logo)]" />
+                <span
+                  className="text-[26px] tracking-tight leading-none text-[var(--text-primary)]"
+                  style={{ fontFamily: 'Clash Grotesk, system-ui, sans-serif', fontWeight: 500 }}
+                >
+                  Kolumn
+                </span>
+              </div>
+            </motion.div>
+
+            {/* Heading + CTA — vertically centered */}
+            <div className="absolute inset-0 flex items-center justify-center px-10">
+              <div className="flex flex-col items-center gap-7">
+                <motion.h2
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-center text-[var(--text-primary)] tracking-tight leading-[1.1]"
+                  style={{ fontFamily: 'Clash Grotesk, system-ui, sans-serif', fontWeight: 400, fontSize: 'clamp(32px, 4.6vw, 54px)' }}
+                >
+                  {OUTRO_TEXT}
+                </motion.h2>
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.45, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="inline-flex items-center gap-2 px-5 h-11 rounded-full bg-[var(--text-primary)] text-[var(--surface-card)] text-[14px] font-medium tracking-tight"
+                  style={{ boxShadow: '0 8px 24px -8px rgba(27,27,24,0.35)' }}
+                >
+                  Try Kolumn
+                  <ArrowUp size={14} weight="bold" style={{ transform: 'rotate(45deg)' }} />
+                </motion.div>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
