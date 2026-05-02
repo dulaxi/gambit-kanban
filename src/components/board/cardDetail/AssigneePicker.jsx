@@ -43,7 +43,7 @@ export default function AssigneePicker({
 
   const sz = SIZES[size] || SIZES.lg
   const isMeName = (n) => profile?.display_name && n.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
-  const { bgClass: profileBg, fgClass: profileFg } = resolveProfileColor(profile?.color)
+  const { style: profileStyle, fallbackClass: profileFallback } = resolveProfileColor(profile?.color)
 
   const maxVisible = 3
   const visible = assignees.slice(0, maxVisible)
@@ -89,7 +89,8 @@ export default function AssigneePicker({
                 return (
                   <span
                     key={name}
-                    className={`${sz.avatar} rounded-full flex items-center justify-center ring-2 ring-[var(--surface-page)] ${profileFg} ${profileBg}`}
+                    className={`${sz.avatar} rounded-full flex items-center justify-center ring-2 ring-[var(--surface-page)] ${profileFallback}`}
+                    style={profileStyle}
                   >
                     <DynamicIcon name={profile.icon} className={sz.glyph} />
                   </span>

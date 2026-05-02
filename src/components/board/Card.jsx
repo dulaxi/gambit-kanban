@@ -133,7 +133,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
 
           {hasAssignee && (() => {
             const isMeName = (n) => profile?.display_name && n.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
-            const { bgClass: profileBg, fgClass: profileFg } = resolveProfileColor(profile?.color)
+            const { style: profileStyle, fallbackClass: profileFallback } = resolveProfileColor(profile?.color)
             const maxVisible = 3
             const visible = assignees.slice(0, maxVisible)
             const overflow = Math.max(0, assignees.length - maxVisible)
@@ -144,7 +144,8 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
                   return isMe && profile?.icon ? (
                     <span
                       key={name}
-                      className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center ring-2 ring-[var(--surface-card)] ${profileFg} ${profileBg}`}
+                      className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center ring-2 ring-[var(--surface-card)] ${profileFallback}`}
+                      style={profileStyle}
                     >
                       <DynamicIcon name={profile.icon} className="w-3 h-3" />
                     </span>

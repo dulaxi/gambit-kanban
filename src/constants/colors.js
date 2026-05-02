@@ -44,20 +44,30 @@ export const PROFILE_COLORS = [
 
 const PROFILE_VALUE_TO_TOKEN = new Map(PROFILE_COLORS.map((p) => [p.value, p.token]))
 
-// Resolve a stored `profile.color` string to theme-aware Tailwind classes.
-// Falls back to a neutral surface-hover swatch when no profile color is set
-// or the stored value isn't in the palette (e.g. a removed legacy color).
+// Resolve a stored `profile.color` string to a theme-aware inline style.
+// Returns { style, fallbackClass } — apply `style` directly via React's
+// `style={...}` prop. Tailwind's JIT can't see runtime-built class strings
+// like `bg-[var(--profile-1)]` (the concrete form never appears in source),
+// so we use CSS variables via inline style instead — that's exactly what
+// they're for. `fallbackClass` is set only when the stored value isn't in
+// the palette, in which case the caller can drop it on as a Tailwind class.
 export function resolveProfileColor(stored) {
   if (!stored) {
-    return { bgClass: 'bg-[var(--surface-hover)]', fgClass: 'text-[var(--text-primary)]' }
+    return {
+      style: { background: 'var(--surface-hover)', color: 'var(--text-primary)' },
+      fallbackClass: '',
+    }
   }
   const token = PROFILE_VALUE_TO_TOKEN.get(stored)
   if (!token) {
-    return { bgClass: stored, fgClass: 'text-[var(--text-primary)]' }
+    return { style: { color: 'var(--text-primary)' }, fallbackClass: stored }
   }
   return {
-    bgClass: `bg-[var(${token})]`,
-    fgClass: `text-[var(${token}-fg)]`,
+    style: {
+      background: `var(${token})`,
+      color: `var(${token}-fg)`,
+    },
+    fallbackClass: '',
   }
 }
 

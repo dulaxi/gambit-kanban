@@ -18,14 +18,14 @@ export default function UserMenu({ variant = 'header', collapsed = false }) {
     navigate('/')
   }
 
-  const { bgClass, fgClass } = resolveProfileColor(profile?.color)
-  const avatarColorClass = profile?.icon
-    ? `${fgClass} ${bgClass}`
-    : 'bg-[var(--surface-hover)]'
+  const { style: profileStyle, fallbackClass } = resolveProfileColor(profile?.color)
 
   const isCompact = variant === 'sidebar' && collapsed
   const avatar = (
-    <span className={`${isCompact ? 'w-7 h-7' : 'w-9 h-9'} rounded-full flex items-center justify-center shrink-0 ${avatarColorClass}`}>
+    <span
+      className={`${isCompact ? 'w-7 h-7' : 'w-9 h-9'} rounded-full flex items-center justify-center shrink-0 ${profile?.icon ? fallbackClass : 'bg-[var(--surface-hover)]'}`}
+      style={profile?.icon ? profileStyle : undefined}
+    >
       {profile?.icon ? (
         <DynamicIcon name={profile.icon} className={isCompact ? 'w-[18px] h-[18px]' : 'w-5 h-5'} />
       ) : (
