@@ -34,6 +34,7 @@
   --color-mauve: #A8969E;
   --color-mauve-wash: #E8DDE2;
   --color-mauve-cream: #F0E8EB;
+  --color-mint-wash: #D6E8E0;
 
   /* Selected-state fills — two intents, two colors:
      - --accent-lime-soft: "I just toggled this on" (filter pills, icon
@@ -55,6 +56,10 @@
 
 /* ── Semantic theme tokens ── */
 :root, [data-theme="light"] {
+  /* Scrollbar thumb (themed) */
+  --scrollbar-thumb: rgba(27, 27, 24, 0.12);
+  --scrollbar-thumb-hover: rgba(27, 27, 24, 0.25);
+
   --surface-page: #FAF8F6;
   --surface-board: #FAF8F6;
   --surface-card: #FFFFFF;
@@ -88,6 +93,30 @@
   --label-purple-bg: #E8DDE2; --label-purple-text: #6E5A65;
   --label-pink-bg: #F0E0D2;   --label-pink-text: #7A5C44;
   --label-gray-bg: #E8E2DB;   --label-gray-text: #5C5C57;
+
+  /* Profile color slots (12) — bg + paired fg. Each slot's bg+fg flips
+     coherently per theme so the *role* of the slot is preserved (lightest
+     neutral stays lightest neutral, etc.). The legacy stored value is the
+     light hex form (`bg-[#C2D64A]`); resolveProfileColor() in
+     constants/colors.js maps it to the var-based class at render time. */
+  --profile-1:  #C2D64A;  --profile-1-fg:  #1B1B18;
+  --profile-2:  #A8BA32;  --profile-2-fg:  #1B1B18;
+  --profile-3:  #D4A843;  --profile-3-fg:  #1B1B18;
+  --profile-4:  #C27A4A;  --profile-4-fg:  #FFFFFF;
+  --profile-5:  #A8969E;  --profile-5-fg:  #FFFFFF;
+  --profile-6:  #8B7355;  --profile-6-fg:  #FFFFFF;
+  --profile-7:  #7A5C44;  --profile-7-fg:  #FFFFFF;
+  --profile-8:  #E0DBD5;  --profile-8-fg:  #1B1B18;
+  --profile-9:  #E8E2DB;  --profile-9-fg:  #1B1B18;
+  --profile-10: #8E8E89;  --profile-10-fg: #FFFFFF;
+  --profile-11: #5C5C57;  --profile-11-fg: #FFFFFF;
+  --profile-12: #1B1B18;  --profile-12-fg: #FFFFFF;
+
+  /* Chat composer — multi-layer soft shadow + hairline ring.
+     Themed because the rgba alphas need to differ on dark surfaces. */
+  --chat-input-shadow:        0 0.25rem 1.25rem rgba(0, 0, 0, 0.035), 0 0 0 0.5px rgba(224, 219, 213, 0.6);
+  --chat-input-shadow-hover:  0 0.25rem 1.25rem rgba(0, 0, 0, 0.035), 0 0 0 0.5px rgba(174, 170, 164, 0.6);
+  --chat-input-shadow-focus:  0 0.25rem 1.25rem rgba(0, 0, 0, 0.075), 0 0 0 0.5px rgba(174, 170, 164, 0.6);
 }
 
 [data-theme="dark"] {
@@ -99,31 +128,91 @@
   --surface-hover: #3A3937;
   --surface-input: #2E2E2B;
 
-  --border-default: #3A3937;
+  --border-default: #454340;   /* was #3A3937 — bumped so borders survive on hover rows where surface flips to #3A3937 */
   --border-subtle: #332F2D;
   --border-focus: #E8E5E0;
 
   --text-primary: #E8E5E0;
-  --text-secondary: #9C9A95;
-  --text-muted: #6B6966;
-  --text-faint: #4A4845;
+  --text-secondary: #B0ADA7;  /* was #9C9A95 — slight bump for confident UI text */
+  --text-muted: #8A8782;      /* was #6B6966 — now passes AA (~5:1) on page bg */
+  --text-faint: #6B6966;      /* was #4A4845 — was 1.8:1 (invisible), now ~3.3:1 */
 
   --accent-lime: #C2D64A;
   --accent-lime-dark: #A8BA32;
-  --accent-lime-wash: #2E3B1A;
-  --accent-lime-soft: #4F6520;
+  --accent-lime-wash: #3A4920;  /* was #2E3B1A — visible as a tint (~2.8:1) instead of merging with page */
+  --accent-lime-soft: #7A9230;  /* was #4F6520 — confident toggle-on fill (~5.5:1) */
 
-  --btn-primary-bg: #C2D64A;
+  --btn-primary-bg: #E8E5E0;     /* was #C2D64A — cream button preserves "strongest contrast" CTA in dark, distinct from lime accent */
   --btn-primary-text: #1C1C1A;
-  --btn-primary-hover: #A8BA32;
+  --btn-primary-hover: #D6D2CC;  /* was #A8BA32 — slightly darker cream on hover */
 
-  --label-red-bg: #3A2A20;    --label-red-text: #C49878;
+  --label-red-bg: #4A2A1F;    --label-red-text: #E0907C;   /* was muddy brown — pushed toward coral-red */
   --label-blue-bg: #2A3040;   --label-blue-text: #8DA0C4;
   --label-green-bg: #2A3520;  --label-green-text: #A8C278;
-  --label-yellow-bg: #3A3520; --label-yellow-text: #C4B078;
+  --label-yellow-bg: #3D3820; --label-yellow-text: #D8C078; /* was muddy brown — pushed toward true gold */
   --label-purple-bg: #3A3040; --label-purple-text: #C4A0B8;
-  --label-pink-bg: #352820;   --label-pink-text: #C09870;
+  --label-pink-bg: #3D2632;   --label-pink-text: #E0A0B8;  /* was muddy brown — pushed toward rose */
   --label-gray-bg: #333330;   --label-gray-text: #9C9A95;
+
+  /* ── Phosphor palette — dark-mode overrides ──
+     The base @theme palette is light-tuned. Anywhere a component uses
+     a raw palette token (--color-cream, --color-bark, etc.) instead of
+     a semantic one, it will inherit these dark values when the user
+     flips theme. Only tokens whose role is unambiguous (bg-only or
+     fg-only) are flipped — tokens that double as both stay put. */
+
+  /* Surface tones — secondary buttons, hover bgs, soft borders */
+  --color-cream: #2E2E2B;        /* matches --surface-raised */
+  --color-cream-dark: #3A3937;   /* hover bg / soft border */
+  --color-sand: #3A3937;         /* borders */
+  --color-mist: #4A4845;         /* slightly stronger borders */
+
+  /* Wash variants — pastels in light, dark muted hues in dark */
+  --color-lime-wash: #2A3520;
+  --color-copper-wash: #3A2A20;
+  --color-honey-wash: #3A3520;
+  --color-bark-wash: #352820;
+  --color-mauve-wash: #3A3040;
+  --color-mauve-cream: #2E2832;
+  --color-mint-wash: #1F3030;
+
+  /* Bark — used as the calendar "today" pill bg.
+     Lighter caramel on dark so the pill actually reads. */
+  --color-bark: #C49878;
+  --color-bark-dark: #A87E5C;
+
+  /* Mauve / walnut — for use as accent text/icons on dark */
+  --color-mauve: #C4A0B8;
+  --color-walnut: #B89880;
+
+  /* Olive logo accent — bumped slightly so it's not flat on dark */
+  --color-logo: #A8BA32;
+
+  /* NOTE: --color-copper, --color-copper-dark, --color-lime, --color-lime-dark,
+     --color-honey, and --color-ink are intentionally NOT overridden — they
+     are saturated tones that read on both surfaces, or (in --color-ink's
+     case) used as a pill bg with hardcoded text-white that we don't want
+     to break. */
+
+  /* Profile color slots — only the slots whose role differs in dark.
+     Slots not redeclared here inherit the light values (saturated identity). */
+  --profile-5:  #C4A0B8;  --profile-5-fg:  #1B1B18;  /* mauve → lighter mauve, fg flips to ink */
+  --profile-6:  #B89880;  --profile-6-fg:  #1B1B18;  /* walnut → lighter walnut */
+  --profile-7:  #C49878;  --profile-7-fg:  #1B1B18;  /* bark → caramel */
+  --profile-8:  #9C9A95;  --profile-8-fg:  #FFFFFF;  /* sand → mid-gray, fg flips to white */
+  --profile-9:  #8E8E89;  --profile-9-fg:  #FFFFFF;  /* cream-dark → mid-gray */
+  --profile-10: #6B6966;                               /* stone slightly darkened, fg unchanged white */
+  --profile-11: #C4BFB8;  --profile-11-fg: #1B1B18;  /* charcoal → mist, fg flips to ink */
+  --profile-12: #E8E5E0;  --profile-12-fg: #1B1B18;  /* ink → cream, fg flips to ink */
+
+  /* Scrollbar thumb (themed) */
+  --scrollbar-thumb: rgba(232, 229, 224, 0.10);
+  --scrollbar-thumb-hover: rgba(232, 229, 224, 0.22);
+
+  /* Chat composer — punchier shadow on dark, lighter hairline ring */
+  --chat-input-shadow:        0 0.25rem 1.25rem rgba(0, 0, 0, 0.25), 0 0 0 0.5px rgba(74, 72, 69, 0.9);
+  --chat-input-shadow-hover:  0 0.25rem 1.25rem rgba(0, 0, 0, 0.30), 0 0 0 0.5px rgba(108, 105, 100, 0.9);
+  --chat-input-shadow-focus:  0 0.25rem 1.25rem rgba(0, 0, 0, 0.40), 0 0 0 0.5px rgba(140, 136, 130, 0.9);
 }
 
 [data-theme="dark"] {
@@ -132,6 +221,7 @@
 
 [data-theme="dark"] ::selection {
   background: rgba(194, 214, 74, 0.3);
+  color: #E8E5E0;
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-track {
@@ -239,7 +329,7 @@
    The band is the leading edge of the reveal. Driven by --reveal CSS variable. */
 .ai-shimmer-reveal {
   background: linear-gradient(90deg,
-    #1B1B18 calc(var(--reveal, 0%) - 12%),
+    var(--text-primary) calc(var(--reveal, 0%) - 12%),
     #C2D64A calc(var(--reveal, 0%) - 4%),
     #D4A843 calc(var(--reveal, 0%) - 1%),
     #C27A4A calc(var(--reveal, 0%) + 1%),
@@ -294,8 +384,8 @@
   background: linear-gradient(
     90deg,
     var(--surface-raised) 0%,
-    #E8DDE2 25%,
-    #EEF2D6 50%,
+    var(--color-mauve-wash) 25%,
+    var(--color-lime-wash) 50%,
     var(--surface-raised) 75%
   );
   background-size: 200% 100%;
@@ -325,12 +415,12 @@
 
 *:hover > ::-webkit-scrollbar-thumb,
 *:hover::-webkit-scrollbar-thumb {
-  background: rgba(27, 27, 24, 0.12);
+  background: var(--scrollbar-thumb);
 }
 
 *:hover > ::-webkit-scrollbar-thumb:hover,
 *:hover::-webkit-scrollbar-thumb:hover {
-  background: rgba(27, 27, 24, 0.25);
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Mobile safe areas for bottom tab bar (iOS notch/home indicator) */

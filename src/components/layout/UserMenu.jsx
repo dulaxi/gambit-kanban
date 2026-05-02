@@ -2,11 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CaretDown, Gear, Keyboard, SignOut, User } from '@phosphor-icons/react'
 import { useAuthStore } from '../../store/authStore'
+import { resolveProfileColor } from '../../constants/colors'
 import DynamicIcon from '../board/DynamicIcon'
 import Menu from '../ui/Menu'
-
-const LIGHT_AVATAR_BGS = ['bg-[#E0DBD5]', 'bg-[#E8E2DB]', 'bg-[#C2D64A]', 'bg-[#A8BA32]', 'bg-[#D4A843]']
-const isLightColor = (color) => LIGHT_AVATAR_BGS.includes(color)
 
 export default function UserMenu({ variant = 'header', collapsed = false }) {
   const [open, setOpen] = useState(false)
@@ -20,8 +18,9 @@ export default function UserMenu({ variant = 'header', collapsed = false }) {
     navigate('/')
   }
 
+  const { bgClass, fgClass } = resolveProfileColor(profile?.color)
   const avatarColorClass = profile?.icon
-    ? `${isLightColor(profile.color) ? 'text-[var(--text-primary)]' : 'text-white'} ${profile.color || 'bg-[#E0DBD5]'}`
+    ? `${fgClass} ${bgClass}`
     : 'bg-[var(--surface-hover)]'
 
   const isCompact = variant === 'sidebar' && collapsed

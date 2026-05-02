@@ -24,7 +24,7 @@ const components = {
       )
     }
     return (
-      <pre className="bg-[var(--text-primary)] text-[var(--surface-hover)] px-4 py-3.5 rounded-[10px] text-[13px] font-mono leading-relaxed overflow-x-auto my-3">
+      <pre className="bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] px-4 py-3.5 rounded-[10px] text-[13px] font-mono leading-relaxed overflow-x-auto my-3">
         <code className={className}>{children}</code>
       </pre>
     )

@@ -30,7 +30,7 @@ export default function ChatInput({ onSend, autoFocus = false }) {
   return (
     <div className="shrink-0 px-4 pb-4 pt-2">
       <div className="mx-auto max-w-2xl">
-        <div className="flex flex-col bg-[var(--surface-card)] rounded-[20px] border border-transparent shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035),0_0_0_0.5px_rgba(224,219,213,0.6)] hover:shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035),0_0_0_0.5px_rgba(174,170,164,0.6)] focus-within:shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.075),0_0_0_0.5px_rgba(174,170,164,0.6)] transition-all duration-200">
+        <div className="flex flex-col bg-[var(--surface-card)] rounded-[20px] border border-transparent shadow-[var(--chat-input-shadow)] hover:shadow-[var(--chat-input-shadow-hover)] focus-within:shadow-[var(--chat-input-shadow-focus)] transition-all duration-200">
           <div className="flex flex-col m-3.5 gap-3">
             <textarea
               ref={textareaRef}

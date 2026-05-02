@@ -31,7 +31,7 @@ export const AVATAR_COLORS = [
   'bg-[var(--color-copper-wash)]',
   'bg-[var(--color-honey-wash)]',
   'bg-[var(--label-blue-bg)]',
-  'bg-[#D6E8E0]',
+  'bg-[var(--color-mint-wash)]',
 ]
 
 export function getAvatarColor(name) {

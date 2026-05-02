@@ -9,6 +9,7 @@ import DynamicIcon from './DynamicIcon'
 import { LABEL_BG, PRIORITY_DOT } from '../../utils/formatting'
 import { formatDueDateLabel, dueDateBadgeClass } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
+import { resolveProfileColor } from '../../constants/colors'
 import { isAICreated } from '../../lib/toolExecutor'
 
 export default memo(function Card({ card, onClick, onComplete, isSelected, iconOverride }) {
@@ -131,9 +132,8 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
           </div>
 
           {hasAssignee && (() => {
-            const lightColors = ['bg-[#8E8E89]', 'bg-[#E0DBD5]', 'bg-[#E8E2DB]', 'bg-[#C2D64A]', 'bg-[#A8BA32]', 'bg-[#D4A843]', 'bg-[#C27A4A]']
             const isMeName = (n) => profile?.display_name && n.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
-            const iconText = lightColors.includes(profile?.color) ? 'text-[var(--text-primary)]' : 'text-white'
+            const { bgClass: profileBg, fgClass: profileFg } = resolveProfileColor(profile?.color)
             const maxVisible = 3
             const visible = assignees.slice(0, maxVisible)
             const overflow = Math.max(0, assignees.length - maxVisible)
@@ -144,7 +144,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
                   return isMe && profile?.icon ? (
                     <span
                       key={name}
-                      className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center ring-2 ring-[var(--surface-card)] ${iconText} ${profile.color}`}
+                      className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center ring-2 ring-[var(--surface-card)] ${profileFg} ${profileBg}`}
                     >
                       <DynamicIcon name={profile.icon} className="w-3 h-3" />
                     </span>

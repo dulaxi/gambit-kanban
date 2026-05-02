@@ -115,7 +115,7 @@ export default function CalendarPage() {
                     <span
                       className={`text-[13px] w-7 h-7 flex items-center justify-center rounded-full leading-none ${
                         today
-                          ? 'bg-[var(--color-bark)] text-white font-semibold'
+                          ? 'bg-[var(--color-bark)] text-[var(--btn-primary-text)] font-semibold'
                           : inMonth
                             ? 'text-[var(--text-primary)] font-medium'
                             : 'text-[var(--text-muted)]'

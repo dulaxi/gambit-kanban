@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Check, Plus, User, X } from '@phosphor-icons/react'
 import Avatar from '../../ui/Avatar'
 import DynamicIcon from '../DynamicIcon'
-
-const LIGHT_AVATAR_BGS = ['bg-[#8E8E89]', 'bg-[#E0DBD5]', 'bg-[#E8E2DB]', 'bg-[#C2D64A]', 'bg-[#A8BA32]', 'bg-[#D4A843]', 'bg-[#C27A4A]']
+import { resolveProfileColor } from '../../../constants/colors'
 
 const SIZES = {
   sm: {
@@ -44,7 +43,7 @@ export default function AssigneePicker({
 
   const sz = SIZES[size] || SIZES.lg
   const isMeName = (n) => profile?.display_name && n.trim().toLowerCase() === profile.display_name.trim().toLowerCase()
-  const iconText = LIGHT_AVATAR_BGS.includes(profile?.color) ? 'text-[var(--text-primary)]' : 'text-white'
+  const { bgClass: profileBg, fgClass: profileFg } = resolveProfileColor(profile?.color)
 
   const maxVisible = 3
   const visible = assignees.slice(0, maxVisible)
@@ -90,7 +89,7 @@ export default function AssigneePicker({
                 return (
                   <span
                     key={name}
-                    className={`${sz.avatar} rounded-full flex items-center justify-center ring-2 ring-[var(--surface-page)] ${iconText} ${profile.color}`}
+                    className={`${sz.avatar} rounded-full flex items-center justify-center ring-2 ring-[var(--surface-page)] ${profileFg} ${profileBg}`}
                   >
                     <DynamicIcon name={profile.icon} className={sz.glyph} />
                   </span>
