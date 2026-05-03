@@ -38,6 +38,12 @@ export default function Popover({
     const onKey = (e) => {
       if (e.key === 'Escape') {
         e.stopPropagation()
+        // Blur whatever is focused (typically the trigger button) so the
+        // keyboard-modality flip from Escape doesn't surface a :focus-visible
+        // ring on the trigger after the popover closes.
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur()
+        }
         onOpenChange?.(false)
       }
     }
@@ -46,7 +52,7 @@ export default function Popover({
   }, [open, closeOnEscape, onOpenChange])
 
   return (
-    <div ref={ref} className={mergeClassNames('relative', className)}>
+    <div ref={ref} data-menu-root className={mergeClassNames('relative', className)}>
       {children}
       {open && (
         <div

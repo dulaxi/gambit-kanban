@@ -138,7 +138,7 @@ describe('Modal primitive', () => {
     expect(document.activeElement).toBe(buttons[0])
   })
 
-  test('restores focus to previously-focused element when closed by Escape', async () => {
+  test('does NOT restore focus when closed by Escape (avoids :focus-visible ring on trigger)', async () => {
     const trigger = document.createElement('button')
     trigger.textContent = 'Trigger'
     document.body.appendChild(trigger)
@@ -152,7 +152,7 @@ describe('Modal primitive', () => {
     render(<Wrapper />)
     expect(document.activeElement).not.toBe(trigger)
     await userEvent.keyboard('{Escape}')
-    expect(document.activeElement).toBe(trigger)
+    expect(document.activeElement).not.toBe(trigger)
 
     document.body.removeChild(trigger)
   })

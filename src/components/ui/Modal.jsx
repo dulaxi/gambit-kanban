@@ -76,11 +76,6 @@ export default function Modal({
   zIndex = 50,
 }) {
   const contentRef = useRef(null)
-  const previouslyFocusedRef = useRef(null)
-  // Tracks how the modal was dismissed so we can skip focus restoration
-  // for mouse-driven closes (which would surface a stale :focus-visible
-  // ring on the trigger). Keyboard-driven closes (Escape) still restore.
-  const closeSourceRef = useRef(null)
 
   const handleClose = useCallback(() => {
     if (typeof onClose === 'function') onClose()
@@ -93,23 +88,16 @@ export default function Modal({
     return () => unlockBodyScroll()
   }, [open, lockScroll])
 
-  // Save + restore focus, set initial focus
+  // Set initial focus inside the modal. We do NOT restore focus to the
+  // trigger on close — restoring would surface a :focus-visible ring on the
+  // trigger after Escape (keyboard modality), which the user does not want.
   useEffect(() => {
     if (!open) return
-    previouslyFocusedRef.current = document.activeElement
-    closeSourceRef.current = null
     const target =
       initialFocusRef?.current ||
       getFocusables(contentRef.current)[0] ||
       contentRef.current
     target?.focus?.()
-    return () => {
-      const prev = previouslyFocusedRef.current
-      if (closeSourceRef.current === 'mouse') return
-      if (prev && typeof prev.focus === 'function') {
-        prev.focus()
-      }
-    }
   }, [open, initialFocusRef])
 
   // Escape + Tab focus trap — only the topmost modal in the stack responds,
@@ -125,7 +113,9 @@ export default function Modal({
       if (!isTopmost()) return
       if (e.key === 'Escape' && dismissOnEscape) {
         e.stopPropagation()
-        closeSourceRef.current = 'keyboard'
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur()
+        }
         handleClose()
         return
       }
@@ -161,7 +151,6 @@ export default function Modal({
   const onBackdropClick = (e) => {
     if (!dismissOnOutside) return
     if (e.target === e.currentTarget) {
-      closeSourceRef.current = 'mouse'
       handleClose()
     }
   }
