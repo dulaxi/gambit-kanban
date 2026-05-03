@@ -366,16 +366,13 @@ export const useWorkspacesStore = create(
     }),
     {
       name: 'kolumn-workspaces',
-      // Do NOT persist activeWorkspaceId — each session should start in the
-      // Personal scope. Users opt into a workspace by clicking it in the
-      // sub-sidebar. Persisting across reloads caused personal boards to
-      // appear "missing" when returning to the app with a workspace still
-      // marked active from a prior session.
-      partialize: () => ({}),
-      // Wipe any stale activeWorkspaceId carried over from pre-fix localStorage.
-      onRehydrateStorage: () => (state) => {
-        if (state) state.activeWorkspaceId = null
-      },
+      // Persist only activeWorkspaceId so a refresh keeps the user in the
+      // same workspace they were viewing. Server data (workspaces, members,
+      // invitations) is always re-fetched — RLS is the source of truth.
+      // fetchWorkspaces validates this id against the live membership list
+      // and resets to null (Personal) if the workspace is gone or access
+      // was revoked, so a stale id can't make personal boards look missing.
+      partialize: (state) => ({ activeWorkspaceId: state.activeWorkspaceId }),
     }
   )
 )
