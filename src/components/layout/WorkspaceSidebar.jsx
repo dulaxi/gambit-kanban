@@ -71,30 +71,35 @@ export default function WorkspaceSidebar() {
       {/* Scrollable list — Claude skills/connectors pattern */}
       <div className="flex flex-col gap-px flex-1 overflow-y-auto p-2">
         {/* Workspace list */}
-        {workspaceList.map((ws) => (
-          <button
-            key={ws.id}
-            type="button"
-            onClick={() => {
-              setActiveWorkspace(ws.id)
-              if (location.pathname !== '/workspace') navigate('/workspace')
-            }}
-            className={`flex items-center rounded-lg text-sm transition-all gap-3 px-4 py-1.5 ${
-              activeWorkspaceId === ws.id
-                ? 'bg-[var(--surface-hover)] text-[var(--text-primary)]'
-                : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
-            }`}
-          >
-            <span className="flex size-5 items-center justify-center">
-              {ws.icon ? (
-                <DynamicIcon name={ws.icon} className="w-4 h-4 text-[var(--text-secondary)]" />
-              ) : (
-                <Users className="w-4 h-4 text-[var(--text-muted)]" />
-              )}
-            </span>
-            <span className="truncate text-left flex-1">{ws.name}</span>
-          </button>
-        ))}
+        {workspaceList.map((ws) => {
+          const isActive = activeWorkspaceId === ws.id
+          const iconWeight = isActive ? 'fill' : 'regular'
+          const iconColor = isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'
+          return (
+            <button
+              key={ws.id}
+              type="button"
+              onClick={() => {
+                setActiveWorkspace(ws.id)
+                if (location.pathname !== '/workspace') navigate('/workspace')
+              }}
+              className={`flex items-center rounded-lg text-sm transition-colors duration-75 gap-3 px-4 py-1.5 ${
+                isActive
+                  ? 'bg-[var(--color-mauve-cream)] text-[var(--text-primary)]'
+                  : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+              }`}
+            >
+              <span className="flex size-5 items-center justify-center">
+                {ws.icon ? (
+                  <DynamicIcon name={ws.icon} weight={iconWeight} className={`w-4 h-4 ${iconColor}`} />
+                ) : (
+                  <Users weight={iconWeight} className={`w-4 h-4 ${iconColor}`} />
+                )}
+              </span>
+              <span className="truncate text-left flex-1">{ws.name}</span>
+            </button>
+          )
+        })}
 
         {/* Empty state hint for first-time users (when no workspaces yet) */}
         {workspaceList.length === 0 && (
