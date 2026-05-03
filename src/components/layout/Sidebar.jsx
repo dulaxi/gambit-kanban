@@ -12,6 +12,7 @@ import ConfirmModal from '../board/ConfirmModal'
 import SidebarNav from './SidebarNav'
 import SidebarBoardItem from './SidebarBoardItem'
 import SidebarBottom from './SidebarBottom'
+import DynamicIcon from '../board/DynamicIcon'
 
 function KolumnLogo({ size = 30 }) {
   return <Kanban size={size} weight="fill" className="shrink-0 text-[var(--color-logo)]" />
@@ -281,24 +282,37 @@ export default function Sidebar() {
             </div>
           )}
 
-          {/* Collapsed: just show Boards icon */}
-          {showCollapsed && (
-            <NavLink
-              to="/boards"
-              title="Boards"
-              className={({ isActive }) =>
-                `flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-[var(--color-mauve-cream)] text-[var(--text-primary)]'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <Kanban className="w-4 h-4 shrink-0" weight={isActive ? 'fill' : 'regular'} />
-              )}
-            </NavLink>
-          )}
+          {/* Collapsed: show the active board's icon (last opened) — falls
+              back to Kanban when no real board is active. '__all__' is the
+              pseudo "All tasks" id and has no icon, so it falls through too. */}
+          {showCollapsed && (() => {
+            const activeBoard = activeBoardId && activeBoardId !== '__all__' ? allBoards[activeBoardId] : null
+            return (
+              <NavLink
+                to="/boards"
+                title={activeBoard?.name || 'Boards'}
+                className={({ isActive }) =>
+                  `flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-[var(--color-mauve-cream)] text-[var(--text-primary)]'
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  activeBoard?.icon ? (
+                    <DynamicIcon
+                      name={activeBoard.icon}
+                      weight={isActive ? 'fill' : 'regular'}
+                      className="w-4 h-4 shrink-0"
+                    />
+                  ) : (
+                    <Kanban className="w-4 h-4 shrink-0" weight={isActive ? 'fill' : 'regular'} />
+                  )
+                )}
+              </NavLink>
+            )
+          })()}
         </nav>
 
         {isDesktop && (
