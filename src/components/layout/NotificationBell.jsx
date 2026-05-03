@@ -79,13 +79,13 @@ export default function NotificationBell({ placement = 'top' }) {
   )
 
   return (
-    <Popover open={open} onOpenChange={setOpen} placement={popoverPlacement} panel={panel} panelClassName="p-0 overflow-hidden">
+    <Popover open={open} onOpenChange={setOpen} placement={popoverPlacement} panel={panel} panelClassName="p-0 overflow-hidden" className="inline-flex">
       <Tooltip content="Notifications" placement={placement === 'top' ? 'top' : 'bottom'} disabled={open}>
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
-          className="relative p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
+          className="relative p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors shrink-0 inline-flex items-center justify-center"
         >
           <Bell size={18} weight={open ? 'fill' : 'regular'} />
           {unreadCount > 0 && (
