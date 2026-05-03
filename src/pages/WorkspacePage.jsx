@@ -37,7 +37,7 @@ export default function WorkspacePage() {
             <div className="w-24 h-24 rounded-3xl bg-[var(--surface-raised)] border-0.5 border-[var(--border-default)] flex items-center justify-center text-[var(--text-secondary)]">
               <Users className="w-12 h-12" strokeWidth={1.25} />
             </div>
-            <h1 className="font-heading text-center text-2xl text-[var(--text-primary)]">Your workspaces</h1>
+            <h1 className="font-heading text-center text-3xl tracking-tight text-[var(--text-primary)]">Your workspaces</h1>
             <p className="text-center text-sm text-[var(--text-muted)]">
               Workspaces group your team's boards, members, and invitations.
               {' '}You have {Object.keys(workspaces).length} workspace{Object.keys(workspaces).length !== 1 ? 's' : ''}
