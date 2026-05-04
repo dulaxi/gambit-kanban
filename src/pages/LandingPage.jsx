@@ -181,8 +181,8 @@ const PRICING_TIERS = [
     // Lime-tinted icon (vs ink on Free/Team) puts brand accent color
     // exactly where the eye first lands — signals "this one matters."
     topIconClass: 'text-[var(--color-logo)]',
+    inheritsFrom: 'Free',
     bullets: [
-      'Everything in Free',
       'Unlimited AI messages',
       'AI can create, move, and update cards for you',
       'Priority support',
@@ -198,8 +198,8 @@ const PRICING_TIERS = [
     primaryCta: false,
     topIcon: Cheers,
     topIconClass: 'text-[var(--text-primary)]',
+    inheritsFrom: 'Pro',
     bullets: [
-      'Everything in Pro',
       'Multiple workspaces with shared boards',
       'Member roles & admin controls',
       'Priority onboarding',
@@ -2411,6 +2411,14 @@ export default function LandingPage() {
                 {tier.cta}
                 <ArrowRight className="w-4 h-4" />
               </Link>
+              {/* "Everything in X, plus:" reads as a bold header above
+                  the checkmark bullets rather than as a checked feature.
+                  Mirrors Anthropic's Max card pattern. */}
+              {tier.inheritsFrom && (
+                <p className="text-sm font-semibold text-[var(--text-primary)] mb-2">
+                  Everything in {tier.inheritsFrom}, plus:
+                </p>
+              )}
               <ul className="space-y-2.5 text-sm text-[var(--text-secondary)]">
                 {tier.bullets.map((bullet) => (
                   <li key={bullet} className="flex items-start gap-2">
