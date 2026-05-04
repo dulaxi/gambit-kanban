@@ -71,7 +71,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
         {/* Title + meta */}
         <div className="flex min-w-0 grow flex-col gap-0.5">
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className={`text-sm font-medium flex-1 ${completed ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-primary)]'}`}>
+            <span className={`text-sm font-medium flex-1 min-w-0 break-words ${completed ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-primary)]'}`}>
               {title}
             </span>
             <button
@@ -96,7 +96,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
 
       {/* Description */}
       {hasDescription && (
-        <p className="line-clamp-2 text-xs text-[var(--text-muted)] leading-relaxed">
+        <p className="line-clamp-2 text-xs text-[var(--text-muted)] leading-relaxed break-words">
           {description}
         </p>
       )}

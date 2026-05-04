@@ -49,10 +49,31 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
     assignees, setAssignees,
   } = useCardEditState(card)
   const [editingDescription, setEditingDescription] = useState(false)
+
+  // Notion-style description: contentEditable div, NOT a textarea. View
+  // and edit modes share the same DOM element so box dimensions are
+  // guaranteed identical — no size jump when the user clicks to edit.
+  // We set innerText via ref on mount instead of via children prop,
+  // because React would otherwise reconcile and overwrite the user's
+  // typing on any re-render mid-edit.
+  useEffect(() => {
+    if (!editingDescription || !descriptionRef.current) return
+    const el = descriptionRef.current
+    el.innerText = description || ''
+    // Place caret at end of content
+    const range = document.createRange()
+    const sel = window.getSelection()
+    range.selectNodeContents(el)
+    range.collapse(false)
+    sel.removeAllRanges()
+    sel.addRange(range)
+    el.focus()
+  }, [editingDescription]) // eslint-disable-line react-hooks/exhaustive-deps
   const [newCheckItem, setNewCheckItem] = useState('')
   // Single openMenu value: 'menu' | 'priority' | 'due' | 'assignee' | 'icon' | null
   const [openMenu, setOpenMenu, toggleMenu] = useMenuState()
   const titleRef = useRef(null)
+  const descriptionRef = useRef(null)
   const [showLabelForm, setShowLabelForm] = useState(false)
   const [newLabelText, setNewLabelText] = useState('')
   const [newLabelColor, setNewLabelColor] = useState('blue')
@@ -142,17 +163,64 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
       <div
         className="flex flex-col text-left shadow-xl border-0.5 border-[var(--border-default)] rounded-2xl md:p-6 p-4 bg-[var(--surface-page)] w-full max-w-3xl min-h-[50vh] max-h-[90vh] overflow-hidden"
       >
-        {/* Top bar — back + actions */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Top bar — back + labels + actions. Labels sit between the
+            back button and the right-aligned action buttons so they live
+            in the same horizontal slab as calendar/attach/menu, left of
+            those — semantic grouping with the rest of the metadata. */}
+        <div className="flex items-center justify-between gap-3 mb-4">
           <button
             type="button"
             onClick={handleSaveAndClose}
-            className="flex items-center gap-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors cursor-pointer"
+            className="shrink-0 flex items-center gap-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             All cards
           </button>
-          <div className="flex items-center gap-1 ml-auto">
+          {/* Labels — moved out of the title row so the heading stays
+              clean and labels live next to the other metadata. */}
+          <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
+            {labels.map((label, idx) => (
+              editingLabelIdx === idx ? (
+                <span key={`${label.text}-${label.color}-edit`} className="relative inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 rounded-lg text-xs lowercase border border-[var(--border-default)]">
+                  <span className="invisible px-2">/{editingLabelText || label.text}</span>
+                  <input value={editingLabelText} onChange={(e) => setEditingLabelText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { const t = editingLabelText.trim(); if (t) { setLabels(labels.map((l, i) => i === idx ? { ...l, text: t } : l)); scheduleSave() }; setEditingLabelIdx(null) } else if (e.key === 'Escape') { setEditingLabelIdx(null) } }}
+                    onBlur={() => { const t = editingLabelText.trim(); if (t) { setLabels(labels.map((l, i) => i === idx ? { ...l, text: t } : l)); scheduleSave() }; setEditingLabelIdx(null) }}
+                    autoFocus className="absolute inset-0 h-full bg-transparent text-xs text-[var(--text-secondary)] px-2 rounded-lg focus:outline-none lowercase" style={{ width: '100%' }} />
+                </span>
+              ) : (
+                <span key={`${label.text}-${label.color}`} className="relative inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 px-2 rounded-lg text-xs lowercase group/label cursor-pointer" onClick={() => { setEditingLabelIdx(idx); setEditingLabelText(label.text) }}>
+                  /{label.text}
+                  <button type="button" onClick={(e) => { e.stopPropagation(); setLabels(labels.filter((_, i) => i !== idx)); scheduleSave() }} className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] flex items-center justify-center text-[var(--text-faint)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] opacity-0 group-hover/label:opacity-100 transition-all">
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </span>
+              )
+            ))}
+            {showLabelForm ? (
+              <span className="inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 rounded-lg text-xs lowercase border border-[var(--border-default)]">
+                <input value={newLabelText} onChange={(e) => setNewLabelText(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { const t = newLabelText.trim(); if (t) { setLabels([...labels, { text: t, color: newLabelColor }]); setNewLabelText(''); setShowLabelForm(false); scheduleSave() } } else if (e.key === 'Escape') { setShowLabelForm(false); setNewLabelText('') } }}
+                  onBlur={() => { const t = newLabelText.trim(); if (t) { setLabels([...labels, { text: t, color: newLabelColor }]); setNewLabelText(''); scheduleSave() }; setShowLabelForm(false) }}
+                  autoFocus placeholder="/label" className="h-full bg-transparent text-xs text-[var(--text-secondary)] px-2 rounded-lg focus:outline-none lowercase w-16" />
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowLabelForm(true)}
+                className={`inline-flex items-center flex-shrink-0 h-6 rounded-lg text-[var(--text-faint)] hover:text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors ${
+                  /* Empty state: show "+ Labels" so the affordance reads.
+                     Otherwise just the plus icon — labels are already
+                     visible so the meaning is implicit. */
+                  labels.length === 0 ? 'gap-1 px-2 text-xs' : 'justify-center w-6'
+                }`}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                {labels.length === 0 && <span>Labels</span>}
+              </button>
+            )}
+          </div>
+          <div className="shrink-0 flex items-center gap-1">
             {/* Due date */}
             <div className="relative" data-menu-root>
               {(() => {
@@ -335,7 +403,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                 <IconPicker value={card.icon} onChange={(icon) => { updateCard(cardId, { icon }); setOpenMenu(null) }} onClose={() => setOpenMenu(null)} />
               )}
             </div>
-            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 mt-0.5 min-w-0 flex-1">
               <span
                 ref={titleRef}
                 contentEditable
@@ -343,41 +411,16 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                 onInput={(e) => setTitle(e.currentTarget.textContent || '')}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur() } }}
                 onBlur={() => scheduleSave()}
-                className="font-heading text-[var(--text-primary)] text-left text-[22px] cursor-text focus:outline-none focus:ring-0 border border-transparent focus:border-[var(--border-default)] rounded-xl px-1 -mx-1"
+                // Notion-style inline edit — no border, no padding, no
+                // focus box. Same visual whether viewing or editing; the
+                // contentEditable + cursor-text affordance signals that
+                // it's editable without chrome.
+                className="font-heading text-[var(--text-primary)] text-left text-[22px] cursor-text focus:outline-none break-words min-w-0 flex-1"
               >
                 {card?.title || 'Untitled task'}
               </span>
-              {/* Labels */}
-              {labels.map((label, idx) => (
-                editingLabelIdx === idx ? (
-                  <span key={`${label.text}-${label.color}-edit`} className="relative inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 rounded-lg text-xs lowercase border border-[var(--border-default)]">
-                    <span className="invisible px-2">/{editingLabelText || label.text}</span>
-                    <input value={editingLabelText} onChange={(e) => setEditingLabelText(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') { const t = editingLabelText.trim(); if (t) { setLabels(labels.map((l, i) => i === idx ? { ...l, text: t } : l)); scheduleSave() }; setEditingLabelIdx(null) } else if (e.key === 'Escape') { setEditingLabelIdx(null) } }}
-                      onBlur={() => { const t = editingLabelText.trim(); if (t) { setLabels(labels.map((l, i) => i === idx ? { ...l, text: t } : l)); scheduleSave() }; setEditingLabelIdx(null) }}
-                      autoFocus className="absolute inset-0 h-full bg-transparent text-xs text-[var(--text-secondary)] px-2 rounded-lg focus:outline-none lowercase" style={{ width: '100%' }} />
-                  </span>
-                ) : (
-                  <span key={`${label.text}-${label.color}`} className="relative inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 px-2 rounded-lg text-xs lowercase group/label cursor-pointer" onClick={() => { setEditingLabelIdx(idx); setEditingLabelText(label.text) }}>
-                    /{label.text}
-                    <button type="button" onClick={(e) => { e.stopPropagation(); setLabels(labels.filter((_, i) => i !== idx)); scheduleSave() }} className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[var(--surface-card)] border-0.5 border-[var(--border-default)] flex items-center justify-center text-[var(--text-faint)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] opacity-0 group-hover/label:opacity-100 transition-all">
-                      <X className="w-2.5 h-2.5" />
-                    </button>
-                  </span>
-                )
-              ))}
-              {showLabelForm ? (
-                <span className="inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 rounded-lg text-xs lowercase border border-[var(--border-default)]">
-                  <input value={newLabelText} onChange={(e) => setNewLabelText(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { const t = newLabelText.trim(); if (t) { setLabels([...labels, { text: t, color: newLabelColor }]); setNewLabelText(''); setShowLabelForm(false); scheduleSave() } } else if (e.key === 'Escape') { setShowLabelForm(false); setNewLabelText('') } }}
-                    onBlur={() => { const t = newLabelText.trim(); if (t) { setLabels([...labels, { text: t, color: newLabelColor }]); setNewLabelText(''); scheduleSave() }; setShowLabelForm(false) }}
-                    autoFocus placeholder="/label" className="h-full bg-transparent text-xs text-[var(--text-secondary)] px-2 rounded-lg focus:outline-none lowercase w-16" />
-                </span>
-              ) : (
-                <button type="button" onClick={() => setShowLabelForm(true)} className="inline-flex items-center justify-center flex-shrink-0 w-6 h-6 rounded-lg text-[var(--text-faint)] hover:text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors">
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              )}
+              {/* Labels relocated to the action row above so the title
+                  stays clean and uncrowded. */}
             </div>
           </div>
           <AssigneePicker
@@ -393,26 +436,41 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
-          {/* Description */}
+          {/* Description — same DOM element across view + edit modes
+              so box dimensions never shift on click. Read-only divs and
+              the contentEditable share the exact `text-sm leading-relaxed
+              py-1 whitespace-pre-wrap` footprint. */}
           {editingDescription ? (
-            <div className="border border-[var(--border-default)] rounded-xl p-6">
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                onBlur={() => { setEditingDescription(false); scheduleSave() }}
-                onKeyDown={(e) => { if (e.key === 'Escape') { setEditingDescription(false); scheduleSave() } }}
-                autoFocus
-                placeholder="Add details about this task..."
-                className="w-full text-sm text-[var(--text-secondary)] bg-transparent focus:outline-none resize-none placeholder-[var(--text-faint)] leading-relaxed min-h-[80px]"
-              />
-            </div>
+            <div
+              ref={descriptionRef}
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => {
+                setDescription(e.currentTarget.innerText.trim())
+                setEditingDescription(false)
+                scheduleSave()
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  e.preventDefault()
+                  e.currentTarget.blur()
+                }
+              }}
+              className="text-sm text-[var(--text-secondary)] leading-relaxed cursor-text whitespace-pre-wrap py-1 focus:outline-none"
+            />
           ) : description ? (
-            <div className="text-[var(--text-secondary)] text-sm leading-relaxed cursor-pointer line-clamp-2 hover:text-[var(--text-primary)] transition-colors" onClick={() => setEditingDescription(true)}>
+            <div
+              className="text-sm text-[var(--text-secondary)] leading-relaxed cursor-text whitespace-pre-wrap py-1 hover:text-[var(--text-primary)] transition-colors"
+              onClick={() => setEditingDescription(true)}
+            >
               {description}
             </div>
           ) : (
-            <div className="border border-[var(--border-default)] rounded-xl p-8 text-center cursor-pointer hover:border-[var(--color-mist)] transition-colors" onClick={() => setEditingDescription(true)}>
-              <h3 className="text-[var(--text-faint)] mb-1 text-balance text-sm">Click to add a description for this task.</h3>
+            <div
+              className="text-sm text-[var(--text-faint)] leading-relaxed cursor-text whitespace-pre-wrap py-1 hover:text-[var(--text-muted)] transition-colors"
+              onClick={() => setEditingDescription(true)}
+            >
+              Add a description…
             </div>
           )}
 

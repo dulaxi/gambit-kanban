@@ -68,6 +68,10 @@ export default function CardChecklist({ checklist, setChecklist, scheduleSave })
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }}
+          // Commit on blur too — clicking outside the input now saves the
+          // typed text as a new item, same as pressing Enter. handleAdd
+          // is a no-op when the input is empty so it's safe to call.
+          onBlur={handleAdd}
           placeholder="Add an item..."
           className="text-sm text-[var(--text-secondary)] bg-transparent focus:outline-none placeholder-[var(--text-faint)]"
         />

@@ -1117,7 +1117,10 @@ export const useBoardStore = create((set, get) => ({
     return data
   },
 
-  deleteAttachment: async (attachmentId, cardId, storagePath) => {
+  // (cardId, attachmentId, storagePath) — matches uploadAttachment's
+  // cardId-first convention. Previously this was (attachmentId, cardId, ...)
+  // which silently no-op'd because the SQL delete targeted the wrong id.
+  deleteAttachment: async (cardId, attachmentId, storagePath) => {
     // Optimistic remove
     const prevAttachments = get().attachments[cardId] || []
     set((s) => ({
