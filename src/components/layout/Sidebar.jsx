@@ -1,5 +1,5 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import { useSettingsStore } from '../../store/settingsStore'
 import { useBoardStore } from '../../store/boardStore'
@@ -80,10 +80,22 @@ export default function Sidebar() {
   const isDesktop = useIsDesktop()
   const isWide = useMediaQuery('(min-width: 1280px)')
 
-  // Auto-collapse on narrow desktop viewports (1024–1280px)
-  // Skip when workspace sub-sidebar is open — it owns the collapsed state in that case.
+  // Auto-collapse only on the WIDE → NARROW transition (1280px boundary).
+  // Previously this fired on every mount and overrode the persisted user
+  // choice on every reload. prevIsWide tracks the last-seen value so the
+  // initial mount is a no-op (persisted state wins). The opposite
+  // transition (narrow → wide) does NOT auto-expand — user's pinned
+  // choice survives until they toggle manually.
+  const prevIsWide = useRef(isWide)
   useEffect(() => {
-    if (isDesktop && !workspaceSidebarOpen) setSidebarCollapsed(!isWide)
+    if (!isDesktop || workspaceSidebarOpen) {
+      prevIsWide.current = isWide
+      return
+    }
+    if (prevIsWide.current && !isWide) {
+      setSidebarCollapsed(true)
+    }
+    prevIsWide.current = isWide
   }, [isDesktop, isWide, workspaceSidebarOpen, setSidebarCollapsed])
 
   // While mobile drawer is open: lock body scroll + Escape closes

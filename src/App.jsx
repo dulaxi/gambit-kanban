@@ -12,8 +12,9 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
 const UpdatePasswordPage = lazy(() => import('./pages/UpdatePasswordPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const BoardsPage = lazy(() => import('./pages/BoardsPage'))
-const CalendarPage = lazy(() => import('./pages/CalendarPage'))
-const NotesPage = lazy(() => import('./pages/NotesPage'))
+// Calendar + Notes removed from the dashboard UI — they added little
+// without core differentiation. Page files still exist on disk; restore
+// the lazy imports + routes below if you want them back.
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const WorkspacePage = lazy(() => import('./pages/WorkspacePage'))
 const ChatPage = lazy(() => import('./pages/ChatPage'))
@@ -71,8 +72,6 @@ export default function App() {
             <Route path="chat/:id" element={<ErrorBoundary><ChatPage /></ErrorBoundary>} />
             <Route path="boards/*" element={<ErrorBoundary><BoardsPage /></ErrorBoundary>} />
             <Route path="workspace" element={<ErrorBoundary><WorkspacePage /></ErrorBoundary>} />
-            <Route path="calendar" element={<ErrorBoundary><CalendarPage /></ErrorBoundary>} />
-            <Route path="notes" element={<ErrorBoundary><NotesPage /></ErrorBoundary>} />
             <Route path="settings" element={<ErrorBoundary><SettingsPage /></ErrorBoundary>} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />

@@ -66,7 +66,7 @@ src/
 │   ├── boardSharingStore.js        # Per-board members + invitations
 │   ├── workspacesStore.js          # Multi-tenant workspaces + members + invitations
 │   ├── chatStore.js                # AI chat threads + messages + tool calls
-│   ├── noteStore.js                # Private notes
+│   ├── noteStore.js                # Private notes — ⚠️ unwired from UI (see "Removed pages")
 │   ├── notificationStore.js        # In-app notifications
 │   ├── templateStore.js            # Board/card templates
 │   ├── settingsStore.js            # Local-only: sidebar, theme, font
@@ -97,10 +97,9 @@ src/
 │   ├── BoardsPage.jsx              # Primary kanban view
 │   ├── ChatPage.jsx + ChatListPage.jsx
 │   ├── WorkspacePage.jsx
-│   ├── CalendarPage.jsx
-│   ├── NotesPage.jsx
 │   ├── SettingsPage.jsx
-│   └── NotFoundPage.jsx
+│   ├── NotFoundPage.jsx
+│   └── CalendarPage.jsx + NotesPage.jsx  # ⚠️ unwired — see "Removed pages" note
 ├── utils/
 │   ├── formatting.js               # LABEL_BG, PRIORITY_DOT, AVATAR_COLORS class strings
 │   ├── toast.js                    # showToast.{success|error|delete|...} helpers
@@ -121,6 +120,21 @@ supabase/
         └── stream.ts               # SSE writer
 ```
 
+### Removed pages (intentional, do not re-wire)
+
+`CalendarPage.jsx`, `NotesPage.jsx`, and `noteStore.js` are unused from
+the dashboard UI. They were removed deliberately to sharpen the product
+focus to "AI-powered kanban" — every PM tool has notes/calendar; trying
+to compete there meant being a worse Notion / worse Google Calendar.
+
+The page files, store, and Supabase `notes` table are left in place so a
+future revival is a one-line route restoration. Do **not** re-add Notes
+to the sidebar or routes without explicit user confirmation.
+
+If a calendar comes back, the right shape is a **board view toggle**
+(month/week grid of cards with `due_date`) alongside the column view —
+not a top-level Calendar nav item.
+
 ## Subsystems
 
 ### AI agent (`supabase/functions/chat/`)
@@ -135,13 +149,13 @@ Tools: `create_card`, `move_card`, `update_card`, `delete_card`, `create_board`,
 `update_board`, `delete_board`, `add_column`, `delete_column`, `invite_member`,
 `remove_member`, `create_note`, `update_note`.
 
-### Tier system (`supabase/functions/chat/tier.ts`)
+### Tier system
 
-- **Free**: 20 messages/day, Haiku model only, write tools blocked. Read-only-ish.
-- **Pro**: unlimited, all tools enabled.
-- `PRO_ONLY_TOOLS` array is the source of truth for which tools require Pro.
-- `profiles.tier` column drives the gate; daily counter via `increment_chat_usage` RPC.
-- Currently Pro and Free both run Haiku — `classifyModel` is wired but routes both paths to Haiku.
+> **Currently being redesigned.** The old Free/Pro tier description was
+> removed from this file so reads don't anchor on stale gating rules
+> while the new pricing/plan system is being designed. The implementation
+> still exists in `supabase/functions/chat/tier.ts` (treat that as
+> source-of-truth until the new system lands here).
 
 ### Workspaces (`workspacesStore.js`)
 

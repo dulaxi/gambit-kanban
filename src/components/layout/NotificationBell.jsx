@@ -7,7 +7,11 @@ import { useBoardStore } from '../../store/boardStore'
 import Popover from '../ui/Popover'
 import Tooltip from '../ui/Tooltip'
 
-export default function NotificationBell({ placement = 'top' }) {
+// `placement` controls the dropdown panel's anchor.
+// `tooltipPlacement` (optional) overrides the hover-tooltip anchor —
+// pass "right" when the bell is in a collapsed sidebar so the tooltip
+// flies out sideways instead of clipping against the narrow column.
+export default function NotificationBell({ placement = 'top', tooltipPlacement }) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const notifications = useNotificationStore((s) => s.notifications)
@@ -17,6 +21,7 @@ export default function NotificationBell({ placement = 'top' }) {
   const setActiveBoard = useBoardStore((s) => s.setActiveBoard)
 
   const popoverPlacement = placement === 'top' ? 'top-start' : 'bottom-end'
+  const finalTooltipPlacement = tooltipPlacement || (placement === 'top' ? 'top' : 'bottom')
 
   const panel = (
     <div className="w-80 -m-1 overflow-hidden rounded-[10px]">
@@ -80,7 +85,7 @@ export default function NotificationBell({ placement = 'top' }) {
 
   return (
     <Popover open={open} onOpenChange={setOpen} placement={popoverPlacement} panel={panel} panelClassName="p-0 overflow-hidden" className="inline-flex">
-      <Tooltip content="Notifications" placement={placement === 'top' ? 'top' : 'bottom'} disabled={open}>
+      <Tooltip content="Notifications" placement={finalTooltipPlacement} disabled={open}>
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}

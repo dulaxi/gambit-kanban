@@ -4,7 +4,7 @@ import '@fontsource-variable/plus-jakarta-sans'
 
 import { SiGmail } from 'react-icons/si'
 import { BsSlack, BsMicrosoftTeams } from 'react-icons/bs'
-import { TextAlignLeft, ArrowRight, ArrowUpRight, Browser, Calendar, CalendarDot, CaretDoubleRight, CaretLeft, CaretRight, ChartBar, ChartPie, ChatsCircle, Check, CheckCircle, CheckSquare, ClipboardText, Clock, Columns, CreditCard, DotsSixVertical, Envelope, FileText, Gauge, Gear, Hash, Kanban, Megaphone, Microphone, SquaresFour, Lightning, List, CursorClick, Notepad, Tag, Plus, ShareNetwork, Shield, ShieldCheck, ShoppingCart, Sparkle, Square, Target, TrendUp, User, Users, VideoCamera, Waveform, X } from '@phosphor-icons/react'
+import { TextAlignLeft, ArrowRight, ArrowUpRight, Browser, Calendar, CalendarDot, CaretDoubleRight, CaretLeft, CaretRight, Champagne, ChartBar, ChartPie, ChatsCircle, Check, CheckCircle, CheckSquare, Cheers, ClipboardText, Clock, Columns, CreditCard, DotsSixVertical, Envelope, FileText, Gauge, Gear, Hash, Kanban, Megaphone, Microphone, SquaresFour, Lightning, List, CursorClick, Notepad, Popcorn, Tag, Plus, ShareNetwork, Shield, ShieldCheck, ShoppingCart, Sparkle, Square, Target, TrendUp, User, Users, VideoCamera, Waveform, X } from '@phosphor-icons/react'
 import {
   DndContext, DragOverlay, pointerWithin, rectIntersection,
   PointerSensor, useSensor, useSensors, useDroppable,
@@ -142,36 +142,95 @@ const mockDetailCard = {
 // post-launch with real metrics (active boards, signup count, avg setup
 // time, etc.) and rebuild the section using credible numbers.
 
-const features = [
+// Features grid + standalone CTA were removed in favor of pricing + FAQ.
+// If a feature catalog ever comes back, restore from git history of this
+// file — it lived here as `const features = [...]`.
+
+// `ghost`       → "ghost" card: page-bg fill + dark ink border. Used on
+//                  Free so it visually blends into the page while a sharp
+//                  ink outline defines its shape.
+// `primaryCta`  → dark ink CTA button. Used on Pro to keep upgrade
+//                  visually distinct now that the highlight border moved.
+const PRICING_TIERS = [
   {
-    icon: Columns,
-    title: 'Kanban Boards',
-    desc: 'Organize work into columns that match your workflow. Drag cards between stages with buttery-smooth interactions.',
+    name: 'Free',
+    tagline: 'For getting started',
+    price: '$0',
+    period: 'forever',
+    cta: 'Try Kolumn',
+    ghost: true,
+    primaryCta: false,
+    topIcon: Popcorn,
+    topIconClass: 'text-[var(--text-primary)]',
+    bullets: [
+      'Unlimited boards & cards',
+      'Drag-and-drop, labels, due dates, checklists',
+      'Real-time team collaboration',
+      '20 AI messages per day',
+    ],
   },
   {
-    icon: Users,
-    title: 'Real-Time Collaboration',
-    desc: 'Share boards with your team. Every change syncs instantly across all connected users — no refresh needed.',
+    name: 'Pro',
+    tagline: 'For daily productivity',
+    price: '$8',
+    period: 'per month',
+    cta: 'Try Kolumn',
+    ghost: false,
+    primaryCta: true,
+    topIcon: Champagne,
+    // Lime-tinted icon (vs ink on Free/Team) puts brand accent color
+    // exactly where the eye first lands — signals "this one matters."
+    topIconClass: 'text-[var(--color-logo)]',
+    bullets: [
+      'Everything in Free',
+      'Unlimited AI messages',
+      'AI can create, move, and update cards for you',
+      'Priority support',
+    ],
   },
   {
-    icon: Lightning,
-    title: 'Smart Organization',
-    desc: 'Priorities, color-coded labels, checklists, and due dates. Everything you need to stay on top of your work.',
+    name: 'Team',
+    tagline: 'For team workspaces',
+    price: '$24',
+    period: 'per month',
+    cta: 'Try Kolumn',
+    ghost: false,
+    primaryCta: false,
+    topIcon: Cheers,
+    topIconClass: 'text-[var(--text-primary)]',
+    bullets: [
+      'Everything in Pro',
+      'Multiple workspaces with shared boards',
+      'Member roles & admin controls',
+      'Priority onboarding',
+    ],
+  },
+]
+
+const FAQ = [
+  {
+    q: 'How is Kolumn different from Asana, Trello, or Notion?',
+    a: "Most PM tools grew into something heavy — workflows, custom fields, sprint planning. Kolumn is a kanban that stayed a kanban. The difference is what's missing: no setup, no rituals, no field discipline. Just boards, cards, and an AI that can run the busywork for you.",
   },
   {
-    icon: Shield,
-    title: 'Secure by Default',
-    desc: 'Row-level security on every table. Your data is private to your team with zero configuration.',
+    q: 'Do I need to learn how to use the AI?',
+    a: "No. Just type what you want — “add a task to redesign the hero,” “move the Stripe card to In Progress” — and Kolumn does it. The kanban interface is also there if you'd rather drag.",
   },
   {
-    icon: CursorClick,
-    title: 'Drag & Drop Everything',
-    desc: 'Reorder cards, move between columns, rearrange your entire board — all with natural drag interactions.',
+    q: 'Is my data private?',
+    a: "Yes. Every table uses row-level security so only you and your team can see your boards. We don't train on your content.",
   },
   {
-    icon: Sparkle,
-    title: 'Clean Interface',
-    desc: 'No bloat, no clutter. A focused workspace that gets out of your way so you can focus on shipping.',
+    q: 'Can I invite my team?',
+    a: 'Yes. Boards can be shared per-board or organized into workspaces. The Free tier supports collaboration with no member cap.',
+  },
+  {
+    q: 'Is there a mobile app?',
+    a: 'Not yet. The web app is responsive and works on phones. Native apps are on the roadmap.',
+  },
+  {
+    q: 'What happens to my data if I cancel Pro?',
+    a: 'Nothing. You keep all your boards and cards forever — cancellation just drops you back to the Free tier (20 AI messages per day).',
   },
 ]
 
@@ -1047,7 +1106,7 @@ function EveryDetailDemo({ active = true }) {
   return (
     <div className="w-full max-w-5xl">
       <div
-        className="relative overflow-hidden w-full rounded-2xl bg-[#E8DDE2]"
+        className="relative overflow-hidden w-full rounded-[2rem] bg-[#E8DDE2]"
         style={{ boxShadow: 'inset 0 0 0 1px #E0DBD5' }}
       >
         <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 p-4 md:p-8">
@@ -1212,7 +1271,7 @@ function SlackThreadDemo({ active = true }) {
   return (
     <div className="w-full max-w-5xl">
       <div
-        className="relative overflow-hidden w-full rounded-2xl bg-[#E8DDE2]"
+        className="relative overflow-hidden w-full rounded-[2rem] bg-[#E8DDE2]"
         style={{ boxShadow: 'inset 0 0 0 1px #E0DBD5' }}
       >
         <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 p-4 md:p-8">
@@ -1367,7 +1426,7 @@ function TranscriptDemo({ active = true }) {
   return (
     <div className="w-full max-w-5xl">
       <div
-        className="relative overflow-hidden w-full rounded-2xl bg-[#E8DDE2]"
+        className="relative overflow-hidden w-full rounded-[2rem] bg-[#E8DDE2]"
         style={{ boxShadow: 'inset 0 0 0 1px #E0DBD5' }}
       >
         <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 p-4 md:p-8">
@@ -1503,7 +1562,7 @@ function TeamsThreadDemo({ active = true }) {
   return (
     <div className="w-full max-w-5xl">
       <div
-        className="relative overflow-hidden w-full rounded-2xl bg-[#E8DDE2]"
+        className="relative overflow-hidden w-full rounded-[2rem] bg-[#E8DDE2]"
         style={{ boxShadow: 'inset 0 0 0 1px #E0DBD5' }}
       >
         <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 p-4 md:p-8">
@@ -1660,7 +1719,7 @@ function GmailThreadDemo({ active = true }) {
   return (
     <div className="w-full max-w-5xl">
       <div
-        className="relative overflow-hidden w-full rounded-2xl bg-[#E8DDE2]"
+        className="relative overflow-hidden w-full rounded-[2rem] bg-[#E8DDE2]"
         style={{ boxShadow: 'inset 0 0 0 1px #E0DBD5' }}
       >
         <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 p-4 md:p-8">
@@ -2018,7 +2077,10 @@ function HeroAuthCard() {
           </form>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="flex items-center gap-2 px-3 py-2 bg-[var(--surface-hover)] rounded-lg text-sm text-[var(--text-secondary)]">
+            {/* Email-display "pill" — sized to match the inputs/button
+                below (h-11, rounded-[0.6rem], text-base) so the post-email
+                signup stack reads as a single coherent column of boxes. */}
+            <div className="flex items-center gap-2 h-11 px-3 bg-[var(--surface-hover)] border border-[var(--border-default)] rounded-[0.6rem] text-base text-[var(--text-secondary)]">
               <span className="truncate flex-1">{email}</span>
               <button type="button" onClick={() => { setMode('email'); setError('') }} className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] shrink-0">
                 Change
@@ -2128,14 +2190,29 @@ function MobileNav() {
 }
 
 /*
- * Renders <HeroAnimation /> at its native 720×680 design size and visually
- * scales the entire animation down to fit any container width (down to ~320px
- * on phones). This preserves card proportions / cursor positioning / camera
- * math exactly — nothing inside HeroAnimation needs to know about responsive
- * sizing. Caps at 1× so wider containers don't upscale the design.
+ * Hero container — three nested layers matching the Anthropic Cowork-style
+ * pattern (outer flex → middle card with shadow → inner bordered tile that
+ * clips the content). The HeroAnimation is rendered at its native 720×680
+ * design size and CSS-scaled so it fills the inner tile without distorting
+ * cards/cursor/camera math.
+ *
+ *   Layer 1  outer flex centered, aspect-ratio 720/680
+ *              defines the outer footprint (max-w 720px, height = w * 680/720)
+ *   Layer 2  outer card — rounded-[28px] + soft shadow + cream bg
+ *              the "frame" you'd see if you took a screenshot of the unit
+ *   Layer 3  inner tile — rounded-[24px] + sand border + mauve bg + clip
+ *              this is the actual "screen" surface; ref lives here, the
+ *              ResizeObserver measures its content-box width to drive scale
+ *   Content  scaled HeroAnimation pinned to top-left of the inner tile
+ *              transform: scale(min(1, contentW / 720)) — never upscales,
+ *              shrinks proportionally on narrower containers down to phone
+ *              widths so cards never get clipped on the edges
  */
 const HERO_DESIGN_WIDTH = 720
-const HERO_DESIGN_HEIGHT = 680
+// 830 (portrait, ~0.87:1) — matches Anthropic's hero video aspect of
+// 1080/1238 (= 0.872). The taller frame gives the captions, animation
+// stage, and cards more vertical breathing room than the prior square.
+const HERO_DESIGN_HEIGHT = 830
 
 function ScaledHero() {
   const ref = useRef(null)
@@ -2156,19 +2233,37 @@ function ScaledHero() {
 
   return (
     <div
-      ref={ref}
-      className="relative w-full max-w-[720px] overflow-hidden rounded-[28px] bg-[var(--color-mauve-wash)] font-sans"
+      /* max-w 684 = 720 × 0.95 — shrinks the hero 5% on both axes while
+         keeping the 720/830 design aspect-ratio. The inner scale math
+         picks up automatically (scale = min(1, 684/720) = 0.95). */
+      className="relative w-full max-w-[684px] flex items-center justify-center"
       style={{ aspectRatio: `${HERO_DESIGN_WIDTH} / ${HERO_DESIGN_HEIGHT}` }}
     >
-      <div
-        className="absolute top-0 left-0 origin-top-left"
-        style={{
-          width: HERO_DESIGN_WIDTH,
-          height: HERO_DESIGN_HEIGHT,
-          transform: `scale(${scale})`,
-        }}
-      >
-        <HeroAnimation />
+      {/* Layer 2 — outer card (frame + shadow). Cream bg is barely visible
+          (the inner tile fills it entirely) but the rounded clip + shadow
+          live on this layer so the inner border can sit cleanly inside. */}
+      <div className="relative w-full h-full rounded-[2rem] bg-[var(--surface-card)] shadow-[0_4px_20px_0_rgba(27,27,24,0.04)] flex justify-center items-center">
+        {/* Layer 3 — inner bordered tile (the "screen"). Mauve bg preserves
+            the existing brand vibe for captions/brand lockup that sit
+            directly on this layer during phases 0-8. */}
+        <div
+          ref={ref}
+          className="relative w-full h-full overflow-hidden rounded-[2rem] border border-[var(--color-sand)] bg-[var(--color-mauve-wash)] font-sans"
+        >
+          <div
+            className="absolute top-0 left-0 origin-top-left"
+            style={{
+              width: HERO_DESIGN_WIDTH,
+              height: HERO_DESIGN_HEIGHT,
+              transform: `scale(${scale})`,
+            }}
+          >
+            {/* parentScale lets HeroAnimation convert getBoundingClientRect
+                screen-space coords back into design-space — without it the
+                drag/cursor/camera math would land 5% short of targets. */}
+            <HeroAnimation parentScale={scale} />
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -2240,7 +2335,7 @@ export default function LandingPage() {
       <section className="px-6 sm:px-10 py-14 max-w-6xl mx-auto">
         {/* Heading + intro centered */}
         <div className="text-center mb-8 max-w-2xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-normal text-[#1B1B18] tracking-tight mb-3">
+          <h2 className="text-3xl sm:text-4xl font-light text-[#1B1B18] tracking-tight mb-3">
             Notes in,{' '}
             <span className="text-[#8BA32E] font-heading">Kanban out</span>
           </h2>
@@ -2256,46 +2351,94 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Features Grid ─── */}
-      <section className="px-6 sm:px-10 py-16 max-w-5xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl sm:text-4xl font-normal text-[var(--text-primary)] tracking-tight mb-2">Built for how teams <span className="text-[var(--color-logo)] font-heading">actually work</span></h2>
-          <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">No bloat, no learning curve. Just the tools that matter — designed to feel invisible.</p>
+      {/* ─── Pricing ─── */}
+      <section className="px-6 sm:px-10 py-20 max-w-[90rem] mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-light text-[var(--text-primary)] tracking-tight mb-2">
+            Compare <span className="font-heading">plans</span>
+          </h2>
+          <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+            Free for solo and small teams. Pro when you want unlimited AI.
+          </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {features.map((f) => (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-[90rem] mx-auto">
+          {PRICING_TIERS.map((tier) => {
+            const TopIcon = tier.topIcon
+            return (
             <div
-              key={f.title}
-              className="group bg-[var(--surface-card)] border border-[var(--color-sand)]/80 rounded-2xl p-5 hover:shadow-lg hover:border-[var(--color-sand)]/80 transition-all duration-300"
+              key={tier.name}
+              className={`relative rounded-[2rem] p-7 flex flex-col ${
+                /* Pro gets a 2px ink border vs the others' 1px — subtle
+                   visual weight that signals "main tier" without breaking
+                   the unified ink-border system. */
+                tier.primaryCta ? 'border-2' : 'border'
+              } ${
+                tier.ghost
+                  ? 'bg-[var(--surface-page)] border-[var(--color-sand)]'
+                  : tier.primaryCta
+                  ? 'bg-[var(--color-mauve-cream)] border-[var(--color-ink)]'
+                  : 'bg-[var(--surface-card)] border-[var(--color-sand)]'
+              } ${
+                tier.accentShadow
+                  ? 'shadow-[0_4px_32px_0_rgba(168,150,158,0.28)]'
+                  : ''
+              }`}
             >
-              <div className="w-9 h-9 rounded-xl bg-[var(--accent-lime)]/20 group-hover:bg-[var(--text-primary)] flex items-center justify-center mb-3.5 transition-colors duration-300">
-                <f.icon className="w-4.5 h-4.5 text-[var(--text-primary)] group-hover:text-white transition-colors duration-300" />
+              {TopIcon && (
+                <div className="mb-5">
+                  <TopIcon size={56} weight="duotone" className={tier.topIconClass} />
+                </div>
+              )}
+              <h3
+                className="text-3xl font-normal tracking-tight text-[var(--text-primary)]"
+                style={{ fontFamily: 'Clash Grotesk, system-ui, sans-serif' }}
+              >
+                {tier.name}
+              </h3>
+              <p className="text-sm text-[var(--text-secondary)] mb-6">{tier.tagline}</p>
+              <div className="flex items-baseline gap-1.5 mb-6">
+                <span className="text-4xl font-normal text-[var(--text-primary)] font-logo">{tier.price}</span>
+                <span className="text-sm text-[var(--text-muted)]">/ {tier.period}</span>
               </div>
-              <h3 className="text-base font-normal text-[var(--text-primary)] mb-1">{f.title}</h3>
-              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">{f.desc}</p>
+              <Link
+                to="/signup"
+                className={`mb-8 inline-flex items-center justify-center gap-2 h-11 rounded-[0.6rem] text-base font-medium transition-colors ${
+                  tier.primaryCta
+                    ? 'bg-[var(--text-primary)] text-white hover:bg-[var(--btn-primary-hover)]'
+                    : 'bg-[var(--surface-hover)] text-[var(--text-primary)] border border-[var(--color-sand)] hover:border-[var(--text-primary)]'
+                }`}
+              >
+                {tier.cta}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <ul className="space-y-2.5 text-sm text-[var(--text-secondary)]">
+                {tier.bullets.map((bullet) => (
+                  <li key={bullet} className="flex items-start gap-2">
+                    <Check size={14} weight="bold" className="mt-1 text-[var(--color-logo)] shrink-0" />
+                    <span>{bullet}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-          ))}
+            )
+          })}
         </div>
       </section>
 
-      {/* ─── CTA ─── */}
-      <section className="relative px-6 sm:px-10 py-16 max-w-5xl mx-auto text-center">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-r from-[var(--text-primary)]/25 to-[var(--accent-lime)]/25 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative">
-        <div className="w-10 h-[1px] bg-[var(--color-sand)] mx-auto mb-10" />
-        <h2 className="text-3xl sm:text-4xl font-normal text-[var(--text-primary)] tracking-tight mb-3">
-          Your team's <span className="text-[var(--color-logo)] font-heading">next move</span> starts here
-        </h2>
-        <p className="text-sm text-[var(--text-secondary)] max-w-sm mx-auto mb-8 leading-relaxed">
-          Set up your first board in under 60 seconds. No credit card, no setup wizard.
-        </p>
-        <Link
-          to="/signup"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--text-primary)] text-white text-sm font-normal rounded-lg hover:bg-[var(--btn-primary-hover)] transition-colors"
-        >
-          Get started free
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+      {/* ─── FAQ ─── */}
+      <section className="px-6 sm:px-10 py-20 max-w-3xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-light text-[var(--text-primary)] tracking-tight mb-2">
+            Frequently asked <span className="text-[var(--color-logo)] font-heading">questions</span>
+          </h2>
+        </div>
+        <div className="divide-y divide-[var(--color-sand)]/80 border-y border-[var(--color-sand)]/80">
+          {FAQ.map((item) => (
+            <div key={item.q} className="py-7">
+              <h3 className="text-base font-medium text-[var(--text-primary)] mb-2 tracking-tight">{item.q}</h3>
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.a}</p>
+            </div>
+          ))}
         </div>
       </section>
 

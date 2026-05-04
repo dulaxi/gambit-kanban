@@ -392,8 +392,17 @@ function MiniColumn({ col, cards, indexOffset = 0, cardOverrides = {}, cardRefs 
   )
 }
 
-/* Hero animation orchestrator */
-export function HeroAnimation() {
+/* Hero animation orchestrator.
+ *
+ * parentScale (default 1) lets a transform: scale(...) wrapper above us
+ * report its scale factor. getBoundingClientRect() returns post-transform
+ * (screen-space) coords, but the card / cursor / camera transforms inside
+ * this component apply in pre-transform (design-space) CSS pixels. When
+ * the parent shrinks us (e.g., landing's ScaledHero at 0.95×), we have
+ * to divide measurements by parentScale so the two coordinate systems
+ * agree. With parentScale = 1 this is a no-op (sandbox case).
+ */
+export function HeroAnimation({ parentScale = 1 } = {}) {
   // See CAPTIONS / storyboard comment above for phase semantics.
   const [phase, setPhase] = useState(0)
   const [typed, setTyped] = useState('')
@@ -478,35 +487,39 @@ export function HeroAnimation() {
     const c2 = card2Ref.current.getBoundingClientRect()
     const c3 = card3Ref.current.getBoundingClientRect()
 
+    // Convert screen-space rect coords to design-space by dividing by
+    // parentScale (1 in sandbox; <1 when ScaledHero shrinks the wrapper).
+    const s = parentScale || 1
     const card1Center = {
-      x: (c1.left + c1.width / 2) - stageRect.left,
-      y: (c1.top + c1.height / 2) - stageRect.top,
+      x: ((c1.left + c1.width / 2) - stageRect.left) / s,
+      y: ((c1.top + c1.height / 2) - stageRect.top) / s,
     }
     const card2Center = {
-      x: (c2.left + c2.width / 2) - stageRect.left,
-      y: (c2.top + c2.height / 2) - stageRect.top,
+      x: ((c2.left + c2.width / 2) - stageRect.left) / s,
+      y: ((c2.top + c2.height / 2) - stageRect.top) / s,
     }
     const card3Center = {
-      x: (c3.left + c3.width / 2) - stageRect.left,
-      y: (c3.top + c3.height / 2) - stageRect.top,
+      x: ((c3.left + c3.width / 2) - stageRect.left) / s,
+      y: ((c3.top + c3.height / 2) - stageRect.top) / s,
     }
 
-    // Slot distance = vertical px between consecutive card centers.
+    // Slot distance = vertical px between consecutive card centers (design space).
     const slotDistance = card3Center.y - card2Center.y
     // Drop center: TOP-aligned with card 1 (so the dropped card's top
     // edge matches slot 1's top edge regardless of card height
     // differences). x is one column over from card-2's column.
-    const card1TopY = c1.top - stageRect.top
+    const card1TopY = (c1.top - stageRect.top) / s
+    const c2Height = c2.height / s
     const dropCenter = {
       x: card2Center.x + 310,
-      y: card1TopY + c2.height / 2,
+      y: card1TopY + c2Height / 2,
     }
     const dragPx = dropCenter.x - card2Center.x
     const dragYPx = dropCenter.y - card2Center.y
 
     // Camera pans (origin = 0 0): bring focal point to viewport center.
-    const viewportW = stageRect.width
-    const viewportH = stageRect.height
+    const viewportW = stageRect.width / s
+    const viewportH = stageRect.height / s
     const zoomedPan = {
       x: viewportW / 2 - card2Center.x * ZOOM_SCALE,
       y: viewportH / 2 - card2Center.y * ZOOM_SCALE,
@@ -527,7 +540,7 @@ export function HeroAnimation() {
       zoomedPan,
       dropPan,
     })
-  }, [phase])
+  }, [phase, parentScale])
 
   // Type-out during phase 5 — 20ms per char (~50 chars/s, brisk).
   useEffect(() => {

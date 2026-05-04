@@ -11,7 +11,10 @@ export default function SidebarBottom({ collapsed, showCollapsed, onToggle, work
   return (
     <div className={`border-t border-[var(--border-subtle)] ${showCollapsed ? 'px-1 py-2 flex flex-col items-center gap-1' : 'px-2 py-2 flex items-center gap-0.5'}`}>
       <UserMenu variant="sidebar" collapsed={showCollapsed} />
-      <NotificationBell placement="top" />
+      <NotificationBell
+        placement="top"
+        tooltipPlacement={showCollapsed ? 'right' : 'top'}
+      />
       <Tooltip content={tooltipText} placement={showCollapsed ? 'right' : 'top'}>
         <button
           onClick={onToggle}

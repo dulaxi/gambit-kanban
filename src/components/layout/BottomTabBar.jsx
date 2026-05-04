@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { Calendar, Columns, Gear, SquaresFour, Notepad, Users } from '@phosphor-icons/react'
+import { Columns, SquaresFour, Users } from '@phosphor-icons/react'
 
+// Calendar + Notes tabs removed — see App.jsx note. The bar now has 3
+// tabs which fit comfortably without crowding on phones.
 const tabs = [
   { to: '/boards', icon: Columns, label: 'Board' },
   { to: '/dashboard', icon: SquaresFour, label: 'Home' },
   { to: '/workspace', icon: Users, label: 'Workspace' },
-  { to: '/calendar', icon: Calendar, label: 'Calendar' },
-  { to: '/notes', icon: Notepad, label: 'Notes' },
 ]
 
 export default function BottomTabBar() {

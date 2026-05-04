@@ -132,6 +132,12 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
       open
       onClose={handleSaveAndClose}
       contentClassName="grid items-center justify-items-center overflow-y-auto overflow-x-hidden md:p-10 p-4"
+      // Open in view-only mode — no element gets initial focus. The
+      // previous fallback (first focusable = "All cards" back button)
+      // showed a stray :focus-visible ring whenever the panel was opened
+      // by keyboard (Enter from search). Tab still reaches everything
+      // inside; we just don't pre-select anything.
+      disableInitialFocus
     >
       <div
         className="flex flex-col text-left shadow-xl border-0.5 border-[var(--border-default)] rounded-2xl md:p-6 p-4 bg-[var(--surface-page)] w-full max-w-3xl min-h-[50vh] max-h-[90vh] overflow-hidden"

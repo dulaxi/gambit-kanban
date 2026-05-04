@@ -70,6 +70,11 @@ export default function Modal({
   dismissOnEscape = true,
   dismissOnOutside = true,
   initialFocusRef,
+  // When true, skip the auto-focus on open. Use for "view-only" panels
+  // (e.g., CardDetailPanel opened via search → Enter) where any focused
+  // element would render a stray :focus-visible ring on the first
+  // focusable child.
+  disableInitialFocus = false,
   backdropClassName = 'bg-[rgba(27,27,24,0.45)]',
   contentClassName = 'flex items-center justify-center',
   className = '',
@@ -93,12 +98,21 @@ export default function Modal({
   // trigger after Escape (keyboard modality), which the user does not want.
   useEffect(() => {
     if (!open) return
+    if (disableInitialFocus) {
+      // Pull focus off any previously-focused element so a stale
+      // :focus-visible ring (e.g., on a button under the dialog) doesn't
+      // bleed through. Body becomes active, no element shows a focus ring.
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur()
+      }
+      return
+    }
     const target =
       initialFocusRef?.current ||
       getFocusables(contentRef.current)[0] ||
       contentRef.current
     target?.focus?.()
-  }, [open, initialFocusRef])
+  }, [open, initialFocusRef, disableInitialFocus])
 
   // Escape + Tab focus trap — only the topmost modal in the stack responds,
   // so nested modals don't all close at once.

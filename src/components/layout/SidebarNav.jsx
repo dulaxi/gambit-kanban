@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { CalendarDots, ChatsCircle, MagnifyingGlass, Notepad, UsersThree } from '@phosphor-icons/react'
+import { ChatsCircle, MagnifyingGlass, UsersThree } from '@phosphor-icons/react'
 import { useWorkspacesStore } from '../../store/workspacesStore'
 
 const ROW_BASE = 'flex items-center h-8 rounded-lg text-sm transition-colors duration-75 overflow-hidden'
@@ -89,8 +89,7 @@ export default function SidebarNav({
       </button>
 
       <NavLinkRow to="/chat" end icon={ChatsCircle} label="Chats" collapsed={collapsed} onNavigate={closeMobileMenu} />
-      <NavLinkRow to="/calendar" icon={CalendarDots} label="Calendar" collapsed={collapsed} onNavigate={closeMobileMenu} />
-      <NavLinkRow to="/notes" icon={Notepad} label="Notes" collapsed={collapsed} onNavigate={closeMobileMenu} />
+      {/* Calendar + Notes removed — see App.jsx note. */}
 
       {/* Workspace — desktop button toggles sub-sidebar; mobile is a plain NavLink */}
       {isDesktop ? (

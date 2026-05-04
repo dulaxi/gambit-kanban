@@ -20,16 +20,21 @@ export default function UserMenu({ variant = 'header', collapsed = false }) {
 
   const { style: profileStyle, fallbackClass } = resolveProfileColor(profile?.color)
 
-  const isCompact = variant === 'sidebar' && collapsed
+  // Sidebar avatar stays the SAME size in collapsed and expanded states
+  // (was w-7 collapsed → w-9 expanded; now consistent w-7 in both). Header
+  // variant (not "sidebar") still uses the larger w-9 avatar.
+  const isSidebar = variant === 'sidebar'
+  const avatarBox = isSidebar ? 'w-7 h-7' : 'w-9 h-9'
+  const innerIcon = isSidebar ? 'w-[18px] h-[18px]' : 'w-5 h-5'
   const avatar = (
     <span
-      className={`${isCompact ? 'w-7 h-7' : 'w-9 h-9'} rounded-full flex items-center justify-center shrink-0 ${profile?.icon ? fallbackClass : 'bg-[var(--surface-hover)]'}`}
+      className={`${avatarBox} rounded-full flex items-center justify-center shrink-0 ${profile?.icon ? fallbackClass : 'bg-[var(--surface-hover)]'}`}
       style={profile?.icon ? profileStyle : undefined}
     >
       {profile?.icon ? (
-        <DynamicIcon name={profile.icon} className={isCompact ? 'w-[18px] h-[18px]' : 'w-5 h-5'} />
+        <DynamicIcon name={profile.icon} className={innerIcon} />
       ) : (
-        <User className={`${isCompact ? 'w-[18px] h-[18px]' : 'w-5 h-5'} text-[var(--text-secondary)]`} />
+        <User className={`${innerIcon} text-[var(--text-secondary)]`} />
       )}
     </span>
   )

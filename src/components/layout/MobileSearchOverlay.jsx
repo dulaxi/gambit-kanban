@@ -2,9 +2,9 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MagnifyingGlass, X } from '@phosphor-icons/react'
 import { useBoardStore } from '../../store/boardStore'
-import { useNoteStore } from '../../store/noteStore'
 import Button from '../ui/Button'
 
+// Notes search section removed alongside the Notes page.
 export default function MobileSearchOverlay({ onClose }) {
   const [query, setQuery] = useState('')
   const inputRef = useRef(null)
@@ -12,7 +12,6 @@ export default function MobileSearchOverlay({ onClose }) {
   const cards = useBoardStore((s) => s.cards)
   const boards = useBoardStore((s) => s.boards)
   const setActiveBoard = useBoardStore((s) => s.setActiveBoard)
-  const notes = useNoteStore((s) => s.notes)
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -20,7 +19,7 @@ export default function MobileSearchOverlay({ onClose }) {
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q || q.length < 2) return { cards: [], notes: [] }
+    if (!q || q.length < 2) return { cards: [] }
 
     const matchedCards = Object.values(cards)
       .filter((c) => {
@@ -31,18 +30,10 @@ export default function MobileSearchOverlay({ onClose }) {
       })
       .slice(0, 6)
 
-    const matchedNotes = Object.values(notes)
-      .filter((n) => {
-        const title = (n.title || '').toLowerCase()
-        const content = (n.content || '').toLowerCase()
-        return title.includes(q) || content.includes(q)
-      })
-      .slice(0, 3)
+    return { cards: matchedCards }
+  }, [query, cards])
 
-    return { cards: matchedCards, notes: matchedNotes }
-  }, [query, cards, notes])
-
-  const hasResults = results.cards.length > 0 || results.notes.length > 0
+  const hasResults = results.cards.length > 0
   const showDropdown = query.trim().length >= 2
 
   const openCard = (card) => {
@@ -54,19 +45,14 @@ export default function MobileSearchOverlay({ onClose }) {
     onClose()
   }
 
-  const openNote = () => {
-    navigate('/notes')
-    onClose()
-  }
-
   return (
     <div className="absolute inset-0 bg-[var(--surface-card)] flex items-center gap-2 px-4 z-40">
       <MagnifyingGlass className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
       <input
         ref={inputRef}
         type="text"
-        aria-label="Search tasks and notes"
-        placeholder="Search tasks, notes..."
+        aria-label="Search tasks"
+        placeholder="Search tasks..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="flex-1 text-sm py-2 bg-transparent focus:outline-none placeholder-gray-400"
@@ -102,23 +88,6 @@ export default function MobileSearchOverlay({ onClose }) {
                       card.priority === 'high' ? 'bg-[var(--color-copper)]' : card.priority === 'medium' ? 'bg-[var(--color-honey)]' : 'bg-[var(--color-lime-dark)]'
                     }`} />
                   )}
-                </button>
-              ))}
-            </div>
-          )}
-          {results.notes.length > 0 && (
-            <div>
-              <p className="px-3 py-1.5 text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider bg-[var(--surface-raised)]">Notes</p>
-              {results.notes.map((note) => (
-                <button
-                  key={note.id}
-                  type="button"
-                  onClick={openNote}
-                  className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-[var(--surface-raised)] transition-colors"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-[var(--text-primary)] truncate">{note.title}</p>
-                  </div>
                 </button>
               ))}
             </div>
