@@ -102,16 +102,17 @@ export default function Column({ column, boardId, onCardClick, onCreateCard, onC
       return
     }
     setCreating(true)
+    // No auto-assignment on create — leave assignees empty so users
+    // explicitly choose. Templates can still seed labels/checklist/etc.
     const cardData = template
       ? {
           title: template.title || 'Untitled task',
           description: template.description || '',
-          assignee: profile?.display_name || '',
           priority: template.priority || 'medium',
           labels: template.labels || [],
           checklist: (template.checklist || []).map((item) => ({ text: item.text, done: false })),
         }
-      : { title: 'Untitled task', assignee: profile?.display_name || '' }
+      : { title: 'Untitled task' }
     try {
       const cardId = await addCard(boardId, column.id, cardData)
       if (onCreateCard && cardId) onCreateCard(cardId)

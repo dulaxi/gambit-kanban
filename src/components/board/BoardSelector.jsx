@@ -71,7 +71,13 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
   return (
     <>
       <div className="space-y-2">
-        <div className="flex items-center gap-2">
+        {/* Single row — when filters expand, the new pills appear inline
+            BEFORE the Archived button so the existing buttons compact
+            left and the filter pills consume horizontal space rather
+            than adding a second row (which would change the toolbar
+            height + push the divider down). flex-wrap permits graceful
+            wrapping only when truly out of room. */}
+        <div className="flex items-center gap-2 flex-wrap">
           {isRealBoard && isOwner && (
             <button
               type="button"
@@ -105,6 +111,33 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
             </button>
           )}
 
+          {/* Filter pills — inline expansion */}
+          {showFilters && isRealBoard && (
+            <>
+              <PriorityFilter filters={filters} setFilters={setFilters} />
+              <AssigneeFilter filters={filters} setFilters={setFilters} assignees={uniqueAssignees} />
+              <LabelFilter filters={filters} setFilters={setFilters} labels={uniqueLabels} />
+              <DueFilter filters={filters} setFilters={setFilters} />
+              {/* Clear all — icon-only X button. When filters are active,
+                  the icon takes the copper/destructive tint so the user
+                  reads it as "live, click to clear." When idle (nothing
+                  to clear), it stays faint and inert-looking. */}
+              <button
+                type="button"
+                onClick={clearFilters}
+                aria-label="Clear all filters"
+                title="Clear all filters"
+                className={`flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--surface-hover)] transition-colors ${
+                  activeFilterCount > 0
+                    ? 'text-[var(--color-copper)] hover:text-[var(--color-copper)]'
+                    : 'text-[var(--text-faint)] hover:text-[var(--text-secondary)]'
+                }`}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </>
+          )}
+
           {isRealBoard && archivedCards.length > 0 && (
             <button
               type="button"
@@ -119,26 +152,8 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
               Archived ({archivedCards.length})
             </button>
           )}
-        </div>
 
-        {showFilters && isRealBoard && (
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <PriorityFilter filters={filters} setFilters={setFilters} />
-            <AssigneeFilter filters={filters} setFilters={setFilters} assignees={uniqueAssignees} />
-            <LabelFilter filters={filters} setFilters={setFilters} labels={uniqueLabels} />
-            <DueFilter filters={filters} setFilters={setFilters} />
-            {activeFilterCount > 0 && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
-              >
-                <X className="w-3 h-3" />
-                Clear all
-              </button>
-            )}
-          </div>
-        )}
+        </div>
 
         {showArchived && (
           <ArchivedCardsPanel

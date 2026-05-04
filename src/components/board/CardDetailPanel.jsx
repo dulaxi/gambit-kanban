@@ -298,7 +298,8 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
               />
             </label>
             </Tooltip>
-            {/* 3-dot menu */}
+            {/* 3-dot menu — Delete pulled out so it's directly clickable.
+                Duplicate + Template stay here as secondary actions. */}
             <Menu
               open={openMenu === 'menu'}
               onOpenChange={(next) => setOpenMenu(next ? 'menu' : null)}
@@ -329,14 +330,6 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                   >
                     Template
                   </Menu.Item>
-                  <Menu.Divider />
-                  <Menu.Item
-                    icon={<Trash size={14} />}
-                    destructive
-                    onSelect={() => { deleteCard(cardId); onClose(); setOpenMenu(null) }}
-                  >
-                    Delete
-                  </Menu.Item>
                 </>
               }
             >
@@ -349,6 +342,18 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                 <DotsThreeVertical className="w-5 h-5" />
               </button>
             </Menu>
+            {/* Delete — promoted out of the 3-dot menu so it's a direct
+                one-click action. Copper tint flags it as destructive. */}
+            <Tooltip content="Delete card" placement="bottom">
+              <button
+                type="button"
+                onClick={() => { deleteCard(cardId); onClose() }}
+                aria-label="Delete card"
+                className="h-8 w-8 rounded-md flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--color-copper)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+              >
+                <Trash className="w-4 h-4" />
+              </button>
+            </Tooltip>
             {/* Priority flag */}
             <Menu
               open={openMenu === 'priority'}
@@ -415,7 +420,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                 // focus box. Same visual whether viewing or editing; the
                 // contentEditable + cursor-text affordance signals that
                 // it's editable without chrome.
-                className="font-heading text-[var(--text-primary)] text-left text-[22px] cursor-text focus:outline-none break-words min-w-0 flex-1"
+                className="font-heading font-light text-[var(--text-primary)] text-left text-[22px] cursor-text focus:outline-none break-words min-w-0 flex-1"
               >
                 {card?.title || 'Untitled task'}
               </span>

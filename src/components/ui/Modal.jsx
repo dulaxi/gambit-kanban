@@ -81,6 +81,7 @@ export default function Modal({
   zIndex = 50,
 }) {
   const contentRef = useRef(null)
+  const mouseDownInsideRef = useRef(false)
 
   const handleClose = useCallback(() => {
     if (typeof onClose === 'function') onClose()
@@ -162,8 +163,22 @@ export default function Modal({
 
   if (!open) return null
 
+  // Track whether the *mousedown* started inside the panel. If a user
+  // selects text inside the dialog and drags the cursor outside the
+  // panel before releasing, the click event resolves to the backdrop
+  // (common ancestor of mousedown + mouseup targets), which would
+  // misfire as an outside-click and close the dialog. By recording
+  // mousedown's origin, we can ignore clicks that started inside.
+  const onBackdropMouseDown = (e) => {
+    mouseDownInsideRef.current = e.target !== e.currentTarget
+  }
+
   const onBackdropClick = (e) => {
     if (!dismissOnOutside) return
+    if (mouseDownInsideRef.current) {
+      mouseDownInsideRef.current = false
+      return
+    }
     if (e.target === e.currentTarget) {
       handleClose()
     }
@@ -173,6 +188,7 @@ export default function Modal({
     <div
       className={`fixed inset-0 ${backdropClassName} ${contentClassName} ${className}`}
       style={{ zIndex }}
+      onMouseDown={onBackdropMouseDown}
       onClick={onBackdropClick}
       data-modal-backdrop
     >

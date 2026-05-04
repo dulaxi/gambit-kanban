@@ -9,7 +9,11 @@ export default function FilterPill({ label, active, children }) {
     <Popover
       open={isOpen}
       onOpenChange={setIsOpen}
-      placement="bottom-start"
+      // bottom-end anchors the dropdown to the trigger's RIGHT edge so
+      // the panel grows leftward into the viewport. The board toolbar
+      // sits on the right side of the page, so bottom-start was making
+      // dropdowns clip off the window's right edge.
+      placement="bottom-end"
       panel={children}
       panelClassName="min-w-[160px]"
     >
