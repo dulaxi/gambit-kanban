@@ -224,18 +224,10 @@
   color: #E8E5E0;
 }
 
-[data-theme="dark"] ::-webkit-scrollbar-track {
-  background: var(--surface-page);
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: var(--border-default);
-  border-radius: 4px;
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background: var(--surface-hover);
-}
+/* Dark scrollbar inherits the same hover-only pattern as light: track
+   stays transparent, thumb only colors in when the parent is hovered.
+   The `--scrollbar-thumb` / `--scrollbar-thumb-hover` tokens are
+   already redefined for dark above. */
 
 /* Subtle scrollbar — nearly invisible, fades in slightly on hover */
 .subtle-scrollbar {
