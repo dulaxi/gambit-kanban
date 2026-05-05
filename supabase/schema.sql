@@ -52,7 +52,12 @@ create table public.board_members (
   user_id uuid not null references auth.users(id) on delete cascade,
   role text not null default 'member' check (role in ('owner', 'member')),
   created_at timestamptz default now(),
-  primary key (board_id, user_id)
+  primary key (board_id, user_id),
+  -- Second FK to public.profiles so PostgREST can embed `profiles(...)`
+  -- from board_members. Without this, embeds silently return null
+  -- because PostgREST won't traverse the auth.users FK across schemas.
+  constraint board_members_user_id_profiles_fkey
+    foreign key (user_id) references public.profiles(id) on delete cascade
 );
 
 alter table public.board_members enable row level security;
@@ -296,9 +301,15 @@ create table public.board_invitations (
   invited_email text not null,
   invited_by uuid not null references auth.users(id) on delete cascade,
   status text not null default 'pending' check (status in ('pending', 'accepted', 'declined')),
-  created_at timestamptz default now(),
-  unique(board_id, invited_email)
+  created_at timestamptz default now()
 );
+
+-- Partial unique: only one PENDING invite per (board, email). Historical
+-- accepted/declined rows can coexist so re-inviting after removal works.
+create unique index if not exists
+  board_invitations_pending_unique_idx
+  on public.board_invitations (board_id, invited_email)
+  where status = 'pending';
 
 alter table public.board_invitations enable row level security;
 
@@ -418,6 +429,11 @@ alter publication supabase_realtime add table public.boards;
 alter publication supabase_realtime add table public.columns;
 alter publication supabase_realtime add table public.cards;
 alter publication supabase_realtime add table public.board_members;
+alter publication supabase_realtime add table public.board_invitations;
+alter publication supabase_realtime add table public.notifications;
+alter publication supabase_realtime add table public.workspaces;
+alter publication supabase_realtime add table public.workspace_members;
+alter publication supabase_realtime add table public.workspace_invitations;
 
 -- ============================================================
 -- 10. CARD COMMENTS

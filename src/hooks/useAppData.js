@@ -35,8 +35,10 @@ export function useAppData() {
   const fetchNotes = useNoteStore((s) => s.fetchNotes)
   const fetchInvitations = useBoardSharingStore((s) => s.fetchInvitations)
   const fetchSharedBoards = useBoardSharingStore((s) => s.fetchSharedBoards)
+  const subscribeToBoardInvitations = useBoardSharingStore((s) => s.subscribeToInvitations)
   const fetchWorkspaces = useWorkspacesStore((s) => s.fetchWorkspaces)
   const fetchWorkspaceInvitations = useWorkspacesStore((s) => s.fetchInvitations)
+  const subscribeToWorkspaceInvitations = useWorkspacesStore((s) => s.subscribeToInvitations)
   const fetchNotifications = useNotificationStore((s) => s.fetchNotifications)
   const subscribeToNotifications = useNotificationStore((s) => s.subscribeToNotifications)
 
@@ -104,6 +106,8 @@ export function useAppData() {
     })
 
     const unsubNotifications = subscribeToNotifications(user.id)
+    const unsubBoardInvites = subscribeToBoardInvitations(user.email, user.id)
+    const unsubWorkspaceInvites = subscribeToWorkspaceInvitations(user.email, user.id)
 
     if (hasLocalData()) setShowMigration(true)
 
@@ -111,6 +115,8 @@ export function useAppData() {
       cancelled = true
       unsubscribeAll()
       unsubNotifications()
+      unsubBoardInvites()
+      unsubWorkspaceInvites()
     }
     // The fetch / subscribe functions are stable Zustand action refs;
     // re-running this effect for them would just thrash subscriptions.

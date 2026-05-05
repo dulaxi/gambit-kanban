@@ -21,6 +21,16 @@ import { fetchProfilesByIds } from '../utils/supabaseHelpers'
 export const useBoardSharingStore = create((set, get) => ({
   invitations: [],
   sharedBoards: [],
+  // Per-board caches for the share modal. Shape:
+  //   boardMembers:        { [boardId]: [{ user_id, role, profiles: {...} }] }
+  //   boardSentInvitations:{ [boardId]: [{ id, invited_email, status, ... }] }
+  //
+  // SWR pattern: the modal reads these instantly (no spinner) on subsequent
+  // opens, then `fetchBoardMembers` / `fetchBoardSentInvitations` refresh
+  // them in the background. Realtime on `board_members` already keeps the
+  // member list current while the user has the app open.
+  boardMembers: {},
+  boardSentInvitations: {},
   loading: false,
   error: null,
 
@@ -28,7 +38,67 @@ export const useBoardSharingStore = create((set, get) => ({
 
   // Clear all state on sign-out / user-switch so the next user doesn't see the
   // previous user's shared boards or pending invitations during the fetch gap.
-  resetStore: () => set({ invitations: [], sharedBoards: [], loading: false, error: null }),
+  resetStore: () => set({
+    invitations: [],
+    sharedBoards: [],
+    boardMembers: {},
+    boardSentInvitations: {},
+    loading: false,
+    error: null,
+  }),
+
+  // ============================================================
+  // PER-BOARD MEMBERS (SWR cache)
+  // ============================================================
+  fetchBoardMembers: async (boardId) => {
+    if (!boardId) return
+    const { data, error } = await supabase
+      .from('board_members')
+      .select('user_id, role, profiles!board_members_user_id_profiles_fkey(id, email, display_name, icon, color)')
+      .eq('board_id', boardId)
+    if (error) {
+      logError('fetchBoardMembers failed:', error)
+      return
+    }
+    set((s) => ({ boardMembers: { ...s.boardMembers, [boardId]: data || [] } }))
+  },
+
+  fetchBoardSentInvitations: async (boardId) => {
+    if (!boardId) return
+    const { data, error } = await supabase
+      .from('board_invitations')
+      .select('*')
+      .eq('board_id', boardId)
+      .eq('status', 'pending')
+    if (error) {
+      logError('fetchBoardSentInvitations failed:', error)
+      return
+    }
+    set((s) => ({ boardSentInvitations: { ...s.boardSentInvitations, [boardId]: data || [] } }))
+  },
+
+  // Local-only mutators — used by BoardShareModal for optimistic updates.
+  // The next background fetch reconciles any drift from the server.
+  removeBoardMemberLocal: (boardId, userId) => set((s) => ({
+    boardMembers: {
+      ...s.boardMembers,
+      [boardId]: (s.boardMembers[boardId] || []).filter((m) => m.user_id !== userId),
+    },
+  })),
+
+  addBoardSentInvitationLocal: (boardId, invitation) => set((s) => ({
+    boardSentInvitations: {
+      ...s.boardSentInvitations,
+      [boardId]: [...(s.boardSentInvitations[boardId] || []), invitation],
+    },
+  })),
+
+  removeBoardSentInvitationLocal: (boardId, invitationId) => set((s) => ({
+    boardSentInvitations: {
+      ...s.boardSentInvitations,
+      [boardId]: (s.boardSentInvitations[boardId] || []).filter((i) => i.id !== invitationId),
+    },
+  })),
 
   // ============================================================
   // FETCH INVITATIONS
@@ -196,6 +266,37 @@ export const useBoardSharingStore = create((set, get) => ({
     } catch (err) {
       logError('declineInvitation failed:', err)
     }
+  },
+
+  // ============================================================
+  // REALTIME SUBSCRIPTION
+  // ============================================================
+  // Listen for new / removed `board_invitations` rows addressed to this
+  // user's email so the bell + sub-sidebar update without a reload.
+  // Also listens on `board_members` so newly accepted shares appear in
+  // "Shared with me" the moment another user shares a board with us.
+  subscribeToInvitations: (email, userId) => {
+    if (!email) return () => {}
+    const lower = email.toLowerCase()
+
+    const channel = supabase
+      .channel(`board-invites:${lower}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'board_invitations', filter: `invited_email=eq.${lower}` },
+        () => { get().fetchInvitations() }
+      )
+
+    if (userId) {
+      channel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'board_members', filter: `user_id=eq.${userId}` },
+        () => { get().fetchSharedBoards() }
+      )
+    }
+
+    channel.subscribe()
+    return () => supabase.removeChannel(channel)
   },
 
   // ============================================================

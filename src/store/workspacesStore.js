@@ -175,6 +175,34 @@ export const useWorkspacesStore = create(
         }
       },
 
+      // ====== Realtime ======
+      // Listen for workspace_invitation changes addressed to this user
+      // and workspace_member changes for this user (so newly accepted
+      // workspaces appear in the sidebar without a reload).
+      subscribeToInvitations: (email, userId) => {
+        if (!email) return () => {}
+        const lower = email.toLowerCase()
+
+        const channel = supabase
+          .channel(`workspace-invites:${lower}`)
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'workspace_invitations', filter: `invited_email=eq.${lower}` },
+            () => { get().fetchInvitations() }
+          )
+
+        if (userId) {
+          channel.on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'workspace_members', filter: `user_id=eq.${userId}` },
+            () => { get().fetchWorkspaces() }
+          )
+        }
+
+        channel.subscribe()
+        return () => supabase.removeChannel(channel)
+      },
+
       // ====== Actions ======
       createWorkspace: async (name, icon = null) => {
         const user = useAuthStore.getState().user
@@ -252,7 +280,56 @@ export const useWorkspacesStore = create(
         const trimmedEmail = (email || '').trim().toLowerCase()
         if (!trimmedEmail) return
 
+        // Block self-invite. RLS would let the row through (the inviter
+        // is also a member) and the user would see their own email in
+        // the pending list, which is just confusing.
+        if (user.email?.toLowerCase() === trimmedEmail) {
+          showToast.error("You can't invite yourself")
+          return
+        }
+
+        // Block invites to people who are already members or already
+        // have a pending invitation. Cached in the store first; falls
+        // back to a live query so a member added on another device
+        // doesn't slip through stale local state.
+        const cachedMembers = get().members[workspaceId] || []
+        if (cachedMembers.some((m) => m.email?.toLowerCase() === trimmedEmail)) {
+          showToast.error('Already a member of this workspace')
+          return
+        }
+
+        const cachedInvites = get().sentInvitations[workspaceId] || []
+        if (cachedInvites.some((inv) => inv.invited_email?.toLowerCase() === trimmedEmail && inv.status === 'pending')) {
+          showToast.error('Already invited')
+          return
+        }
+
         try {
+          // Live duplicate check — covers the case where membership /
+          // invites changed on another device and the local cache is stale.
+          const [{ data: memberRow }, { data: inviteRow }] = await Promise.all([
+            supabase
+              .from('workspace_members')
+              .select('user_id, profiles!workspace_members_user_id_profiles_fkey(email)')
+              .eq('workspace_id', workspaceId),
+            supabase
+              .from('workspace_invitations')
+              .select('id, invited_email, status')
+              .eq('workspace_id', workspaceId)
+              .eq('status', 'pending')
+              .eq('invited_email', trimmedEmail)
+              .maybeSingle(),
+          ])
+
+          if ((memberRow || []).some((m) => m.profiles?.email?.toLowerCase() === trimmedEmail)) {
+            showToast.error('Already a member of this workspace')
+            return
+          }
+          if (inviteRow) {
+            showToast.error('Already invited')
+            return
+          }
+
           const { error } = await supabase
             .from('workspace_invitations')
             .insert({ workspace_id: workspaceId, invited_email: trimmedEmail, invited_by: user.id, status: 'pending' })

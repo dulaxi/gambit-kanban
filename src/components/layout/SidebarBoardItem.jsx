@@ -1,4 +1,4 @@
-import { Kanban, Trash } from '@phosphor-icons/react'
+import { Kanban, SignOut, Trash } from '@phosphor-icons/react'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
 import Tooltip from '../ui/Tooltip'
@@ -15,10 +15,12 @@ export default function SidebarBoardItem({
   active,
   editable = false,
   deletable = false,
+  leavable = false,
   onSelect,
   onRename,
   onUpdateIcon,
   onDelete,
+  onLeave,
   iconPickerOpen,
   onToggleIconPicker,
   renaming,
@@ -102,6 +104,18 @@ export default function SidebarBoardItem({
             aria-label={`Delete board ${board.name}`}
             className="w-3.5 h-3.5 text-[var(--text-muted)] hover:text-[var(--color-copper)] opacity-0 group-hover:opacity-100 shrink-0"
             onClick={(e) => { e.stopPropagation(); onDelete?.(board.id) }}
+          />
+        </span>
+      )}
+
+      {leavable && (
+        <span className="flex items-center gap-0.5 shrink-0">
+          <SignOut
+            role="button"
+            aria-label={`Leave board ${board.name}`}
+            title="Leave board"
+            className="w-3.5 h-3.5 text-[var(--text-muted)] hover:text-[var(--color-copper)] opacity-0 group-hover:opacity-100 shrink-0"
+            onClick={(e) => { e.stopPropagation(); onLeave?.(board.id) }}
           />
         </span>
       )}

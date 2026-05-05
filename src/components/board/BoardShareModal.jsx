@@ -1,50 +1,67 @@
 import { useState, useEffect } from 'react'
 import { capture } from '../../lib/analytics'
-import { Crown, Envelope, Trash, UserPlus, Users, X } from '@phosphor-icons/react'
+import { Envelope, ShareNetwork, Trash, UserPlus, Users, X } from '@phosphor-icons/react'
 import { showToast } from '../../utils/toast'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
+import { useBoardSharingStore } from '../../store/boardSharingStore'
+
+// Stable empty-array reference — returning a fresh `[]` from a Zustand
+// selector triggers a re-render every time (Object.is([], []) is false),
+// which produced "Maximum update depth exceeded" here.
+const EMPTY = []
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import Modal from '../ui/Modal'
 import Button from '../ui/Button'
 import Input from '../ui/Input'
+import DynamicIcon from './DynamicIcon'
+import { getAvatarColor, getAvatarTextColor, getInitials } from '../../utils/formatting'
 
 export default function BoardShareModal({ board, onClose }) {
   const isMobile = useIsMobile()
-  const [members, setMembers] = useState([])
-  const [invitations, setInvitations] = useState([])
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const user = useAuthStore((s) => s.user)
 
+  // SWR pattern: read members + invitations from the per-board cache so
+  // the modal renders instantly on subsequent opens (no spinner, no
+  // empty→full reflow). The fetchers below run in the background to
+  // revalidate. Realtime on `board_members` keeps the cache fresh while
+  // the app is open, so re-opens after the first usually find a current
+  // list and the network round-trip is invisible.
+  const members = useBoardSharingStore((s) => s.boardMembers[board.id] || EMPTY)
+  const invitations = useBoardSharingStore((s) => s.boardSentInvitations[board.id] || EMPTY)
+  const fetchBoardMembers = useBoardSharingStore((s) => s.fetchBoardMembers)
+  const fetchBoardSentInvitations = useBoardSharingStore((s) => s.fetchBoardSentInvitations)
+  const removeBoardMemberLocal = useBoardSharingStore((s) => s.removeBoardMemberLocal)
+  const addBoardSentInvitationLocal = useBoardSharingStore((s) => s.addBoardSentInvitationLocal)
+  const removeBoardSentInvitationLocal = useBoardSharingStore((s) => s.removeBoardSentInvitationLocal)
+
+  // Track first-load-for-this-board so we can show a skeleton ONLY on
+  // truly empty cache. Subsequent opens have data and skip the skeleton
+  // entirely — the modal feels instant.
+  const hasCachedMembers = useBoardSharingStore((s) => Boolean(s.boardMembers[board.id]))
+  const showSkeleton = !hasCachedMembers
+
   useEffect(() => {
-    fetchMembers()
-    fetchInvitations()
-  }, [board.id])
-
-  const fetchMembers = async () => {
-    const { data } = await supabase
-      .from('board_members')
-      .select('user_id, role, profiles(id, email, display_name, icon, color)')
-      .eq('board_id', board.id)
-    setMembers(data || [])
-  }
-
-  const fetchInvitations = async () => {
-    const { data } = await supabase
-      .from('board_invitations')
-      .select('*')
-      .eq('board_id', board.id)
-      .eq('status', 'pending')
-    setInvitations(data || [])
-  }
+    fetchBoardMembers(board.id)
+    fetchBoardSentInvitations(board.id)
+  }, [board.id, fetchBoardMembers, fetchBoardSentInvitations])
 
   const handleInvite = async (e) => {
     e.preventDefault()
     setError('')
     const trimmed = email.trim().toLowerCase()
     if (!trimmed) return
+
+    // Block self-invite — caught here BEFORE the membership check so the
+    // error reads "you can't invite yourself" instead of the generic
+    // "already a member" (true for the owner, but unhelpful messaging).
+    if (user?.email?.toLowerCase() === trimmed) {
+      setError("You can't invite yourself")
+      return
+    }
 
     // Check if already a member
     const alreadyMember = members.some(
@@ -66,6 +83,34 @@ export default function BoardShareModal({ board, onClose }) {
 
     setLoading(true)
 
+    // Server-side double-check — local `members`/`invitations` can be
+    // stale (e.g. someone accepted on another device); without this, the
+    // insert fails with a unique-constraint message that's not friendly.
+    const [{ data: memberRows }, { data: inviteRow }] = await Promise.all([
+      supabase
+        .from('board_members')
+        .select('user_id, profiles!board_members_user_id_profiles_fkey(email)')
+        .eq('board_id', board.id),
+      supabase
+        .from('board_invitations')
+        .select('id, invited_email, status')
+        .eq('board_id', board.id)
+        .eq('status', 'pending')
+        .eq('invited_email', trimmed)
+        .maybeSingle(),
+    ])
+
+    if ((memberRows || []).some((m) => m.profiles?.email?.toLowerCase() === trimmed)) {
+      setError('This user is already a member')
+      setLoading(false)
+      return
+    }
+    if (inviteRow) {
+      setError('This email has already been invited')
+      setLoading(false)
+      return
+    }
+
     const { data: invData, error: invError } = await supabase
       .from('board_invitations')
       .insert({
@@ -79,8 +124,9 @@ export default function BoardShareModal({ board, onClose }) {
     if (invError) {
       setError(invError.message)
     } else {
-      // Update local state directly instead of refetching
-      if (invData) setInvitations((prev) => [...prev, invData])
+      // Optimistic cache update — store action keeps the modal in sync
+      // across re-opens without an extra round-trip.
+      if (invData) addBoardSentInvitationLocal(board.id, invData)
       setEmail('')
       showToast.success('Invitation sent')
       capture('member_invited')
@@ -91,21 +137,19 @@ export default function BoardShareModal({ board, onClose }) {
 
   const handleRemoveMember = async (userId) => {
     if (userId === board.owner_id) return
-    // Optimistic remove
-    setMembers((prev) => prev.filter((m) => m.user_id !== userId))
+    removeBoardMemberLocal(board.id, userId)
     const { error } = await supabase
       .from('board_members')
       .delete()
       .eq('board_id', board.id)
       .eq('user_id', userId)
-    if (error) fetchMembers() // Rollback by refetching
+    if (error) fetchBoardMembers(board.id) // Rollback by refetching
   }
 
   const handleCancelInvitation = async (invId) => {
-    // Optimistic remove
-    setInvitations((prev) => prev.filter((inv) => inv.id !== invId))
+    removeBoardSentInvitationLocal(board.id, invId)
     const { error } = await supabase.from('board_invitations').delete().eq('id', invId)
-    if (error) fetchInvitations() // Rollback by refetching
+    if (error) fetchBoardSentInvitations(board.id) // Rollback
   }
 
   const isOwner = user?.id === board.owner_id
@@ -120,8 +164,8 @@ export default function BoardShareModal({ board, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-[var(--text-secondary)]" />
-            <h2 className="text-base font-semibold text-[var(--text-primary)]">Share "{board.name}"</h2>
+            <ShareNetwork className="w-5 h-5 text-[var(--text-secondary)]" />
+            <h2 className="font-heading text-lg font-light text-[var(--text-primary)]">Share "{board.name}"</h2>
           </div>
           <button
             type="button"
@@ -164,17 +208,42 @@ export default function BoardShareModal({ board, onClose }) {
         {/* Members list */}
         <div className="px-5 py-3 max-h-64 overflow-y-auto">
           <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">
-            Members ({members.length})
+            Members{members.length ? ` (${members.length})` : ''}
           </p>
           <div className="space-y-1">
-            {members.map((m) => (
+            {/* First-open skeleton — only when there's truly no cached
+                data for this board. Two ghost rows keep the panel
+                height stable so members landing doesn't push the
+                modal taller. */}
+            {showSkeleton && members.length === 0 && (
+              <>
+                {[0, 1].map((i) => (
+                  <div key={`sk-${i}`} className="flex items-center gap-2.5 py-2">
+                    <div className="w-7 h-7 rounded-full bg-[var(--surface-hover)] animate-pulse shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="h-3 w-24 rounded bg-[var(--surface-hover)] animate-pulse" />
+                      <div className="mt-1.5 h-2.5 w-32 rounded bg-[var(--surface-hover)] animate-pulse opacity-60" />
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+            {members.map((m) => {
+              const displayName = m.profiles?.display_name || 'Unknown'
+              const bg = m.profiles?.color || getAvatarColor(displayName)
+              const textColor = getAvatarTextColor(bg)
+              return (
               <div
                 key={m.user_id}
                 className="flex items-center justify-between py-2 group"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold ${m.profiles?.color || 'bg-[#E0DBD5]'}`}>
-                    {(m.profiles?.display_name || '?')[0].toUpperCase()}
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${bg} ${textColor}`}>
+                    {m.profiles?.icon ? (
+                      <DynamicIcon name={m.profiles.icon} className="w-3.5 h-3.5" />
+                    ) : (
+                      <span className="text-[10px] font-medium">{getInitials(displayName)}</span>
+                    )}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-[var(--text-primary)] truncate">
@@ -185,8 +254,7 @@ export default function BoardShareModal({ board, onClose }) {
                 </div>
                 <div className="flex items-center gap-1.5">
                   {m.role === 'owner' ? (
-                    <span className="flex items-center gap-1 text-xs text-[var(--color-honey)] bg-[var(--color-honey-wash)] px-2 py-0.5 rounded-full">
-                      <Crown className="w-3 h-3" />
+                    <span className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-[var(--surface-hover)] text-[var(--text-muted)]">
                       Owner
                     </span>
                   ) : isOwner ? (
@@ -197,12 +265,11 @@ export default function BoardShareModal({ board, onClose }) {
                     >
                       <Trash className="w-3.5 h-3.5" />
                     </button>
-                  ) : (
-                    <span className="text-xs text-[var(--text-muted)]">Member</span>
-                  )}
+                  ) : null}
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
 
           {/* Pending invitations */}

@@ -67,10 +67,14 @@ function SectionHeader({ label, collapsed, onToggle, onPlusClick, plusTitle }) {
 }
 
 export default function Sidebar() {
-  // Board invites surface in the notification bell; workspace invites
-  // surface on the Workspace page (and drive the workspace nav badge).
-  // The two sources are intentionally kept separate.
-  const invitationCount = useWorkspacesStore((s) => s.invitations.length)
+  // Workspace nav badge counts both kinds of pending invitations:
+  // workspace invites (handled on the Workspace page) AND board invites
+  // (now surfaced in the workspace sub-sidebar's "Shared with me"
+  // section). The notification bell shows the same items, so the badges
+  // intentionally agree.
+  const workspaceInvitationCount = useWorkspacesStore((s) => s.invitations.length)
+  const boardInvitationCount = useBoardSharingStore((s) => s.invitations.length)
+  const invitationCount = workspaceInvitationCount + boardInvitationCount
   const collapsed = useSettingsStore((s) => s.sidebarCollapsed)
   const toggle = useSettingsStore((s) => s.toggleSidebar)
   const setSidebarCollapsed = useSettingsStore((s) => s.setSidebarCollapsed)
@@ -123,10 +127,12 @@ export default function Sidebar() {
   const navigate = useNavigate()
 
   const sharedBoards = useBoardSharingStore((s) => s.sharedBoards)
+  const leaveBoard = useBoardSharingStore((s) => s.leaveBoard)
   const [iconPickerBoardId, setIconPickerBoardId] = useState(null)
   const [renamingBoardId, setRenamingBoardId] = useState(null)
   const [renameValue, setRenameValue] = useState('')
   const [confirmDeleteBoardId, setConfirmDeleteBoardId] = useState(null)
+  const [confirmLeaveBoardId, setConfirmLeaveBoardId] = useState(null)
 
   // "Boards" section = personal boards only (owned by me, not tied to a workspace).
   // Workspace boards live under the Spaces section below.
@@ -164,14 +170,16 @@ export default function Sidebar() {
   const cancelRename = () => setRenamingBoardId(null)
 
   // Per-row prop-builder so each row gets the right rename / icon-picker context
-  const itemPropsFor = (board, { editable, deletable }) => ({
+  const itemPropsFor = (board, { editable, deletable, leavable = false }) => ({
     board,
     active: isBoardsActive && activeBoardId === board.id,
     editable,
     deletable,
+    leavable,
     onSelect: handleSelectBoard,
     onUpdateIcon: updateBoardIcon,
     onDelete: (id) => setConfirmDeleteBoardId(id),
+    onLeave: (id) => setConfirmLeaveBoardId(id),
     iconPickerOpen: iconPickerBoardId === board.id,
     onToggleIconPicker: (id) => setIconPickerBoardId(id ?? null),
     renaming: renamingBoardId === board.id,
@@ -289,7 +297,7 @@ export default function Sidebar() {
               />
               <div className={`flex flex-col gap-px ${sharedBoardsCollapsed ? 'hidden' : ''}`}>
                 {sharedBoards.map((board) => (
-                  <SidebarBoardItem key={board.id} {...itemPropsFor(board, { editable: false, deletable: false })} />
+                  <SidebarBoardItem key={board.id} {...itemPropsFor(board, { editable: false, deletable: false, leavable: true })} />
                 ))}
               </div>
             </div>
@@ -347,6 +355,25 @@ export default function Sidebar() {
             setConfirmDeleteBoardId(null)
           }}
           onCancel={() => setConfirmDeleteBoardId(null)}
+        />
+      )}
+
+      {confirmLeaveBoardId && (
+        <ConfirmModal
+          title="Leave board"
+          message="You'll lose access to this board. The owner can re-invite you later."
+          confirmLabel="Leave"
+          onConfirm={() => {
+            leaveBoard(confirmLeaveBoardId)
+            setConfirmLeaveBoardId(null)
+            // If the user leaves the board they're currently viewing,
+            // bounce them off it so they don't see a "no access" flash.
+            if (activeBoardId === confirmLeaveBoardId) {
+              setActiveBoard(null)
+              navigate('/dashboard')
+            }
+          }}
+          onCancel={() => setConfirmLeaveBoardId(null)}
         />
       )}
     </>

@@ -7,6 +7,7 @@ import { useBoardSharingStore } from '../../store/boardSharingStore'
 import { useBoardStore } from '../../store/boardStore'
 import { useIsDesktop } from '../../hooks/useMediaQuery'
 import WorkspaceCreateModal from '../workspace/WorkspaceCreateModal'
+import ConfirmModal from '../board/ConfirmModal'
 import SidebarBoardItem from './SidebarBoardItem'
 import DynamicIcon from '../board/DynamicIcon'
 import Tooltip from '../ui/Tooltip'
@@ -32,13 +33,16 @@ export default function WorkspaceSidebar() {
   const sharedBoards = useBoardSharingStore((s) => s.sharedBoards)
   const acceptBoardInvitation = useBoardSharingStore((s) => s.acceptInvitation)
   const declineBoardInvitation = useBoardSharingStore((s) => s.declineInvitation)
+  const leaveBoard = useBoardSharingStore((s) => s.leaveBoard)
   const setActiveBoard = useBoardStore((s) => s.setActiveBoard)
+  const activeBoardId = useBoardStore((s) => s.activeBoardId)
   const hasShared = boardInvitations.length > 0 || sharedBoards.length > 0
 
   const location = useLocation()
   const navigate = useNavigate()
 
   const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [confirmLeaveId, setConfirmLeaveId] = useState(null)
 
   useEffect(() => {
     if (open) fetchWorkspaces()
@@ -190,7 +194,9 @@ export default function WorkspaceSidebar() {
                   active={false}
                   editable={false}
                   deletable={false}
+                  leavable
                   onSelect={(id) => { setActiveBoard(id); navigate('/boards') }}
+                  onLeave={(id) => setConfirmLeaveId(id)}
                 />
               ))}
             </div>
@@ -200,6 +206,23 @@ export default function WorkspaceSidebar() {
     </aside>
 
     <WorkspaceCreateModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
+
+    {confirmLeaveId && (
+      <ConfirmModal
+        title="Leave board"
+        message="You'll lose access to this board. The owner can re-invite you later."
+        confirmLabel="Leave"
+        onConfirm={() => {
+          leaveBoard(confirmLeaveId)
+          if (activeBoardId === confirmLeaveId) {
+            setActiveBoard(null)
+            navigate('/dashboard')
+          }
+          setConfirmLeaveId(null)
+        }}
+        onCancel={() => setConfirmLeaveId(null)}
+      />
+    )}
     </>
   )
 }
