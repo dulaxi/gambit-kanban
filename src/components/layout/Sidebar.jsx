@@ -67,9 +67,10 @@ function SectionHeader({ label, collapsed, onToggle, onPlusClick, plusTitle }) {
 }
 
 export default function Sidebar() {
-  const boardInvitationCount = useBoardSharingStore((s) => s.invitations.length)
-  const workspaceInvitationCount = useWorkspacesStore((s) => s.invitations.length)
-  const invitationCount = boardInvitationCount + workspaceInvitationCount
+  // Board invites surface in the notification bell; workspace invites
+  // surface on the Workspace page (and drive the workspace nav badge).
+  // The two sources are intentionally kept separate.
+  const invitationCount = useWorkspacesStore((s) => s.invitations.length)
   const collapsed = useSettingsStore((s) => s.sidebarCollapsed)
   const toggle = useSettingsStore((s) => s.toggleSidebar)
   const setSidebarCollapsed = useSettingsStore((s) => s.setSidebarCollapsed)

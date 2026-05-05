@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, Envelope, Plus, SquaresFour, Users, X } from '@phosphor-icons/react'
+import { Check, Envelope, Plus, Users, X } from '@phosphor-icons/react'
 import { useSettingsStore } from '../store/settingsStore'
 import { useWorkspacesStore } from '../store/workspacesStore'
 import WorkspaceCreateModal from '../components/workspace/WorkspaceCreateModal'
@@ -14,7 +14,6 @@ import Tooltip from '../components/ui/Tooltip'
  *  - Detail (activeWorkspaceId set): members, invite form, danger zone
  */
 export default function WorkspacePage() {
-  const openWorkspaceSidebar = useSettingsStore((s) => s.openWorkspaceSidebar)
   const workspaces = useWorkspacesStore((s) => s.workspaces)
   const activeWorkspaceId = useWorkspacesStore((s) => s.activeWorkspaceId)
   const invitations = useWorkspacesStore((s) => s.invitations)
@@ -94,24 +93,10 @@ export default function WorkspacePage() {
             </div>
           )}
 
-          {/* Action cards */}
+          {/* Action cards — "Browse workspaces" removed since this IS
+              the workspaces page; the sidebar already lists workspaces.
+              Kept "Create a new workspace" as the primary action. */}
           <div className="flex w-full flex-col gap-3">
-            <button
-              type="button"
-              onClick={openWorkspaceSidebar}
-              className="flex w-full items-center gap-4 rounded-3xl border border-[var(--border-default)] bg-[var(--surface-card)] p-5 text-left shadow-sm transition-colors hover:bg-[var(--surface-raised)] cursor-pointer"
-            >
-              <div className="flex shrink-0 items-center rounded-full bg-[var(--surface-hover)] p-1.5">
-                <div style={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <SquaresFour className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="flex flex-1 flex-col gap-0.5">
-                <span className="text-sm font-semibold text-[var(--text-primary)]">Browse workspaces</span>
-                <span className="text-sm text-[var(--text-muted)]">See all the workspaces you're a member of and jump into one.</span>
-              </div>
-            </button>
-
             <button
               type="button"
               onClick={() => setCreateOpen(true)}
