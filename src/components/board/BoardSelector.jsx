@@ -78,14 +78,17 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
             height + push the divider down). flex-wrap permits graceful
             wrapping only when truly out of room. */}
         <div className="flex items-center gap-2 flex-wrap">
-          {isRealBoard && isOwner && (
+          {/* Owner: full Share modal (invite + remove). Non-owner member:
+              read-only Members modal (just see who's on the board). Same
+              modal, isOwner flag inside drives the difference. */}
+          {isRealBoard && (
             <button
               type="button"
               onClick={() => setShowShareModal(true)}
               className="flex items-center gap-1.5 h-8 px-2.5 text-sm text-[var(--text-secondary)] bg-[var(--surface-card)] border-[0.5px] border-[var(--border-default)] rounded-lg hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-all duration-75 cursor-pointer active:scale-[0.995]"
             >
               <Users className="w-4 h-4 -ml-0.5" />
-              Share
+              {isOwner ? 'Share' : 'Members'}
             </button>
           )}
 

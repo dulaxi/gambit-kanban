@@ -1,48 +1,80 @@
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useMemo, useEffect } from 'react'
 import { MagnifyingGlass, X } from '@phosphor-icons/react'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import DynamicIcon from './DynamicIcon'
-import { PHOSPHOR_CATEGORIES, ALL_PHOSPHOR_ICONS } from '../../data/phosphorIcons'
+import {
+  PHOSPHOR_CATEGORIES,
+  ALL_PHOSPHOR_ICONS,
+  searchPhosphor,
+} from '../../data/phosphorIcons'
 import Modal from '../ui/Modal'
 import Button from '../ui/Button'
 
-// Lazy-load Material data only when the user switches to the Material tab.
-// This keeps the 139KB file out of the main JS chunk.
-let _materialCache = null
-async function loadMaterialIcons() {
-  if (!_materialCache) {
-    const mod = await import('../../data/materialSymbolsIcons')
-    _materialCache = { categories: mod.MATERIAL_CATEGORIES, names: mod.MATERIAL_ICON_NAMES }
-  }
-  return _materialCache
+// Each category gets a representative phosphor glyph for its bottom-tab.
+// Mirrors iOS emoji-picker tabs (Recents 🕒 / Smileys 😀 / etc.) where
+// each tab is a single iconographic hint at what's inside.
+const CATEGORY_TAB_GLYPH = {
+  popular: 'star',
+  arrows: 'arrows-out-cardinal',
+  system: 'gear',
+  communications: 'chat-circle',
+  office: 'briefcase',
+  editor: 'pencil-simple',
+  design: 'palette',
+  media: 'play-circle',
+  people: 'users',
+  objects: 'package',
+  commerce: 'shopping-cart',
+  finances: 'currency-dollar',
+  'maps & travel': 'map-pin',
+  nature: 'leaf',
+  weather: 'cloud-sun',
+  'health & wellness': 'heart',
+  'technology & development': 'code',
+  games: 'game-controller',
+  brands: 'shapes',
 }
 
-const LIBRARY_TABS = [
-  { key: 'phosphor', label: 'Phosphor' },
-  { key: 'material', label: 'Material' },
-]
+// Recents storage. Skipping store/zustand for this — picker state is
+// purely UI and localStorage is fine. Tracks the last 24 picks so the
+// "Recent" tab feels like an iOS recents row.
+const RECENTS_KEY = 'kolumn:icon-picker:recents'
+const RECENTS_LIMIT = 24
 
-function IconGrid({ icons: iconList, value, onChange, onClose, namePrefix = '' }) {
+function loadRecents() {
+  try {
+    const raw = localStorage.getItem(RECENTS_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+function pushRecent(name) {
+  if (!name) return
+  try {
+    const next = [name, ...loadRecents().filter((n) => n !== name)].slice(0, RECENTS_LIMIT)
+    localStorage.setItem(RECENTS_KEY, JSON.stringify(next))
+  } catch { /* localStorage unavailable — non-fatal */ }
+}
+
+function IconGrid({ icons: iconList, value, onPick }) {
   return (
-    <div className="grid grid-cols-6 sm:grid-cols-8 lg:grid-cols-10 gap-1">
-      {iconList.map((name) => {
-        const storedName = namePrefix + name
-        return (
-          <button
-            key={name}
-            type="button"
-            onClick={() => { onChange(storedName); onClose() }}
-            title={name}
-            className={`w-10 h-10 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
-              value === storedName
-                ? 'bg-[var(--accent-lime-soft)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-secondary)]'
-            }`}
-          >
-            <DynamicIcon name={storedName} className="w-5 h-5" />
-          </button>
-        )
-      })}
+    <div className="grid grid-cols-7 sm:grid-cols-9 gap-1">
+      {iconList.map((name) => (
+        <button
+          key={name}
+          type="button"
+          onClick={() => onPick(name)}
+          title={name}
+          className={`aspect-square flex items-center justify-center rounded-xl transition-all duration-75 cursor-pointer active:scale-90 ${
+            value === name
+              ? 'bg-[var(--accent-lime-soft)] text-[var(--text-primary)]'
+              : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
+          }`}
+        >
+          <DynamicIcon name={name} className="w-6 h-6" />
+        </button>
+      ))}
     </div>
   )
 }
@@ -51,31 +83,40 @@ export default function IconPicker({ value, onChange, onClose }) {
   const isMobile = useIsMobile()
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('popular')
-  const [activeTab, setActiveTab] = useState('phosphor')
+  const [recents, setRecents] = useState(() => loadRecents())
   const inputRef = useRef(null)
+  const gridScrollRef = useRef(null)
 
-  const [materialData, setMaterialData] = useState(null)
-
-  const categories = activeTab === 'phosphor' ? PHOSPHOR_CATEGORIES : (materialData?.categories || [])
-  const allIcons = activeTab === 'phosphor' ? ALL_PHOSPHOR_ICONS : (materialData?.names || [])
-  const iconCount = allIcons.length
-
-  // Reset category when switching tabs; lazy-load Material data on first switch
+  // Reset grid scroll on tab/search change so users always see the top
+  // of a new list (iOS pickers do the same).
   useEffect(() => {
-    setActiveCategory('popular')
-    if (activeTab === 'material' && !materialData) {
-      loadMaterialIcons().then(setMaterialData)
-    }
-  }, [activeTab, materialData])
+    gridScrollRef.current?.scrollTo({ top: 0 })
+  }, [activeCategory, search])
+
+  const handlePick = (name) => {
+    pushRecent(name)
+    setRecents(loadRecents())
+    onChange(name)
+    onClose()
+  }
 
   const searchResults = useMemo(() => {
-    if (!search.trim()) return null
-    const q = search.toLowerCase().replace(/\s+/g, activeTab === 'material' ? '_' : '-')
-    return allIcons.filter((name) => name.includes(q))
-  }, [search, allIcons, activeTab])
+    return search.trim() ? searchPhosphor(search) : null
+  }, [search])
 
-  const currentCategory = categories.find((c) => c.key === activeCategory)
-  const displayIcons = !searchResults ? (currentCategory ? currentCategory.icons : []) : null
+  // Build the display list. Recents goes FIRST (only when populated, so
+  // a brand-new user doesn't see an empty tab).
+  const tabs = useMemo(() => {
+    const list = []
+    if (recents.length) list.push({ key: 'recent', label: 'Recent', icons: recents, glyph: 'clock-counter-clockwise' })
+    for (const cat of PHOSPHOR_CATEGORIES) {
+      list.push({ ...cat, glyph: CATEGORY_TAB_GLYPH[cat.key] || 'circle' })
+    }
+    return list
+  }, [recents])
+
+  const currentTab = tabs.find((t) => t.key === activeCategory) || tabs[0]
+  const displayIcons = currentTab?.icons || []
 
   return (
     <Modal
@@ -88,114 +129,95 @@ export default function IconPicker({ value, onChange, onClose }) {
         data-icon-picker
         className={`bg-[var(--surface-card)] shadow-2xl flex flex-col overflow-hidden ${
           isMobile
-            ? 'fixed inset-0 rounded-none'
-            : 'rounded-2xl w-[640px] max-h-[80vh]'
+            ? 'fixed inset-x-0 bottom-0 rounded-t-2xl pb-[env(safe-area-inset-bottom)] max-h-[88vh]'
+            : 'rounded-2xl w-[460px] h-[560px]'
         }`}
       >
-        {/* Header with tabs */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border-subtle)]">
-          <div className="flex items-center gap-4">
-            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Choose an icon</h2>
-            <div className="flex items-center bg-[var(--surface-hover)] rounded-lg p-0.5">
-              {LIBRARY_TABS.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors cursor-pointer focus:outline-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-[var(--color-ink)] focus-visible:outline-offset-1 ${
-                    activeTab === tab.key
-                      ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-secondary)]'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+        {/* iOS-style drag handle on mobile only */}
+        {isMobile && (
+          <div className="pt-2 pb-1 flex justify-center">
+            <div className="w-9 h-1 rounded-full bg-[var(--border-default)]" />
           </div>
-          <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close">
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
+        )}
 
-        {/* Search */}
-        <div className="flex items-center gap-2 px-5 py-3 border-b border-[var(--border-subtle)]">
-          <MagnifyingGlass className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-          <input
-            ref={inputRef}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search icons..."
-            className="flex-1 text-sm bg-transparent border-none focus:outline-none placeholder-[var(--text-muted)]"
-          />
-          {search && (
-            <button type="button" onClick={() => setSearch('')} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex flex-1 min-h-0">
-          {/* Category sidebar */}
-          {!searchResults && (
-            <div className="hidden sm:block w-44 shrink-0 border-r border-[var(--border-subtle)] overflow-y-auto py-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat.key}
-                  type="button"
-                  onClick={() => setActiveCategory(cat.key)}
-                  className={`w-full text-left px-4 py-1.5 text-xs transition-colors cursor-pointer ${
-                    activeCategory === cat.key
-                      ? 'text-[var(--text-primary)] font-medium bg-[var(--surface-raised)]'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
-                  }`}
-                >
-                  {cat.label}
-                  <span className="text-[var(--text-muted)] ml-1">({cat.icons.length})</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Icons grid */}
-          <div className="flex-1 overflow-y-auto p-4">
-            {/* Remove icon option */}
-            {value && (
+        {/* Pill search bar — iOS UISearchBar shape */}
+        <div className="px-3 pt-3 pb-2">
+          <div className="flex items-center gap-2 h-9 px-3 rounded-xl bg-[var(--surface-hover)]">
+            <MagnifyingGlass className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+            <input
+              ref={inputRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search icons"
+              className="flex-1 text-sm bg-transparent border-none focus:outline-none placeholder-[var(--text-muted)] text-[var(--text-primary)]"
+            />
+            {search && (
               <button
                 type="button"
-                onClick={() => { onChange(null); onClose() }}
-                className="mb-3 text-xs text-[var(--text-muted)] hover:text-[var(--color-copper)] transition-colors cursor-pointer"
+                onClick={() => setSearch('')}
+                aria-label="Clear search"
+                className="shrink-0 w-5 h-5 rounded-full inline-flex items-center justify-center bg-[var(--text-muted)]/20 text-[var(--text-muted)] hover:bg-[var(--text-muted)]/30"
               >
-                Remove icon
+                <X className="w-3 h-3" weight="bold" />
               </button>
-            )}
-
-            {searchResults ? (
-              <>
-                <p className="text-xs text-[var(--text-muted)] mb-3">{searchResults.length} results for &ldquo;{search}&rdquo;</p>
-                <IconGrid icons={searchResults} value={value} onChange={onChange} onClose={onClose} namePrefix={activeTab === 'material' ? 'material:' : ''} />
-                {searchResults.length === 0 && (
-                  <p className="text-center text-sm text-[var(--text-muted)] py-8">No icons found</p>
-                )}
-              </>
-            ) : (
-              <>
-                <IconGrid icons={displayIcons} value={value} onChange={onChange} onClose={onClose} namePrefix={activeTab === 'material' ? 'material:' : ''} />
-                {displayIcons.length === 0 && (
-                  <p className="text-center text-sm text-[var(--text-muted)] py-8">No icons found</p>
-                )}
-              </>
             )}
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-5 py-2.5 border-t border-[var(--border-subtle)] flex items-center justify-between">
-          <span className="text-[11px] text-[var(--text-muted)]">{iconCount} icons available</span>
-          <button type="button" onClick={onClose} className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-secondary)] px-3 py-1 rounded-lg hover:bg-[var(--surface-hover)] cursor-pointer">
-            Cancel
-          </button>
+        {/* Icons grid */}
+        <div ref={gridScrollRef} className="flex-1 overflow-y-auto px-3 pb-2">
+          {/* Remove icon shortcut — only visible when one is currently set */}
+          {value && !searchResults && (
+            <button
+              type="button"
+              onClick={() => { onChange(null); onClose() }}
+              className="mb-2 text-[11px] text-[var(--text-muted)] hover:text-[var(--color-copper)] transition-colors cursor-pointer"
+            >
+              Remove icon
+            </button>
+          )}
+
+          {searchResults ? (
+            searchResults.length === 0 ? (
+              <div className="text-center text-sm text-[var(--text-muted)] py-12">
+                No icons match &ldquo;{search}&rdquo;
+              </div>
+            ) : (
+              <IconGrid icons={searchResults} value={value} onPick={handlePick} />
+            )
+          ) : (
+            <IconGrid icons={displayIcons} value={value} onPick={handlePick} />
+          )}
         </div>
+
+        {/* Bottom category tab bar — iOS emoji-picker style */}
+        {!searchResults && (
+          <div className="border-t border-[var(--border-subtle)] bg-[var(--surface-card)]">
+            <div className="overflow-x-auto">
+              <div className="flex items-center px-2 py-1.5 gap-0.5">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setActiveCategory(tab.key)}
+                    title={tab.label}
+                    aria-label={tab.label}
+                    className={`shrink-0 w-9 h-9 inline-flex items-center justify-center rounded-lg transition-colors cursor-pointer ${
+                      activeCategory === tab.key
+                        ? 'bg-[var(--surface-hover)] text-[var(--text-primary)]'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <DynamicIcon name={tab.glyph} className="w-4 h-4" />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="px-3 pb-1.5 text-[10px] uppercase tracking-wider text-[var(--text-faint)]">
+              {currentTab?.label} · {displayIcons.length}
+            </p>
+          </div>
+        )}
       </div>
     </Modal>
   )

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { capture } from '../../lib/analytics'
-import { Envelope, ShareNetwork, Trash, UserPlus, Users, X } from '@phosphor-icons/react'
+import { Envelope, ShareNetwork, SignOut, Trash, UserPlus, Users, X } from '@phosphor-icons/react'
 import { showToast } from '../../utils/toast'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
@@ -15,6 +15,9 @@ import Modal from '../ui/Modal'
 import Button from '../ui/Button'
 import Input from '../ui/Input'
 import DynamicIcon from './DynamicIcon'
+import ConfirmModal from './ConfirmModal'
+import { useBoardStore } from '../../store/boardStore'
+import { useNavigate } from 'react-router-dom'
 import { getAvatarColor, getAvatarTextColor, getInitials } from '../../utils/formatting'
 
 export default function BoardShareModal({ board, onClose }) {
@@ -22,7 +25,12 @@ export default function BoardShareModal({ board, onClose }) {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [confirmLeaveOpen, setConfirmLeaveOpen] = useState(false)
   const user = useAuthStore((s) => s.user)
+  const leaveBoard = useBoardSharingStore((s) => s.leaveBoard)
+  const activeBoardId = useBoardStore((s) => s.activeBoardId)
+  const setActiveBoard = useBoardStore((s) => s.setActiveBoard)
+  const navigate = useNavigate()
 
   // SWR pattern: read members + invitations from the per-board cache so
   // the modal renders instantly on subsequent opens (no spinner, no
@@ -164,8 +172,14 @@ export default function BoardShareModal({ board, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-2">
-            <ShareNetwork className="w-5 h-5 text-[var(--text-secondary)]" />
-            <h2 className="font-heading text-lg font-light text-[var(--text-primary)]">Share "{board.name}"</h2>
+            {isOwner ? (
+              <ShareNetwork className="w-5 h-5 text-[var(--text-secondary)]" />
+            ) : (
+              <Users className="w-5 h-5 text-[var(--text-secondary)]" />
+            )}
+            <h2 className="font-heading text-lg font-light text-[var(--text-primary)]">
+              {isOwner ? `Share "${board.name}"` : `Members of "${board.name}"`}
+            </h2>
           </div>
           <button
             type="button"
@@ -265,6 +279,19 @@ export default function BoardShareModal({ board, onClose }) {
                     >
                       <Trash className="w-3.5 h-3.5" />
                     </button>
+                  ) : m.user_id === user?.id ? (
+                    /* Non-owner viewing their own row: surface a Leave
+                       affordance so they can exit the board without
+                       hunting for the sidebar icon. */
+                    <button
+                      type="button"
+                      onClick={() => setConfirmLeaveOpen(true)}
+                      title="Leave this board"
+                      className="inline-flex items-center gap-1 h-6 px-2 text-[11px] font-medium rounded-md text-[var(--text-muted)] hover:text-[var(--color-copper)] hover:bg-[var(--surface-hover)] transition-colors"
+                    >
+                      <SignOut className="w-3 h-3" weight="bold" />
+                      Leave
+                    </button>
                   ) : null}
                 </div>
               </div>
@@ -273,7 +300,9 @@ export default function BoardShareModal({ board, onClose }) {
           </div>
 
           {/* Pending invitations */}
-          {invitations.length > 0 && (
+          {/* Pending invitations are owner-only — non-owner members
+              shouldn't see other people's invited emails. */}
+          {isOwner && invitations.length > 0 && (
             <>
               <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mt-4 mb-2">
                 Pending Invitations ({invitations.length})
@@ -306,6 +335,24 @@ export default function BoardShareModal({ board, onClose }) {
           )}
         </div>
       </div>
+
+      {confirmLeaveOpen && (
+        <ConfirmModal
+          title="Leave board"
+          message="You'll lose access to this board. The owner can re-invite you later."
+          confirmLabel="Leave"
+          onConfirm={() => {
+            leaveBoard(board.id)
+            setConfirmLeaveOpen(false)
+            if (activeBoardId === board.id) {
+              setActiveBoard(null)
+              navigate('/dashboard')
+            }
+            onClose()
+          }}
+          onCancel={() => setConfirmLeaveOpen(false)}
+        />
+      )}
     </Modal>
   )
 }

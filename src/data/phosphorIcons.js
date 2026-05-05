@@ -1,193 +1,94 @@
-// Curated Phosphor icon names for the IconPicker UI.
-// DynamicIcon renders ANY valid Phosphor name via CSS class — this list
-// is only for browsable categories inside the picker modal.
+// Sources Phosphor's full icon metadata (~1,500 icons with tags +
+// categories) from `@phosphor-icons/core`. The CDN-loaded
+// `@phosphor-icons/web` CSS classes (`ph ph-{name}`) render every one of
+// these names, so DynamicIcon Just Works™ — this file only exists to
+// power the IconPicker.
+import { icons as RAW_ICONS, IconCategory } from '@phosphor-icons/core'
 
-export const PHOSPHOR_CATEGORIES = [
-  { key: 'popular', label: 'Popular', icons: [
-    'house', 'star', 'heart', 'gear', 'magnifying-glass', 'user', 'envelope', 'phone',
-    'calendar-blank', 'clock', 'camera', 'image', 'video-camera', 'music-note',
-    'microphone', 'speaker-high', 'bell', 'sun', 'moon', 'cloud', 'lightning',
-    'globe', 'map-pin', 'navigation-arrow', 'compass', 'flag', 'bookmark', 'tag',
-    'hash', 'at', 'link', 'paperclip', 'pencil-simple', 'file-text', 'folder',
-    'archive', 'trash', 'download', 'upload', 'share-network', 'paper-plane-tilt',
-    'chat-circle', 'chat-text', 'thumbs-up', 'thumbs-down', 'check-circle', 'x-circle',
-    'warning-circle', 'info', 'question', 'play', 'pause', 'eye', 'lock', 'key',
-    'shield', 'wifi-high', 'cpu', 'monitor', 'device-mobile', 'laptop', 'printer',
-    'floppy-disk', 'copy', 'clipboard', 'squares-four', 'list', 'kanban', 'table',
-    'chart-pie', 'chart-bar', 'trend-up', 'target', 'trophy', 'gift', 'shopping-cart',
-    'credit-card', 'currency-dollar', 'briefcase', 'buildings', 'rocket', 'airplane',
-    'car', 'coffee', 'fork-knife', 'cake', 'wine', 'dog', 'cat', 'bird', 'bug',
-    'flower', 'tree', 'palette', 'paint-brush', 'pen', 'pen-nib', 'figma-logo',
-    'github-logo', 'code', 'terminal', 'database', 'hard-drives', 'wrench', 'hammer',
-    'sparkle', 'fire', 'robot', 'brain', 'lightbulb', 'crown', 'diamond',
-    'push-pin', 'smiley', 'hand-waving', 'strategy', 'notebook', 'book-open',
-  ]},
-  { key: 'arrows', label: 'Arrows', icons: [
-    'arrow-left', 'arrow-right', 'arrow-up', 'arrow-down',
-    'arrow-up-right', 'arrow-up-left', 'arrow-down-right', 'arrow-down-left',
-    'arrow-clockwise', 'arrow-counter-clockwise',
-    'arrows-clockwise', 'arrows-counter-clockwise',
-    'arrows-left-right', 'arrows-down-up', 'arrows-in', 'arrows-out',
-    'arrows-horizontal', 'arrows-vertical',
-    'caret-up', 'caret-down', 'caret-left', 'caret-right',
-    'caret-double-up', 'caret-double-down', 'caret-double-left', 'caret-double-right',
-    'caret-circle-up', 'caret-circle-down', 'caret-circle-left', 'caret-circle-right',
-    'arrow-fat-up', 'arrow-fat-down', 'arrow-fat-left', 'arrow-fat-right',
-    'arrow-bend-up-right', 'arrow-bend-up-left', 'arrow-bend-down-right', 'arrow-bend-down-left',
-    'arrow-elbow-right', 'arrow-elbow-left',
-    'arrow-u-up-right', 'arrow-u-up-left', 'arrow-u-down-right', 'arrow-u-down-left',
-  ]},
-  { key: 'layout', label: 'Layout', icons: [
-    'layout', 'squares-four', 'grid-four', 'grid-nine', 'columns', 'rows',
-    'sidebar', 'sidebar-simple', 'split-horizontal', 'split-vertical',
-    'kanban', 'table', 'tabs', 'stack', 'stack-simple',
-    'square-split-horizontal', 'square-split-vertical',
-    'browser', 'browsers', 'app-window', 'picture-in-picture',
-    'frame-corners', 'bounding-box', 'selection', 'rectangle',
-    'columns-plus-left', 'columns-plus-right', 'rows-plus-bottom', 'rows-plus-top',
-  ]},
-  { key: 'files', label: 'Files & Folders', icons: [
-    'file', 'file-text', 'file-code', 'file-pdf', 'file-image', 'file-audio',
-    'file-video', 'file-zip', 'file-arrow-up', 'file-arrow-down',
-    'file-plus', 'file-minus', 'file-dashed', 'file-lock', 'file-magnifying-glass',
-    'files', 'folder', 'folder-open', 'folder-plus', 'folder-minus',
-    'folder-dashed', 'folder-lock', 'folder-star', 'folder-user', 'folders',
-    'notebook', 'notepad', 'note', 'note-blank', 'note-pencil',
-    'clipboard', 'clipboard-text', 'archive',
-    'book', 'book-open', 'book-open-text', 'book-bookmark', 'bookmarks', 'article',
-  ]},
-  { key: 'communication', label: 'Communication', icons: [
-    'envelope', 'envelope-open', 'envelope-simple',
-    'chat-circle', 'chat-circle-text', 'chat-circle-dots',
-    'chat-text', 'chat-dots', 'chat-teardrop', 'chat-teardrop-text',
-    'chats', 'chats-circle',
-    'phone', 'phone-call', 'phone-incoming', 'phone-outgoing',
-    'video-camera', 'video-conference',
-    'microphone', 'microphone-slash', 'microphone-stage',
-    'speaker-high', 'speaker-low', 'speaker-none', 'speaker-slash',
-    'bell', 'bell-ringing', 'bell-slash', 'bell-simple',
-    'paper-plane-tilt', 'paper-plane-right',
-    'share-network', 'share-fat', 'at', 'megaphone', 'broadcast',
-  ]},
-  { key: 'media', label: 'Media', icons: [
-    'image', 'images', 'camera', 'camera-plus', 'camera-rotate',
-    'play', 'play-circle', 'pause', 'pause-circle', 'stop', 'stop-circle',
-    'skip-forward', 'skip-back', 'fast-forward', 'rewind',
-    'record', 'music-note', 'music-notes', 'music-notes-simple',
-    'radio', 'speaker-hifi', 'headphones',
-    'film-strip', 'film-reel', 'film-slate', 'screencast',
-    'monitor-play', 'video', 'vinyl-record', 'disc',
-  ]},
-  { key: 'shapes', label: 'Shapes', icons: [
-    'circle', 'circle-half', 'circle-dashed', 'square', 'square-half',
-    'triangle', 'diamond', 'hexagon', 'octagon', 'pentagon',
-    'star', 'star-four', 'star-half',
-    'heart', 'heart-half', 'heart-straight',
-    'shield', 'seal', 'seal-check',
-    'polygon', 'parallelogram', 'spiral', 'asterisk',
-    'plus', 'minus', 'x', 'check', 'equals',
-    'circles-four', 'circles-three', 'diamonds-four',
-  ]},
-  { key: 'weather', label: 'Weather & Nature', icons: [
-    'sun', 'sun-dim', 'sun-horizon', 'moon', 'moon-stars',
-    'cloud', 'cloud-rain', 'cloud-lightning', 'cloud-snow', 'cloud-sun', 'cloud-moon', 'cloud-fog',
-    'snowflake', 'wind', 'drop', 'rainbow', 'rainbow-cloud',
-    'thermometer', 'thermometer-hot', 'thermometer-cold', 'umbrella',
-    'lightning', 'fire', 'flame',
-    'flower', 'flower-lotus', 'flower-tulip',
-    'tree', 'tree-evergreen', 'tree-palm', 'leaf',
-    'mountains', 'wave', 'waves', 'planet', 'globe',
-  ]},
-  { key: 'travel', label: 'Travel & Transport', icons: [
-    'airplane', 'airplane-takeoff', 'airplane-landing',
-    'car', 'car-simple', 'bus', 'train', 'train-simple', 'tram',
-    'bicycle', 'motorcycle', 'scooter', 'boat', 'sailboat',
-    'rocket', 'rocket-launch',
-    'map-pin', 'map-pin-line', 'map-pin-area', 'map-trifold',
-    'navigation-arrow', 'compass', 'compass-rose', 'globe',
-    'flag', 'flag-banner', 'tent', 'anchor',
-    'road-horizon', 'traffic-sign', 'traffic-cone',
-    'gas-pump', 'taxi', 'truck', 'van', 'jeep',
-  ]},
-  { key: 'food', label: 'Food & Drink', icons: [
-    'coffee', 'coffee-bean', 'fork-knife', 'cooking-pot',
-    'bowl-food', 'bowl-steam', 'bread', 'cake', 'cookie',
-    'egg', 'hamburger', 'pizza', 'popcorn', 'shrimp',
-    'apple-logo', 'orange', 'orange-slice', 'cherries', 'avocado',
-    'carrot', 'pepper', 'grains',
-    'wine', 'beer-stein', 'beer-bottle', 'champagne', 'martini',
-    'tea-bag', 'pint-glass', 'ice-cream', 'popsicle',
-  ]},
-  { key: 'tools', label: 'Tools & Dev', icons: [
-    'wrench', 'hammer', 'screwdriver', 'toolbox',
-    'gear', 'gear-six', 'gear-fine',
-    'terminal', 'terminal-window', 'code', 'code-block', 'code-simple',
-    'database', 'hard-drives', 'cpu', 'graphics-card',
-    'bug', 'bug-beetle', 'bug-droid',
-    'git-branch', 'git-commit', 'git-fork', 'git-merge', 'git-pull-request',
-    'brackets-curly', 'brackets-angle', 'brackets-round',
-    'function', 'binary', 'circuitry', 'robot', 'command',
-    'plug', 'plugs', 'plugs-connected',
-    'figma-logo', 'github-logo', 'gitlab-logo',
-  ]},
-  { key: 'people', label: 'People & Body', icons: [
-    'user', 'user-circle', 'user-plus', 'user-minus', 'user-check',
-    'user-gear', 'user-switch', 'user-focus',
-    'users', 'users-three', 'users-four',
-    'person', 'person-simple', 'person-arms-spread',
-    'baby', 'hand', 'hand-waving', 'hand-pointing', 'hand-grabbing',
-    'hand-palm', 'hands-clapping',
-    'thumbs-up', 'thumbs-down',
-    'eye', 'eye-closed', 'eye-slash',
-    'smiley', 'smiley-wink', 'smiley-sad', 'smiley-meh', 'smiley-angry',
-    'brain', 'skull', 'fingerprint', 'graduation-cap',
-  ]},
-  { key: 'commerce', label: 'Commerce', icons: [
-    'shopping-cart', 'shopping-cart-simple', 'shopping-bag', 'shopping-bag-open',
-    'tote', 'bag', 'credit-card',
-    'currency-dollar', 'currency-btc', 'currency-eur', 'currency-gbp',
-    'coins', 'coin', 'wallet', 'money', 'money-wavy',
-    'receipt', 'receipt-x', 'barcode', 'qr-code',
-    'tag', 'tag-simple', 'storefront',
-    'bank', 'piggy-bank', 'cash-register', 'percent', 'invoice',
-  ]},
-  { key: 'charts', label: 'Charts & Data', icons: [
-    'chart-bar', 'chart-bar-horizontal', 'chart-line', 'chart-line-up', 'chart-line-down',
-    'chart-pie', 'chart-pie-slice', 'chart-donut', 'chart-polar', 'chart-scatter',
-    'trend-up', 'trend-down', 'pulse', 'activity',
-    'speedometer', 'gauge', 'timer',
-    'hourglass', 'hourglass-simple',
-    'calendar', 'calendar-blank', 'calendar-check', 'calendar-plus', 'calendar-minus',
-    'clock', 'clock-countdown', 'clock-clockwise', 'clock-counter-clockwise',
-    'presentation', 'presentation-chart', 'strategy',
-  ]},
-  { key: 'security', label: 'Security', icons: [
-    'lock', 'lock-open', 'lock-key', 'lock-key-open', 'lock-simple', 'lock-laminated',
-    'key', 'key-return',
-    'shield', 'shield-check', 'shield-checkered', 'shield-plus',
-    'shield-slash', 'shield-warning', 'shield-star',
-    'fingerprint', 'fingerprint-simple', 'password',
-    'warning', 'warning-circle', 'warning-diamond', 'warning-octagon',
-    'prohibit', 'scan', 'security-camera', 'detective',
-    'biohazard', 'siren', 'police-car', 'seal-warning',
-  ]},
-  { key: 'animals', label: 'Animals', icons: [
-    'dog', 'cat', 'bird', 'fish', 'fish-simple', 'bug', 'bug-beetle',
-    'butterfly', 'horse', 'cow', 'rabbit', 'paw-print',
-  ]},
-  { key: 'brands', label: 'Brands & Logos', icons: [
-    'github-logo', 'gitlab-logo', 'figma-logo', 'discord-logo', 'slack-logo',
-    'twitter-logo', 'x-logo', 'instagram-logo', 'facebook-logo', 'linkedin-logo',
-    'youtube-logo', 'twitch-logo', 'spotify-logo', 'apple-logo', 'android-logo',
-    'windows-logo', 'linux-logo', 'google-logo', 'google-chrome-logo',
-    'amazon-logo', 'dribbble-logo', 'behance-logo', 'medium-logo',
-    'reddit-logo', 'telegram-logo', 'whatsapp-logo', 'snapchat-logo',
-    'tiktok-logo', 'pinterest-logo', 'paypal-logo', 'stripe-logo',
-    'notion-logo', 'codepen-logo', 'codesandbox-logo', 'replit-logo',
-    'open-ai-logo', 'meta-logo',
-  ]},
+// Friendly labels for the IconCategory values (which are lowercase
+// human strings like 'maps & travel'). Order is the chip-row order.
+const CATEGORY_LABEL = {
+  [IconCategory.ARROWS]: 'Arrows',
+  [IconCategory.SYSTEM]: 'System',
+  [IconCategory.COMMUNICATION]: 'Communication',
+  [IconCategory.OFFICE]: 'Office',
+  [IconCategory.EDITOR]: 'Editor',
+  [IconCategory.DESIGN]: 'Design',
+  [IconCategory.MEDIA]: 'Media',
+  [IconCategory.PEOPLE]: 'People',
+  [IconCategory.OBJECTS]: 'Objects',
+  [IconCategory.COMMERCE]: 'Commerce',
+  [IconCategory.FINANCE]: 'Finance',
+  [IconCategory.MAP]: 'Maps',
+  [IconCategory.NATURE]: 'Nature',
+  [IconCategory.WEATHER]: 'Weather',
+  [IconCategory.HEALTH]: 'Health',
+  [IconCategory.DEVELOPMENT]: 'Development',
+  [IconCategory.GAMES]: 'Games',
+  [IconCategory.BRAND]: 'Brands',
+}
+const CATEGORY_ORDER = Object.keys(CATEGORY_LABEL)
+
+// Hand-picked "Popular" — surfaces the icons people reach for most so
+// the default grid feels useful without scrolling.
+const POPULAR_NAMES = [
+  'house', 'star', 'heart', 'gear', 'magnifying-glass', 'user', 'envelope', 'phone',
+  'calendar-blank', 'clock', 'camera', 'image', 'video-camera', 'music-note',
+  'microphone', 'speaker-high', 'bell', 'sun', 'moon', 'cloud', 'lightning',
+  'globe', 'map-pin', 'compass', 'flag', 'bookmark', 'tag',
+  'hash', 'at', 'link', 'paperclip', 'pencil-simple', 'file-text', 'folder',
+  'archive', 'trash', 'download', 'upload', 'share-network', 'paper-plane-tilt',
+  'chat-circle', 'chat-text', 'thumbs-up', 'thumbs-down', 'check-circle', 'x-circle',
+  'warning-circle', 'info', 'question', 'play', 'pause', 'eye', 'lock', 'key',
+  'shield', 'wifi-high', 'cpu', 'monitor', 'device-mobile', 'laptop', 'printer',
+  'floppy-disk', 'copy', 'clipboard', 'squares-four', 'list', 'kanban', 'table',
+  'chart-pie', 'chart-bar', 'trend-up', 'target', 'trophy', 'gift', 'shopping-cart',
+  'credit-card', 'currency-dollar', 'briefcase', 'buildings', 'rocket', 'airplane',
+  'car', 'coffee', 'fork-knife', 'cake', 'wine', 'dog', 'cat', 'bird', 'bug',
+  'flower', 'tree', 'palette', 'paint-brush', 'pen', 'pen-nib', 'figma-logo',
+  'github-logo', 'code', 'terminal', 'database', 'hard-drives', 'wrench', 'hammer',
+  'sparkle', 'fire', 'robot', 'brain', 'lightbulb', 'crown', 'diamond',
+  'push-pin', 'smiley', 'hand-waving', 'strategy', 'notebook', 'book-open',
 ]
 
-// Flat list of all curated icon names (for search)
-export const ALL_PHOSPHOR_ICONS = PHOSPHOR_CATEGORIES.flatMap((c) => c.icons)
-  .filter((v, i, a) => a.indexOf(v) === i) // dedupe
+// Build category groups. Each icon may belong to multiple categories;
+// we list it under each (matches phosphor.com behavior).
+const CATEGORY_GROUPS = CATEGORY_ORDER.map((catKey) => ({
+  key: catKey,
+  label: CATEGORY_LABEL[catKey],
+  icons: RAW_ICONS
+    .filter((ic) => ic.categories.includes(catKey))
+    .map((ic) => ic.name),
+}))
+
+export const PHOSPHOR_CATEGORIES = [
+  { key: 'popular', label: 'Popular', icons: POPULAR_NAMES },
+  ...CATEGORY_GROUPS,
+]
+
+export const ALL_PHOSPHOR_ICONS = RAW_ICONS.map((ic) => ic.name)
+
+// Pre-built lower-case haystack per icon for tag-aware search:
+//   "trash"  matches Trash + Bin (alias)
+//   "delete" matches Trash via tag
+//   "send"   matches PaperPlane via tag
+// Done once at module load — search itself is then a tight string scan.
+export const PHOSPHOR_SEARCH_INDEX = RAW_ICONS.map((ic) => ({
+  name: ic.name,
+  haystack: [
+    ic.name,
+    ic.pascal_name,
+    ...(ic.alias ? [ic.alias.name] : []),
+    ...ic.tags,
+  ].join(' ').toLowerCase(),
+}))
+
+export function searchPhosphor(query) {
+  const q = query.trim().toLowerCase()
+  if (!q) return []
+  // Multi-token AND: "send mail" matches icons whose haystack has both.
+  const tokens = q.split(/\s+/)
+  return PHOSPHOR_SEARCH_INDEX
+    .filter(({ haystack }) => tokens.every((t) => haystack.includes(t)))
+    .map(({ name }) => name)
+}

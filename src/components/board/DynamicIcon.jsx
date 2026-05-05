@@ -41,28 +41,6 @@ function toKebab(name) {
     .replace(/\d+$/, '')
 }
 
-function renderMaterial(materialName, sizePx, props) {
-  return (
-    <span
-      className="material-symbols-outlined"
-      style={{
-        fontSize: `${sizePx}px`,
-        lineHeight: `${sizePx}px`,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: `${sizePx}px`,
-        height: `${sizePx}px`,
-        flexShrink: 0,
-        fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
-      }}
-      {...props}
-    >
-      {materialName}
-    </span>
-  )
-}
-
 function renderPhosphor(iconName, sizePx, props) {
   const prefix = props.weight === 'fill' ? 'ph-fill' : 'ph'
   const { weight: _, ...restProps } = props
@@ -89,16 +67,6 @@ export default memo(function DynamicIcon({ name, className = 'w-4 h-4', ...props
 
   const sizeMatch = className.match(/w-(\d+(?:\.\d+)?)/)
   const sizePx = sizeMatch ? parseFloat(sizeMatch[1]) * 4 : 16
-
-  // Explicit prefix: "material:icon_name"
-  if (name.startsWith('material:')) {
-    return renderMaterial(name.slice(9), sizePx, props)
-  }
-
-  // Legacy Material names with underscores: "check_circle", "arrow_forward"
-  if (name.includes('_')) {
-    return renderMaterial(name, sizePx, props)
-  }
 
   // Phosphor: kebab-case or single lowercase word; PascalCase → convert to kebab
   const kebab = name.includes('-') || name === name.toLowerCase() ? name : toKebab(name)
