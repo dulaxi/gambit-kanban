@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
               We sent a password reset link to <span className="font-medium text-[var(--text-primary)]">{email}</span>. Click the link in the email to set a new password.
             </p>
             <Link
-              to="/login"
+              to="/"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-lime-dark)] hover:text-[var(--color-lime-dark)]"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
         )}
 
         <p className="text-center text-sm text-[var(--text-secondary)] mt-4">
-          <Link to="/login" className="text-[var(--color-lime-dark)] hover:text-[var(--color-lime-dark)] font-medium">
+          <Link to="/" className="text-[var(--color-lime-dark)] hover:text-[var(--color-lime-dark)] font-medium">
             Back to sign in
           </Link>
         </p>

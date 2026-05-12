@@ -18,6 +18,8 @@ import Input from '../components/ui/Input'
 import { LABEL_BG, PRIORITY_DOT } from '../utils/formatting'
 import { useAuthStore } from '../store/authStore'
 import { HeroAnimation } from './LandingBoardSandbox'
+import PlanCard from '../components/PlanCard'
+import { PLANS } from '../data/plans'
 
 /* ── Mock board data for hero preview ── */
 const mockColumns = [
@@ -151,86 +153,21 @@ const mockDetailCard = {
 //                  ink outline defines its shape.
 // `primaryCta`  → dark ink CTA button. Used on Pro to keep upgrade
 //                  visually distinct now that the highlight border moved.
-const PRICING_TIERS = [
-  {
-    name: 'Free',
-    tagline: 'For getting started',
-    price: '$0',
-    period: 'forever',
-    cta: 'Try Kolumn',
-    ghost: true,
-    primaryCta: false,
-    topIcon: Popcorn,
-    topIconClass: 'text-[var(--text-primary)]',
-    bullets: [
-      'Unlimited boards & cards',
-      'Drag-and-drop, labels, due dates, checklists',
-      'Real-time team collaboration',
-      '20 AI messages per day',
-    ],
-  },
-  {
-    name: 'Pro',
-    tagline: 'For daily productivity',
-    price: '$8',
-    period: 'per month',
-    cta: 'Try Kolumn',
-    ghost: false,
-    primaryCta: true,
-    topIcon: Champagne,
-    // Lime-tinted icon (vs ink on Free/Team) puts brand accent color
-    // exactly where the eye first lands — signals "this one matters."
-    topIconClass: 'text-[var(--color-logo)]',
-    inheritsFrom: 'Free',
-    bullets: [
-      'Unlimited AI messages',
-      'AI can create, move, and update cards for you',
-      'Priority support',
-    ],
-  },
-  {
-    name: 'Team',
-    tagline: 'For team workspaces',
-    price: '$24',
-    period: 'per month',
-    cta: 'Try Kolumn',
-    ghost: false,
-    primaryCta: false,
-    topIcon: Cheers,
-    topIconClass: 'text-[var(--text-primary)]',
-    inheritsFrom: 'Pro',
-    bullets: [
-      'Multiple workspaces with shared boards',
-      'Member roles & admin controls',
-      'Priority onboarding',
-    ],
-  },
-]
+// Plan definitions live in src/data/plans.js — shared with the
+// signup plan-picker step. Edits there propagate to both surfaces.
 
 const FAQ = [
+  {
+    q: 'What should I use Kolumn for?',
+    a: 'Anything you used to keep in a notes app, a shared sheet, or a Trello board you abandoned. Personal projects, side hustles, team workstreams, content calendars, recurring chores — anything that benefits from "cards in columns" but where you do not want to set up a workflow tool first. The AI runs the busywork; you stay in the kanban.',
+  },
   {
     q: 'How is Kolumn different from Asana, Trello, or Notion?',
     a: "Most PM tools grew into something heavy — workflows, custom fields, sprint planning. Kolumn is a kanban that stayed a kanban. The difference is what's missing: no setup, no rituals, no field discipline. Just boards, cards, and an AI that can run the busywork for you.",
   },
   {
-    q: 'Do I need to learn how to use the AI?',
-    a: "No. Just type what you want — “add a task to redesign the hero,” “move the Stripe card to In Progress” — and Kolumn does it. The kanban interface is also there if you'd rather drag.",
-  },
-  {
     q: 'Is my data private?',
-    a: "Yes. Every table uses row-level security so only you and your team can see your boards. We don't train on your content.",
-  },
-  {
-    q: 'Can I invite my team?',
-    a: 'Yes. Boards can be shared per-board or organized into workspaces. The Free tier supports collaboration with no member cap.',
-  },
-  {
-    q: 'Is there a mobile app?',
-    a: 'Not yet. The web app is responsive and works on phones. Native apps are on the roadmap.',
-  },
-  {
-    q: 'What happens to my data if I cancel Pro?',
-    a: 'Nothing. You keep all your boards and cards forever — cancellation just drops you back to the Free tier (20 AI messages per day).',
+    a: "Yes. Every table uses row-level security so only you and your team can see your boards. We don't train on your content, and you can export or delete everything at any time.",
   },
 ]
 
@@ -2004,21 +1941,134 @@ function DemoBoard() {
   )
 }
 
+// Accordion item for the FAQ section. All items start collapsed; each
+// owns its own open/closed state so multiple can be expanded at once.
+// Animation uses the CSS Grid 0fr→1fr trick on the content row so the
+// transition runs against the content's natural height — no JS height
+// measurement, no library, just one transition rule.
+function FaqItem({ question, answer, index }) {
+  const [open, setOpen] = useState(false)
+  const panelId = `faq-panel-${index}`
+  const headerId = `faq-header-${index}`
+  return (
+    <div>
+      <button
+        type="button"
+        id={headerId}
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-4 py-2.5 text-left group cursor-pointer"
+      >
+        <h3 className="text-lg sm:text-xl font-light text-[var(--text-primary)] tracking-tight leading-snug">
+          {question}
+        </h3>
+        <span
+          aria-hidden="true"
+          className={`shrink-0 w-5 h-5 flex items-center justify-center text-[var(--text-secondary)] transition-transform duration-200 ${open ? 'rotate-45' : ''}`}
+        >
+          <Plus size={18} weight="light" />
+        </span>
+      </button>
+      <div
+        id={panelId}
+        role="region"
+        aria-labelledby={headerId}
+        className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+      >
+        <div className="overflow-hidden">
+          <p className="pb-3 pr-10 text-sm text-[var(--text-secondary)] leading-relaxed">
+            {answer}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function GoogleGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">
+      <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615Z"/>
+      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.71H.957v2.332A8.997 8.997 0 0 0 9 18Z"/>
+      <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z"/>
+      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z"/>
+    </svg>
+  )
+}
+
 function HeroAuthCard() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
   const [error, setError] = useState('')
+  const [checking, setChecking] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [mode, setMode] = useState('email') // 'email' | 'signup' | 'signin'
-  const signUp = useAuthStore((s) => s.signUp)
+  const [googleSubmitting, setGoogleSubmitting] = useState(false)
+  const [mode, setMode] = useState('email') // 'email' | 'signin'
+  // Transient "you clicked Sign in, here's where to look" highlight.
+  // Triggered by the URL hash changing to #sign-in; cleared after a
+  // short window so the ring is a momentary cue, not a permanent state.
+  const [highlighted, setHighlighted] = useState(false)
   const signIn = useAuthStore((s) => s.signIn)
+  const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle)
+  const checkEmailExists = useAuthStore((s) => s.checkEmailExists)
   const navigate = useNavigate()
 
-  const handleEmailContinue = (e) => {
+  useEffect(() => {
+    const trigger = () => {
+      if (window.location.hash !== '#sign-in') return
+      // Reset to email step so the input is actually visible — if the
+      // user had progressed to the password step and clicks Sign in
+      // again, we want to send them back to the start.
+      setMode('email')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setHighlighted(true)
+      // Clear the hash so re-clicking the same link re-fires
+      // hashchange. Without this, the second click is a no-op.
+      window.setTimeout(() => {
+        window.history.replaceState(null, '', window.location.pathname)
+      }, 50)
+      window.setTimeout(() => setHighlighted(false), 1800)
+    }
+    // Handle the case where the page loads with #sign-in already set
+    trigger()
+    window.addEventListener('hashchange', trigger)
+    return () => window.removeEventListener('hashchange', trigger)
+  }, [])
+
+  const handleGoogle = async () => {
+    setError('')
+    setGoogleSubmitting(true)
+    try {
+      await signInWithGoogle()
+      // Supabase performs a full-page redirect to Google — control won't return here.
+    } catch (err) {
+      setError(err.message)
+      setGoogleSubmitting(false)
+    }
+  }
+
+  const handleEmailContinue = async (e) => {
     e.preventDefault()
     if (!email) return
-    setMode('signup')
+    setError('')
+    setChecking(true)
+    try {
+      const exists = await checkEmailExists(email)
+      if (exists) {
+        setMode('signin')
+      } else {
+        navigate('/signup', { state: { email } })
+      }
+    } catch (err) {
+      // If the lookup itself fails (network, RPC missing, etc.) fall back to
+      // showing the password input so the user can still attempt to sign in
+      // — wrong path beats a dead-end.
+      setMode('signin')
+      setError(err?.message || 'Could not verify email. Try signing in.')
+    } finally {
+      setChecking(false)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -2026,20 +2076,10 @@ function HeroAuthCard() {
     setError('')
     setSubmitting(true)
     try {
-      if (mode === 'signup') {
-        if (password.length < 6) { setError('Password must be at least 6 characters'); setSubmitting(false); return }
-        await signUp(email, password, name || email.split('@')[0])
-      } else {
-        await signIn(email, password)
-      }
+      await signIn(email, password)
       navigate('/dashboard', { replace: true })
     } catch (err) {
-      if (mode === 'signup' && err.message?.includes('already')) {
-        setMode('signin')
-        setError('Account exists — enter your password to sign in')
-      } else {
-        setError(err.message)
-      }
+      setError(err?.message || 'Sign in failed')
     } finally {
       setSubmitting(false)
     }
@@ -2047,81 +2087,110 @@ function HeroAuthCard() {
 
   return (
     <div className="mx-4 sm:mx-auto w-full max-w-md min-w-[20rem]">
-      <div className="bg-[var(--surface-card)] border border-[var(--color-sand)] rounded-[2rem] p-7 shadow-[0_4px_24px_0_rgba(0,0,0,0.04),0_2px_64px_0_rgba(0,0,0,0.02)] space-y-4">
+      <div className="bg-[var(--surface-card)] border border-[var(--color-sand)] rounded-[2rem] p-7 shadow-[0_4px_24px_0_rgba(0,0,0,0.04),0_2px_64px_0_rgba(0,0,0,0.02)] space-y-5">
         {error && (
           <div className="text-sm text-[var(--color-copper)] bg-[var(--color-copper-wash)]/60 border border-[var(--color-copper)]/30 rounded-xl px-3 py-2.5">
             {error}
           </div>
         )}
 
-        {mode === 'email' ? (
-          <form onSubmit={handleEmailContinue} className="space-y-3">
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-              className="!h-11 !rounded-[0.6rem] !text-base"
-            />
-            <Button type="submit" size="lg" className="w-full !text-base !rounded-[0.6rem]">
-              Continue with email
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-            <p className="text-center text-xs text-[var(--text-muted)] pt-1">
-              Already have an account?{' '}
-              <Link to="/login" className="text-[var(--text-secondary)] underline underline-offset-2 decoration-[var(--color-sand)] hover:decoration-[var(--text-secondary)] transition-colors">
-                Sign in
-              </Link>
-            </p>
-          </form>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Email-display "pill" — sized to match the inputs/button
-                below (h-11, rounded-[0.6rem], text-base) so the post-email
-                signup stack reads as a single coherent column of boxes. */}
-            <div className="flex items-center gap-2 h-11 px-3 bg-[var(--surface-hover)] border border-[var(--border-default)] rounded-[0.6rem] text-base text-[var(--text-secondary)]">
-              <span className="truncate flex-1">{email}</span>
-              <button type="button" onClick={() => { setMode('email'); setError('') }} className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] shrink-0">
-                Change
-              </button>
-            </div>
-            {mode === 'signup' && (
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={handleGoogle}
+            disabled={googleSubmitting || submitting}
+            className="inline-flex items-center justify-center gap-2 h-11 w-full px-5 rounded-[0.6rem] text-base font-medium border border-[var(--color-sand)] bg-[var(--surface-card)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <GoogleGlyph />
+            {googleSubmitting ? 'Redirecting…' : 'Continue with Google'}
+          </button>
+
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-[var(--color-sand)]" />
+            <span className="text-[11px] tracking-[0.08em] uppercase text-[var(--text-muted)]">or</span>
+            <div className="flex-1 h-px bg-[var(--color-sand)]" />
+          </div>
+
+          {mode === 'email' ? (
+            <form onSubmit={handleEmailContinue} className="space-y-3">
               <Input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+                disabled={checking}
+                className={`!h-11 !rounded-[0.6rem] !text-base transition-shadow duration-300 ${
+                  highlighted
+                    ? 'ring-2 ring-[var(--color-olive)] ring-offset-2 ring-offset-[var(--surface-card)]'
+                    : ''
+                }`}
+              />
+              <Button
+                type="submit"
+                size="lg"
+                loading={checking}
+                loadingText="Checking…"
+                className="w-full !text-base !rounded-[0.6rem]"
+              >
+                Continue with email
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div className="flex items-center gap-2 h-11 px-3 bg-[var(--surface-raised)] border border-[var(--border-default)] rounded-[0.6rem] text-base text-[var(--text-secondary)]">
+                <span className="truncate flex-1">{email}</span>
+                <button
+                  type="button"
+                  onClick={() => { setMode('email'); setPassword(''); setError('') }}
+                  className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] shrink-0"
+                >
+                  Change
+                </button>
+              </div>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
                 autoFocus
                 className="!h-11 !rounded-[0.6rem] !text-base"
               />
-            )}
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={mode === 'signup' ? 'Create a password' : 'Enter your password'}
-              required
-              autoFocus={mode === 'signin'}
-              className="!h-11 !rounded-[0.6rem] !text-base"
-            />
-            <Button
-              type="submit"
-              loading={submitting}
-              loadingText="Please wait…"
-              size="lg"
-              className="w-full !text-base !rounded-[0.6rem]"
-            >
-              {mode === 'signup' ? 'Create account' : 'Sign in'}
-            </Button>
-            <p className="text-center text-xs text-[var(--text-muted)] pt-1">
-              {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
-              <button type="button" onClick={() => { setMode(mode === 'signup' ? 'signin' : 'signup'); setError('') }} className="text-[var(--text-secondary)] underline underline-offset-2 decoration-[var(--color-sand)] hover:decoration-[var(--text-secondary)] transition-colors">
-                {mode === 'signup' ? 'Sign in' : 'Sign up'}
-              </button>
-            </p>
-          </form>
-        )}
+              <Button
+                type="submit"
+                loading={submitting}
+                loadingText="Signing in…"
+                size="lg"
+                className="w-full !text-base !rounded-[0.6rem]"
+              >
+                Sign in
+              </Button>
+              <p className="text-center text-xs text-[var(--text-muted)] pt-1">
+                Don't have an account?{' '}
+                <Link
+                  to="/signup"
+                  state={{ email }}
+                  className="text-[var(--text-secondary)] underline underline-offset-2 decoration-[var(--color-sand)] hover:decoration-[var(--text-secondary)] transition-colors"
+                >
+                  Sign up
+                </Link>
+              </p>
+            </form>
+          )}
+        </div>
+
+        <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+          By continuing, you acknowledge Kolumn's{' '}
+          <a
+            href="/privacy"
+            className="underline underline-offset-[3px] decoration-[var(--color-sand)] hover:decoration-[var(--text-secondary)] text-[var(--text-secondary)]"
+          >
+            Privacy Policy
+          </a>{' '}
+          and agree to get occasional product emails and notifications.
+        </p>
       </div>
     </div>
   )
@@ -2133,17 +2202,22 @@ function MobileNav() {
     <nav className="sticky top-0 z-50 bg-[var(--surface-page)]">
       {/* Desktop nav */}
       <div className="hidden sm:flex items-center justify-between max-w-[90rem] mx-auto" style={{ width: 'calc(100% - (2 * clamp(2rem, 1.43rem + 2.86vw, 4rem)))' }}>
-        <div className="flex items-center">
+        <Link
+          to="/"
+          onClick={() => window.scrollTo(0, 0)}
+          aria-label="Kolumn — home"
+          className="flex items-center hover:opacity-90 transition-opacity"
+        >
           <Kanban size={34} weight="fill" className="text-[var(--color-logo)]" />
           <span className="text-[28px] font-[450] text-[var(--text-primary)] tracking-tight leading-none ml-2 font-logo">Kolumn</span>
-        </div>
+        </Link>
         <div className="flex items-center gap-3 py-6">
-          <Link
-            to="/login"
+          <a
+            href="#sign-in"
             className="inline-flex items-center justify-center h-9 px-5 min-w-[5rem] whitespace-nowrap text-[15px] font-normal text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[0.5px] border-[var(--color-sand)] rounded-lg transition-all duration-200"
           >
             Sign in
-          </Link>
+          </a>
           <Link
             to="/signup"
             className="inline-flex items-center justify-center h-9 px-5 min-w-[5rem] whitespace-nowrap text-[15px] font-normal bg-[var(--text-primary)] text-white rounded-lg overflow-hidden transition-transform will-change-transform ease-[cubic-bezier(0.165,0.85,0.45,1)] duration-150 hover:scale-y-[1.015] hover:scale-x-[1.005]"
@@ -2155,10 +2229,18 @@ function MobileNav() {
 
       {/* Mobile nav */}
       <div className="flex sm:hidden items-center justify-between px-5 py-4">
-        <div className="flex items-center">
+        <Link
+          to="/"
+          onClick={() => {
+            window.scrollTo(0, 0)
+            setMenuOpen(false)
+          }}
+          aria-label="Kolumn — home"
+          className="flex items-center hover:opacity-90 transition-opacity"
+        >
           <Kanban size={34} weight="fill" className="text-[var(--color-logo)]" />
           <span className="text-[28px] font-[450] text-[var(--text-primary)] tracking-tight leading-none ml-1.5 font-logo">Kolumn</span>
-        </div>
+        </Link>
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="w-9 h-9 flex items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--color-cream-dark)] transition-colors"
@@ -2171,12 +2253,13 @@ function MobileNav() {
       {/* Mobile dropdown */}
       {menuOpen && (
         <div className="sm:hidden border-t border-[var(--color-cream-dark)] bg-[var(--surface-page)] px-5 pb-4 pt-3 flex flex-col gap-2 animate-dropdown">
-          <Link
-            to="/login"
+          <a
+            href="#sign-in"
+            onClick={() => setMenuOpen(false)}
             className="flex items-center justify-center h-10 text-[15px] font-normal text-[var(--text-secondary)] border border-[var(--color-sand)] rounded-lg transition-colors hover:text-[var(--text-primary)]"
           >
             Sign in
-          </Link>
+          </a>
           <Link
             to="/signup"
             className="flex items-center justify-center h-10 text-[15px] font-normal bg-[var(--text-primary)] text-white rounded-lg"
@@ -2362,74 +2445,9 @@ export default function LandingPage() {
           </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-[90rem] mx-auto">
-          {PRICING_TIERS.map((tier) => {
-            const TopIcon = tier.topIcon
-            return (
-            <div
-              key={tier.name}
-              className={`relative rounded-[2rem] p-7 flex flex-col ${
-                /* Pro gets a 2px ink border vs the others' 1px — subtle
-                   visual weight that signals "main tier" without breaking
-                   the unified ink-border system. */
-                tier.primaryCta ? 'border-2' : 'border'
-              } ${
-                tier.ghost
-                  ? 'bg-[var(--surface-page)] border-[var(--color-sand)]'
-                  : tier.primaryCta
-                  ? 'bg-[var(--color-mauve-cream)] border-[var(--color-ink)]'
-                  : 'bg-[var(--surface-card)] border-[var(--color-sand)]'
-              } ${
-                tier.accentShadow
-                  ? 'shadow-[0_4px_32px_0_rgba(168,150,158,0.28)]'
-                  : ''
-              }`}
-            >
-              {TopIcon && (
-                <div className="mb-5">
-                  <TopIcon size={56} weight="duotone" className={tier.topIconClass} />
-                </div>
-              )}
-              <h3
-                className="text-3xl font-normal tracking-tight text-[var(--text-primary)]"
-                style={{ fontFamily: 'Clash Grotesk, system-ui, sans-serif' }}
-              >
-                {tier.name}
-              </h3>
-              <p className="text-sm text-[var(--text-secondary)] mb-6">{tier.tagline}</p>
-              <div className="flex items-baseline gap-1.5 mb-6">
-                <span className="text-4xl font-normal text-[var(--text-primary)] font-logo">{tier.price}</span>
-                <span className="text-sm text-[var(--text-muted)]">/ {tier.period}</span>
-              </div>
-              <Link
-                to="/signup"
-                className={`mb-8 inline-flex items-center justify-center gap-2 h-11 rounded-[0.6rem] text-base font-medium transition-colors ${
-                  tier.primaryCta
-                    ? 'bg-[var(--text-primary)] text-white hover:bg-[var(--btn-primary-hover)]'
-                    : 'bg-[var(--surface-hover)] text-[var(--text-primary)] border border-[var(--color-sand)] hover:border-[var(--text-primary)]'
-                }`}
-              >
-                {tier.cta}
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              {/* "Everything in X, plus:" reads as a bold header above
-                  the checkmark bullets rather than as a checked feature.
-                  Mirrors Anthropic's Max card pattern. */}
-              {tier.inheritsFrom && (
-                <p className="text-sm font-semibold text-[var(--text-primary)] mb-2">
-                  Everything in {tier.inheritsFrom}, plus:
-                </p>
-              )}
-              <ul className="space-y-2.5 text-sm text-[var(--text-secondary)]">
-                {tier.bullets.map((bullet) => (
-                  <li key={bullet} className="flex items-start gap-2">
-                    <Check size={14} weight="bold" className="mt-1 text-[var(--color-logo)] shrink-0" />
-                    <span>{bullet}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            )
-          })}
+          {PLANS.map((plan) => (
+            <PlanCard key={plan.id} plan={plan} mode="landing" />
+          ))}
         </div>
       </section>
 
@@ -2437,15 +2455,12 @@ export default function LandingPage() {
       <section className="px-6 sm:px-10 py-20 max-w-3xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-light text-[var(--text-primary)] tracking-tight mb-2">
-            Frequently asked <span className="text-[var(--color-logo)] font-heading">questions</span>
+            Frequently asked <span className="font-heading">questions</span>
           </h2>
         </div>
-        <div className="divide-y divide-[var(--color-sand)]/80 border-y border-[var(--color-sand)]/80">
-          {FAQ.map((item) => (
-            <div key={item.q} className="py-7">
-              <h3 className="text-base font-medium text-[var(--text-primary)] mb-2 tracking-tight">{item.q}</h3>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.a}</p>
-            </div>
+        <div className="flex flex-col gap-2">
+          {FAQ.map((item, i) => (
+            <FaqItem key={item.q} question={item.q} answer={item.a} index={i} />
           ))}
         </div>
       </section>
@@ -2461,7 +2476,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]">
             <a href="mailto:hello@kolumn.app" className="hover:text-[var(--text-secondary)] transition-colors">Contact</a>
-            <Link to="/login" className="hover:text-[var(--text-secondary)] transition-colors">Sign in</Link>
+            <a href="#sign-in" className="hover:text-[var(--text-secondary)] transition-colors">Sign in</a>
             <Link to="/signup" className="hover:text-[var(--text-secondary)] transition-colors">Sign up</Link>
           </div>
         </div>

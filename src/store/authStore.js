@@ -141,6 +141,36 @@ export const useAuthStore = create((set, get) => ({
     return data
   },
 
+  signInWithGoogle: async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    })
+    if (error) throw error
+    capture('user_signed_in_oauth_initiated', { provider: 'google' })
+    return data
+  },
+
+  // Returns true if an account exists for this email. Backed by the
+  // `check-email` Edge Function, which rate-limits per IP and runs the
+  // lookup under the service-role key. Throws on transport error or
+  // 429 so callers can decide how to degrade — the landing card falls
+  // through to the sign-in form on failure rather than blocking.
+  checkEmailExists: async (email) => {
+    const { data, error } = await supabase.functions.invoke('check-email', {
+      body: { email: email.trim().toLowerCase() },
+    })
+    if (error) {
+      // functions.invoke wraps non-2xx responses in FunctionsHttpError;
+      // the body is on `error.context.response` as a stream. We don't
+      // need the detail here — the caller only cares that the check
+      // didn't succeed. Surface the message for telemetry.
+      throw new Error(error.message || 'check-email failed')
+    }
+    if (data && typeof data.exists === 'boolean') return data.exists
+    throw new Error('check-email returned unexpected shape')
+  },
+
   signOut: () => {
     set({ user: null, session: null, profile: null })
     Sentry.setUser(null)
@@ -166,6 +196,28 @@ export const useAuthStore = create((set, get) => ({
   updatePassword: async (newPassword) => {
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     if (error) throw error
+  },
+
+  // Sets the user's tier in their profile row. Called from the
+  // post-signup plan picker today; will move behind a Stripe webhook
+  // once real billing lands. Keep all "tier becomes X" writes routed
+  // through here so the eventual swap is one place.
+  setTier: async (tier) => {
+    const { user } = get()
+    if (!user) throw new Error('Not signed in')
+    if (!['free', 'pro', 'team'].includes(tier)) {
+      throw new Error(`Unknown tier: ${tier}`)
+    }
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ tier })
+      .eq('id', user.id)
+      .select()
+      .single()
+    if (error) throw error
+    set({ profile: data })
+    capture('user_picked_tier', { tier })
+    return data
   },
 
   updateProfile: async (updates) => {

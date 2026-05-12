@@ -612,3 +612,103 @@ alter table public.cards add column archived boolean not null default false;
 -- 16. COLUMN WIP LIMITS
 -- ============================================================
 alter table public.columns add column wip_limit int;
+
+-- ============================================================
+-- 17. AUTH RATE LIMITS (gates the `check-email` edge function)
+-- ============================================================
+-- Shared Postgres state for rate-limiting unauthenticated auth helpers
+-- (currently: the email-existence check used by the landing sign-in
+-- card). The edge function calls public.check_rate_limit with its
+-- service-role key before doing any user lookup.
+create table if not exists public.auth_rate_limits (
+  bucket text primary key,
+  count int not null default 0,
+  window_start timestamptz not null default now()
+);
+
+alter table public.auth_rate_limits enable row level security;
+
+create or replace function public.check_rate_limit(
+  p_bucket text,
+  p_max int,
+  p_window_seconds int
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_count int;
+  v_now timestamptz := now();
+begin
+  insert into public.auth_rate_limits (bucket, count, window_start)
+  values (p_bucket, 1, v_now)
+  on conflict (bucket) do update
+    set count = case
+                  when public.auth_rate_limits.window_start <
+                       v_now - make_interval(secs => p_window_seconds)
+                    then 1
+                  else public.auth_rate_limits.count + 1
+                end,
+        window_start = case
+                         when public.auth_rate_limits.window_start <
+                              v_now - make_interval(secs => p_window_seconds)
+                           then v_now
+                         else public.auth_rate_limits.window_start
+                       end
+  returning count into v_count;
+
+  return v_count <= p_max;
+end;
+$$;
+
+-- IMPORTANT: revoking from PUBLIC alone is insufficient. Supabase
+-- grants EXECUTE directly to anon + authenticated via default
+-- privileges. Revoke from the named roles or anon can bypass the
+-- edge function via /rest/v1/rpc/check_rate_limit.
+revoke all on function public.check_rate_limit(text, int, int) from public;
+revoke execute on function public.check_rate_limit(text, int, int)
+  from anon, authenticated;
+grant execute on function public.check_rate_limit(text, int, int)
+  to service_role;
+
+-- Lookup helper for the check-email edge function. SECURITY DEFINER
+-- because PostgREST does not expose the auth schema.
+create or replace function public.lookup_email_exists(p_email text)
+returns boolean
+language sql
+security definer
+set search_path = public, auth
+stable
+as $$
+  select exists (
+    select 1 from auth.users
+    where lower(email) = lower(p_email)
+  );
+$$;
+
+revoke all on function public.lookup_email_exists(text) from public;
+revoke execute on function public.lookup_email_exists(text)
+  from anon, authenticated;
+grant execute on function public.lookup_email_exists(text) to service_role;
+
+-- Deny-all RLS policies on auth_rate_limits — RLS is on with no
+-- policies already denies, but explicit policies silence the advisor
+-- lint and document intent.
+create policy "deny all anon select" on public.auth_rate_limits
+  for select to anon using (false);
+create policy "deny all anon insert" on public.auth_rate_limits
+  for insert to anon with check (false);
+create policy "deny all anon update" on public.auth_rate_limits
+  for update to anon using (false);
+create policy "deny all anon delete" on public.auth_rate_limits
+  for delete to anon using (false);
+create policy "deny all auth select" on public.auth_rate_limits
+  for select to authenticated using (false);
+create policy "deny all auth insert" on public.auth_rate_limits
+  for insert to authenticated with check (false);
+create policy "deny all auth update" on public.auth_rate_limits
+  for update to authenticated using (false);
+create policy "deny all auth delete" on public.auth_rate_limits
+  for delete to authenticated using (false);
