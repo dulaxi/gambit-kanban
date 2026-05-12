@@ -321,15 +321,11 @@ export default function Sidebar() {
                 }
               >
                 {({ isActive }) => (
-                  activeBoard?.icon ? (
-                    <DynamicIcon
-                      name={activeBoard.icon}
-                      weight={isActive ? 'fill' : 'regular'}
-                      className="w-4 h-4 shrink-0"
-                    />
-                  ) : (
-                    <Kanban className="w-4 h-4 shrink-0" weight={isActive ? 'fill' : 'regular'} />
-                  )
+                  <DynamicIcon
+                    name={activeBoard?.icon || 'cards-three'}
+                    weight={isActive ? 'fill' : 'regular'}
+                    className="w-4 h-4 shrink-0"
+                  />
                 )}
               </NavLink>
             )

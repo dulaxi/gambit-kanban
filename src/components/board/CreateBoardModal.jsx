@@ -1,16 +1,52 @@
 import { useState, useRef, useCallback } from 'react'
-import { Kanban, X } from '@phosphor-icons/react'
+import { X } from '@phosphor-icons/react'
 import { useIsMobile } from '../../hooks/useMediaQuery'
 import { useBoardStore } from '../../store/boardStore'
 import DynamicIcon from './DynamicIcon'
 import IconPicker from './IconPicker'
 import Modal from '../ui/Modal'
-import Button from '../ui/Button'
-import Input from '../ui/Input'
 import Tooltip from '../ui/Tooltip'
-import TemplatePicker from './createBoard/TemplatePicker'
-import BoardSkeletonPreview from './createBoard/BoardSkeletonPreview'
-import { TEMPLATES } from './createBoard/templates'
+
+const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Done']
+
+// Column-name input that empties itself on focus so the user can type a fresh
+// name. The previous value lingers as a faded placeholder; if the user blurs
+// without typing anything, we restore it.
+function ColumnInput({ value, onChange, fallback, ariaLabel }) {
+  const [focused, setFocused] = useState(false)
+  const [typing, setTyping] = useState(false)
+  const originalRef = useRef(value)
+
+  const display = focused && !typing ? '' : value
+  const placeholder = focused ? originalRef.current || fallback : fallback
+  const len = Math.max((display || placeholder).length, 5)
+
+  return (
+    <input
+      type="text"
+      value={display}
+      onChange={(e) => {
+        setTyping(true)
+        onChange(e.target.value)
+      }}
+      onFocus={() => {
+        originalRef.current = value
+        setFocused(true)
+        setTyping(false)
+      }}
+      onBlur={() => {
+        if (!value.trim()) onChange(originalRef.current)
+        setFocused(false)
+        setTyping(false)
+      }}
+      maxLength={80}
+      placeholder={placeholder}
+      aria-label={ariaLabel}
+      style={{ width: `calc(${len}ch + 1.75rem)` }}
+      className="h-8 px-3 rounded-lg border border-[var(--border-default)] bg-transparent text-xs text-[var(--text-primary)] placeholder:text-[var(--text-faint)] outline-none transition-colors hover:border-[var(--color-mist)] focus:border-[var(--color-ink)]"
+    />
+  )
+}
 
 export default function CreateBoardModal({ onClose, workspaceId = null }) {
   const isMobile = useIsMobile()
@@ -18,146 +54,172 @@ export default function CreateBoardModal({ onClose, workspaceId = null }) {
 
   const [name, setName] = useState('')
   const [icon, setIcon] = useState(null)
-  // Once the user explicitly picks an icon, don't let a later template
-  // selection silently overwrite it.
-  const [iconManuallySet, setIconManuallySet] = useState(false)
-  const [selectedTemplate, setSelectedTemplate] = useState('blank')
+  const [columns, setColumns] = useState(DEFAULT_COLUMNS)
   const [creating, setCreating] = useState(false)
   const [showIconPicker, setShowIconPicker] = useState(false)
+  const [nameError, setNameError] = useState(false)
 
   const nameRef = useRef(null)
 
-  const template = TEMPLATES.find((t) => t.key === selectedTemplate) || TEMPLATES[0]
-
-  const handleTemplateSelect = useCallback((tpl) => {
-    setSelectedTemplate(tpl.key)
-    if (tpl.icon && !iconManuallySet) setIcon(tpl.icon)
-  }, [iconManuallySet])
+  const updateColumn = useCallback((idx, value) => {
+    setColumns((prev) => prev.map((c, i) => (i === idx ? value : c)))
+  }, [])
 
   const handleCreate = useCallback(async () => {
-    const trimmed = name.trim()
-    if (!trimmed || creating) return
+    if (creating) return
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      setNameError(true)
+      nameRef.current?.focus()
+      return
+    }
+    const trimmedColumns = columns.map(
+      (c, i) => c.trim() || DEFAULT_COLUMNS[i] || `Column ${i + 1}`,
+    )
     setCreating(true)
     try {
-      const id = await addBoard(trimmed, icon, template.columns, workspaceId)
+      const id = await addBoard(trimmedName, icon, trimmedColumns, workspaceId)
       if (id) onClose()
     } finally {
       setCreating(false)
     }
-  }, [name, icon, template, creating, addBoard, onClose, workspaceId])
+  }, [name, columns, icon, creating, addBoard, onClose, workspaceId])
 
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleCreate()
-    }
+  const handleSubmit = useCallback((e) => {
+    e.preventDefault()
+    handleCreate()
   }, [handleCreate])
-
-  const canCreate = name.trim().length > 0 && !creating
 
   return (
     <>
       <Modal
         open
         onClose={onClose}
-        contentClassName="flex items-center justify-center"
+        contentClassName="flex items-center justify-center p-4"
         initialFocusRef={nameRef}
       >
         <div
-          className={`bg-[var(--surface-page)] shadow-2xl flex flex-col overflow-hidden ${
-            isMobile ? 'fixed inset-0 rounded-none' : 'rounded-2xl w-[900px] max-h-[85vh]'
+          className={`relative bg-[var(--surface-page)] flex flex-col overflow-hidden ${
+            isMobile
+              ? 'fixed inset-0 rounded-none'
+              : 'rounded-2xl w-[512px] max-h-[88vh] shadow-[0_24px_72px_rgba(27,27,24,0.16)]'
           }`}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)]">
-            <div className="flex items-center gap-2">
-              <Kanban className="w-4 h-4 text-[var(--text-muted)]" />
-              <h2 className="text-sm font-semibold text-[var(--text-primary)]">New Board</h2>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1 text-[var(--text-muted)] hover:text-[var(--text-secondary)] rounded-lg hover:bg-[var(--surface-hover)] transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-faint)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors z-10"
+          >
+            <X className="w-4 h-4" />
+          </button>
 
-          {/* Body */}
-          <div className={`flex-1 overflow-y-auto ${isMobile ? 'flex flex-col' : 'flex'}`}>
-            {/* Left side: inputs + templates */}
-            <div className={`p-6 flex flex-col gap-5 ${
-              isMobile ? 'w-full' : 'w-[340px] shrink-0 border-r border-[var(--border-default)]'
-            }`}>
-              {/* Board name + icon */}
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-medium text-[var(--text-secondary)]">Board name</label>
-                <div className="flex gap-2">
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-10 pt-12 pb-2">
+            <h2
+              id="create-board-title"
+              className="font-heading text-[30px] font-light leading-tight tracking-tight text-[var(--text-primary)] mb-7"
+            >
+              Create a new board
+            </h2>
+
+            <div className="grid grid-cols-1 gap-4">
+              {/* Name field */}
+              <div>
+                <label
+                  htmlFor="cb-name"
+                  className="block mb-1.5 text-[13px] text-[var(--text-secondary)]"
+                >
+                  Name your board
+                </label>
+                <div className="flex items-stretch gap-2">
                   <Tooltip content="Choose icon" placement="top">
                     <button
                       type="button"
                       onClick={() => setShowIconPicker(true)}
                       aria-label="Choose icon"
-                      className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] hover:bg-[var(--surface-raised)] transition-colors"
+                      className="w-11 h-11 shrink-0 flex items-center justify-center rounded-[10px] border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-secondary)] hover:border-[var(--color-mist)] hover:text-[var(--text-primary)] transition-colors"
                     >
-                      {icon ? (
-                        <DynamicIcon name={icon} className="w-4 h-4 text-[var(--text-secondary)]" />
-                      ) : (
-                        <Kanban className="w-4 h-4 text-[var(--text-muted)]" />
-                      )}
+                      <DynamicIcon
+                        name={icon || 'cards-three'}
+                        className={`w-4 h-4 ${icon ? '' : 'text-[var(--text-muted)]'}`}
+                      />
                     </button>
                   </Tooltip>
-                  <Input
+                  <input
+                    id="cb-name"
                     ref={nameRef}
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onKeyDown={handleKeyDown}
+                    onChange={(e) => {
+                      setName(e.target.value)
+                      if (nameError) setNameError(false)
+                    }}
                     autoFocus
                     maxLength={200}
-                    placeholder="e.g. Product Roadmap"
-                    className="flex-1"
+                    placeholder="Untitled"
+                    aria-invalid={nameError || undefined}
+                    aria-describedby={nameError ? 'cb-name-error' : undefined}
+                    className={`flex-1 min-w-0 h-11 px-3 rounded-[10px] border bg-[var(--surface-card)] text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-faint)] outline-none transition-colors ${
+                      nameError
+                        ? 'border-[var(--color-copper)] hover:border-[var(--color-copper)] focus:border-[var(--color-copper)]'
+                        : 'border-[var(--border-default)] hover:border-[var(--color-mist)] focus:border-[var(--color-ink)]'
+                    }`}
                   />
                 </div>
+                {nameError && (
+                  <p
+                    id="cb-name-error"
+                    className="mt-1.5 ml-[52px] text-[12px] text-[var(--color-copper)]"
+                  >
+                    Board name is required.
+                  </p>
+                )}
               </div>
 
-              <TemplatePicker selectedKey={selectedTemplate} onSelect={handleTemplateSelect} />
+              {/* Columns */}
+              <div>
+                <label className="block mb-1.5 text-[13px] text-[var(--text-secondary)]">
+                  Columns
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {columns.map((col, i) => (
+                    <ColumnInput
+                      key={i}
+                      value={col}
+                      onChange={(v) => updateColumn(i, v)}
+                      fallback={DEFAULT_COLUMNS[i] || `Column ${i + 1}`}
+                      ariaLabel={`Column ${i + 1} name`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Right side: skeleton preview */}
-            <div className={`flex-1 flex flex-col items-center justify-center p-6 ${
-              isMobile ? 'border-t border-[var(--border-default)]' : ''
-            }`}>
-              <div className="text-[11px] font-medium text-[var(--text-muted)] mb-3 self-start">Preview</div>
-              <div className="w-full">
-                <BoardSkeletonPreview columns={template.columns} />
-              </div>
-              <div className="mt-3 text-[11px] text-[var(--text-muted)]">
-                {template.columns.length} column{template.columns.length !== 1 ? 's' : ''}
-              </div>
+            {/* Footer */}
+            <div className="mt-6 flex justify-end gap-2 pb-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex items-center justify-center h-9 px-4 min-w-[5rem] rounded-lg text-[13px] font-medium text-[var(--text-primary)] border border-[var(--border-default)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={creating}
+                className="relative inline-flex items-center justify-center h-9 px-4 min-w-[5rem] rounded-lg text-[13px] font-medium text-[var(--btn-primary-text)] bg-[var(--btn-primary-bg)] overflow-hidden transition-transform duration-150 ease-[cubic-bezier(0.165,0.85,0.45,1)] hover:scale-y-[1.015] hover:scale-x-[1.005] disabled:opacity-60 disabled:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(at_bottom,rgba(255,255,255,0.18),rgba(255,255,255,0))] after:opacity-0 after:translate-y-2 after:transition after:duration-200 hover:after:opacity-100 hover:after:translate-y-0"
+              >
+                <span className="relative z-10">{creating ? 'Creating…' : 'Create board'}</span>
+              </button>
             </div>
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[var(--border-default)]">
-            <Button variant="ghost" onClick={onClose}>Cancel</Button>
-            <Button
-              onClick={handleCreate}
-              disabled={!canCreate}
-              loading={creating}
-              loadingText="Creating"
-            >
-              Create
-            </Button>
-          </div>
+          </form>
         </div>
       </Modal>
 
-      {/* Icon picker overlay (separate Modal — stacks above) */}
       {showIconPicker && (
         <IconPicker
           value={icon}
-          onChange={(newIcon) => { setIcon(newIcon); setIconManuallySet(true) }}
+          onChange={(newIcon) => setIcon(newIcon)}
           onClose={() => setShowIconPicker(false)}
         />
       )}

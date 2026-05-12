@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, lazy, Suspense } from 'react'
+import { useState, useMemo, useCallback, useEffect, lazy, Suspense } from 'react'
 import { Archive, Funnel, Users, X } from '@phosphor-icons/react'
 import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
@@ -15,6 +15,19 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
   const [showShareModal, setShowShareModal] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
+  // The drawer keeps overflow hidden during the open/close animation so the
+  // pills don't spill out, then unhides it once the drawer is fully open so
+  // individual filter popovers can drop below the toolbar without being
+  // clipped.
+  const [drawerOverflowVisible, setDrawerOverflowVisible] = useState(false)
+
+  useEffect(() => {
+    if (showFilters) {
+      const t = setTimeout(() => setDrawerOverflowVisible(true), 320)
+      return () => clearTimeout(t)
+    }
+    setDrawerOverflowVisible(false)
+  }, [showFilters])
 
   const boards = useBoardStore((s) => s.boards)
   const activeBoardId = useBoardStore((s) => s.activeBoardId)
@@ -114,23 +127,44 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
             </button>
           )}
 
-          {/* Filter pills — inline expansion */}
-          {showFilters && isRealBoard && (
-            <>
+          {/* Filter pills — drawer expansion. Pills live in a wrapper whose
+              max-width animates from 0 → expanded. Because the wrapper is a
+              flex child, the surrounding buttons (Share/Sort/Filter) glide
+              left continuously as it grows — no separate animation needed.
+              Overflow stays hidden during the transition (so pills don't
+              spill out) and switches to visible once open, so the individual
+              filter popovers can drop below without being clipped. */}
+          {isRealBoard && (
+            <div
+              inert={!showFilters ? '' : undefined}
+              aria-hidden={!showFilters || undefined}
+              className={`inline-flex items-center gap-2 ${
+                drawerOverflowVisible ? 'overflow-visible' : 'overflow-hidden'
+              }`}
+              style={{
+                maxWidth: showFilters ? '800px' : 0,
+                opacity: showFilters ? 1 : 0,
+                transition:
+                  'max-width 320ms cubic-bezier(0.4, 0, 0.2, 1), opacity 180ms ease-out 80ms',
+              }}
+            >
               <PriorityFilter filters={filters} setFilters={setFilters} />
               <AssigneeFilter filters={filters} setFilters={setFilters} assignees={uniqueAssignees} />
               <LabelFilter filters={filters} setFilters={setFilters} labels={uniqueLabels} />
               <DueFilter filters={filters} setFilters={setFilters} />
-              {/* Clear all — icon-only X button. When filters are active,
-                  the icon takes the copper/destructive tint so the user
-                  reads it as "live, click to clear." When idle (nothing
-                  to clear), it stays faint and inert-looking. */}
+              {/* Clear all — icon-only X button. When filters are active, the
+                  icon takes the copper/destructive tint so the user reads it
+                  as "live, click to clear." When idle, it stays faint and
+                  inert-looking. */}
               <button
                 type="button"
-                onClick={clearFilters}
-                aria-label="Clear all filters"
-                title="Clear all filters"
-                className={`flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--surface-hover)] transition-colors ${
+                onClick={() => {
+                  if (activeFilterCount > 0) clearFilters()
+                  else setShowFilters(false)
+                }}
+                aria-label={activeFilterCount > 0 ? 'Clear all filters' : 'Close filters'}
+                title={activeFilterCount > 0 ? 'Clear all filters' : 'Close filters'}
+                className={`shrink-0 flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[var(--surface-hover)] transition-colors ${
                   activeFilterCount > 0
                     ? 'text-[var(--color-copper)] hover:text-[var(--color-copper)]'
                     : 'text-[var(--text-faint)] hover:text-[var(--text-secondary)]'
@@ -138,7 +172,7 @@ export default function BoardSelector({ filters, setFilters, sortBy, setSortBy }
               >
                 <X className="w-3.5 h-3.5" />
               </button>
-            </>
+            </div>
           )}
 
           {isRealBoard && archivedCards.length > 0 && (

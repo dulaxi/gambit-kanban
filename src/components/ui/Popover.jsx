@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useClickOutside } from '../../hooks/useClickOutside'
 
 function mergeClassNames(...parts) {
@@ -15,8 +15,11 @@ const PLACEMENT = {
 const PANEL_BASE =
   'absolute z-50 min-w-[200px] p-1 ' +
   'bg-[var(--surface-card)] border border-[var(--color-mist)] rounded-[10px] ' +
-  'shadow-[0_10px_30px_rgba(27,27,24,0.10),0_2px_6px_rgba(27,27,24,0.04)] ' +
-  'animate-dropdown'
+  'shadow-[0_10px_30px_rgba(27,27,24,0.10),0_2px_6px_rgba(27,27,24,0.04)]'
+
+// Keep the panel mounted briefly after close so the exit animation can play.
+// Matches the duration of @keyframes dropdownOut in index.css.
+const EXIT_MS = 120
 
 export default function Popover({
   open,
@@ -29,6 +32,24 @@ export default function Popover({
   className = '',
   children,
 }) {
+  const [rendered, setRendered] = useState(open)
+  const [exiting, setExiting] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setRendered(true)
+      setExiting(false)
+      return
+    }
+    if (!rendered) return
+    setExiting(true)
+    const t = setTimeout(() => {
+      setRendered(false)
+      setExiting(false)
+    }, EXIT_MS)
+    return () => clearTimeout(t)
+  }, [open, rendered])
+
   const ref = useClickOutside(() => {
     if (closeOnOutsideClick && open) onOpenChange?.(false)
   })
@@ -54,10 +75,15 @@ export default function Popover({
   return (
     <div ref={ref} data-menu-root className={mergeClassNames('relative', className)}>
       {children}
-      {open && (
+      {rendered && (
         <div
           role="dialog"
-          className={mergeClassNames(PANEL_BASE, PLACEMENT[placement] || PLACEMENT['bottom-start'], panelClassName)}
+          className={mergeClassNames(
+            PANEL_BASE,
+            exiting ? 'animate-dropdown-out pointer-events-none' : 'animate-dropdown',
+            PLACEMENT[placement] || PLACEMENT['bottom-start'],
+            panelClassName,
+          )}
         >
           {panel}
         </div>

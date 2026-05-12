@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Check, Kanban, Plus, Users, X } from '@phosphor-icons/react'
+import { ArrowLeft, Check, Plus, Users, X } from '@phosphor-icons/react'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useWorkspacesStore } from '../../store/workspacesStore'
 import { useBoardSharingStore } from '../../store/boardSharingStore'
@@ -152,11 +152,10 @@ export default function WorkspaceSidebar() {
                   >
                     <span className="flex items-center gap-3 truncate">
                       <span className="flex items-center justify-center shrink-0" style={{ width: 16, height: 16 }}>
-                        {boardIcon ? (
-                          <DynamicIcon name={boardIcon} className="w-4 h-4 text-[var(--text-muted)]" />
-                        ) : (
-                          <Kanban className="w-4 h-4 text-[var(--text-muted)]" />
-                        )}
+                        <DynamicIcon
+                          name={boardIcon || 'cards-three'}
+                          className="w-4 h-4 text-[var(--text-muted)]"
+                        />
                       </span>
                       <span className="truncate">{boardName}</span>
                     </span>

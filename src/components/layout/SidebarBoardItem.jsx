@@ -1,4 +1,4 @@
-import { Kanban, SignOut, Trash } from '@phosphor-icons/react'
+import { SignOut, Trash } from '@phosphor-icons/react'
 import DynamicIcon from '../board/DynamicIcon'
 import IconPicker from '../board/IconPicker'
 import Tooltip from '../ui/Tooltip'
@@ -33,10 +33,12 @@ export default function SidebarBoardItem({
   const iconColor = active ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'
   const iconWeight = active ? 'fill' : 'regular'
 
-  const iconGlyph = board.icon ? (
-    <DynamicIcon name={board.icon} weight={iconWeight} className={`w-4 h-4 ${iconColor}`} />
-  ) : (
-    <Kanban weight={iconWeight} className={`w-4 h-4 ${iconColor}`} />
+  const iconGlyph = (
+    <DynamicIcon
+      name={board.icon || 'cards-three'}
+      weight={iconWeight}
+      className={`w-4 h-4 ${iconColor}`}
+    />
   )
 
   return (
