@@ -1,4 +1,10 @@
-# Kolumn — Project Context
+# Kolumn — Project Context (development branch)
+
+> **Branch-scoped CLAUDE.md.** This file is tuned for the `development` branch
+> and its current focus: polishing and re-architecting the AI workflow. The
+> `master` branch has its own broader CLAUDE.md. If you're starting a session
+> on a different branch, the contents below may not reflect that branch's
+> priorities.
 
 ## What this is
 
@@ -9,18 +15,24 @@ Claude operates the same data model through tools.
 Stack: **React 19 + Vite 7 + Tailwind v4 + Supabase (Postgres, Auth, Realtime,
 Edge Functions) + Anthropic Claude API**.
 
-## Active focus (April 2026)
+## Active focus (May 2026, development branch)
 
-**Polish, test, debug, coherency — not features.**
+**AI workflow rework.** Polish, harden, and instrument the Claude-powered chat
+agent. Everything in the [AI Workflow](#ai-workflow-current-branch-focus)
+section below is in scope; everything else is reference material — touch it only
+when the AI work demands it.
 
-"Coherency" means CSS / interaction consistency across the whole app: every
-button looks like every other button, every modal animates the same way, every
-focus state behaves the same. Design north star is **claude.ai-style**:
-restrained, generous whitespace, single accent (lime), Mona Sans + serif accents,
-soft 1px borders, 8-12px radius.
+Concretely, this means: closing the tool-result loop so the model knows when its
+tool calls succeed; splitting the system prompt into cacheable + volatile blocks;
+persisting conversations to Supabase instead of localStorage; centralizing the
+model ID; resolving the dead `classifyModel()` branch (either use it or delete
+it); adding cache-token telemetry.
 
-Bias: prefer extending an existing pattern over inventing a new one. Refactor
-inconsistencies you encounter, but don't go on unrelated cleanup tangents.
+UI coherency rules (claude.ai-style: restrained, lime accent, Mona Sans + serif,
+1px borders, 8–12px radius) still apply — but don't go on unrelated coherency
+tangents while you're in the AI files. Refactor what you touch.
+
+Bias: prefer extending an existing pattern over inventing a new one.
 
 ## Commands
 
@@ -135,27 +147,146 @@ If a calendar comes back, the right shape is a **board view toggle**
 (month/week grid of cards with `due_date`) alongside the column view —
 not a top-level Calendar nav item.
 
+## AI Workflow (current branch focus)
+
+The Claude agent is the active rework target on this branch. Read this whole
+section before changing any AI-adjacent file.
+
+### Two AI surfaces, not one
+
+Kolumn has **two** distinct AI surfaces with different jobs. This is the most
+important architectural rule on this branch — conflating them is the source of
+most past confusion.
+
+| Surface | Where | Job | Tools? |
+|---------|-------|-----|--------|
+| **Pill** (`QuickAddBar.jsx`) | Mounted on board pages, takes `boardId` prop | The **action** surface. Type intent → AI fires write tools scoped to **this** board. The pill forces `board: boardName` into every tool call. | Yes — write tools, per tier. |
+| **Chat** (`ChatPage.jsx`, `/chat`) | Standalone chat route | The **conversation** surface. Discuss what exists, ask questions, get summaries. | **None for free.** Read-only (`search_cards`, `summarize_board`) for paid tiers. |
+
+Single Anthropic endpoint serves both. Backend distinguishes callers via a
+`mode` parameter on the request (`'pill' | 'chat'`) and computes the effective
+tool list from `(mode × tier)` **server-side**. The client identifies itself;
+the server enforces. Never trust the client to filter tools.
+
+Pills on other pages (dashboard, workspace, etc.) are out of scope for now.
+
+### Where AI lives — the complete surface
+
+There is **exactly one** Claude API call in the codebase, and it lives in a
+Supabase Edge Function. Everything else is plumbing around it.
+
+| Layer | File | Lines | Role |
+|-------|------|-------|------|
+| Edge — handler | `supabase/functions/chat/index.ts` | ~180 | Auth → tier check → context build → Claude API stream → SSE re-emit. **Only file that talks to Anthropic.** |
+| Edge — system prompt | `supabase/functions/chat/context.ts` | ~130 | Fetches user's boards/columns/cards/notes/members via 6 parallel Supabase queries and assembles a ~1,500-word system prompt. **One template today; needs to branch by `mode`.** |
+| Edge — tools | `supabase/functions/chat/tools.ts` | ~280 | 18 tool definitions (schema only; execution happens in the browser). |
+| Edge — tier/model | `supabase/functions/chat/tier.ts` | ~80 | Rate limit, per-tool gating, model selection. Hardcodes the model ID in four places. **Needs to extend gating to the `(mode × tier)` matrix.** |
+| Edge — SSE infra | `supabase/functions/chat/stream.ts` | ~40 | `SSEWriter` wrapper around a `ReadableStream`. |
+| Frontend — pill | `src/components/board/QuickAddBar.jsx` | ~155 | **The action surface.** Mounted per board, forces `board: boardName` into every tool call. Has a fast path that splits comma/newline input and skips the LLM. |
+| Frontend — chat page | `src/pages/ChatPage.jsx`, `ChatListPage.jsx`, `src/components/chat/*` | ~350 total | The conversation surface. Bubbles, composer, markdown rendering. **Currently shares the tool-execution path with the pill — needs to stop firing write tools.** |
+| Frontend — client | `src/lib/aiClient.js` | ~95 | `fetch` to `/functions/v1/chat`; SSE parser; dispatches `onText / onTier / onToolCall / onDone / onError`. **Needs to forward a `mode` parameter.** |
+| Frontend — store | `src/store/chatStore.js` | ~190 | Zustand: conversations, messages, tierInfo, streaming state. **Conversations live in localStorage only.** Used by ChatPage; pill bypasses it. |
+| Frontend — tool executor | `src/lib/toolExecutor.js` | ~380 | Fuzzy title→ID resolver, calls boardStore/noteStore. Has a **4-second polling loop** waiting for backend to confirm temp IDs. `search_cards` and `summarize_board` exist as no-op placeholders (lines 372–374). |
+
+Not AI despite the names: `src/components/ActionCard.jsx` (presentational only),
+`supabase/functions/check-email/` (signup email validation).
+
+### The Claude call (current state)
+
+- **Model:** `claude-haiku-4-5-20251001` — hardcoded in `tier.ts` four times. **No central constant yet** (T2-#5 below).
+- **Streaming:** native Anthropic SSE → parsed in `index.ts` → re-emitted as our own SSE protocol (`type: text|tier|tool_call|done|error`).
+- **Caching:** `cache_control: { type: "ephemeral" }` on the full system prompt. Tools array and message history are uncached. **No cache-hit telemetry** (T2-#7).
+- **Not in use:** extended thinking, batch API, files API, vision, retries, fallback model.
+- **History window:** last 20 messages, sliced naively in `chatStore.sendMessage` — can orphan a `tool_use` from its `tool_result` (T3-#8).
+
+### System prompt anatomy (`context.ts`)
+
+Built fresh on every message. Concatenated in this order:
+
+1. Static persona (`"You are Kolumn, a sharp project management assistant…"`)
+2. User name, today's date, workspace + team member list
+3. Every board → its columns → first 10 card titles per column
+4. Overdue + due-today alerts
+5. Activity counts (last 7 days)
+6. All notes (first 200 chars each) — **note: notes UI is unwired, see Removed pages**
+7. Hardcoded Phosphor icon allow-list (~80 names)
+8. 18 hand-written instruction rules
+
+**Cacheability rule when editing this file:** keep static text (persona, rules,
+icon list, anything user-agnostic) at the top, volatile data (boards, alerts,
+activity) at the bottom. The split exists conceptually but is not yet enforced
+with separate `cache_control` blocks (T2-#4).
+
+### Tools (18 total — schema in `tools.ts`)
+
+| Group | Tools |
+|-------|-------|
+| Cards | `create_card`, `move_card`, `update_card`, `delete_card`, `duplicate_card` |
+| Batch cards | `move_cards`, `update_cards`, `complete_cards` |
+| Card details | `toggle_checklist` |
+| Boards | `create_board`, `update_board`, `delete_board` |
+| Columns | `add_column`, `delete_column` |
+| Members | `invite_member`, `remove_member` |
+| Notes ⚠️ | `create_note`, `update_note` — UI is unwired; tools still exposed (T3-#11) |
+
+**Critical:** the tool-call loop is **not closed**. When Claude emits a `tool_use`,
+the edge function streams it to the browser, the browser executes it against
+Zustand + Supabase, and the result is **never reported back to the model**. Multi-step
+requests ("create a board then add 5 cards") can desync silently. Don't add a new
+tool without a plan for how its outcome reaches the model on the next turn (T1-#1).
+
+### Tier & gating (`tier.ts`)
+
+Tier names below are placeholders — the tier system is being redesigned (see
+the `Tier system` note in this file). The principle is what matters: tools are
+gated by **(surface × tier)**, not just tier.
+
+| Surface × tier | Free | Pro / Teams |
+|----------------|------|-------------|
+| **Pill** (write side) | 3 create_* tools | All 18 write tools |
+| **Chat** (read side) | None — pure text Q&A | `search_cards`, `summarize_board` (read-only) |
+
+- Daily message limit (currently 20 for free) lives in `tier.ts` and increments via the `increment_chat_usage` RPC. If that RPC errors, the function 500s with no fallback.
+- `classifyModel(message, tier)` exists and returns Haiku in **both** branches — dead code that pretends to route by intent. Decide: actually branch (Sonnet for complex writes, Haiku for reads) or delete the path (T2-#6).
+- **Destructive vs Pro-only drift:** the frontend's destructive-confirmation list (`isDestructive()` in `toolExecutor.js`) and the backend's `PRO_ONLY_TOOLS` list don't match. Free users can't even reach the confirmation UI for deletes (already blocked server-side), but Pro users get an in-chat approval. Pick one source of truth (T3-#10).
+- **Read-only tools are no-op placeholders today** — `search_cards` and `summarize_board` return `{ ok: true, readOnly: true }` and do nothing. They need real implementations before the chat surface ships its read-tools feature.
+
+### Rework backlog (ranked — read before changing AI code)
+
+Full details: `docs/superpowers/specs/2026-05-13-ai-workflow-rework-backlog.md`.
+
+**T1 — architecture & correctness:**
+1. **Implement the `mode` parameter** end-to-end (`aiClient.js` → `index.ts` → `tier.ts`). Backend computes effective tool list from `(mode × tier)`. Without this, the pill/chat split is policy, not enforcement.
+2. **Strip write tools from the chat path.** ChatPage must not be able to mutate state via the model. Belt-and-suspenders with T1-#1.
+3. **Close the tool-result loop.** After the browser executes a tool, follow up with a `tool_result` content block so the model can react to failures and chain steps reliably.
+4. **Persist conversations to Supabase.** Tables `chat_threads` and `chat_messages` already exist in `supabase/schema.sql`. Current localStorage-only history dies when the user clears cookies or switches devices.
+5. **Replace the 4s temp-ID polling in `toolExecutor.js`** with the existing realtime subscription in `boardStore`.
+
+**T2 — cost, latency, instrumentation:**
+6. **Branch the system prompt by `mode`.** Pill prompt: short, action-focused, board context pinned. Chat prompt: full read-only context with Q&A framing. Today one prompt serves both.
+7. **Split each prompt** into a cached static prefix and an uncached dynamic tail. Today any card edit invalidates the entire cache.
+8. **Centralize the model ID** into one `MODEL` constant at the top of `tier.ts` (or a new `model.ts`).
+9. **Resolve `classifyModel()`** — branch it for real or delete it.
+10. **Log Anthropic usage fields** (`input_tokens`, `cache_read_input_tokens`, `cache_creation_input_tokens`, `output_tokens`) so we can see whether caching actually fires.
+
+**T3 — UX, cleanup, parity:**
+11. **Implement `search_cards` and `summarize_board`** as real read-only tools for the chat surface (currently no-op placeholders).
+12. **Verify pill fast-path parity.** QuickAddBar's comma/newline split path bypasses the LLM — make sure it applies the same defaults the LLM path produces.
+13. **Token-budget history** instead of "last 20 messages"; never trim a `tool_use` away from its paired `tool_result`.
+14. **Resolve cards by ID** for cross-card lookups (move, update). Pill writes are already board-pinned, but card titles within a board can still collide.
+15. **Reconcile destructive vs pro-only** so the two lists don't drift (see Tier & gating above).
+16. **Drop unwired note tools** until the notes UI returns. They bloat the prompt and tempt the model into dead-end actions.
+
+### AI-specific conventions
+
+- **One Claude entry point.** All Anthropic API calls live in `supabase/functions/chat/index.ts`. There is no `ANTHROPIC_API_KEY` in the frontend and there shouldn't be. If you find yourself wanting a second AI surface, propose it first.
+- **Model IDs:** never hardcode in source files. Once T2-#5 lands, import the `MODEL` constant. Until then, if you touch a hardcoded model string, fix them all in the same change.
+- **New tools require a result-reporting plan.** A tool that returns nothing to the model is a footgun. Document how the outcome reaches the next turn (via `tool_result`, refreshed context, or both).
+- **System prompt ordering:** static prefix first, volatile tail last. Don't sprinkle dates, IDs, or counts into the static prefix.
+- **Telemetry:** prefer `src/utils/logger.js` over ad-hoc `console.log` for anything you want to survive into production. The edge function logs go to Supabase function logs — readable via `supabase functions logs chat` or the MCP `get_logs` tool.
+- **Schema source of truth:** the Anthropic API. When checking caching or extended-thinking behavior, use the `claude-api` skill (which fetches current docs) instead of going by memory.
+
 ## Subsystems
-
-### AI agent (`supabase/functions/chat/`)
-
-Edge Function that streams Claude responses via SSE. Loads the user's boards/cards
-into a system prompt (`context.ts`), exposes 18 tools (`tools.ts`), gates by tier
-(`tier.ts`), and writes results back to Supabase via the same RLS-protected APIs
-the frontend uses.
-
-Tools: `create_card`, `move_card`, `update_card`, `delete_card`, `create_board`,
-`move_cards`, `update_cards`, `complete_cards`, `duplicate_card`, `toggle_checklist`,
-`update_board`, `delete_board`, `add_column`, `delete_column`, `invite_member`,
-`remove_member`, `create_note`, `update_note`.
-
-### Tier system
-
-> **Currently being redesigned.** The old Free/Pro tier description was
-> removed from this file so reads don't anchor on stale gating rules
-> while the new pricing/plan system is being designed. The implementation
-> still exists in `supabase/functions/chat/tier.ts` (treat that as
-> source-of-truth until the new system lands here).
 
 ### Workspaces (`workspacesStore.js`)
 
@@ -295,10 +426,12 @@ Migrations live in `supabase/migrations/`; the canonical full schema is
 
 ## Conventions
 
-- **Commits**: conventional with scope — `feat(ai):`, `fix(chat):`, `style(ai):`, `refactor(board):`, `docs:`.
+- **Commits**: conventional with scope — `feat(ai):`, `fix(chat):`, `style(ai):`, `refactor(board):`, `docs:`. On this branch most commits should use the `ai`, `chat`, or `prompt` scope.
 - **Plans / specs**: `docs/superpowers/{plans,specs}/YYYY-MM-DD-<topic>.md`. Use the superpowers skills (`brainstorming` → `writing-plans` → `executing-plans`) for non-trivial work.
 - **Verifying changes**: `npm run build` for type/syntax sanity, `npm run test` for behavior, `npm run lint` for style.
 - **UI changes**: open the dev server in a browser and exercise the feature, including edge cases. Don't claim "done" without seeing it run.
+- **Edge-function changes**: deploy with `supabase functions deploy chat` (or use the Supabase MCP `deploy_edge_function`) and tail logs with `supabase functions logs chat` while exercising the chat in a browser. Type-checking with `deno check supabase/functions/chat/index.ts` catches most edge-function bugs before deploy.
+- **Anthropic API questions** (caching semantics, model IDs, tool-use protocol, extended thinking, batch): use the `claude-api` skill to fetch current docs. Don't go by memory — the API surface changes.
 
 ## Environment setup
 

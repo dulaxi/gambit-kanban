@@ -1,6 +1,37 @@
 import { useBoardStore } from '../store/boardStore'
 import { useNoteStore } from '../store/noteStore'
 import { useWorkspacesStore } from '../store/workspacesStore'
+import { LEGACY_ICON_REMAP } from '../components/board/DynamicIcon'
+
+// Normalize an icon name from the model: trim, lowercase, accept only kebab-case-ish
+// strings (letters/digits/hyphens), then apply the legacy lucide→Phosphor remap.
+// Returns null for anything malformed so the card renders without an icon rather
+// than crashing on a bad Phosphor name.
+function normalizeIcon(name) {
+  if (!name || typeof name !== 'string') return null
+  const trimmed = name.trim().toLowerCase()
+  if (!trimmed) return null
+  if (!/^[a-z0-9-]+$/.test(trimmed)) return null
+  return LEGACY_ICON_REMAP[trimmed] || trimmed
+}
+
+const TITLE_MAX = 200
+const DESCRIPTION_MAX = 5000
+
+// Capitalize the first letter of a title — but only when the first word looks
+// like an accidental lowercase ("buy milk" from a fast-path paste), not when
+// the case is intentional ("iPhone repair", "API rewrite", "macOS update").
+// Heuristic: skip if any uppercase letter already appears in the first word.
+function capitalizeFirstLetter(title) {
+  if (!title) return title
+  // Bail out if it doesn't start with a lowercase letter (number, emoji, etc.)
+  if (!/^[a-z]/.test(title)) return title
+  const firstSpace = title.search(/\s/)
+  const firstWord = firstSpace >= 0 ? title.slice(0, firstSpace) : title
+  // Intentional casing signal: any uppercase letter inside the first word
+  if (/[A-Z]/.test(firstWord)) return title
+  return title.charAt(0).toUpperCase() + title.slice(1)
+}
 
 function findBoardByName(name) {
   const boards = useBoardStore.getState().boards
@@ -97,28 +128,87 @@ export async function executeTool(action, params) {
   const store = useBoardStore.getState()
 
   if (action === 'create_card') {
-    const board = params.board ? findBoardByName(params.board) : Object.values(store.boards)[0]
-    if (!board) return { ok: false, error: `Board "${params.board}" not found` }
+    // Title: required, trimmed, 1–200 chars. Capitalize the first letter so
+    // the fast path (which ships raw user paste) produces presentable cards
+    // — e.g. "buy milk" → "Buy milk". See `capitalizeFirstLetter` for the
+    // intentional-casing heuristic that preserves "iPhone repair" etc.
+    const titleTrimmed = (params.title || '').trim()
+    if (!titleTrimmed) return { ok: false, error: 'Card title is required' }
+    if (titleTrimmed.length > TITLE_MAX) {
+      return { ok: false, error: `Card title is too long (max ${TITLE_MAX} chars)` }
+    }
+    const title = capitalizeFirstLetter(titleTrimmed)
 
-    const column = params.column
-      ? findColumnByName(board.id, params.column)
-      : firstColumnOf(board.id)
-    if (!column) return { ok: false, error: `Column "${params.column}" not found` }
+    // Description: truncate silently at DESCRIPTION_MAX, flag in result
+    const descRaw = params.description || ''
+    const truncated = descRaw.length > DESCRIPTION_MAX
+    const description = truncated ? descRaw.slice(0, DESCRIPTION_MAX) : descRaw
 
+    // Board: prefer boardId (pill injects this), fall back to board name for
+    // future surfaces that may not have a pinned board.
+    let board = null
+    if (params.boardId) {
+      board = store.boards[params.boardId] || null
+    } else if (params.board) {
+      board = findBoardByName(params.board)
+    }
+    if (!board) {
+      if (params.boardId) return { ok: false, error: 'Board not found for the given boardId' }
+      if (params.board) return { ok: false, error: `Board "${params.board}" not found` }
+      return { ok: false, error: 'No board context — caller must provide boardId' }
+    }
+
+    // Column: provided name → match; otherwise first by position
+    let column
+    if (params.column) {
+      column = findColumnByName(board.id, params.column)
+      if (!column) {
+        const available = Object.values(store.columns)
+          .filter((c) => c.board_id === board.id)
+          .sort((a, b) => a.position - b.position)
+          .map((c) => c.title)
+          .join(', ')
+        return { ok: false, error: `Column "${params.column}" not found on "${board.name}". Available: ${available}` }
+      }
+    } else {
+      column = firstColumnOf(board.id)
+      if (!column) return { ok: false, error: `Board "${board.name}" has no columns` }
+    }
+
+    // Defaults enforced in executor (not just prompt) so the pill's fast path
+    // and LLM path produce identical cards. Conservative principle: do NOT
+    // auto-attribute user-facing fields like assignee — leave null unless the
+    // user explicitly named someone. See memory:
+    // feedback_ai_tool_defaults_conservative.
+    const appliedDefaults = []
+
+    const priority = params.priority || 'medium'
+    if (!params.priority) appliedDefaults.push('priority')
+
+    const assignee = params.assignee || null
+
+    const icon = normalizeIcon(params.icon)
     const checklist = (params.checklist || []).map((text) => ({ text, done: false }))
 
+    // boardStore.addCard reads `cardData.assignee` (not `assignee_name`) and
+    // `cardData.dueDate` (not `due_date`). This camelCase quirk is intentional
+    // — see CLAUDE.md → Key Data Shapes. The store maps to the snake_case
+    // DB columns internally. Do not "fix" by renaming here.
     const tempId = await store.addCard(board.id, column.id, {
-      title: params.title,
-      description: params.description || '',
-      priority: params.priority || 'medium',
-      icon: params.icon || null,
+      title,
+      description,
+      priority,
+      icon,
       labels: params.labels || [],
       checklist,
-      assignee_name: params.assignee || null,
+      assignee,
       dueDate: params.due_date || null,
     })
     if (!tempId) return { ok: false, error: 'Failed to create card' }
     aiBuildingCards.add(tempId)
+
+    // Capture task_number from the optimistic card (set by boardStore.addCard)
+    const taskNumber = useBoardStore.getState().cards[tempId]?.task_number ?? null
 
     let cardId = tempId
     for (let i = 0; i < 20; i++) {
@@ -132,7 +222,18 @@ export async function executeTool(action, params) {
       }
     }
     setTimeout(() => { aiBuildingCards.delete(tempId); aiBuildingCards.delete(cardId) }, 3000)
-    return { ok: true, cardId }
+
+    return {
+      ok: true,
+      cardId,
+      task_number: taskNumber,
+      resolved: {
+        board: { id: board.id, name: board.name },
+        column: { id: column.id, title: column.title },
+      },
+      applied_defaults: appliedDefaults,
+      ...(truncated ? { truncated: true } : {}),
+    }
   }
 
   if (action === 'move_card') {

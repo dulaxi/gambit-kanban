@@ -54,7 +54,7 @@ export default function QuickAddBar({ boardId }) {
 
       if (parts && parts.length > 1) {
         for (const title of parts) {
-          await executeTool('create_card', { title, board: boardName })
+          await executeTool('create_card', { title, boardId })
         }
       } else {
         await new Promise((resolve) => {
@@ -63,7 +63,10 @@ export default function QuickAddBar({ boardId }) {
             {
               onText: () => {},
               onToolCall: async (action, params) => {
-                await executeTool(action, { ...params, board: boardName })
+                // Inject pill context. boardId is the canonical handle (read by
+                // polished tools like create_card); board name is kept for
+                // tools that haven't been polished yet and still resolve by name.
+                await executeTool(action, { ...params, board: boardName, boardId })
               },
               onTier: () => {},
               onDone: resolve,

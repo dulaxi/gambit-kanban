@@ -1,13 +1,12 @@
 export const TOOLS = [
   {
     name: "create_card",
-    description: "Create a new card on a kanban board. Populate all fields you can infer from context — icon, description, priority, labels, checklist, assignee, due_date.",
+    description: "Create a new card on the current board. The board is determined by the surface you're called from — do not specify it. Populate all fields you can infer from context — icon, description, priority, labels, checklist, assignee, due_date.",
     input_schema: {
       type: "object",
       properties: {
-        title: { type: "string", description: "Card title" },
-        description: { type: "string", description: "Detailed card description" },
-        board: { type: "string", description: "Board name to create the card in" },
+        title: { type: "string", description: "Card title (1–200 chars)" },
+        description: { type: "string", description: "Detailed card description (markdown, truncated to 5000 chars)" },
         column: { type: "string", description: "Column name (defaults to first column if omitted)" },
         priority: { type: "string", enum: ["low", "medium", "high"], description: "Card priority" },
         icon: { type: "string", description: "Phosphor icon name in kebab-case (e.g. rocket, credit-card, bug)" },
