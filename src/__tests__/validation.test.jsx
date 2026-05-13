@@ -116,7 +116,7 @@ describe('SignupPage', () => {
     // One CTA per plan. Pro's CTA mentions the trial instead of plan name.
     expect(screen.getByRole('button', { name: /Use Kolumn for free/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Try Pro plan/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Continue with Team/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Get in touch/i })).toBeInTheDocument()
   })
 
   test('Free plan CTA: navigates without writing to profiles', async () => {
@@ -139,9 +139,8 @@ describe('SignupPage', () => {
     expect(mockSetTier).not.toHaveBeenCalled()
   })
 
-  test('Pro plan CTA: setTier is called, then navigate', async () => {
+  test('Pro plan CTA: routes to /upgrade/pro without writing tier yet', async () => {
     mockSignUp.mockResolvedValueOnce({ session: { user: { id: 'u1' } } })
-    mockSetTier.mockResolvedValueOnce({ tier: 'pro' })
     render(<SignupPage />)
 
     await userEvent.type(screen.getByPlaceholderText('you@example.com'), 'a@b.com')
@@ -154,8 +153,9 @@ describe('SignupPage', () => {
     proCta.click()
 
     await waitFor(() => {
-      expect(mockSetTier).toHaveBeenCalledWith('pro')
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true })
+      expect(mockNavigate).toHaveBeenCalledWith('/upgrade/pro')
     })
+    // Tier is committed by UpgradeProPage on Subscribe, not by the picker.
+    expect(mockSetTier).not.toHaveBeenCalled()
   })
 })

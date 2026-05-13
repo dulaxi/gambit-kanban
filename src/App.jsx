@@ -9,6 +9,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'))
 const SignupPage = lazy(() => import('./pages/SignupPage'))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
 const UpdatePasswordPage = lazy(() => import('./pages/UpdatePasswordPage'))
+const UpgradeProPage = lazy(() => import('./pages/UpgradeProPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const BoardsPage = lazy(() => import('./pages/BoardsPage'))
 // Calendar + Notes removed from the dashboard UI — they added little
@@ -58,6 +59,16 @@ export default function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/update-password" element={<UpdatePasswordPage />} />
+          {/* Auth-protected but renders OUTSIDE AppLayout — checkout-style
+              focused view, no sidebar. */}
+          <Route
+            path="/upgrade/pro"
+            element={
+              <ProtectedRoute>
+                <UpgradeProPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             element={
               <ProtectedRoute>

@@ -66,7 +66,7 @@ export const PLANS = [
     tagline: 'For team workspaces',
     price: '$24',
     period: 'per month',
-    cta: 'Continue with Team',
+    cta: 'Get in touch',
     ghost: false,
     primaryCta: false,
     topIcon: Cheers,

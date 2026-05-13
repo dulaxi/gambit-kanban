@@ -122,6 +122,10 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
       if (isDirtyRef.current && formDataRef.current && cardId) {
+        // Bail if the card was deleted while the panel was open — otherwise
+        // the optimistic spread in updateCard re-inserts a corrupt card row
+        // (no id/board_id/column_id) and the user sees it "come back".
+        if (!useBoardStore.getState().cards[cardId]) return
         const d = formDataRef.current
         useBoardStore.getState().updateCard(cardId, {
           title: d.title.trim() || 'Untitled task',
@@ -347,7 +351,13 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
             <Tooltip content="Delete card" placement="bottom">
               <button
                 type="button"
-                onClick={() => { deleteCard(cardId); onClose() }}
+                onClick={() => {
+                  // Clear dirty flag first so the cleanup effect skips the
+                  // save-on-unmount and doesn't fight the optimistic delete.
+                  isDirtyRef.current = false
+                  deleteCard(cardId)
+                  onClose()
+                }}
                 aria-label="Delete card"
                 className="h-8 w-8 rounded-md flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--color-copper)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
               >

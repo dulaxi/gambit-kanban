@@ -59,6 +59,13 @@ export default function SignupPage() {
 
   const handlePickPlan = async (planId) => {
     setError('')
+    // Pro routes through the dedicated upgrade page (period picker,
+    // order summary, payment flow). We DON'T write tier here — the
+    // upgrade page commits the tier once the user confirms billing.
+    if (planId === 'pro') {
+      navigate('/upgrade/pro')
+      return
+    }
     setCommittingPlan(planId)
     try {
       // Free is the column's default — skip the write to keep the
