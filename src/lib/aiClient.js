@@ -1,12 +1,17 @@
 import { supabase } from './supabase'
 import { env } from './env'
 
-export async function streamChat({ message, history = [] }, { onText, onToolCall, onDone, onError, onTier }) {
+export async function streamChat({ message, history = [], boardId }, { onText, onToolCall, onDone, onError, onTier }) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session?.access_token) {
     onError('Not authenticated')
     return
   }
+
+  // Forward boardId only when present. When provided, the edge function scopes
+  // the system prompt's board snapshot to just that board (pill mode). When
+  // absent, the prompt includes the user's full board context (chat mode).
+  const body = boardId ? { message, history, boardId } : { message, history }
 
   const response = await fetch(`${env.supabaseUrl}/functions/v1/chat`, {
     method: 'POST',
@@ -15,7 +20,7 @@ export async function streamChat({ message, history = [] }, { onText, onToolCall
       'Content-Type': 'application/json',
       'apikey': env.supabaseAnonKey,
     },
-    body: JSON.stringify({ message, history }),
+    body: JSON.stringify(body),
   })
 
   console.log('[aiClient] response status:', response.status, 'content-type:', response.headers.get('content-type'))

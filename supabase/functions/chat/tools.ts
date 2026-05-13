@@ -35,13 +35,13 @@ export const TOOLS = [
   },
   {
     name: "move_card",
-    description: "Move a card to a different column on the same or different board.",
+    description: "Move a card to a different column on the current board. The board is fixed by the surface you're called from — there is no cross-board move.",
     input_schema: {
       type: "object",
       properties: {
-        card_title: { type: "string", description: "Title of the card to move" },
-        to_column: { type: "string", description: "Destination column name" },
-        to_board: { type: "string", description: "Destination board name (if moving across boards)" },
+        card_title: { type: "string", description: "Title of the card to move (matched case-insensitively on the current board)" },
+        to_column: { type: "string", description: "Destination column name on the current board" },
+        cardId: { type: "string", description: "Internal use only — do not specify unless an explicit card ID was provided to you. Always prefer card_title." },
       },
       required: ["card_title", "to_column"],
     },

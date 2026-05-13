@@ -42,7 +42,12 @@ Deno.serve(async (req) => {
     return new Response("Unauthorized", { status: 401 })
   }
 
-  let body: { conversation_id?: string; message: string; history?: Array<{ role: string; content: string }> }
+  let body: {
+    conversation_id?: string
+    message: string
+    history?: Array<{ role: string; content: string }>
+    boardId?: string
+  }
   try {
     body = await req.json()
   } catch {
@@ -70,7 +75,7 @@ Deno.serve(async (req) => {
     )
   }
 
-  const { systemPrompt } = await buildContext(supabase, user.id)
+  const { systemPrompt } = await buildContext(supabase, user.id, { boardId: body.boardId })
 
   const messages: Array<{ role: string; content: string }> = [
     ...(body.history || []),

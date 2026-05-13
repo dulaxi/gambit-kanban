@@ -3,6 +3,7 @@ import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 export async function buildContext(
   supabase: SupabaseClient,
   userId: string,
+  opts: { boardId?: string } = {},
 ): Promise<{ systemPrompt: string }> {
   const [boardsRes, columnsRes, cardsRes, notesRes, profileRes] = await Promise.all([
     supabase.from("boards").select("id, name, icon"),
@@ -12,11 +13,23 @@ export async function buildContext(
     supabase.from("profiles").select("display_name").eq("id", userId).single(),
   ])
 
-  const boards = boardsRes.data || []
-  const columns = columnsRes.data || []
-  const cards = cardsRes.data || []
+  const allBoards = boardsRes.data || []
+  const allColumns = columnsRes.data || []
+  const allCards = cardsRes.data || []
   const notes = notesRes.data || []
   const profile = profileRes.data || { display_name: "User" }
+
+  // When boardId is provided (pill mode), scope every downstream snapshot to
+  // just that board. The model should not see other boards' cards or columns;
+  // the pill is a single-board action surface.
+  const scopedBoard = opts.boardId
+    ? allBoards.find((b: any) => b.id === opts.boardId)
+    : null
+  const boards = scopedBoard ? [scopedBoard] : allBoards
+  const boardIdSet = new Set(boards.map((b: any) => b.id))
+  const columns = allColumns.filter((c: any) => boardIdSet.has(c.board_id))
+  const cards = allCards.filter((c: any) => boardIdSet.has(c.board_id))
+  const pillMode = !!scopedBoard
 
   const boardIds = boards.map((b: any) => b.id)
   let members: Array<{ display_name: string }> = []
@@ -79,14 +92,38 @@ export async function buildContext(
 
   const memberList = members.map((m: any) => m.display_name).join(", ")
 
+  const scopeSection = pillMode
+    ? `
+
+## Scope (LOCKED)
+You are operating **exclusively on the board "${scopedBoard!.name}"**. You cannot view, reference, or modify any other board. The board snapshot below is the only board you have. If the user asks about a card or column on a different board, or asks you to move/copy/duplicate a card to a different board, respond in text saying you can only work on the current board — do not call any cross-board tool.`
+    : ""
+
+  const boardSectionHeading = pillMode ? "## Your board" : "## Your boards"
+
+  const moveCardRule = pillMode
+    ? `- For move_card: omit to_board and to_board_id entirely — the card stays on the current board. Only specify card_title and to_column.`
+    : `- For move_card: the source board is implicit — only cards on the user's current board can be moved. Specify to_board only for cross-board destinations, never to identify the source. If the user references moving a card on a different board, ask them to switch to that board first.`
+
+  const boardActiveTrackingRule = pillMode
+    ? ""
+    : `\n- Track the active board from conversation history. If the user just created or discussed a board, follow-up messages about "it" or "that board" refer to that board.`
+
+  const createBoardRule = pillMode
+    ? ""
+    : `\n- When creating a board, call create_board AND multiple create_card tools in the same response. Create at least 5 cards. Every card goes in the first column unless the user explicitly says otherwise.`
+
+  const workspacesLine = pillMode
+    ? ""
+    : `\nWorkspaces: ${workspaceList.length > 0 ? workspaceList.join(", ") : "None"}`
+
   const systemPrompt = `You are Kolumn, a sharp project management assistant. You manage boards, cards, and workflow. Be direct — act on clear intent, ask only when genuinely ambiguous.
 
 User: ${profile.display_name}
 Today: ${today}
-Team: ${memberList || "None"}
-Workspaces: ${workspaceList.length > 0 ? workspaceList.join(", ") : "None"}
+Team: ${memberList || "None"}${workspacesLine}${scopeSection}
 
-## Your boards
+${boardSectionHeading}
 ${boardSummary || "No boards yet"}
 
 ## Alerts
@@ -103,13 +140,13 @@ ${notesSummary}
 house, star, heart, bookmark, tag, flag, target, trophy, gift, briefcase, buildings, user, users, users-three, graduation-cap, code, terminal, bug, cpu, monitor, device-mobile, laptop, database, gear, file-text, folder, clipboard, note, notepad, article, envelope, chat-circle, megaphone, bell, phone, calendar-blank, clock, hourglass, timer, camera, image, credit-card, currency-dollar, money, receipt, shopping-cart, airplane, car, rocket, truck, sun, moon, cloud, lightning, fire, leaf, tree, coffee, fork-knife, cake, pencil-simple, paint-brush, wrench, hammer, toolbox, key, lock, shield, check-circle, warning, sparkle, kanban, list, table, chart-bar, chart-pie, squares-four, columns, presentation, broom, person, hand-grabbing, magnifying-glass, paper-plane-tilt, robot, brain, lightbulb
 
 ## Always
-- Act on clear intent. "Move all to Done" = move them. Don't ask which board if only one was discussed.
-- Track the active board from conversation history. If the user just created or discussed a board, follow-up messages about "it" or "that board" refer to that board.
+- Act on clear intent. "Move all to Done" = move them.${boardActiveTrackingRule}
 - Answer questions about boards, cards, tasks, and notes from the context above. You already have all the data.
 - Use tools immediately when the user asks to create, move, update, or delete. Text alone does nothing.
 - For card creation: always include title, priority, and icon (from the list above). The card's board is set automatically by the surface you're called from — do not include a "board" field. Add description, labels, checklist, assignee, due_date only when they add value. Do not include an assignee unless the user explicitly names a person — leave cards unassigned by default. Capitalize the first letter of titles.
-- For batch operations: use batch tools (move_cards, update_cards, complete_cards) instead of calling single-card tools repeatedly.
-- When creating a board, call create_board AND multiple create_card tools in the same response. Create at least 5 cards. Every card goes in the first column unless the user explicitly says otherwise.
+${moveCardRule}
+- **Never combine move_card with create_card in the same response.** When the user says "move X to Y", call **only** move_card. If the card "X" does not appear in the board snapshot, respond in text saying you can't find it — do **not** call create_card to bring it into existence. Same rule for "transfer", "shift", "relocate", "push to" — these all mean move, never create.
+- For batch operations: use batch tools (move_cards, update_cards, complete_cards) instead of calling single-card tools repeatedly.${createBoardRule}
 - Only modify the specific card(s) the user mentions.
 - When the user asks to change or update a card you just created, use update_card — do NOT create a new card. Match by the card title you used when creating it.
 - Parse natural language dates relative to Today.

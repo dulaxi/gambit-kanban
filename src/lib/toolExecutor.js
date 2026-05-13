@@ -237,19 +237,124 @@ export async function executeTool(action, params) {
   }
 
   if (action === 'move_card') {
-    const card = findCardByTitle(params.card_title)
-    if (!card) return { ok: false, error: `Card "${params.card_title}" not found` }
+    // Source card resolution. Order of precedence:
+    //   1. params.cardId (forward-compat; the model can't fabricate one today
+    //      because IDs aren't in the prompt, but the field is wired for when
+    //      they are).
+    //   2. params.card_title scoped to params.boardId (pill's host board) —
+    //      this is the common path. Strict scope: no cross-board source.
+    //   3. Defensive global fallback when boardId is absent (future
+    //      non-pill surface, e.g. a chat read-only summarize that needs to
+    //      identify cards).
+    let card = null
+    let sourceBoard = null
+    let scopeName = '' // used in the not-found error
 
-    const targetBoardId = params.to_board
-      ? findBoardByName(params.to_board)?.id
-      : card.board_id
-    if (!targetBoardId) return { ok: false, error: `Board "${params.to_board}" not found` }
+    if (params.cardId) {
+      const candidate = store.cards[params.cardId] || null
+      // Enforce pill scope: cardId must point to a card on the pill's board
+      if (candidate && params.boardId && candidate.board_id !== params.boardId) {
+        return { ok: false, error: 'Card is not on the current board' }
+      }
+      if (candidate) {
+        card = candidate
+        sourceBoard = store.boards[card.board_id] || null
+      }
+    } else if (params.card_title) {
+      const lowerTitle = params.card_title.toLowerCase()
+      if (params.boardId) {
+        sourceBoard = store.boards[params.boardId] || null
+        if (!sourceBoard) {
+          return { ok: false, error: 'Board not found for the given boardId' }
+        }
+        scopeName = `board "${sourceBoard.name}"`
+        const matches = Object.values(store.cards).filter(
+          (c) => c.board_id === sourceBoard.id && c.title.toLowerCase() === lowerTitle,
+        )
+        if (matches.length > 1) {
+          const hints = matches
+            .map((m) => `"${m.title}" in ${store.columns[m.column_id]?.title || 'unknown column'}`)
+            .join(', ')
+          return {
+            ok: false,
+            error: `Multiple cards titled "${params.card_title}" on ${scopeName} (${hints}). Be more specific.`,
+          }
+        }
+        card = matches[0] || null
+      } else {
+        // Defensive global search
+        scopeName = 'any board'
+        const matches = Object.values(store.cards).filter(
+          (c) => c.title.toLowerCase() === lowerTitle,
+        )
+        if (matches.length > 1) {
+          const hints = matches
+            .map((m) => `${store.boards[m.board_id]?.name || '?'}/${store.columns[m.column_id]?.title || '?'}`)
+            .join(', ')
+          return {
+            ok: false,
+            error: `Multiple cards titled "${params.card_title}" across boards (${hints}). Be more specific.`,
+          }
+        }
+        card = matches[0] || null
+        if (card) sourceBoard = store.boards[card.board_id] || null
+      }
+    }
 
-    const column = findColumnByName(targetBoardId, params.to_column)
-    if (!column) return { ok: false, error: `Column "${params.to_column}" not found` }
+    if (!card) {
+      return {
+        ok: false,
+        error: `Card "${params.card_title || params.cardId}" not found on ${scopeName || 'any board'}`,
+      }
+    }
+    if (!sourceBoard) {
+      return { ok: false, error: 'Source board for the card could not be resolved' }
+    }
+    const sourceColumn = store.columns[card.column_id] || null
 
-    await store.updateCard(card.id, { column_id: column.id, board_id: targetBoardId })
-    return { ok: true }
+    // Target board is always the source board. Cross-board moves are off
+    // — the pill is a single-board action surface, and to_board/to_board_id
+    // have been removed from the schema. If the model still emits them
+    // (stale prompt cache, etc.), we silently ignore.
+    const targetBoard = sourceBoard
+
+    // Target column resolution — must exist on target board
+    const targetColumn = findColumnByName(targetBoard.id, params.to_column)
+    if (!targetColumn) {
+      const available = Object.values(store.columns)
+        .filter((c) => c.board_id === targetBoard.id)
+        .sort((a, b) => a.position - b.position)
+        .map((c) => c.title)
+        .join(', ')
+      return {
+        ok: false,
+        error: `Column "${params.to_column}" not found on "${targetBoard.name}". Available: ${available}`,
+      }
+    }
+
+    const result = {
+      ok: true,
+      cardId: card.id,
+      card: { id: card.id, title: card.title, task_number: card.task_number },
+      from: {
+        board: { id: sourceBoard.id, name: sourceBoard.name },
+        column: sourceColumn
+          ? { id: sourceColumn.id, title: sourceColumn.title }
+          : null,
+      },
+      to: {
+        board: { id: targetBoard.id, name: targetBoard.name },
+        column: { id: targetColumn.id, title: targetColumn.title },
+      },
+    }
+
+    // No-op detection: card already in target column on target board
+    if (card.column_id === targetColumn.id && card.board_id === targetBoard.id) {
+      return { ...result, noop: true }
+    }
+
+    await store.updateCard(card.id, { column_id: targetColumn.id, board_id: targetBoard.id })
+    return result
   }
 
   if (action === 'update_card') {
