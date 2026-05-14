@@ -22,6 +22,24 @@ import CardFiles from './cardDetail/CardFiles'
 import { showToast } from '../../utils/toast'
 import { useTemplateStore } from '../../store/templateStore'
 
+// Defense-in-depth: drop duplicate labels by (text|color) key before they
+// land in state. Same text + same color = same label; multiple instances
+// are never the user's intent and are usually a bug symptom (e.g. the
+// Enter+blur double-fire in the new-label input).
+function dedupLabels(arr) {
+  if (!Array.isArray(arr)) return arr
+  const seen = new Set()
+  const out = []
+  for (const l of arr) {
+    if (!l || typeof l.text !== 'string') continue
+    const key = `${l.text.toLowerCase()}|${l.color || ''}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(l)
+  }
+  return out
+}
+
 export default memo(function CardDetailPanel({ cardId, onClose }) {
   const card = useBoardStore((s) => s.cards[cardId])
   const updateCard = useBoardStore((s) => s.updateCard)
@@ -76,6 +94,13 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
   const descriptionRef = useRef(null)
   const [showLabelForm, setShowLabelForm] = useState(false)
   const [newLabelText, setNewLabelText] = useState('')
+  // Suppresses the label input's onBlur from re-firing the add/edit action
+  // after Enter (or Escape) already handled it. The DOM input gets removed
+  // when showLabelForm/editingLabelIdx flips, which triggers blur — but the
+  // blur handler's closure captures the OLD newLabelText, leading to a
+  // duplicate add. Setting this ref synchronously in onKeyDown lets onBlur
+  // bail out before re-executing.
+  const labelSubmittedRef = useRef(false)
   const [newLabelColor, setNewLabelColor] = useState('blue')
   const [editingLabelIdx, setEditingLabelIdx] = useState(null)
   const [editingLabelText, setEditingLabelText] = useState('')
@@ -93,6 +118,29 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
   useEffect(() => {
     if (card) fetchAttachments(cardId)
   }, [cardId])
+
+  // Re-sync local form state when the card is updated externally (AI tool
+  // call, realtime broadcast from another client, etc.) and the user has no
+  // pending unsaved edits. Without this, useCardEditState's lazy initializers
+  // freeze the form at mount-time values and AI updates only show after a
+  // page reload. Gating on isDirtyRef.current prevents clobbering in-progress
+  // edits — if the user is mid-type, their unsaved changes win until autosave
+  // fires (which resets isDirtyRef and lets the next external update through).
+  useEffect(() => {
+    if (!card) return
+    if (isDirtyRef.current) return
+    setTitle(card.title || '')
+    setDescription(card.description || '')
+    setPriority(card.priority || 'medium')
+    setDueDate(card.due_date || '')
+    setLabels(card.labels ? card.labels.map((l) => ({ ...l })) : [])
+    setAssignees(
+      card.assignees?.length
+        ? [...card.assignees]
+        : (card.assignee_name ? [card.assignee_name] : [])
+    )
+    setChecklist(card.checklist ? card.checklist.map((i) => ({ ...i })) : [])
+  }, [card?.updated_at, card?.id])
 
   const scheduleSave = useCallback(() => {
     isDirtyRef.current = true
@@ -188,8 +236,29 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                 <span key={`${label.text}-${label.color}-edit`} className="relative inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 rounded-lg text-xs lowercase border border-[var(--border-default)]">
                   <span className="invisible px-2">/{editingLabelText || label.text}</span>
                   <input value={editingLabelText} onChange={(e) => setEditingLabelText(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { const t = editingLabelText.trim(); if (t) { setLabels(labels.map((l, i) => i === idx ? { ...l, text: t } : l)); scheduleSave() }; setEditingLabelIdx(null) } else if (e.key === 'Escape') { setEditingLabelIdx(null) } }}
-                    onBlur={() => { const t = editingLabelText.trim(); if (t) { setLabels(labels.map((l, i) => i === idx ? { ...l, text: t } : l)); scheduleSave() }; setEditingLabelIdx(null) }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        labelSubmittedRef.current = true
+                        const t = editingLabelText.trim()
+                        if (t) {
+                          setLabels(dedupLabels(labels.map((l, i) => i === idx ? { ...l, text: t } : l)))
+                          scheduleSave()
+                        }
+                        setEditingLabelIdx(null)
+                      } else if (e.key === 'Escape') {
+                        labelSubmittedRef.current = true
+                        setEditingLabelIdx(null)
+                      }
+                    }}
+                    onBlur={() => {
+                      if (labelSubmittedRef.current) { labelSubmittedRef.current = false; return }
+                      const t = editingLabelText.trim()
+                      if (t) {
+                        setLabels(dedupLabels(labels.map((l, i) => i === idx ? { ...l, text: t } : l)))
+                        scheduleSave()
+                      }
+                      setEditingLabelIdx(null)
+                    }}
                     autoFocus className="absolute inset-0 h-full bg-transparent text-xs text-[var(--text-secondary)] px-2 rounded-lg focus:outline-none lowercase" style={{ width: '100%' }} />
                 </span>
               ) : (
@@ -204,8 +273,32 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
             {showLabelForm ? (
               <span className="inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 rounded-lg text-xs lowercase border border-[var(--border-default)]">
                 <input value={newLabelText} onChange={(e) => setNewLabelText(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { const t = newLabelText.trim(); if (t) { setLabels([...labels, { text: t, color: newLabelColor }]); setNewLabelText(''); setShowLabelForm(false); scheduleSave() } } else if (e.key === 'Escape') { setShowLabelForm(false); setNewLabelText('') } }}
-                  onBlur={() => { const t = newLabelText.trim(); if (t) { setLabels([...labels, { text: t, color: newLabelColor }]); setNewLabelText(''); scheduleSave() }; setShowLabelForm(false) }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      labelSubmittedRef.current = true
+                      const t = newLabelText.trim()
+                      if (t) {
+                        setLabels(dedupLabels([...labels, { text: t, color: newLabelColor }]))
+                        setNewLabelText('')
+                        setShowLabelForm(false)
+                        scheduleSave()
+                      }
+                    } else if (e.key === 'Escape') {
+                      labelSubmittedRef.current = true
+                      setShowLabelForm(false)
+                      setNewLabelText('')
+                    }
+                  }}
+                  onBlur={() => {
+                    if (labelSubmittedRef.current) { labelSubmittedRef.current = false; return }
+                    const t = newLabelText.trim()
+                    if (t) {
+                      setLabels(dedupLabels([...labels, { text: t, color: newLabelColor }]))
+                      setNewLabelText('')
+                      scheduleSave()
+                    }
+                    setShowLabelForm(false)
+                  }}
                   autoFocus placeholder="/label" className="h-full bg-transparent text-xs text-[var(--text-secondary)] px-2 rounded-lg focus:outline-none lowercase w-16" />
               </span>
             ) : (

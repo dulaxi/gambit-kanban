@@ -57,6 +57,14 @@ export default function QuickAddBar({ boardId }) {
     let toolFired = false
     let toolErrorMsg = ''
 
+    // Circuit breaker: cap how many tool calls a single pill submission can
+    // execute. Defense against runaway model behavior (e.g. emitting many
+    // update_card calls in a single response). Hard ceiling; the model can
+    // still emit more, we just stop executing them.
+    const MAX_TOOL_CALLS_PER_SUBMIT = 25
+    let toolCallCount = 0
+    let circuitTripped = false
+
     try {
       // Split candidate parts. Prefer newlines (explicit user choice); fall
       // back to commas only when it looks like an actual list.
@@ -90,6 +98,15 @@ export default function QuickAddBar({ boardId }) {
             {
               onText: (chunk) => { modelText += chunk },
               onToolCall: async (action, params) => {
+                // Circuit breaker — see MAX_TOOL_CALLS_PER_SUBMIT comment above.
+                if (circuitTripped) return
+                toolCallCount++
+                if (toolCallCount > MAX_TOOL_CALLS_PER_SUBMIT) {
+                  circuitTripped = true
+                  toolErrorMsg = `Stopped after ${MAX_TOOL_CALLS_PER_SUBMIT} tool calls — the model emitted too many in one response. Try a smaller request or use a batch tool.`
+                  logError('[QuickAdd] circuit breaker tripped', { action, count: toolCallCount })
+                  return
+                }
                 // Inject pill context. boardId is the canonical handle (read by
                 // polished tools like create_card); board name is kept for
                 // tools that haven't been polished yet and still resolve by name.
