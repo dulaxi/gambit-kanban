@@ -358,22 +358,205 @@ export async function executeTool(action, params) {
   }
 
   if (action === 'update_card') {
-    const card = findCardByTitle(params.card_title)
-    if (!card) return { ok: false, error: `Card "${params.card_title}" not found` }
-
-    const updates = { ...params.updates }
-    if (updates.checklist) {
-      updates.checklist = updates.checklist.map((text) =>
-        typeof text === 'string' ? { text, done: false } : text
-      )
-    }
-    if (updates.assignee) {
-      updates.assignee_name = updates.assignee
-      delete updates.assignee
+    const updates = params.updates
+    if (!updates || typeof updates !== 'object' || Object.keys(updates).length === 0) {
+      return { ok: false, error: 'update_card requires at least one field in updates' }
     }
 
-    await store.updateCard(card.id, updates)
-    return { ok: true }
+    // Card resolution (mirrors move_card: cardId > card_title in pill scope > defensive global)
+    let card = null
+    let sourceBoard = null
+    let scopeName = ''
+
+    if (params.cardId) {
+      const candidate = store.cards[params.cardId] || null
+      if (candidate && params.boardId && candidate.board_id !== params.boardId) {
+        return { ok: false, error: 'Card is not on the current board' }
+      }
+      if (candidate) {
+        card = candidate
+        sourceBoard = store.boards[card.board_id] || null
+      }
+    } else if (params.card_title) {
+      const lowerTitle = params.card_title.toLowerCase()
+      if (params.boardId) {
+        sourceBoard = store.boards[params.boardId] || null
+        if (!sourceBoard) return { ok: false, error: 'Board not found for the given boardId' }
+        scopeName = `board "${sourceBoard.name}"`
+        const matches = Object.values(store.cards).filter(
+          (c) => c.board_id === sourceBoard.id && c.title.toLowerCase() === lowerTitle,
+        )
+        if (matches.length > 1) {
+          const hints = matches
+            .map((m) => `"${m.title}" in ${store.columns[m.column_id]?.title || 'unknown column'}`)
+            .join(', ')
+          return {
+            ok: false,
+            error: `Multiple cards titled "${params.card_title}" on ${scopeName} (${hints}). Be more specific.`,
+          }
+        }
+        card = matches[0] || null
+      } else {
+        scopeName = 'any board'
+        const matches = Object.values(store.cards).filter(
+          (c) => c.title.toLowerCase() === lowerTitle,
+        )
+        if (matches.length > 1) {
+          const hints = matches
+            .map((m) => `${store.boards[m.board_id]?.name || '?'}/${store.columns[m.column_id]?.title || '?'}`)
+            .join(', ')
+          return {
+            ok: false,
+            error: `Multiple cards titled "${params.card_title}" across boards (${hints}). Be more specific.`,
+          }
+        }
+        card = matches[0] || null
+        if (card) sourceBoard = store.boards[card.board_id] || null
+      }
+    }
+
+    if (!card) {
+      return {
+        ok: false,
+        error: `Card "${params.card_title || params.cardId}" not found on ${scopeName || 'any board'}`,
+      }
+    }
+    if (!sourceBoard) {
+      return { ok: false, error: 'Source board for the card could not be resolved' }
+    }
+
+    // Build the normalized update payload. Semantics:
+    //   - field present with non-null value → change → payload set, 'changed' list
+    //   - field present with null value     → clear → payload set to null/[]/default, 'cleared' list
+    //   - field missing entirely           → leave alone (not in payload)
+    // boardStore.updateCard accepts `assignee` (renames to assignee_name) and
+    // `due_date` (direct). See store/boardStore.js:592-604.
+    const payload = {}
+    const changed = []
+    const cleared = []
+    let truncated = false
+
+    if ('title' in updates) {
+      if (updates.title === null) {
+        return { ok: false, error: 'Card title cannot be cleared' }
+      }
+      const t = (updates.title || '').trim()
+      if (!t) return { ok: false, error: 'Card title cannot be empty' }
+      if (t.length > TITLE_MAX) {
+        return { ok: false, error: `Card title is too long (max ${TITLE_MAX} chars)` }
+      }
+      payload.title = capitalizeFirstLetter(t)
+      changed.push('title')
+    }
+
+    if ('description' in updates) {
+      if (updates.description === null) {
+        payload.description = ''
+        cleared.push('description')
+      } else {
+        const d = updates.description || ''
+        if (d.length > DESCRIPTION_MAX) {
+          payload.description = d.slice(0, DESCRIPTION_MAX)
+          truncated = true
+        } else {
+          payload.description = d
+        }
+        changed.push('description')
+      }
+    }
+
+    if ('priority' in updates) {
+      if (updates.priority === null) {
+        payload.priority = 'medium'
+        cleared.push('priority')
+      } else {
+        payload.priority = updates.priority
+        changed.push('priority')
+      }
+    }
+
+    if ('icon' in updates) {
+      if (updates.icon === null) {
+        payload.icon = null
+        cleared.push('icon')
+      } else {
+        payload.icon = normalizeIcon(updates.icon)
+        changed.push('icon')
+      }
+    }
+
+    if ('labels' in updates) {
+      if (updates.labels === null || (Array.isArray(updates.labels) && updates.labels.length === 0)) {
+        payload.labels = []
+        cleared.push('labels')
+      } else {
+        payload.labels = updates.labels
+        changed.push('labels')
+      }
+    }
+
+    if ('checklist' in updates) {
+      if (updates.checklist === null || (Array.isArray(updates.checklist) && updates.checklist.length === 0)) {
+        payload.checklist = []
+        cleared.push('checklist')
+      } else {
+        payload.checklist = updates.checklist.map((text) =>
+          typeof text === 'string' ? { text, done: false } : text,
+        )
+        changed.push('checklist')
+      }
+    }
+
+    if ('assignee' in updates) {
+      if (updates.assignee === null) {
+        payload.assignee = null
+        cleared.push('assignee')
+      } else {
+        payload.assignee = updates.assignee
+        changed.push('assignee')
+      }
+    }
+
+    if ('due_date' in updates) {
+      if (updates.due_date === null) {
+        payload.due_date = null
+        cleared.push('due_date')
+      } else {
+        payload.due_date = updates.due_date
+        changed.push('due_date')
+      }
+    }
+
+    if ('completed' in updates) {
+      if (updates.completed === null) {
+        payload.completed = false
+        cleared.push('completed')
+      } else {
+        payload.completed = Boolean(updates.completed)
+        changed.push('completed')
+      }
+    }
+
+    await store.updateCard(card.id, payload)
+
+    const sourceColumn = store.columns[card.column_id] || null
+
+    return {
+      ok: true,
+      cardId: card.id,
+      card: {
+        id: card.id,
+        title: payload.title || card.title,
+        task_number: card.task_number,
+      },
+      resolved: {
+        board: { id: sourceBoard.id, name: sourceBoard.name },
+        column: sourceColumn ? { id: sourceColumn.id, title: sourceColumn.title } : null,
+      },
+      changed,
+      cleared,
+      ...(truncated ? { truncated: true } : {}),
+    }
   }
 
   if (action === 'delete_card') {
