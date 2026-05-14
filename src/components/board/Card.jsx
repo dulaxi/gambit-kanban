@@ -1,5 +1,5 @@
 import { useState, memo } from 'react'
-import { isPast, parseISO } from 'date-fns'
+import { isPast } from 'date-fns'
 
 import { CalendarDot, CheckCircle, CheckSquare, FileText } from '@phosphor-icons/react'
 import { useBoardStore } from '../../store/boardStore'
@@ -7,7 +7,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import DynamicIcon from './DynamicIcon'
 import { LABEL_BG, PRIORITY_DOT } from '../../utils/formatting'
-import { formatDueDateLabel, dueDateBadgeClass } from '../../utils/dateUtils'
+import { formatDueDateLabel, dueDateBadgeClass, parseDueDate } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
 import { resolveProfileColor } from '../../constants/colors'
 import { isAICreated } from '../../lib/toolExecutor'
@@ -37,7 +37,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
   const hasDescription = description && description.trim().length > 0
   const hasAssignee = assignees.length > 0
 
-  const dueDateObj = dueDate ? parseISO(dueDate) : null
+  const dueDateObj = dueDate ? parseDueDate(dueDate) : null
   const overdue = dueDateObj ? isPast(dueDateObj) : false
 
   const priDot = PRIORITY_DOT[priority] || PRIORITY_DOT.medium

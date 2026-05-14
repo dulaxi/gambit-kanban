@@ -10,7 +10,7 @@ import { useMenuState } from '../../hooks/useMenuState'
 import { useCardEditState } from '../../hooks/useCardEditState'
 import { useBoardMemberNames } from '../../hooks/useBoardMemberNames'
 import IconPicker from './IconPicker'
-import { formatDueDateLabel } from '../../utils/dateUtils'
+import { formatDueDateLabel, parseDueDate } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
 import Modal from '../ui/Modal'
 import Popover from '../ui/Popover'
@@ -324,7 +324,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                 let dateLabel = null
                 let dateColor = 'text-[var(--text-muted)]'
                 if (dueDate) {
-                  const d = new Date(dueDate)
+                  const d = parseDueDate(dueDate)
                   const today = new Date()
                   dateLabel = formatDueDateLabel(d)
                   if (dateLabel === 'Today') dateColor = 'text-[var(--color-honey)]'
@@ -353,7 +353,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                     }
                   >
                     <Tooltip
-                      content={dueDate ? `Due: ${new Date(dueDate).toLocaleDateString()}` : 'Set due date'}
+                      content={dueDate ? `Due: ${parseDueDate(dueDate).toLocaleDateString()}` : 'Set due date'}
                       placement="bottom"
                     >
                       <button

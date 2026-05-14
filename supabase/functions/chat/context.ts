@@ -3,7 +3,7 @@ import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 export async function buildContext(
   supabase: SupabaseClient,
   userId: string,
-  opts: { boardId?: string } = {},
+  opts: { boardId?: string; today?: string } = {},
 ): Promise<{ systemPrompt: string }> {
   const [boardsRes, columnsRes, cardsRes, notesRes, profileRes] = await Promise.all([
     supabase.from("boards").select("id, name, icon"),
@@ -52,7 +52,12 @@ export async function buildContext(
   const { data: workspaces } = await supabase.from("workspaces").select("id, name")
   const workspaceList = (workspaces || []).map((w: any) => w.name)
 
-  const today = new Date().toISOString().split("T")[0]
+  // Prefer the caller's local-tz date when provided. Server-side UTC fallback
+  // is wrong for users east of UTC during their early-morning hours (they're
+  // already on the next day locally; server still sees "yesterday").
+  const today = opts.today && /^\d{4}-\d{2}-\d{2}$/.test(opts.today)
+    ? opts.today
+    : new Date().toISOString().split("T")[0]
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString()
 
   const dueToday = cards.filter((c: any) => !c.completed && c.due_date?.startsWith(today))

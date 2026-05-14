@@ -92,9 +92,15 @@ export default function QuickAddBar({ boardId }) {
           }
         }
       } else {
+        // User's local date as YYYY-MM-DD. The en-CA locale formats dates in
+        // ISO order (YYYY-MM-DD) and respects local timezone by default —
+        // unlike toISOString() which is always UTC.
+        const today = new Intl.DateTimeFormat('en-CA', {
+          year: 'numeric', month: '2-digit', day: '2-digit',
+        }).format(new Date())
         await new Promise((resolve) => {
           streamChat(
-            { message: text, boardId },
+            { message: text, boardId, today },
             {
               onText: (chunk) => { modelText += chunk },
               onToolCall: async (action, params) => {

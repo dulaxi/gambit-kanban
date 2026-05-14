@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 import { env } from './env'
 
-export async function streamChat({ message, history = [], boardId }, { onText, onToolCall, onDone, onError, onTier }) {
+export async function streamChat({ message, history = [], boardId, today }, { onText, onToolCall, onDone, onError, onTier }) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session?.access_token) {
     onError('Not authenticated')
@@ -11,7 +11,11 @@ export async function streamChat({ message, history = [], boardId }, { onText, o
   // Forward boardId only when present. When provided, the edge function scopes
   // the system prompt's board snapshot to just that board (pill mode). When
   // absent, the prompt includes the user's full board context (chat mode).
-  const body = boardId ? { message, history, boardId } : { message, history }
+  // Forward today (user's local YYYY-MM-DD) so the model anchors date math
+  // to the user's clock, not the edge function's UTC server time.
+  const body = { message, history }
+  if (boardId) body.boardId = boardId
+  if (today) body.today = today
 
   const response = await fetch(`${env.supabaseUrl}/functions/v1/chat`, {
     method: 'POST',

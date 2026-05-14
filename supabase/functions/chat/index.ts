@@ -47,6 +47,7 @@ Deno.serve(async (req) => {
     message: string
     history?: Array<{ role: string; content: string }>
     boardId?: string
+    today?: string // user's local date as YYYY-MM-DD
   }
   try {
     body = await req.json()
@@ -75,7 +76,7 @@ Deno.serve(async (req) => {
     )
   }
 
-  const { systemPrompt } = await buildContext(supabase, user.id, { boardId: body.boardId })
+  const { systemPrompt } = await buildContext(supabase, user.id, { boardId: body.boardId, today: body.today })
 
   const messages: Array<{ role: string; content: string }> = [
     ...(body.history || []),

@@ -9,8 +9,7 @@ import { useMenuState } from '../../hooks/useMenuState'
 import { useCardEditState } from '../../hooks/useCardEditState'
 import { useBoardMemberNames } from '../../hooks/useBoardMemberNames'
 import { PRIORITY_OPTIONS } from '../../constants/colors'
-import { parseISO } from 'date-fns'
-import { formatDueDateLabel, dueDateBadgeClass } from '../../utils/dateUtils'
+import { formatDueDateLabel, dueDateBadgeClass, parseDueDate } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
 import AssigneePicker from './cardDetail/AssigneePicker'
 
@@ -101,7 +100,7 @@ export default function InlineCardEditor({ cardId: rawCardId, onDone }) {
     }
   }
 
-  const dueDateObj = dueDate ? parseISO(dueDate) : null
+  const dueDateObj = dueDate ? parseDueDate(dueDate) : null
   const hasLabels = labels.length > 0
   const hasChecklist = checklist.length > 0
   const hasAssignee = assignees.length > 0
