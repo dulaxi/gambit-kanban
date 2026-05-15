@@ -1,4 +1,5 @@
 import { useEffect, useCallback, lazy, Suspense } from 'react'
+import { createPortal } from 'react-dom'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import toast, { Toaster, useToasterStore } from 'react-hot-toast'
 import AppLayout from './components/layout/AppLayout'
@@ -44,13 +45,21 @@ function UndoListener() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          duration: 3000,
-        }}
-        containerProps={{ role: 'status', 'aria-live': 'polite' }}
-      />
+      {createPortal(
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 3000,
+          }}
+          // Portal-to-body + explicit z-index above any Modal (default 50).
+          // Modals also portal to body — without ALSO portaling the Toaster,
+          // it would render inside <div id="root"> (z-auto) and any modal
+          // would visually cover it regardless of the local z-index value.
+          containerStyle={{ zIndex: 100 }}
+          containerProps={{ role: 'status', 'aria-live': 'polite' }}
+        />,
+        document.body,
+      )}
       <UndoListener />
       <Suspense fallback={<div className="min-h-screen bg-[var(--surface-raised)] flex items-center justify-center"><div className="text-sm text-[var(--text-muted)]">Loading...</div></div>}>
         <Routes>

@@ -571,9 +571,19 @@ export const useBoardStore = create((set, get) => ({
   duplicateCard: async (cardId) => {
     const card = get().cards[cardId]
     if (!card) return null
+
+    // Duplicate uses the source title verbatim — no "(copy)" suffix. The
+    // user can rename via update_card if they want. Identical titles will
+    // trigger the executor's ambiguity error on the next title-based
+    // operation, which is an acceptable trade for clean titles by default.
     return get().addCard(card.board_id, card.column_id, {
-      title: `${card.title} (copy)`,
+      title: card.title,
       description: card.description || '',
+      // Copy BOTH the modern multi-assignee array AND the legacy single name.
+      // Without copying `assignees`, multi-assignee data is silently lost on
+      // duplicate. addCard accepts either; passing both keeps it consistent
+      // with how the source card looks.
+      assignees: card.assignees && card.assignees.length ? [...card.assignees] : undefined,
       assignee: card.assignee_name || '',
       labels: card.labels ? [...card.labels] : [],
       dueDate: card.due_date || null,

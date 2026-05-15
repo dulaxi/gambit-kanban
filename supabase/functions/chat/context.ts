@@ -70,7 +70,14 @@ export async function buildContext(
     const bCards = cards.filter((c: any) => c.board_id === b.id)
     const colSummary = bCols.map((col: any) => {
       const colCards = bCards.filter((c: any) => c.column_id === col.id && !c.completed)
-      const titles = colCards.slice(0, 10).map((c: any) => `"${c.title}"`)
+      const titles = colCards.slice(0, 10).map((c: any) => {
+        // Include due date inline (just the calendar-date prefix) so the
+        // model can answer questions like "what's due tomorrow" or "due Friday"
+        // without needing a separate search tool. due_date is timestamptz in
+        // the DB so we strip to YYYY-MM-DD for stable date-comparison prose.
+        const due = c.due_date ? ` due ${String(c.due_date).slice(0, 10)}` : ""
+        return `"${c.title}"${due}`
+      })
       const extra = colCards.length > 10 ? ` + ${colCards.length - 10} more` : ""
       if (titles.length > 0) {
         return `${col.title} (${colCards.length}: ${titles.join(", ")}${extra})`
@@ -169,7 +176,9 @@ ${moveCardRule}
 - Use emojis.
 - Create empty boards.
 - Include workspace/board names in card titles when they're just contextual references.
-- Execute destructive actions (delete board, delete column, remove member) without asking for confirmation first.`
+- Execute remove_member without first asking the user to confirm in text. This action is **irreversible** — no undo flow. Always require an explicit "yes" before calling.
+- Ask "are you sure?" in text before calling **delete_card**, **delete_column**, or **delete_board**. Each of these shows a 5-second undo toast in the UI which IS the user-facing confirmation — never ask for textual approval. When the user explicitly names something to delete (a card, the current column, the current board) and uses a delete/remove verb, call the matching tool immediately; do not add a "I'd like to confirm…" turn.
+- Ask the user to confirm batch delete intents ("delete all cards", "delete all overdue", "remove every task in column X"). There is no batch-delete tool — call delete_card once per matching card. Each card gets its own undo toast; the user can undo any individual one within 5 seconds.`
 
   return { systemPrompt }
 }

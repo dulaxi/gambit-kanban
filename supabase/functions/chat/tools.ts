@@ -75,12 +75,12 @@ export const TOOLS = [
   },
   {
     name: "delete_card",
-    description: "Delete a card. Always ask the user for confirmation before executing this action.",
+    description: "Delete a card on the current board. The delete is reversible for 5 seconds via an undo toast in the UI, but the action still requires clear user intent — never call this speculatively.",
     input_schema: {
       type: "object",
       properties: {
-        card_title: { type: "string", description: "Title of the card to delete" },
-        board: { type: "string", description: "Board name the card belongs to" },
+        card_title: { type: "string", description: "Title of the card to delete (matched case-insensitively on the current board)" },
+        cardId: { type: "string", description: "Internal use only — do not specify unless an explicit card ID was provided to you. Always prefer card_title." },
       },
       required: ["card_title"],
     },
@@ -154,13 +154,13 @@ export const TOOLS = [
   },
   {
     name: "duplicate_card",
-    description: "Duplicate an existing card, optionally to a different board or column.",
+    description: "Duplicate an existing card on the current board. The new card carries the exact same title and inherits the source's fields (description, labels, checklist, priority, icon, assignees, due_date) and lands in the same column unless to_column is specified. The board is fixed by the surface — there is no cross-board duplicate.",
     input_schema: {
       type: "object",
       properties: {
-        card_title: { type: "string", description: "Title of the card to duplicate" },
-        to_board: { type: "string", description: "Destination board name (defaults to same board)" },
-        to_column: { type: "string", description: "Destination column name (defaults to first column)" },
+        card_title: { type: "string", description: "Title of the card to duplicate (matched case-insensitively on the current board)" },
+        to_column: { type: "string", description: "Destination column name on the current board. Defaults to the source card's column." },
+        cardId: { type: "string", description: "Internal use only — do not specify unless an explicit card ID was provided to you. Always prefer card_title." },
       },
       required: ["card_title"],
     },

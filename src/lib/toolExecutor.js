@@ -560,10 +560,91 @@ export async function executeTool(action, params) {
   }
 
   if (action === 'delete_card') {
-    const card = findCardByTitle(params.card_title)
-    if (!card) return { ok: false, error: `Card "${params.card_title}" not found` }
-    await store.deleteCard(card.id)
-    return { ok: true }
+    // Card resolution (same pattern as move_card / update_card)
+    let card = null
+    let sourceBoard = null
+    let scopeName = ''
+
+    if (params.cardId) {
+      const candidate = store.cards[params.cardId] || null
+      if (candidate && params.boardId && candidate.board_id !== params.boardId) {
+        return { ok: false, error: 'Card is not on the current board' }
+      }
+      if (candidate) {
+        card = candidate
+        sourceBoard = store.boards[card.board_id] || null
+      }
+    } else if (params.card_title) {
+      const lowerTitle = params.card_title.toLowerCase()
+      if (params.boardId) {
+        sourceBoard = store.boards[params.boardId] || null
+        if (!sourceBoard) return { ok: false, error: 'Board not found for the given boardId' }
+        scopeName = `board "${sourceBoard.name}"`
+        const matches = Object.values(store.cards).filter(
+          (c) => c.board_id === sourceBoard.id && c.title.toLowerCase() === lowerTitle,
+        )
+        if (matches.length > 1) {
+          const hints = matches
+            .map((m) => `"${m.title}" in ${store.columns[m.column_id]?.title || 'unknown column'}`)
+            .join(', ')
+          return {
+            ok: false,
+            error: `Multiple cards titled "${params.card_title}" on ${scopeName} (${hints}). Be more specific.`,
+          }
+        }
+        card = matches[0] || null
+      } else {
+        scopeName = 'any board'
+        const matches = Object.values(store.cards).filter(
+          (c) => c.title.toLowerCase() === lowerTitle,
+        )
+        if (matches.length > 1) {
+          const hints = matches
+            .map((m) => `${store.boards[m.board_id]?.name || '?'}/${store.columns[m.column_id]?.title || '?'}`)
+            .join(', ')
+          return {
+            ok: false,
+            error: `Multiple cards titled "${params.card_title}" across boards (${hints}). Be more specific.`,
+          }
+        }
+        card = matches[0] || null
+        if (card) sourceBoard = store.boards[card.board_id] || null
+      }
+    }
+
+    if (!card) {
+      return {
+        ok: false,
+        error: `Card "${params.card_title || params.cardId}" not found on ${scopeName || 'any board'}`,
+      }
+    }
+    if (!sourceBoard) {
+      return { ok: false, error: 'Source board for the card could not be resolved' }
+    }
+
+    // Capture the full card snapshot BEFORE delete so the result can carry
+    // it. boardStore.deleteCard already runs an undo-toast flow internally
+    // (see undoableDelete in boardStore.js) — we don't have to wire one here.
+    const sourceColumn = store.columns[card.column_id] || null
+    const snapshot = { ...card }
+
+    // Fire and forget: store.deleteCard awaits a 5-second undo window
+    // internally. If we awaited here, the pill would stay locked in
+    // "Creating..." for the full window, and the user couldn't even click
+    // the undo button. The optimistic DOM update in deleteCard is
+    // synchronous, so the user-visible state is already correct by the
+    // time we return.
+    store.deleteCard(card.id)
+
+    return {
+      ok: true,
+      cardId: card.id,
+      card: snapshot,
+      resolved: {
+        board: { id: sourceBoard.id, name: sourceBoard.name },
+        column: sourceColumn ? { id: sourceColumn.id, title: sourceColumn.title } : null,
+      },
+    }
   }
 
   if (action === 'create_board') {
@@ -636,25 +717,112 @@ export async function executeTool(action, params) {
   }
 
   if (action === 'duplicate_card') {
-    const card = findCardByTitle(params.card_title)
-    if (!card) return { ok: false, error: `Card "${params.card_title}" not found` }
+    // Card resolution (same pattern as move/update/delete)
+    let card = null
+    let sourceBoard = null
+    let scopeName = ''
 
-    const newId = await store.duplicateCard(card.id)
-    if (!newId) return { ok: false, error: 'Failed to duplicate card' }
-
-    if (params.to_board || params.to_column) {
-      const targetBoardId = params.to_board ? findBoardByName(params.to_board)?.id : card.board_id
-      if (!targetBoardId) return { ok: false, error: `Board "${params.to_board}" not found` }
-
-      const targetCol = params.to_column
-        ? findColumnByName(targetBoardId, params.to_column)
-        : firstColumnOf(targetBoardId)
-      if (targetCol) {
-        await store.updateCard(newId, { column_id: targetCol.id, board_id: targetBoardId })
+    if (params.cardId) {
+      const candidate = store.cards[params.cardId] || null
+      if (candidate && params.boardId && candidate.board_id !== params.boardId) {
+        return { ok: false, error: 'Card is not on the current board' }
+      }
+      if (candidate) {
+        card = candidate
+        sourceBoard = store.boards[card.board_id] || null
+      }
+    } else if (params.card_title) {
+      const lowerTitle = params.card_title.toLowerCase()
+      if (params.boardId) {
+        sourceBoard = store.boards[params.boardId] || null
+        if (!sourceBoard) return { ok: false, error: 'Board not found for the given boardId' }
+        scopeName = `board "${sourceBoard.name}"`
+        const matches = Object.values(store.cards).filter(
+          (c) => c.board_id === sourceBoard.id && c.title.toLowerCase() === lowerTitle,
+        )
+        if (matches.length > 1) {
+          const hints = matches
+            .map((m) => `"${m.title}" in ${store.columns[m.column_id]?.title || 'unknown column'}`)
+            .join(', ')
+          return {
+            ok: false,
+            error: `Multiple cards titled "${params.card_title}" on ${scopeName} (${hints}). Be more specific.`,
+          }
+        }
+        card = matches[0] || null
+      } else {
+        scopeName = 'any board'
+        const matches = Object.values(store.cards).filter(
+          (c) => c.title.toLowerCase() === lowerTitle,
+        )
+        if (matches.length > 1) {
+          const hints = matches
+            .map((m) => `${store.boards[m.board_id]?.name || '?'}/${store.columns[m.column_id]?.title || '?'}`)
+            .join(', ')
+          return {
+            ok: false,
+            error: `Multiple cards titled "${params.card_title}" across boards (${hints}). Be more specific.`,
+          }
+        }
+        card = matches[0] || null
+        if (card) sourceBoard = store.boards[card.board_id] || null
       }
     }
 
-    return { ok: true, cardId: newId }
+    if (!card) {
+      return {
+        ok: false,
+        error: `Card "${params.card_title || params.cardId}" not found on ${scopeName || 'any board'}`,
+      }
+    }
+    if (!sourceBoard) {
+      return { ok: false, error: 'Source board for the card could not be resolved' }
+    }
+
+    // to_column resolution (optional — scoped to source board)
+    let targetColumn = store.columns[card.column_id] || null
+    if (params.to_column) {
+      const found = findColumnByName(sourceBoard.id, params.to_column)
+      if (!found) {
+        const available = Object.values(store.columns)
+          .filter((c) => c.board_id === sourceBoard.id)
+          .sort((a, b) => a.position - b.position)
+          .map((c) => c.title)
+          .join(', ')
+        return {
+          ok: false,
+          error: `Column "${params.to_column}" not found on "${sourceBoard.name}". Available: ${available}`,
+        }
+      }
+      targetColumn = found
+    }
+
+    // store.duplicateCard handles smart-increment title + assignees copy
+    const newId = await store.duplicateCard(card.id)
+    if (!newId) return { ok: false, error: 'Failed to duplicate card' }
+
+    // If the user picked a different target column, move the new card there.
+    // Same-column duplicate is the default and skips this update.
+    if (targetColumn && targetColumn.id !== card.column_id) {
+      await store.updateCard(newId, { column_id: targetColumn.id })
+    }
+
+    const newCard = useBoardStore.getState().cards[newId] || null
+
+    return {
+      ok: true,
+      cardId: newId,
+      card: newCard ? {
+        id: newCard.id,
+        title: newCard.title,
+        task_number: newCard.task_number,
+      } : { id: newId },
+      source: { cardId: card.id, title: card.title },
+      resolved: {
+        board: { id: sourceBoard.id, name: sourceBoard.name },
+        column: targetColumn ? { id: targetColumn.id, title: targetColumn.title } : null,
+      },
+    }
   }
 
   if (action === 'toggle_checklist') {
