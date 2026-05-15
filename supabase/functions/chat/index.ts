@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
               cache_control: { type: "ephemeral" },
             },
           ],
-          tools: filterToolsForTier(TOOLS, tierInfo.tier),
+          tools: filterToolsForTier(TOOLS, tierInfo.tier, { pillMode: !!body.boardId }),
           messages,
           stream: true,
         }),
