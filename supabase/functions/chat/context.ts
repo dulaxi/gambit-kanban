@@ -69,18 +69,29 @@ export async function buildContext(
     const bCols = columns.filter((c: any) => c.board_id === b.id)
     const bCards = cards.filter((c: any) => c.board_id === b.id)
     const colSummary = bCols.map((col: any) => {
-      const colCards = bCards.filter((c: any) => c.column_id === col.id && !c.completed)
-      const titles = colCards.slice(0, 10).map((c: any) => {
-        // Include due date inline (just the calendar-date prefix) so the
-        // model can answer questions like "what's due tomorrow" or "due Friday"
-        // without needing a separate search tool. due_date is timestamptz in
-        // the DB so we strip to YYYY-MM-DD for stable date-comparison prose.
+      const colCards = bCards.filter((c: any) => c.column_id === col.id)
+      const openCards = colCards.filter((c: any) => !c.completed)
+      const doneCards = colCards.filter((c: any) => c.completed)
+      // Include due date inline (just the calendar-date prefix) so the
+      // model can answer questions like "what's due tomorrow" or "due Friday"
+      // without needing a separate search tool. due_date is timestamptz in
+      // the DB so we strip to YYYY-MM-DD for stable date-comparison prose.
+      const openTitles = openCards.slice(0, 10).map((c: any) => {
         const due = c.due_date ? ` due ${String(c.due_date).slice(0, 10)}` : ""
         return `"${c.title}"${due}`
       })
-      const extra = colCards.length > 10 ? ` + ${colCards.length - 10} more` : ""
+      // Include completed cards too (capped lower than open) so the model
+      // can find them when the user says "unmark X as done" or "delete
+      // completed cards". Without this they're invisible to the snapshot.
+      const doneTitles = doneCards.slice(0, 5).map((c: any) => {
+        const due = c.due_date ? ` due ${String(c.due_date).slice(0, 10)}` : ""
+        return `"${c.title}"${due} ✓done`
+      })
+      const titles = [...openTitles, ...doneTitles]
+      const openExtra = openCards.length > 10 ? ` +${openCards.length - 10} more open` : ""
+      const doneExtra = doneCards.length > 5 ? ` +${doneCards.length - 5} more done` : ""
       if (titles.length > 0) {
-        return `${col.title} (${colCards.length}: ${titles.join(", ")}${extra})`
+        return `${col.title} (${openCards.length} open / ${doneCards.length} done: ${titles.join(", ")}${openExtra}${doneExtra})`
       }
       return `${col.title} (0)`
     }).join(" | ")
@@ -158,7 +169,7 @@ house, star, heart, bookmark, tag, flag, target, trophy, gift, briefcase, buildi
 - For card creation: always include title, priority, and icon (from the list above). The card's board is set automatically by the surface you're called from — do not include a "board" field. Add description, labels, checklist, assignee, due_date only when they add value. Do not include an assignee unless the user explicitly names a person — leave cards unassigned by default. Capitalize the first letter of titles.
 ${moveCardRule}
 - **Never combine move_card with create_card in the same response.** When the user says "move X to Y", call **only** move_card. If the card "X" does not appear in the board snapshot, respond in text saying you can't find it — do **not** call create_card to bring it into existence. Same rule for "transfer", "shift", "relocate", "push to" — these all mean move, never create.
-- For update_card: only include fields in 'updates' that the user wants changed; omit fields to leave them alone. To **clear** a field (e.g. "remove the due date", "unassign", "clear the icon"), set that field to **null** explicitly — never use create_card to recreate a card just to drop a field. Verbs like "change", "update", "edit", "rename", "set", "remove", "clear", and "mark X as done/complete" all mean update_card on an existing card — never create_card. To mark a card complete, send completed=true in updates; the card stays in its current column.
+- For update_card: only include fields in 'updates' that the user wants changed; omit fields to leave them alone. To **clear** a field (e.g. "remove the due date", "unassign", "clear the icon"), set that field to **null** explicitly — never use create_card to recreate a card just to drop a field. Verbs like "change", "update", "edit", "rename", "set", "remove", "clear", and "mark X as done/complete" all mean update_card on an existing card — never create_card. To mark a card complete, send completed=true in updates; the card stays in its current column. To **unmark** a card complete ("undo done", "mark X as not done", "uncomplete X", "reopen X"), send completed=**false** in updates. Cards rendered with the **✓done** marker in the snapshot are completed and can be targeted just like any other card — never say "I can't find that card" when it appears with ✓done.
 - **One update_card call per card per response, total.** When updating a card's labels, send the FULL final label set in a single call — never call update_card multiple times for the same card to "add one more label" each time (labels REPLACES the array, it does not append). Same rule for checklist.
 - **For "all cards", "every card", "each card" intents: use the batch tool (update_cards), NOT multiple update_card calls.** A request like "add labels to all cards" is exactly ONE update_cards call with no card_titles filter — never N update_card calls.
 - For batch operations: use batch tools (move_cards, update_cards, complete_cards) instead of calling single-card tools repeatedly. Filters (column, card_titles) are optional — omit them to mean "all cards on the current board". The board is implicit.
