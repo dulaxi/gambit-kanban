@@ -71,3 +71,14 @@ export function dueDateBadgeClass(date) {
   if (isToday(d)) return 'bg-[var(--color-honey-wash)] text-[var(--color-honey)]'
   return 'bg-[var(--color-lime-wash)] text-[var(--color-lime-dark)]'
 }
+
+// Outlined / "faded pill" variant of the due-date chip: same color
+// semantics (copper/honey/lime), but rendered as a thin border at low
+// alpha + colored text, no fill. Used when chipStyle === 'outlined'.
+export function dueDateOutlineClass(date) {
+  if (!date) return 'text-[var(--text-muted)] border-[var(--text-muted)]/20'
+  const d = typeof date === 'string' ? parseDueDate(date) : date
+  if (isYesterday(d) || (isPast(d) && !isToday(d))) return 'text-[var(--color-copper)] border-[var(--color-copper)]/30'
+  if (isToday(d)) return 'text-[var(--color-honey)] border-[var(--color-honey)]/30'
+  return 'text-[var(--color-lime-dark)] border-[var(--color-lime-dark)]/30'
+}

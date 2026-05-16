@@ -6,8 +6,8 @@ import { useBoardStore } from '../../store/boardStore'
 import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import DynamicIcon from './DynamicIcon'
-import { LABEL_BG, PRIORITY_DOT } from '../../utils/formatting'
-import { formatDueDateLabel, dueDateBadgeClass, parseDueDate } from '../../utils/dateUtils'
+import { LABEL_OUTLINE, PRIORITY_DOT } from '../../utils/formatting'
+import { formatDueDateLabel, dueDateBadgeClass, dueDateOutlineClass, parseDueDate } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
 import { resolveProfileColor } from '../../constants/colors'
 import { isAICreated } from '../../lib/toolExecutor'
@@ -22,6 +22,12 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
   const updateCard = useBoardStore((s) => s.updateCard)
   const profile = useAuthStore((s) => s.profile)
   const font = useSettingsStore((s) => s.font)
+  const labelStyle = useSettingsStore((s) => s.labelStyle)
+  const toggleLabelStyle = useSettingsStore((s) => s.toggleLabelStyle)
+  const iconStyle = useSettingsStore((s) => s.iconStyle)
+  const toggleIconStyle = useSettingsStore((s) => s.toggleIconStyle)
+  const chipStyle = useSettingsStore((s) => s.chipStyle)
+  const toggleChipStyle = useSettingsStore((s) => s.toggleChipStyle)
   const [checklistOpen, setChecklistOpen] = useState(false)
 
   const checkedCount = checklist?.filter((item) => item.done).length || 0
@@ -57,16 +63,34 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
     >
       {/* Top row: icon + title + check */}
       <div className="flex items-center gap-3">
-        {/* Icon container — Claude skill card style */}
-        <div className="flex w-10 h-10 shrink-0 items-center justify-center rounded-lg border-0.5 border-[var(--border-default)] bg-[var(--surface-raised)]">
-          <div className="w-5 h-5 flex items-center justify-center">
+        {/* Icon — toggleable between "boxed" (40×40 raised container) and
+            "plain" (bare 20×20 icon). Click toggles iconStyle in settingsStore.
+            stopPropagation so card-open click handler doesn't fire. */}
+        {iconStyle === 'plain' ? (
+          <div
+            onClick={(e) => { e.stopPropagation(); toggleIconStyle() }}
+            className="w-5 h-5 shrink-0 flex items-center justify-center cursor-pointer"
+          >
             {displayIcon ? (
               <DynamicIcon name={displayIcon} className="w-5 h-5 text-[var(--text-primary)]" />
             ) : (
               <FileText size={20} weight="regular" className="text-[var(--text-muted)]" />
             )}
           </div>
-        </div>
+        ) : (
+          <div
+            onClick={(e) => { e.stopPropagation(); toggleIconStyle() }}
+            className="flex w-10 h-10 shrink-0 items-center justify-center rounded-lg border-0.5 border-[var(--border-default)] bg-[var(--surface-raised)] cursor-pointer"
+          >
+            <div className="w-5 h-5 flex items-center justify-center">
+              {displayIcon ? (
+                <DynamicIcon name={displayIcon} className="w-5 h-5 text-[var(--text-primary)]" />
+              ) : (
+                <FileText size={20} weight="regular" className="text-[var(--text-muted)]" />
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Title + meta */}
         <div className="flex min-w-0 grow flex-col gap-0.5">
@@ -87,9 +111,31 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
             </button>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-            {labels?.length > 0 && labels.map((label) => (
-              <span key={`${label.text}-${label.color}`} className="font-medium text-[var(--text-secondary)] lowercase">/{label.text}</span>
-            ))}
+            {labels?.length > 0 && labels.map((label) => {
+              const isAlt = labelStyle === 'alt'
+              const onLabelClick = (e) => { e.stopPropagation(); toggleLabelStyle() }
+              if (isAlt) {
+                const colorClasses = LABEL_OUTLINE[label.color] || LABEL_OUTLINE.gray
+                return (
+                  <span
+                    key={`${label.text}-${label.color}`}
+                    onClick={onLabelClick}
+                    className={`cursor-pointer text-xs font-medium leading-[1.4] py-px px-1.5 border-[0.5px] rounded-full capitalize ${colorClasses}`}
+                  >
+                    {label.text}
+                  </span>
+                )
+              }
+              return (
+                <span
+                  key={`${label.text}-${label.color}`}
+                  onClick={onLabelClick}
+                  className="cursor-pointer font-medium text-[var(--text-secondary)] lowercase"
+                >
+                  /{label.text}
+                </span>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -105,30 +151,55 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
       {(dueDateObj || hasChecklist || hasAssignee) && (
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
           <div className="flex items-center gap-2">
-            {dueDateObj && (
-              <span className={`font-semibold flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${dueDateBadgeClass(dueDateObj)}`}>
-                <CalendarDot size={12} weight="bold" />
-                {formatDueDateLabel(dueDateObj)}
-              </span>
-            )}
+            {dueDateObj && (() => {
+              // Due-date chip is the toggle handle for chipStyle. Click flips
+              // BOTH this chip and the checklist chip between filled/outlined.
+              // Outlined variant uses a 0.5px border at low alpha + colored
+              // text + no fill — matches the alt-label "faded pill" style.
+              const isOutlined = chipStyle === 'outlined'
+              const onChipClick = (e) => { e.stopPropagation(); toggleChipStyle() }
+              const colorClasses = isOutlined
+                ? dueDateOutlineClass(dueDateObj)
+                : dueDateBadgeClass(dueDateObj)
+              const shapeClasses = isOutlined
+                ? 'border-[0.5px] py-px px-1.5'
+                : 'px-2 py-0.5'
+              return (
+                <span
+                  onClick={onChipClick}
+                  className={`cursor-pointer font-semibold flex items-center gap-1 rounded-full text-[10px] ${shapeClasses} ${colorClasses}`}
+                >
+                  <CalendarDot size={12} weight="bold" />
+                  {formatDueDateLabel(dueDateObj)}
+                </span>
+              )
+            })()}
 
-            {hasChecklist && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setChecklistOpen(!checklistOpen)
-                }}
-                className={`font-semibold flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] transition-colors ${
-                  checkedCount === totalCount
-                    ? 'bg-[var(--color-lime-wash)] text-[var(--color-lime-dark)]'
-                    : 'bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[var(--border-default)]'
-                }`}
-              >
-                <CheckSquare size={12} weight="bold" />
-                {checkedCount}/{totalCount}
-              </button>
-            )}
+            {hasChecklist && (() => {
+              // Checklist click keeps its existing job (open popup); only its
+              // STYLE follows chipStyle. The due-date chip handles toggling.
+              const isOutlined = chipStyle === 'outlined'
+              const filledClasses = checkedCount === totalCount
+                ? 'bg-[var(--color-lime-wash)] text-[var(--color-lime-dark)]'
+                : 'bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[var(--border-default)]'
+              const outlinedClasses = checkedCount === totalCount
+                ? 'text-[var(--color-lime-dark)] border-[var(--color-lime-dark)]/30 border-[0.5px]'
+                : 'text-[var(--text-muted)] border-[var(--text-muted)]/30 border-[0.5px]'
+              const shapeClasses = isOutlined ? 'py-px px-1.5' : 'px-2 py-0.5'
+              return (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setChecklistOpen(!checklistOpen)
+                  }}
+                  className={`font-semibold flex items-center gap-1 rounded-full text-[10px] transition-colors ${shapeClasses} ${isOutlined ? outlinedClasses : filledClasses}`}
+                >
+                  <CheckSquare size={12} weight="bold" />
+                  {checkedCount}/{totalCount}
+                </button>
+              )
+            })()}
           </div>
 
           {hasAssignee && (() => {

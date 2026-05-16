@@ -12,6 +12,9 @@ export const useSettingsStore = create(
       collapsedSpaces: {}, // { [workspaceId]: true } — persists workspace collapse state
       boardsCollapsed: false,
       sharedBoardsCollapsed: false,
+      labelStyle: 'default',
+      iconStyle: 'boxed',
+      chipStyle: 'filled',
       workspaceSidebarOpen: false,
       _sidebarBeforeWorkspace: false,
       toggleSidebar: () =>
@@ -57,6 +60,9 @@ export const useSettingsStore = create(
       }),
       toggleBoardsCollapsed: () => set((s) => ({ boardsCollapsed: !s.boardsCollapsed })),
       toggleSharedBoardsCollapsed: () => set((s) => ({ sharedBoardsCollapsed: !s.sharedBoardsCollapsed })),
+      toggleLabelStyle: () => set((s) => ({ labelStyle: s.labelStyle === 'alt' ? 'default' : 'alt' })),
+      toggleIconStyle: () => set((s) => ({ iconStyle: s.iconStyle === 'plain' ? 'boxed' : 'plain' })),
+      toggleChipStyle: () => set((s) => ({ chipStyle: s.chipStyle === 'outlined' ? 'filled' : 'outlined' })),
     }),
     {
       name: 'kolumn-settings',

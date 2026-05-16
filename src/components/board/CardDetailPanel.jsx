@@ -271,7 +271,7 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
               )
             ))}
             {showLabelForm ? (
-              <span className="inline-flex items-center align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] h-6 rounded-lg text-xs lowercase border border-[var(--border-default)]">
+              <span className="inline-flex flex-col items-stretch align-middle leading-tight flex-shrink-0 bg-[var(--surface-hover)] text-[var(--text-secondary)] rounded-lg text-xs lowercase border border-[var(--border-default)]">
                 <input value={newLabelText} onChange={(e) => setNewLabelText(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -299,7 +299,27 @@ export default memo(function CardDetailPanel({ cardId, onClose }) {
                     }
                     setShowLabelForm(false)
                   }}
-                  autoFocus placeholder="/label" className="h-full bg-transparent text-xs text-[var(--text-secondary)] px-2 rounded-lg focus:outline-none lowercase w-16" />
+                  autoFocus placeholder="/label" className="h-6 bg-transparent text-xs text-[var(--text-secondary)] px-2 rounded-t-lg focus:outline-none lowercase w-24" />
+                <div className="flex items-center justify-center gap-1 px-1.5 py-1 border-t border-[var(--border-default)]">
+                  {LABEL_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      // onMouseDown preventDefault keeps the input focused so
+                      // its onBlur handler (which auto-submits) doesn't fire
+                      // when picking a color.
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => setNewLabelColor(c)}
+                      aria-label={`Color: ${c}`}
+                      title={c}
+                      className={`w-3 h-3 rounded-full border ${COLOR_DOT_CLASSES[c]} ${
+                        newLabelColor === c
+                          ? 'border-[var(--text-primary)]'
+                          : 'border-transparent hover:border-[var(--border-default)]'
+                      } transition-colors`}
+                    />
+                  ))}
+                </div>
               </span>
             ) : (
               <button

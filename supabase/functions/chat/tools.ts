@@ -16,7 +16,7 @@ export const TOOLS = [
             type: "object",
             properties: {
               text: { type: "string" },
-              color: { type: "string", enum: ["red", "blue", "green", "yellow", "purple", "pink", "gray"] },
+              color: { type: "string", enum: ["red", "orange", "yellow", "green", "blue", "purple", "pink", "gray"] },
             },
             required: ["text", "color"],
           },
