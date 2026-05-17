@@ -7,7 +7,7 @@ const ROW_BASE = 'flex items-center h-8 rounded-lg text-sm transition-colors dur
 function activeClasses(isActive) {
   return isActive
     ? 'bg-[var(--color-mauve-cream)] text-[var(--text-primary)]'
-    : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:bg-[var(--surface-hover)]'
+    : 'text-[var(--text-primary)] hover:bg-[var(--surface-raised)] active:bg-[var(--surface-raised)]'
 }
 
 function layoutClasses(collapsed) {

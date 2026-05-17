@@ -55,7 +55,7 @@ function SectionHeader({ label, collapsed, onToggle, onPlusClick, plusTitle }) {
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onPlusClick() }}
-            className="p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
+            className="p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-raised)] transition-colors"
             title={plusTitle}
           >
             <Plus className="w-5 h-5" weight="light" />
@@ -316,7 +316,7 @@ export default function Sidebar() {
                   `flex items-center justify-center p-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-[var(--color-mauve-cream)] text-[var(--text-primary)]'
-                      : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
                   }`
                 }
               >

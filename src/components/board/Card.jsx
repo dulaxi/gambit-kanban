@@ -118,7 +118,7 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
                   <span
                     key={`${label.text}-${label.color}`}
                     onClick={onLabelClick}
-                    className={`cursor-pointer text-xs font-medium leading-[1.4] py-px px-1.5 border-[0.5px] rounded-full capitalize ${colorClasses}`}
+                    className={`cursor-pointer text-xs font-medium leading-[1.4] py-px px-1.5 border-[0.5px] rounded-md capitalize ${colorClasses}`}
                   >
                     {label.text}
                   </span>
