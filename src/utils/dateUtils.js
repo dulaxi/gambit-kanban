@@ -74,7 +74,7 @@ export function dueDateBadgeClass(date) {
 
 // Outlined / "faded pill" variant of the due-date chip: same color
 // semantics (copper/honey/lime), but rendered as a thin border at low
-// alpha + colored text, no fill. Used when chipStyle === 'outlined'.
+// alpha + colored text, no fill. Canonical chip style on cards.
 export function dueDateOutlineClass(date) {
   if (!date) return 'text-[var(--text-muted)] border-[var(--text-muted)]/20'
   const d = typeof date === 'string' ? parseDueDate(date) : date

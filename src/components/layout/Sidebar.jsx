@@ -43,7 +43,7 @@ function SectionHeader({ label, collapsed, onToggle, onPlusClick, plusTitle }) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle?.() }
       }}
-      className="flex items-center justify-between gap-2 px-4 mb-px group/sec cursor-pointer select-none"
+      className="flex items-center justify-between gap-2 px-2 mb-px group/sec cursor-pointer select-none"
       title={collapsed ? `Show ${label}` : `Hide ${label}`}
     >
       <span className="text-xs text-[var(--text-muted)] truncate">{label}</span>
@@ -58,7 +58,7 @@ function SectionHeader({ label, collapsed, onToggle, onPlusClick, plusTitle }) {
             className="p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
             title={plusTitle}
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-5 h-5" weight="light" />
           </button>
         )}
       </span>
@@ -210,7 +210,7 @@ export default function Sidebar() {
         }`}
       >
         {/* Logo — clicks to Home */}
-        <div className={`flex items-center ${showCollapsed ? 'justify-center px-1 h-12' : 'gap-2 px-4 h-16'}`}>
+        <div className={`flex items-center ${showCollapsed ? 'justify-center px-1 h-12' : 'gap-2 px-2 h-16'}`}>
           <button
             type="button"
             onClick={() => { closeMobileMenu(); navigate('/dashboard') }}
@@ -323,8 +323,8 @@ export default function Sidebar() {
                 {({ isActive }) => (
                   <DynamicIcon
                     name={activeBoard?.icon || 'cards-three'}
-                    weight={isActive ? 'fill' : 'regular'}
-                    className="w-4 h-4 shrink-0"
+                    weight={isActive ? 'fill' : 'light'}
+                    className="w-5 h-5 shrink-0"
                   />
                 )}
               </NavLink>

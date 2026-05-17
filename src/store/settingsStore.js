@@ -14,7 +14,6 @@ export const useSettingsStore = create(
       sharedBoardsCollapsed: false,
       labelStyle: 'default',
       iconStyle: 'boxed',
-      chipStyle: 'filled',
       workspaceSidebarOpen: false,
       _sidebarBeforeWorkspace: false,
       toggleSidebar: () =>
@@ -62,7 +61,6 @@ export const useSettingsStore = create(
       toggleSharedBoardsCollapsed: () => set((s) => ({ sharedBoardsCollapsed: !s.sharedBoardsCollapsed })),
       toggleLabelStyle: () => set((s) => ({ labelStyle: s.labelStyle === 'alt' ? 'default' : 'alt' })),
       toggleIconStyle: () => set((s) => ({ iconStyle: s.iconStyle === 'plain' ? 'boxed' : 'plain' })),
-      toggleChipStyle: () => set((s) => ({ chipStyle: s.chipStyle === 'outlined' ? 'filled' : 'outlined' })),
     }),
     {
       name: 'kolumn-settings',

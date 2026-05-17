@@ -7,7 +7,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import DynamicIcon from './DynamicIcon'
 import { LABEL_OUTLINE, PRIORITY_DOT } from '../../utils/formatting'
-import { formatDueDateLabel, dueDateBadgeClass, dueDateOutlineClass, parseDueDate } from '../../utils/dateUtils'
+import { formatDueDateLabel, dueDateOutlineClass, parseDueDate } from '../../utils/dateUtils'
 import Avatar from '../ui/Avatar'
 import { resolveProfileColor } from '../../constants/colors'
 import { isAICreated } from '../../lib/toolExecutor'
@@ -26,8 +26,6 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
   const toggleLabelStyle = useSettingsStore((s) => s.toggleLabelStyle)
   const iconStyle = useSettingsStore((s) => s.iconStyle)
   const toggleIconStyle = useSettingsStore((s) => s.toggleIconStyle)
-  const chipStyle = useSettingsStore((s) => s.chipStyle)
-  const toggleChipStyle = useSettingsStore((s) => s.toggleChipStyle)
   const [checklistOpen, setChecklistOpen] = useState(false)
 
   const checkedCount = checklist?.filter((item) => item.done).length || 0
@@ -151,41 +149,19 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
       {(dueDateObj || hasChecklist || hasAssignee) && (
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
           <div className="flex items-center gap-2">
-            {dueDateObj && (() => {
-              // Due-date chip is the toggle handle for chipStyle. Click flips
-              // BOTH this chip and the checklist chip between filled/outlined.
-              // Outlined variant uses a 0.5px border at low alpha + colored
-              // text + no fill — matches the alt-label "faded pill" style.
-              const isOutlined = chipStyle === 'outlined'
-              const onChipClick = (e) => { e.stopPropagation(); toggleChipStyle() }
-              const colorClasses = isOutlined
-                ? dueDateOutlineClass(dueDateObj)
-                : dueDateBadgeClass(dueDateObj)
-              const shapeClasses = isOutlined
-                ? 'border-[0.5px] py-px px-1.5'
-                : 'px-2 py-0.5'
-              return (
-                <span
-                  onClick={onChipClick}
-                  className={`cursor-pointer font-semibold flex items-center gap-1 rounded-full text-[10px] ${shapeClasses} ${colorClasses}`}
-                >
-                  <CalendarDot size={12} weight="bold" />
-                  {formatDueDateLabel(dueDateObj)}
-                </span>
-              )
-            })()}
+            {dueDateObj && (
+              <span
+                className={`font-medium flex items-center gap-1 rounded-full text-xs leading-[1.4] border-[0.5px] py-px px-1.5 ${dueDateOutlineClass(dueDateObj)}`}
+              >
+                <CalendarDot size={14} weight="regular" className="shrink-0 -mt-px" />
+                {formatDueDateLabel(dueDateObj)}
+              </span>
+            )}
 
             {hasChecklist && (() => {
-              // Checklist click keeps its existing job (open popup); only its
-              // STYLE follows chipStyle. The due-date chip handles toggling.
-              const isOutlined = chipStyle === 'outlined'
-              const filledClasses = checkedCount === totalCount
-                ? 'bg-[var(--color-lime-wash)] text-[var(--color-lime-dark)]'
-                : 'bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[var(--border-default)]'
-              const outlinedClasses = checkedCount === totalCount
-                ? 'text-[var(--color-lime-dark)] border-[var(--color-lime-dark)]/30 border-[0.5px]'
-                : 'text-[var(--text-muted)] border-[var(--text-muted)]/30 border-[0.5px]'
-              const shapeClasses = isOutlined ? 'py-px px-1.5' : 'px-2 py-0.5'
+              const colorClasses = checkedCount === totalCount
+                ? 'text-[var(--color-lime-dark)] border-[var(--color-lime-dark)]/30'
+                : 'text-[var(--text-muted)] border-[var(--text-muted)]/30'
               return (
                 <button
                   type="button"
@@ -193,9 +169,9 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
                     e.stopPropagation()
                     setChecklistOpen(!checklistOpen)
                   }}
-                  className={`font-semibold flex items-center gap-1 rounded-full text-[10px] transition-colors ${shapeClasses} ${isOutlined ? outlinedClasses : filledClasses}`}
+                  className={`font-medium flex items-center gap-1 rounded-full text-xs leading-[1.4] border-[0.5px] py-px px-1.5 transition-colors ${colorClasses}`}
                 >
-                  <CheckSquare size={12} weight="bold" />
+                  <CheckSquare size={14} weight="regular" className="shrink-0 -mt-px" />
                   {checkedCount}/{totalCount}
                 </button>
               )
@@ -235,31 +211,27 @@ export default memo(function Card({ card, onClick, onComplete, isSelected, iconO
         </div>
       )}
 
-      {/* Expandable checklist */}
+      {/* Expandable checklist — matches CardDetailPanel's CardChecklist style:
+          CheckCircle icon button, no native checkbox. */}
       {hasChecklist && checklistOpen && (
         <div className="pt-2 border-t border-[var(--border-subtle)]" onClick={(e) => e.stopPropagation()}>
-          {/* Progress bar */}
-          <div className="w-full bg-[var(--surface-hover)] rounded-full h-1 mb-2">
-            <div
-              className={`h-1 rounded-full transition-all ${checkedCount === totalCount ? 'bg-[var(--color-lime-dark)]' : 'bg-[var(--color-lime)]'}`}
-              style={{ width: `${(checkedCount / totalCount) * 100}%` }}
-            />
-          </div>
-          <div className="space-y-1">
-            {checklist.map((item, idx) => (
-              <label key={`${item.text}-${idx}`} className="flex items-center gap-2 py-0.5 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={item.done}
-                  onChange={() => toggleCheckItem(idx)}
-                  className="w-3.5 h-3.5 rounded border-[var(--border-default)] text-[var(--color-lime)] focus:ring-1 focus:ring-[var(--color-ink)]"
+          {checklist.map((item, idx) => (
+            <div key={`${item.text}-${idx}`} className="flex items-center gap-2 py-1">
+              <button
+                type="button"
+                onClick={() => toggleCheckItem(idx)}
+                aria-label={item.done ? 'Mark incomplete' : 'Mark complete'}
+                className="shrink-0"
+              >
+                <CheckCircle
+                  className={`w-4 h-4 transition-colors ${item.done ? 'text-[var(--color-lime-dark)]' : 'text-[var(--text-faint)] hover:text-[var(--text-muted)]'}`}
                 />
-                <span className={`text-[12px] leading-snug ${item.done ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-secondary)]'}`}>
-                  {item.text}
-                </span>
-              </label>
-            ))}
-          </div>
+              </button>
+              <span className={`text-xs ${item.done ? 'line-through text-[var(--text-faint)]' : 'text-[var(--text-secondary)]'}`}>
+                {item.text}
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </button>

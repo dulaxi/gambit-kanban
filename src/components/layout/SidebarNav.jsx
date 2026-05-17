@@ -11,12 +11,12 @@ function activeClasses(isActive) {
 }
 
 function layoutClasses(collapsed) {
-  return collapsed ? 'justify-center px-2' : 'gap-3 py-1.5 px-4'
+  return collapsed ? 'justify-center px-2' : 'gap-3 py-1.5 px-2'
 }
 
 function IconSlot({ children, badge }) {
   return (
-    <span className="relative flex items-center justify-center" style={{ width: 16, height: 16 }}>
+    <span className="relative flex items-center justify-center" style={{ width: 20, height: 20 }}>
       {children}
       {badge}
     </span>
@@ -35,7 +35,7 @@ function NavLinkRow({ to, end, icon: Icon, label, collapsed, onNavigate, badge, 
       {({ isActive }) => (
         <>
           <IconSlot badge={collapsed ? badgeCollapsed : null}>
-            <Icon className="w-4 h-4 shrink-0" weight={isActive ? 'fill' : 'regular'} />
+            <Icon className="w-5 h-5 shrink-0" weight={isActive ? 'fill' : 'light'} />
           </IconSlot>
           {!collapsed && (
             <>
@@ -83,7 +83,7 @@ export default function SidebarNav({
         className={`${ROW_BASE} ${activeClasses(false)} ${layoutClasses(collapsed)}`}
       >
         <IconSlot>
-          <MagnifyingGlass size={16} weight="regular" className="shrink-0" />
+          <MagnifyingGlass size={20} weight="light" className="shrink-0" />
         </IconSlot>
         {!collapsed && <span className="truncate flex-1 text-left">Search</span>}
       </button>
@@ -106,7 +106,7 @@ export default function SidebarNav({
           className={`${ROW_BASE} ${activeClasses(wsActive)} ${layoutClasses(collapsed)} w-full`}
         >
           <IconSlot badge={collapsed ? invBadgeCollapsed : null}>
-            <UsersThree className="w-4 h-4 shrink-0" weight={wsActive ? 'fill' : 'regular'} />
+            <UsersThree className="w-5 h-5 shrink-0" weight={wsActive ? 'fill' : 'light'} />
           </IconSlot>
           {!collapsed && (
             <>

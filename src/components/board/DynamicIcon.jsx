@@ -41,8 +41,17 @@ function toKebab(name) {
     .replace(/\d+$/, '')
 }
 
+const WEIGHT_PREFIX = {
+  thin: 'ph-thin',
+  light: 'ph-light',
+  regular: 'ph',
+  bold: 'ph-bold',
+  fill: 'ph-fill',
+  duotone: 'ph-duotone',
+}
+
 function renderPhosphor(iconName, sizePx, props) {
-  const prefix = props.weight === 'fill' ? 'ph-fill' : 'ph'
+  const prefix = WEIGHT_PREFIX[props.weight] || 'ph'
   const { weight: _, ...restProps } = props
   return (
     <i
